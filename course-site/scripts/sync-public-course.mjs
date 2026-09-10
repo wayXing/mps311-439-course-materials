@@ -11,7 +11,7 @@ const sourceCourseSite = projectRoot;
 const sourceSlides = resolve(workspaceRoot, 'lecture-slids');
 
 const courseSiteIgnored = new Set([
-  '.git', '.astro', '.openai', '.sites-artifacts', '.sites-stage', '.vercel',
+  '.git', '.astro', '.openai', '.sites-artifacts', '.sites-stage', '.vercel', 'CLAUDE.md',
   'dist', 'node_modules', 'public/materials', 'supabase/.temp',
 ]);
 const lessonIgnoredNames = new Set([
