@@ -12,4 +12,7 @@ This is a generated public mirror. Edit the canonical private course workspace, 
 
 ## Licence
 
-Licensing is being selected before the first public release. Do not reuse material until a licence is added.
+- Software in this repository is available under the [MIT License](LICENSE-CODE).
+- Teaching material, including slides, notes, worksheets, notebooks, figures, and course data, is available under [CC BY-NC-SA 4.0](LICENSE-MATERIALS.md).
+
+Files credited to third parties retain their own terms. Student, assessment, feedback, and administrative information is intentionally excluded.

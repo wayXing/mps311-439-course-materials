@@ -57,7 +57,42 @@ This is a generated public mirror. Edit the canonical private course workspace, 
 
 ## Licence
 
-Licensing is being selected before the first public release. Do not reuse material until a licence is added.
+- Software in this repository is available under the [MIT License](LICENSE-CODE).
+- Teaching material, including slides, notes, worksheets, notebooks, figures, and course data, is available under [CC BY-NC-SA 4.0](LICENSE-MATERIALS.md).
+
+Files credited to third parties retain their own terms. Student, assessment, feedback, and administrative information is intentionally excluded.
+`);
+
+await writeFile(join(publicRoot, 'LICENSE-CODE'), `MIT License
+
+Copyright (c) 2026 Wei Xing
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+`);
+
+await writeFile(join(publicRoot, 'LICENSE-MATERIALS.md'), `# Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International
+
+Unless a file states otherwise, the teaching material in this repository — including slides, notes, worksheets, notebooks, figures, and course data — is licensed under the [Creative Commons Attribution-NonCommercial-ShareAlike 4.0 International License](https://creativecommons.org/licenses/by-nc-sa/4.0/).
+
+You may share and adapt this material for non-commercial purposes, provided that you give appropriate credit to Dr Wei Xing and the MPS311 / MPS439 Machine Learning course, link to this licence, indicate any changes, and distribute adaptations under the same licence.
+
+Third-party material and dependencies retain their own licence terms. This licence does not cover student work, assessment material, feedback, or administrative information.
 `);
 
 console.log(`Synced public course mirror to ${publicRoot}.`);
