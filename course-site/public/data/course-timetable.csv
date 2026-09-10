@@ -1,0 +1,70 @@
+"Lesson","Type","Contents","Theme","Core Learning Outcomes (Required for all students)","Advanced Learning Outcomes (for MPS439 students)","Assessment info","Lecture date","Lab date"
+"1","Lecture + Lab","Introduction of machine learning and tools
+Tool usage: iPython notebook, Google Colab
+Programming: Python basics and visualization","Basic","• Set up Google Colab and run basic Python code
+• Save and load data
+• Create simple plots using matplotlib
+• Simple data exploration and cleaning
+• Use AI tools (ChatGPT/Copilot) to debug code","• Explore advanced IDE (VS Code/Cursor)","","2026-10-02","2026-10-06"
+"2","Lecture + Lab","linear regression (with a machine learning framework, input, output, loss, training)","regression","• Apply sklearn's LinearRegression to predict continuous outcomes
+• Explain why minimizing squared error makes sense
+• Understand metrics like R2, MSE, MAE, etc
+• Describe what the normal equation solution tells us
+• Compare training vs testing performance","• Reproduce full least squares derivation
+• Implement gradient descent from scratch","Assessment 1 Release 
+10/9/2026","2026-10-09","2026-10-13"
+"3","Lecture + Lab","linear regression Plus","regression","• Apply simple feature engineering
+• Use Ridge and Lasso regression in sklearn
+• Explain why Ridge regression shrinks coefficients toward zero
+• Describe when regularization prevents overfitting
+• Choose regularization strength using cross-validation","• Derive Ridge/Lasso cost functions using Lagrange multipliers
+• Implement regularized regression from scratch","","2026-10-16","2026-10-20"
+"4","Lecture + Lab","linear classification (with metrics for classifications)","classification","• Apply LogisticRegression for binary classification
+• Explain why we use sigmoid function for probabilities
+• Describe when linear classification fails
+• Interpret confusion matrices and classification metrics, ROC curve, AUC","• Derive cross-entropy loss function
+• Implement logistic regression using gradient descent","Exercise 1  (optional)
+Release
+10/23/2026","2026-10-23","2026-10-27"
+"5","Lecture + Lab","Discriminative analysis","classification","• Use sklearn's LinearDiscriminantAnalysis and QuadraticDiscriminantAnalysis
+• Explain why LDA assumes equal covariances
+• Describe when LDA vs QDA is appropriate
+• Compare LDA vs logistic regression performance","• Derive LDA decision boundaries mathematically
+• Implement LDA in python","Optional workshop on assessment 1
+10/28/2026","2026-10-30","2026-11-03"
+"6","Lecture + Lab","Decision Tree","classification","• Build decision trees using sklearn's DecisionTreeClassifier
+• Explain how splitting criteria (Gini, entropy) work
+• Describe when trees overfit and how to prevent it
+• Interpret tree structure and feature importance","• Calculate Gini impurity by hand
+• Explore using other classification method in sklearn (eg, SVM)
+• Explore advanced ensemble methods (XGBoost)","Assessment 1 submission deadline
+11/6/2026","2026-11-06","2026-11-17"
+"7","Lecture + Lab","Principal component analysis (PCA)","Dimension reduction (non-supervise learning)","• Use sklearn's PCA for dimensionality reduction
+• Explain why PCA finds directions of maximum variance
+• Describe what eigenvalues represent
+• Determine optimal number of components","• Derive PCA from eigenvalue decomposition
+• Implement PCA using SVD from scratch","Exercise 1 (optional) submission deadline
+11/20/2026","2026-11-20","2026-11-24"
+"8","Lecture + Lab","k-means and Hierarchical Clustering","Clustering (non-supervise learning)","• Apply K-means clustering using sklearn
+• Explain why K-means finds spherical clusters
+• Describe when hierarchical vs K-means is better
+• Choose optimal K using elbow method","• Implement K-means algorithm from scratch","","2026-11-27","2026-12-01"
+"9","Lecture + Lab","Deep learning","Deep Learning","• Implementing neural networks using Keras
+• Explain why we need multiple layers","• Understand the backpropagation algorithm
+• Implement a simple neural network with different tricks: regularization, dropout, stochastic gradient descent, etc","Assessment 1 feedback to student 
+12/4/2026","2026-12-04","2026-12-08"
+"10","Lecture + Lab","Deep learning Convolutional network","Deep Learning","• Understand how a convolutional layer works
+• Implementing a CNN using Keras","• Build Convolutional neural networks using Keras
+• Describe what convolutions detect in images
+• Load pre-built CNN (eg, vgg-16) or other architecture to a classification problem","Optional workshop on assessment 2
+12/9/2026
+
+Exercise 1  (optional) feedback to student 
+12/11/2026","2026-12-11","2026-12-15"
+"","Assessment","Assessment 2 submission deadline
+1/20/2027","","","","Assessment 2 submission deadline
+1/20/2027","",""
+"","Workshop (Optional)","Questions on assignments; General discussions; 
+Demonstration of AI for study","","","","","",""
+"","Workshop (Optional)","Questions on assignments; General discussions; 
+Demonstration of AI for study; convolutional networks and applications","","","","","",""

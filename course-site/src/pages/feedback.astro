@@ -1,0 +1,540 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { course } from '../data/course';
+import '../styles/feedback.css';
+
+const projectUrl = 'https://whxpzfruhtshrwiksezg.supabase.co';
+const publishableKey = 'sb_publishable_GEKCtohy16BxHMc8_fji6w_TbcrlbPd';
+const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
+const academicYearsUrl = `${projectUrl}/rest/v1/course_academic_years?select=year_key,label&order=year_key.desc`;
+const academicYearKey = course.academicYear.replace(/[^0-9]+/g, '-').replace(/^-|-$/g, '');
+const previousAcademicYear = (() => {
+  const match = course.academicYear.match(/^(\d{4})\/(\d{2})$/);
+  if (!match) return { key: '2025-26', label: '2025/26' };
+  const previousStart = Number(match[1]) - 1;
+  const previousEnd = String((Number(match[2]) + 99) % 100).padStart(2, '0');
+  return { key: `${previousStart}-${previousEnd}`, label: `${previousStart}/${previousEnd}` };
+})();
+const academicYears = [
+  { key: academicYearKey, label: course.academicYear },
+  previousAcademicYear,
+];
+const teachingLessons = course.lessons.filter((lesson) => lesson.type === 'teaching');
+const sessionTemplates = teachingLessons.flatMap((lesson) => [
+  { suffix: `${lesson.slug}-lecture`, label: `${lesson.label} · Lecture — ${lesson.shortTitle}` },
+  { suffix: `${lesson.slug}-lab`, label: `${lesson.label} · Lab — ${lesson.shortTitle}` },
+]);
+const sessions = sessionTemplates.map((session) => ({
+  key: `${academicYearKey}-${session.suffix}`,
+  label: session.label,
+}));
+---
+
+<SiteLayout
+  title={`Questions & feedback · ${course.code}`}
+  description={`Public class questions and anonymous, session-specific feedback for ${course.code}.`}
+>
+  <section class="feedback-page shell">
+    <header class="feedback-heading">
+      <div>
+        <span class="eyebrow">30-second check-in & questions</span>
+        <h1>Help shape the next class.</h1>
+        <p>
+          Send private anonymous feedback about the difficulty, pace, and content, or post a
+          question you would like answered in class.
+        </p>
+      </div>
+      <aside class="privacy-note">
+        <strong>Two separate channels</strong>
+        Ratings and improvement suggestions remain anonymous. Class questions are public,
+        show the name you choose, and are never linked to your feedback.
+      </aside>
+    </header>
+
+    <div class="session-bar feedback-panel">
+      <div class="field academic-year-field">
+        <label for="feedback-year">Academic year</label>
+        <select id="feedback-year" name="academicYear" required>
+          {academicYears.map((year) => <option value={year.key}>{year.label}</option>)}
+        </select>
+        <span class="field-help">Select an earlier year to view past records.</span>
+      </div>
+      <div class="field session-field">
+        <label for="feedback-session">Lecture or lab</label>
+        <select id="feedback-session" name="session" required>
+          {sessions.map((session) => <option value={session.key}>{session.label}</option>)}
+        </select>
+      </div>
+    </div>
+
+    <div class="anonymous-section-heading">
+      <div>
+        <span class="channel-label private-channel">Private · instructor only</span>
+        <h2>Anonymous course feedback</h2>
+      </div>
+      <p>One response is counted per browser for each session. Submitting again updates it.</p>
+    </div>
+
+    <div class="feedback-grid">
+      <form class="feedback-panel feedback-form-panel" id="course-feedback-form">
+        <fieldset class="rating-field">
+          <legend>Difficulty</legend>
+          <div class="rating-control">
+            <input id="difficulty" name="difficulty" type="range" min="1" max="10" value="5" required />
+            <output for="difficulty" data-output="difficulty">5</output>
+          </div>
+          <div class="rating-ends"><span>1 · Too easy</span><span>10 · Too difficult</span></div>
+        </fieldset>
+
+        <fieldset class="rating-field">
+          <legend>Pace</legend>
+          <div class="rating-control">
+            <input id="pace" name="pace" type="range" min="1" max="10" value="5" required />
+            <output for="pace" data-output="pace">5</output>
+          </div>
+          <div class="rating-ends"><span>1 · Too slow</span><span>10 · Too fast</span></div>
+        </fieldset>
+
+        <fieldset class="rating-field">
+          <legend>Amount of content</legend>
+          <div class="rating-control">
+            <input id="content-amount" name="contentAmount" type="range" min="1" max="10" value="5" required />
+            <output for="content-amount" data-output="contentAmount">5</output>
+          </div>
+          <div class="rating-ends"><span>1 · Too little</span><span>10 · Too much</span></div>
+        </fieldset>
+
+        <div class="field">
+          <label for="comment">How could I improve the class? <span aria-hidden="true">(optional)</span></label>
+          <textarea
+            id="comment"
+            name="comment"
+            maxlength="2000"
+            placeholder="Something to clarify, change, add, or revisit…"
+          ></textarea>
+          <span class="field-help">Private and anonymous. Only the instructor can read this suggestion.</span>
+        </div>
+
+        <div class="honeypot-field" aria-hidden="true">
+          <label for="feedback-website">Website</label>
+          <input id="feedback-website" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+
+        <div class="feedback-actions">
+          <button class="feedback-submit" type="submit">Send anonymous feedback</button>
+          <p class="form-status" id="form-status" aria-live="polite"></p>
+        </div>
+      </form>
+
+      <section class="feedback-panel feedback-results-panel" aria-labelledby="results-heading">
+        <header class="results-header">
+          <div>
+            <h2 id="results-heading">Class snapshot</h2>
+            <p id="results-session-label">Loading this session’s responses…</p>
+          </div>
+          <span class="response-count" id="response-count">— responses</span>
+        </header>
+
+        <div class="results-state" id="results-state">Loading aggregate results…</div>
+
+        <div class="metric-list" id="metric-list" hidden>
+          <article class="metric-card" data-metric="difficulty">
+            <div>
+              <span class="metric-label">Difficulty</span>
+              <div class="metric-average"><strong>—</strong><span>/ 10</span></div>
+            </div>
+            <div class="mini-chart" aria-label="Difficulty response distribution"></div>
+          </article>
+          <article class="metric-card" data-metric="pace">
+            <div>
+              <span class="metric-label">Pace</span>
+              <div class="metric-average"><strong>—</strong><span>/ 10</span></div>
+            </div>
+            <div class="mini-chart" aria-label="Pace response distribution"></div>
+          </article>
+          <article class="metric-card" data-metric="contentAmount">
+            <div>
+              <span class="metric-label">Content</span>
+              <div class="metric-average"><strong>—</strong><span>/ 10</span></div>
+            </div>
+            <div class="mini-chart" aria-label="Content amount response distribution"></div>
+          </article>
+        </div>
+
+        <footer class="results-footnote">
+          Charts contain aggregate ratings only. Improvement suggestions remain private.
+        </footer>
+      </section>
+    </div>
+
+    <section class="feedback-panel question-panel" aria-labelledby="question-heading">
+      <header class="panel-heading compact-heading">
+        <div>
+          <span class="channel-label public-channel">Public · shown to the class</span>
+          <h2 id="question-heading">Question for class</h2>
+          <p>Leave something you would like me to answer during the lecture or lab.</p>
+        </div>
+      </header>
+
+      <form class="question-form" id="course-question-form">
+        <div class="field compact-field name-field">
+          <label for="question-name">Display name <span aria-hidden="true">(optional)</span></label>
+          <input id="question-name" name="displayName" maxlength="40" autocomplete="nickname" placeholder="Any name" />
+        </div>
+        <div class="field compact-field question-field">
+          <label for="question-text">Your question</label>
+          <textarea
+            id="question-text"
+            name="question"
+            maxlength="1000"
+            required
+            placeholder="What would you like me to explain in class?"
+          ></textarea>
+        </div>
+        <div class="honeypot-field" aria-hidden="true">
+          <label for="question-website">Website</label>
+          <input id="question-website" name="website" tabindex="-1" autocomplete="off" />
+        </div>
+        <div class="question-actions">
+          <button class="feedback-submit" type="submit">Post question</button>
+        </div>
+      </form>
+      <p class="form-status question-status" id="question-status" aria-live="polite"></p>
+
+      <div class="question-feed" aria-live="polite">
+        <div class="question-feed-heading">
+          <h3>Questions from this session</h3>
+          <span id="question-count">—</span>
+        </div>
+        <div class="question-state" id="question-state">Loading questions…</div>
+        <div class="question-list" id="question-list" hidden></div>
+      </div>
+    </section>
+  </section>
+
+  <script is:inline define:vars={{
+    projectUrl,
+    publishableKey,
+    submissionUrl,
+    academicYearsUrl,
+    academicYearKey,
+    academicYears,
+    sessionTemplates,
+  }}>
+    const feedbackForm = document.querySelector('#course-feedback-form');
+    const questionForm = document.querySelector('#course-question-form');
+    const yearSelect = document.querySelector('#feedback-year');
+    const sessionSelect = document.querySelector('#feedback-session');
+    const feedbackButton = feedbackForm.querySelector('button[type="submit"]');
+    const questionButton = questionForm.querySelector('button[type="submit"]');
+    const formStatus = document.querySelector('#form-status');
+    const questionStatus = document.querySelector('#question-status');
+    const questionState = document.querySelector('#question-state');
+    const questionList = document.querySelector('#question-list');
+    const questionCount = document.querySelector('#question-count');
+    const resultsState = document.querySelector('#results-state');
+    const metricList = document.querySelector('#metric-list');
+    const responseCount = document.querySelector('#response-count');
+    const resultsSessionLabel = document.querySelector('#results-session-label');
+
+    const deviceStorageKey = 'mps-course-feedback-device-v1';
+    const getDeviceId = () => {
+      try {
+        const current = window.localStorage.getItem(deviceStorageKey);
+        if (current && /^[a-zA-Z0-9-]{20,100}$/.test(current)) return current;
+        const created = crypto.randomUUID();
+        window.localStorage.setItem(deviceStorageKey, created);
+        return created;
+      } catch {
+        return crypto.randomUUID();
+      }
+    };
+    const deviceId = getDeviceId();
+
+    const readError = async (response, fallback) => {
+      try {
+        const error = await response.json();
+        if (typeof error?.error === 'string') return error.error;
+        if (typeof error?.message === 'string') return error.message;
+      } catch {}
+      return fallback;
+    };
+
+    const requestFeedbackApi = async (body) => {
+      const response = await fetch(submissionUrl, {
+        method: 'POST',
+        headers: { apikey: publishableKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (!response.ok) {
+        throw new Error(await readError(response, 'Could not save this submission.'));
+      }
+      return response.json();
+    };
+
+    const submitEntry = (body) => requestFeedbackApi({ ...body, device_id: deviceId });
+
+    const selectedSessionLabel = () =>
+      sessionSelect.options[sessionSelect.selectedIndex]?.textContent ?? 'Selected session';
+
+    const populateSessions = (yearKey, requestedSession = null) => {
+      sessionSelect.replaceChildren();
+      sessionTemplates.forEach((session) => {
+        const option = document.createElement('option');
+        option.value = `${yearKey}-${session.suffix}`;
+        option.textContent = session.label;
+        sessionSelect.append(option);
+      });
+      const requestedIsValid = requestedSession
+        && Array.from(sessionSelect.options).some((option) => option.value === requestedSession);
+      if (requestedIsValid) sessionSelect.value = requestedSession;
+    };
+
+    const loadAcademicYears = async () => {
+      try {
+        const response = await fetch(academicYearsUrl, { headers: { apikey: publishableKey } });
+        if (!response.ok) throw new Error('Could not load academic years.');
+        const rows = await response.json();
+        const years = Array.isArray(rows)
+          ? rows
+            .filter((row) => (
+              /^[a-z0-9][a-z0-9-]{2,79}$/.test(row?.year_key)
+              && typeof row?.label === 'string'
+              && row.label.trim().length >= 2
+              && row.label.trim().length <= 80
+            ))
+            .map((row) => ({ key: row.year_key, label: row.label.trim() }))
+          : [];
+        return years.length > 0 ? years : academicYears;
+      } catch {
+        return academicYears;
+      }
+    };
+
+    const renderAcademicYears = (years, selectedKey) => {
+      yearSelect.replaceChildren();
+      years.forEach((year) => {
+        const option = document.createElement('option');
+        option.value = year.key;
+        option.textContent = year.label;
+        yearSelect.append(option);
+      });
+      yearSelect.value = selectedKey;
+    };
+
+    const makeChart = (container, distribution) => {
+      const values = Array.isArray(distribution) ? distribution.map(Number) : Array(10).fill(0);
+      const max = Math.max(1, ...values);
+      container.replaceChildren();
+      values.forEach((count, index) => {
+        const group = document.createElement('div');
+        group.className = 'mini-bar-group';
+        group.title = `${index + 1}: ${count} response${count === 1 ? '' : 's'}`;
+        const track = document.createElement('div');
+        track.className = 'mini-bar-track';
+        const bar = document.createElement('div');
+        bar.className = 'mini-bar';
+        bar.style.height = `${Math.max(count > 0 ? 8 : 2, (count / max) * 100)}%`;
+        track.append(bar);
+        const label = document.createElement('span');
+        label.textContent = String(index + 1);
+        group.append(track, label);
+        container.append(group);
+      });
+    };
+
+    const renderMetric = (metricName, data) => {
+      const card = document.querySelector(`[data-metric="${metricName}"]`);
+      card.querySelector('.metric-average strong').textContent =
+        data?.average == null ? '—' : Number(data.average).toFixed(1);
+      makeChart(card.querySelector('.mini-chart'), data?.distribution);
+    };
+
+    const loadResults = async () => {
+      const contextKey = sessionSelect.value;
+      resultsSessionLabel.textContent = selectedSessionLabel();
+      resultsState.hidden = false;
+      resultsState.textContent = 'Loading aggregate results…';
+      metricList.hidden = true;
+      responseCount.textContent = '— responses';
+      try {
+        const result = await requestFeedbackApi({ action: 'summary', context_key: contextKey });
+        const summary = result?.summary;
+        const count = Number(summary?.responseCount ?? 0);
+        responseCount.textContent = `${count} response${count === 1 ? '' : 's'}`;
+        if (count === 0) {
+          resultsState.textContent = 'No responses yet for this session. Be the first to check in.';
+          return;
+        }
+        renderMetric('difficulty', summary.difficulty);
+        renderMetric('pace', summary.pace);
+        renderMetric('contentAmount', summary.contentAmount);
+        resultsState.hidden = true;
+        metricList.hidden = false;
+      } catch (error) {
+        resultsState.textContent = error instanceof Error ? error.message : 'Could not load the results.';
+      }
+    };
+
+    const formatQuestionTime = (value) => {
+      const date = new Date(value);
+      if (Number.isNaN(date.getTime())) return '';
+      return date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+    };
+
+    const renderQuestions = (questions) => {
+      questionList.replaceChildren();
+      questionCount.textContent = `${questions.length} shown`;
+      questions.forEach((entry) => {
+        const article = document.createElement('article');
+        article.className = 'question-item';
+        const meta = document.createElement('div');
+        meta.className = 'question-meta';
+        const name = document.createElement('strong');
+        name.textContent = entry.display_name || 'Anonymous';
+        const time = document.createElement('time');
+        time.dateTime = entry.created_at;
+        time.textContent = formatQuestionTime(entry.created_at);
+        meta.append(name, time);
+        const text = document.createElement('p');
+        text.textContent = entry.question;
+        article.append(meta, text);
+        questionList.append(article);
+      });
+    };
+
+    const loadQuestions = async () => {
+      questionState.hidden = false;
+      questionState.textContent = 'Loading questions…';
+      questionList.hidden = true;
+      questionCount.textContent = '—';
+      const query = new URLSearchParams({
+        select: 'id,display_name,question,created_at',
+        context_key: `eq.${sessionSelect.value}`,
+        is_visible: 'eq.true',
+        order: 'created_at.desc',
+        limit: '30',
+      });
+      try {
+        const response = await fetch(`${projectUrl}/rest/v1/course_questions?${query}`, {
+          headers: { apikey: publishableKey },
+        });
+        if (!response.ok) throw new Error(await readError(response, 'Could not load class questions.'));
+        const questions = await response.json();
+        if (!Array.isArray(questions) || questions.length === 0) {
+          questionState.textContent = 'No questions yet for this session.';
+          questionCount.textContent = '0 shown';
+          return;
+        }
+        renderQuestions(questions);
+        questionState.hidden = true;
+        questionList.hidden = false;
+      } catch (error) {
+        questionState.textContent = error instanceof Error ? error.message : 'Could not load class questions.';
+      }
+    };
+
+    document.querySelectorAll('input[type="range"]').forEach((input) => {
+      const output = document.querySelector(`[data-output="${input.name}"]`);
+      input.addEventListener('input', () => { output.textContent = input.value; });
+    });
+
+    const updateSelection = () => {
+      const url = new URL(window.location.href);
+      url.searchParams.set('year', yearSelect.value);
+      url.searchParams.set('session', sessionSelect.value);
+      window.history.replaceState({}, '', url);
+      [formStatus, questionStatus].forEach((status) => {
+        status.textContent = '';
+        status.removeAttribute('data-state');
+      });
+      loadResults();
+      loadQuestions();
+    };
+
+    yearSelect.addEventListener('change', () => {
+      populateSessions(yearSelect.value);
+      updateSelection();
+    });
+
+    sessionSelect.addEventListener('change', updateSelection);
+
+    questionForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      questionButton.disabled = true;
+      questionButton.textContent = 'Posting…';
+      questionStatus.textContent = '';
+      questionStatus.removeAttribute('data-state');
+      const data = new FormData(questionForm);
+      try {
+        await submitEntry({
+          action: 'question',
+          context_key: sessionSelect.value,
+          display_name: String(data.get('displayName') ?? ''),
+          question: String(data.get('question') ?? ''),
+          website: String(data.get('website') ?? ''),
+        });
+        questionStatus.textContent = 'Your question is now visible to the class.';
+        questionStatus.dataset.state = 'success';
+        questionForm.querySelector('#question-text').value = '';
+        await loadQuestions();
+      } catch (error) {
+        questionStatus.textContent = error instanceof Error ? error.message : 'Could not post your question.';
+        questionStatus.dataset.state = 'error';
+      } finally {
+        questionButton.disabled = false;
+        questionButton.textContent = 'Post question';
+      }
+    });
+
+    feedbackForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      feedbackButton.disabled = true;
+      feedbackButton.textContent = 'Sending…';
+      formStatus.textContent = '';
+      formStatus.removeAttribute('data-state');
+      const data = new FormData(feedbackForm);
+      try {
+        await submitEntry({
+          action: 'feedback',
+          context_key: sessionSelect.value,
+          difficulty: Number(data.get('difficulty')),
+          pace: Number(data.get('pace')),
+          content_amount: Number(data.get('contentAmount')),
+          comment: String(data.get('comment') ?? ''),
+          website: String(data.get('website') ?? ''),
+        });
+        formStatus.textContent = 'Thank you — your anonymous feedback has been saved.';
+        formStatus.dataset.state = 'success';
+        feedbackForm.querySelector('#comment').value = '';
+        await loadResults();
+      } catch (error) {
+        formStatus.textContent = error instanceof Error ? error.message : 'Could not send your feedback.';
+        formStatus.dataset.state = 'error';
+      } finally {
+        feedbackButton.disabled = false;
+        feedbackButton.textContent = 'Send anonymous feedback';
+      }
+    });
+
+    const initialiseFeedbackPage = async () => {
+      const years = await loadAcademicYears();
+      const params = new URLSearchParams(window.location.search);
+      const requestedYear = params.get('year');
+      const requestedSession = params.get('session');
+      const sessionYear = requestedSession?.match(/^(\d{4}-\d{2})-/)?.[1];
+      const availableYearKeys = years.map((year) => year.key);
+      const initialYear = availableYearKeys.includes(requestedYear)
+        ? requestedYear
+        : availableYearKeys.includes(sessionYear)
+          ? sessionYear
+          : years[0]?.key ?? academicYearKey;
+      renderAcademicYears(years, initialYear);
+      populateSessions(initialYear, requestedSession);
+      loadResults();
+      loadQuestions();
+    };
+
+    initialiseFeedbackPage();
+  </script>
+</SiteLayout>

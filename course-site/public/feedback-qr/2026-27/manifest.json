@@ -1,0 +1,146 @@
+{
+  "academicYear": "2026-27",
+  "baseUrl": "https://ml.wxing.me/",
+  "sessions": [
+    {
+      "filename": "lesson-01-lecture.svg",
+      "pngFilename": "lesson-01-lecture.png",
+      "session": "2026-27-lesson-01-lecture",
+      "label": "Lesson 01 · Lecture — Welcome to machine learning",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-01-lecture"
+    },
+    {
+      "filename": "lesson-01-lab.svg",
+      "pngFilename": "lesson-01-lab.png",
+      "session": "2026-27-lesson-01-lab",
+      "label": "Lesson 01 · Lab — Welcome to machine learning",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-01-lab"
+    },
+    {
+      "filename": "lesson-02-lecture.svg",
+      "pngFilename": "lesson-02-lecture.png",
+      "session": "2026-27-lesson-02-lecture",
+      "label": "Lesson 02 · Lecture — Predicting the future with lines",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-02-lecture"
+    },
+    {
+      "filename": "lesson-02-lab.svg",
+      "pngFilename": "lesson-02-lab.png",
+      "session": "2026-27-lesson-02-lab",
+      "label": "Lesson 02 · Lab — Predicting the future with lines",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-02-lab"
+    },
+    {
+      "filename": "lesson-03-lecture.svg",
+      "pngFilename": "lesson-03-lecture.png",
+      "session": "2026-27-lesson-03-lecture",
+      "label": "Lesson 03 · Lecture — From lines to curves",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-03-lecture"
+    },
+    {
+      "filename": "lesson-03-lab.svg",
+      "pngFilename": "lesson-03-lab.png",
+      "session": "2026-27-lesson-03-lab",
+      "label": "Lesson 03 · Lab — From lines to curves",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-03-lab"
+    },
+    {
+      "filename": "lesson-04-lecture.svg",
+      "pngFilename": "lesson-04-lecture.png",
+      "session": "2026-27-lesson-04-lecture",
+      "label": "Lesson 04 · Lecture — Linear classification",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-04-lecture"
+    },
+    {
+      "filename": "lesson-04-lab.svg",
+      "pngFilename": "lesson-04-lab.png",
+      "session": "2026-27-lesson-04-lab",
+      "label": "Lesson 04 · Lab — Linear classification",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-04-lab"
+    },
+    {
+      "filename": "lesson-05-lecture.svg",
+      "pngFilename": "lesson-05-lecture.png",
+      "session": "2026-27-lesson-05-lecture",
+      "label": "Lesson 05 · Lecture — Finding the best projection",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-05-lecture"
+    },
+    {
+      "filename": "lesson-05-lab.svg",
+      "pngFilename": "lesson-05-lab.png",
+      "session": "2026-27-lesson-05-lab",
+      "label": "Lesson 05 · Lab — Finding the best projection",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-05-lab"
+    },
+    {
+      "filename": "lesson-06-lecture.svg",
+      "pngFilename": "lesson-06-lecture.png",
+      "session": "2026-27-lesson-06-lecture",
+      "label": "Lesson 06 · Lecture — Learning through decisions",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-06-lecture"
+    },
+    {
+      "filename": "lesson-06-lab.svg",
+      "pngFilename": "lesson-06-lab.png",
+      "session": "2026-27-lesson-06-lab",
+      "label": "Lesson 06 · Lab — Learning through decisions",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-06-lab"
+    },
+    {
+      "filename": "lesson-07-lecture.svg",
+      "pngFilename": "lesson-07-lecture.png",
+      "session": "2026-27-lesson-07-lecture",
+      "label": "Lesson 07 · Lecture — Finding structure in dimensions",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-07-lecture"
+    },
+    {
+      "filename": "lesson-07-lab.svg",
+      "pngFilename": "lesson-07-lab.png",
+      "session": "2026-27-lesson-07-lab",
+      "label": "Lesson 07 · Lab — Finding structure in dimensions",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-07-lab"
+    },
+    {
+      "filename": "lesson-08-lecture.svg",
+      "pngFilename": "lesson-08-lecture.png",
+      "session": "2026-27-lesson-08-lecture",
+      "label": "Lesson 08 · Lecture — Discovering groups",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-08-lecture"
+    },
+    {
+      "filename": "lesson-08-lab.svg",
+      "pngFilename": "lesson-08-lab.png",
+      "session": "2026-27-lesson-08-lab",
+      "label": "Lesson 08 · Lab — Discovering groups",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-08-lab"
+    },
+    {
+      "filename": "lesson-09-lecture.svg",
+      "pngFilename": "lesson-09-lecture.png",
+      "session": "2026-27-lesson-09-lecture",
+      "label": "Lesson 09 · Lecture — Learning representations",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-09-lecture"
+    },
+    {
+      "filename": "lesson-09-lab.svg",
+      "pngFilename": "lesson-09-lab.png",
+      "session": "2026-27-lesson-09-lab",
+      "label": "Lesson 09 · Lab — Learning representations",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-09-lab"
+    },
+    {
+      "filename": "lesson-10-lecture.svg",
+      "pngFilename": "lesson-10-lecture.png",
+      "session": "2026-27-lesson-10-lecture",
+      "label": "Lesson 10 · Lecture — Learning from images",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-10-lecture"
+    },
+    {
+      "filename": "lesson-10-lab.svg",
+      "pngFilename": "lesson-10-lab.png",
+      "session": "2026-27-lesson-10-lab",
+      "label": "Lesson 10 · Lab — Learning from images",
+      "url": "https://ml.wxing.me/feedback/?year=2026-27&session=2026-27-lesson-10-lab"
+    }
+  ]
+}

@@ -1,0 +1,59 @@
+---
+import CourseLessonRow from '../components/CourseLessonRow.astro';
+import SemesterProgress from '../components/SemesterProgress.astro';
+import ResourceIcon from '../components/ResourceIcon.astro';
+import { course } from '../data/course';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { withBase } from '../lib/urls';
+
+const preparation = course.lessons.find((lesson) => lesson.type === 'preparation');
+---
+
+<SiteLayout>
+  <section class="home-intro shell" id="about">
+    <div>
+      <span class="eyebrow">{course.title} · {course.academicYear}</span>
+      <h1>Machine Learning</h1>
+      <p>
+        Find your lesson and open the slides, notes, demonstration, or lab directly.
+        Everything students need is listed below.
+      </p>
+    </div>
+    <dl class="course-meta">
+      <div><dt>Module</dt><dd>{course.code}</dd></div>
+      <div><dt>Academic year</dt><dd>{course.academicYear}</dd></div>
+      <div><dt>Instructor</dt><dd>{course.instructor}</dd></div>
+    </dl>
+  </section>
+
+  <div class="shell">
+    <SemesterProgress />
+  </div>
+
+  {preparation && (
+    <aside class="start-strip shell">
+      <div>
+        <strong>New to Python?</strong>
+        <span>Complete the preparation guide before the first practical.</span>
+      </div>
+      <a href={withBase(`course/${preparation.slug}/`)}><ResourceIcon kind="guide" size={14} />Open preparation guide <span aria-hidden="true">→</span></a>
+    </aside>
+  )}
+
+  <section class="course-index shell" id="lessons" aria-labelledby="course-index-heading">
+    <div class="index-heading">
+      <div>
+        <span class="section-kicker">Course materials</span>
+        <h2 id="course-index-heading">Lesson index</h2>
+      </div>
+      <p>Use “All files” for additional materials and downloads.</p>
+    </div>
+
+    <div class="course-table">
+      <div class="course-table-head" aria-hidden="true">
+        <span>Lesson</span><span>Topic</span><span>Lecture</span><span>Practice</span>
+      </div>
+      {course.lessons.map((lesson) => <CourseLessonRow lesson={lesson} />)}
+    </div>
+  </section>
+</SiteLayout>

@@ -1,0 +1,229 @@
+{
+  "source": "MPS311 _439_TimeTable-byLessons-2026.xlsx",
+  "academicYear": "2026/27",
+  "basis": "lesson",
+  "events": [
+    {
+      "lesson": 1,
+      "type": "Lecture + Lab",
+      "title": "Introduction of machine learning and tools\nTool usage: iPython notebook, Google Colab\nProgramming: Python basics and visualization",
+      "theme": "Basic",
+      "coreOutcomes": [
+        "Set up Google Colab and run basic Python code",
+        "Save and load data",
+        "Create simple plots using matplotlib",
+        "Simple data exploration and cleaning",
+        "Use AI tools (ChatGPT/Copilot) to debug code"
+      ],
+      "advancedOutcomes": [
+        "Explore advanced IDE (VS Code/Cursor)"
+      ],
+      "assessment": "",
+      "lectureDate": "2026-10-02",
+      "labDate": "2026-10-06"
+    },
+    {
+      "lesson": 2,
+      "type": "Lecture + Lab",
+      "title": "linear regression (with a machine learning framework, input, output, loss, training)",
+      "theme": "regression",
+      "coreOutcomes": [
+        "Apply sklearn's LinearRegression to predict continuous outcomes",
+        "Explain why minimizing squared error makes sense",
+        "Understand metrics like R2, MSE, MAE, etc",
+        "Describe what the normal equation solution tells us",
+        "Compare training vs testing performance"
+      ],
+      "advancedOutcomes": [
+        "Reproduce full least squares derivation",
+        "Implement gradient descent from scratch"
+      ],
+      "assessment": "Assessment 1 Release \n10/9/2026",
+      "lectureDate": "2026-10-09",
+      "labDate": "2026-10-13"
+    },
+    {
+      "lesson": 3,
+      "type": "Lecture + Lab",
+      "title": "linear regression Plus",
+      "theme": "regression",
+      "coreOutcomes": [
+        "Apply simple feature engineering",
+        "Use Ridge and Lasso regression in sklearn",
+        "Explain why Ridge regression shrinks coefficients toward zero",
+        "Describe when regularization prevents overfitting",
+        "Choose regularization strength using cross-validation"
+      ],
+      "advancedOutcomes": [
+        "Derive Ridge/Lasso cost functions using Lagrange multipliers",
+        "Implement regularized regression from scratch"
+      ],
+      "assessment": "",
+      "lectureDate": "2026-10-16",
+      "labDate": "2026-10-20"
+    },
+    {
+      "lesson": 4,
+      "type": "Lecture + Lab",
+      "title": "linear classification (with metrics for classifications)",
+      "theme": "classification",
+      "coreOutcomes": [
+        "Apply LogisticRegression for binary classification",
+        "Explain why we use sigmoid function for probabilities",
+        "Describe when linear classification fails",
+        "Interpret confusion matrices and classification metrics, ROC curve, AUC"
+      ],
+      "advancedOutcomes": [
+        "Derive cross-entropy loss function",
+        "Implement logistic regression using gradient descent"
+      ],
+      "assessment": "Exercise 1  (optional)\nRelease\n10/23/2026",
+      "lectureDate": "2026-10-23",
+      "labDate": "2026-10-27"
+    },
+    {
+      "lesson": 5,
+      "type": "Lecture + Lab",
+      "title": "Discriminative analysis",
+      "theme": "classification",
+      "coreOutcomes": [
+        "Use sklearn's LinearDiscriminantAnalysis and QuadraticDiscriminantAnalysis",
+        "Explain why LDA assumes equal covariances",
+        "Describe when LDA vs QDA is appropriate",
+        "Compare LDA vs logistic regression performance"
+      ],
+      "advancedOutcomes": [
+        "Derive LDA decision boundaries mathematically",
+        "Implement LDA in python"
+      ],
+      "assessment": "Optional workshop on assessment 1\n10/28/2026",
+      "lectureDate": "2026-10-30",
+      "labDate": "2026-11-03"
+    },
+    {
+      "lesson": 6,
+      "type": "Lecture + Lab",
+      "title": "Decision Tree",
+      "theme": "classification",
+      "coreOutcomes": [
+        "Build decision trees using sklearn's DecisionTreeClassifier",
+        "Explain how splitting criteria (Gini, entropy) work",
+        "Describe when trees overfit and how to prevent it",
+        "Interpret tree structure and feature importance"
+      ],
+      "advancedOutcomes": [
+        "Calculate Gini impurity by hand",
+        "Explore using other classification method in sklearn (eg, SVM)",
+        "Explore advanced ensemble methods (XGBoost)"
+      ],
+      "assessment": "Assessment 1 submission deadline\n11/6/2026",
+      "lectureDate": "2026-11-06",
+      "labDate": "2026-11-17"
+    },
+    {
+      "lesson": 7,
+      "type": "Lecture + Lab",
+      "title": "Principal component analysis (PCA)",
+      "theme": "Dimension reduction (non-supervise learning)",
+      "coreOutcomes": [
+        "Use sklearn's PCA for dimensionality reduction",
+        "Explain why PCA finds directions of maximum variance",
+        "Describe what eigenvalues represent",
+        "Determine optimal number of components"
+      ],
+      "advancedOutcomes": [
+        "Derive PCA from eigenvalue decomposition",
+        "Implement PCA using SVD from scratch"
+      ],
+      "assessment": "Exercise 1 (optional) submission deadline\n11/20/2026",
+      "lectureDate": "2026-11-20",
+      "labDate": "2026-11-24"
+    },
+    {
+      "lesson": 8,
+      "type": "Lecture + Lab",
+      "title": "k-means and Hierarchical Clustering",
+      "theme": "Clustering (non-supervise learning)",
+      "coreOutcomes": [
+        "Apply K-means clustering using sklearn",
+        "Explain why K-means finds spherical clusters",
+        "Describe when hierarchical vs K-means is better",
+        "Choose optimal K using elbow method"
+      ],
+      "advancedOutcomes": [
+        "Implement K-means algorithm from scratch"
+      ],
+      "assessment": "",
+      "lectureDate": "2026-11-27",
+      "labDate": "2026-12-01"
+    },
+    {
+      "lesson": 9,
+      "type": "Lecture + Lab",
+      "title": "Deep learning",
+      "theme": "Deep Learning",
+      "coreOutcomes": [
+        "Implementing neural networks using Keras",
+        "Explain why we need multiple layers"
+      ],
+      "advancedOutcomes": [
+        "Understand the backpropagation algorithm",
+        "Implement a simple neural network with different tricks: regularization, dropout, stochastic gradient descent, etc"
+      ],
+      "assessment": "Assessment 1 feedback to student \n12/4/2026",
+      "lectureDate": "2026-12-04",
+      "labDate": "2026-12-08"
+    },
+    {
+      "lesson": 10,
+      "type": "Lecture + Lab",
+      "title": "Deep learning Convolutional network",
+      "theme": "Deep Learning",
+      "coreOutcomes": [
+        "Understand how a convolutional layer works",
+        "Implementing a CNN using Keras"
+      ],
+      "advancedOutcomes": [
+        "Build Convolutional neural networks using Keras",
+        "Describe what convolutions detect in images",
+        "Load pre-built CNN (eg, vgg-16) or other architecture to a classification problem"
+      ],
+      "assessment": "Optional workshop on assessment 2\n12/9/2026\n\nExercise 1  (optional) feedback to student \n12/11/2026",
+      "lectureDate": "2026-12-11",
+      "labDate": "2026-12-15"
+    },
+    {
+      "lesson": null,
+      "type": "Assessment",
+      "title": "Assessment 2 submission deadline\n1/20/2027",
+      "theme": "",
+      "coreOutcomes": [],
+      "advancedOutcomes": [],
+      "assessment": "Assessment 2 submission deadline\n1/20/2027",
+      "lectureDate": "",
+      "labDate": ""
+    },
+    {
+      "lesson": null,
+      "type": "Workshop (Optional)",
+      "title": "Questions on assignments; General discussions; \nDemonstration of AI for study",
+      "theme": "",
+      "coreOutcomes": [],
+      "advancedOutcomes": [],
+      "assessment": "",
+      "lectureDate": "",
+      "labDate": ""
+    },
+    {
+      "lesson": null,
+      "type": "Workshop (Optional)",
+      "title": "Questions on assignments; General discussions; \nDemonstration of AI for study; convolutional networks and applications",
+      "theme": "",
+      "coreOutcomes": [],
+      "advancedOutcomes": [],
+      "assessment": "",
+      "lectureDate": "",
+      "labDate": ""
+    }
+  ]
+}

@@ -1,0 +1,152 @@
+---
+import { course, type CourseLesson } from '../data/course';
+import { withBase } from '../lib/urls';
+import '../styles/style-samples.css';
+
+const sampleLessons = course.lessons.filter((lesson) => ['lesson-02', 'lesson-08', 'lesson-10'].includes(lesson.slug));
+const styles = [
+  {
+    id: 'editorial',
+    option: 'A',
+    name: 'Academic editorial',
+    note: 'Warm, calm, and human. Closest to Anthropic and a well-designed course reader.',
+  },
+  {
+    id: 'apple',
+    option: 'B',
+    name: 'Apple education',
+    note: 'Cooler, brighter, and highly precise. The clearest utilitarian option.',
+  },
+  {
+    id: 'scientific',
+    option: 'C',
+    name: 'Modern scientific',
+    note: 'Technical and distinctive, with controlled colour used as information.',
+  },
+  {
+    id: 'syllabus',
+    option: 'D',
+    name: 'University syllabus',
+    note: 'A schedule-first academic utility, inspired by MIT OpenCourseWare and Stanford course sites.',
+  },
+  {
+    id: 'pathway',
+    option: 'E',
+    name: 'Guided learning path',
+    note: 'Each lesson communicates what to do first, next, and last, inspired by the CS50 learning workflow.',
+  },
+  {
+    id: 'reader',
+    option: 'F',
+    name: 'Digital course reader',
+    note: 'A persistent contents rail and reading-led structure, inspired by fast.ai and The Missing Semester.',
+  },
+];
+
+const linksFor = (lesson: CourseLesson) => [
+  lesson.resources.find((resource) => resource.kind === 'slides') && { label: 'Slides', kind: 'lecture' },
+  lesson.resources.find((resource) => resource.kind === 'notes') && { label: 'Notes', kind: 'lecture' },
+  lesson.resources.find((resource) => resource.kind === 'notebook') && { label: 'Demo', kind: 'practice' },
+  lesson.resources.find((resource) => resource.kind === 'worksheet') && { label: 'Lab', kind: 'practice' },
+].filter(Boolean) as { label: string; kind: string }[];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="Three visual directions for the MPS311 / MPS439 course website." />
+    <title>Course website · Style samples</title>
+  </head>
+  <body class="samples-page">
+    <header class="samples-header">
+      <div>
+        <a href={withBase()}><span aria-hidden="true">←</span> Back to current site</a>
+        <span class="samples-label">Visual study · not part of the student site</span>
+      </div>
+      <nav aria-label="Style sample navigation">
+        {styles.map((style) => <a href={`#${style.id}`}>{style.option}</a>)}
+      </nav>
+    </header>
+
+    <main>
+      <section class="samples-intro">
+        <span>Same structure. Three visual systems.</span>
+        <h1>Choose the atmosphere,<br />not a different website.</h1>
+        <p>Every sample below uses the same content and course index, so the comparison is about typography, colour, spacing, and tone.</p>
+      </section>
+
+      {styles.map((style) => (
+        <>
+        {style.option === 'D' && (
+          <section class="research-divider">
+            <span>Additional directions from course-site research</span>
+            <h2>Structure can carry the teaching.</h2>
+            <p>These options change not only the atmosphere, but also what the page tells students to do.</p>
+          </section>
+        )}
+        <section class="sample-section" id={style.id}>
+          <header class="sample-description">
+            <span>{style.option}</span>
+            <div><h2>{style.name}</h2><p>{style.note}</p></div>
+          </header>
+
+          <div class={`sample-window sample-${style.id}`}>
+            <header class="sample-site-header">
+              <a class="sample-brand" href="#">
+                <span class="sample-brand-mark">ML</span>
+                <span>MPS311 / MPS439</span>
+              </a>
+              <nav><span>Course index</span><span>Python preparation</span></nav>
+            </header>
+
+            {style.id === 'reader' && (
+              <aside class="sample-reader-nav">
+                <strong>Course contents</strong>
+                <span>00 · Python preparation</span>
+                <span>01 · Welcome</span>
+                <span class="active">02 · Linear regression</span>
+                <span>03 · Regularisation</span>
+                <span>04 · Classification</span>
+                <span>05 · LDA</span>
+              </aside>
+            )}
+
+            <div class="sample-main">
+              <section class="sample-hero">
+                <div>
+                  <span class="sample-eyebrow">Machine Learning · 2025/26</span>
+                  <h3>Machine Learning</h3>
+                  <p>Find your lesson and open the slides, notes, demonstration, or lab directly.</p>
+                </div>
+                <dl>
+                  <div><dt>Module</dt><dd>MPS311 / MPS439</dd></div>
+                  <div><dt>Instructor</dt><dd>Dr Wei Xing</dd></div>
+                </dl>
+              </section>
+
+              <aside class="sample-prep"><strong>New to Python?</strong><span>Open preparation guide</span><b aria-hidden="true">→</b></aside>
+
+              <section class="sample-index">
+                <div class="sample-index-title"><span>Course materials</span><h4>Lesson index</h4></div>
+                <div class="sample-table-head"><span>Lesson</span><span>Topic</span><span>Resources</span></div>
+                {sampleLessons.map((lesson, lessonIndex) => (
+                  <div class="sample-row">
+                    <span class="sample-lesson"><i style={`--row-accent: var(--row-${lessonIndex + 1})`}></i>{lesson.label}</span>
+                    <span class="sample-topic"><strong>{lesson.shortTitle}</strong><small>{lesson.topics.slice(0, 2).join(' · ')}</small></span>
+                    <span class="sample-links">
+                      {linksFor(lesson).map((link) => <b class={link.kind}>{link.label}</b>)}
+                      <b class="all">All files</b>
+                    </span>
+                  </div>
+                ))}
+              </section>
+            </div>
+          </div>
+        </section>
+        </>
+      ))}
+    </main>
+  </body>
+</html>

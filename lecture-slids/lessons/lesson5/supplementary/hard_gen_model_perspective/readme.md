@@ -1,0 +1,1 @@
+hard version, derive LDA from the generative model view point

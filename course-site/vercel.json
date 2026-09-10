@@ -1,0 +1,4 @@
+{
+  "buildCommand": "npx astro build && node scripts/remove-deployment-pdfs.mjs",
+  "outputDirectory": "dist"
+}

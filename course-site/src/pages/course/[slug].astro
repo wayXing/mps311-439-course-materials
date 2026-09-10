@@ -1,0 +1,150 @@
+---
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { course, type CourseLesson } from '../../data/course';
+import { colabUrl, withBase } from '../../lib/urls';
+import ResourceIcon from '../../components/ResourceIcon.astro';
+
+export function getStaticPaths() {
+  return course.lessons.map((lesson, index) => ({
+    params: { slug: lesson.slug },
+    props: {
+      lesson,
+      previousLesson: course.lessons[index - 1] ?? null,
+      nextLesson: course.lessons[index + 1] ?? null,
+    },
+  }));
+}
+
+interface Props {
+  lesson: CourseLesson;
+  previousLesson: CourseLesson | null;
+  nextLesson: CourseLesson | null;
+}
+
+const { lesson, previousLesson, nextLesson } = Astro.props;
+// Keep printable files in the source archive, but do not list them on the website.
+const visibleResources = lesson.resources.filter((resource) => resource.kind !== 'pdf');
+const groups = [...new Set(visibleResources.map((resource) => resource.group))];
+const primaryResource = visibleResources.find((resource) => resource.kind === 'slides')
+  ?? visibleResources.find((resource) => resource.kind === 'guide');
+const colabRepository = course.colab?.repository;
+const colabBranch = course.colab?.branch;
+const colabNotebookRoot = course.colab?.notebookRoot;
+
+const resourceLabels: Record<string, string> = {
+  slides: 'Interactive',
+  pdf: 'PDF',
+  notes: 'Notes',
+  notebook: 'Google Colab demo',
+  worksheet: 'Worksheet',
+  solution: 'Worked solution',
+  guide: 'Guide',
+  data: 'Data',
+};
+---
+
+<SiteLayout
+  title={`${lesson.label}: ${lesson.title} · ${course.code}`}
+  description={lesson.summary}
+>
+  <section class={`detail-hero shell accent-${lesson.accent}`}>
+    <a class="back-link" href={`${withBase()}#lessons`}><span aria-hidden="true">←</span> All course lessons</a>
+
+    <div class="detail-hero-grid">
+      <div class="detail-copy">
+        <span class="eyebrow">{lesson.label} · {course.academicYear}</span>
+        <h1>{lesson.title}</h1>
+        <p>{lesson.summary}</p>
+        {primaryResource && (
+          <a class="button button-primary" href={withBase(primaryResource.href)}>
+            <ResourceIcon kind={primaryResource.kind} size={15} />
+            {primaryResource.kind === 'slides' ? 'Open interactive slides' : 'Open preparation guide'}
+            <span aria-hidden="true">↗</span>
+          </a>
+        )}
+      </div>
+
+      <aside class="topic-panel" aria-labelledby="topics-heading">
+        <span class="topic-number" aria-hidden="true">{lesson.number}</span>
+        <h2 id="topics-heading">This lesson</h2>
+        <ul>
+          {lesson.topics.map((topic) => <li>{topic}</li>)}
+        </ul>
+      </aside>
+    </div>
+  </section>
+
+  <section class="resource-section shell" aria-labelledby="materials-heading">
+    <div class="section-heading detail-heading">
+      <h2 id="materials-heading">Materials</h2>
+      <p>Everything for this lesson, collected in one place.</p>
+    </div>
+
+    {groups.length > 0 ? groups.map((group) => (
+      <section class="resource-group" aria-labelledby={`group-${group.toLowerCase()}`}>
+        <div class="resource-group-heading">
+          <h3 id={`group-${group.toLowerCase()}`}>{group}</h3>
+          <span>{visibleResources.filter((resource) => resource.group === group).length} resources</span>
+        </div>
+        <div class="resource-grid">
+          {visibleResources.filter((resource) => resource.group === group).map((resource) => (
+            <div class={`resource-card resource-${resource.kind}`}>
+              <a
+                class="resource-card-main"
+                href={resource.kind === 'notebook' && colabRepository
+                  ? colabUrl(colabRepository, resource.source, colabBranch, colabNotebookRoot)
+                  : withBase(resource.href)}
+                target={resource.kind === 'notebook' && colabRepository ? '_blank' : undefined}
+                rel={resource.kind === 'notebook' && colabRepository ? 'noopener' : undefined}
+              >
+                <span class={`resource-icon resource-${resource.kind}`}><ResourceIcon kind={resource.kind} size={17} /></span>
+                <span class="resource-card-copy">
+                  <span class="resource-kind">{resourceLabels[resource.kind]}</span>
+                  <strong>{resource.label}</strong>
+                  <small>{resource.kind === 'notebook' && colabRepository ? 'Run and adapt the examples in Google Colab.' : resource.description}</small>
+                </span>
+                <span class="resource-arrow" aria-hidden="true">↗</span>
+              </a>
+              {(resource.downloadHref || (resource.kind === 'notebook' && colabRepository)) && (
+                <div class="resource-actions">
+                  {resource.kind === 'notebook' && colabRepository && (
+                    <a class="resource-read" href={withBase(resource.href)}>
+                      <ResourceIcon kind="notes" size={13} />
+                      Read online
+                    </a>
+                  )}
+                  {resource.downloadHref && (
+                    <a class="resource-download" href={withBase(resource.downloadHref)} download>
+                      <ResourceIcon kind="notebook" size={13} />
+                      Download .ipynb
+                    </a>
+                  )}
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </section>
+    )) : (
+      <div class="empty-state">
+        <span class="empty-orb" aria-hidden="true"></span>
+        <h3>Pause, review, connect.</h3>
+        <p>No new lecture or lab is scheduled. Use this time to consolidate earlier material.</p>
+      </div>
+    )}
+
+    {lesson.note && <aside class="note-panel"><strong>Good to know</strong><p>{lesson.note}</p></aside>}
+    {lesson.resources.some((resource) => resource.kind === 'solution') && (
+      <aside class="note-panel quiet"><strong>Using the lab solution</strong><p>Attempt the worksheet first, then use the worked notebook to compare approaches and check your results.</p></aside>
+    )}
+
+    <nav class="lesson-navigation" aria-label="Previous and next course lessons">
+      {previousLesson
+        ? <a href={withBase(`course/${previousLesson.slug}/`)}><span>Previous</span><strong>← {previousLesson.shortTitle}</strong></a>
+        : <span></span>}
+      {nextLesson
+        ? <a class="next" href={withBase(`course/${nextLesson.slug}/`)}><span>Next</span><strong>{nextLesson.shortTitle} →</strong></a>
+        : <span></span>}
+    </nav>
+  </section>
+</SiteLayout>

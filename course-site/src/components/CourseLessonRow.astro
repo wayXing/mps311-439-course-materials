@@ -1,0 +1,66 @@
+---
+import { course, type CourseLesson, type ResourceKind } from '../data/course';
+import { colabUrl, withBase } from '../lib/urls';
+import ResourceIcon from './ResourceIcon.astro';
+
+interface Props {
+  lesson: CourseLesson;
+}
+
+const { lesson } = Astro.props;
+
+const resource = (kind: ResourceKind) => lesson.resources.find((item) => item.kind === kind);
+const lectureResources = [resource('guide'), resource('slides'), resource('notes'), resource('notebook')].filter(Boolean);
+const practiceResources = [resource('worksheet'), resource('solution')].filter(Boolean);
+const colabRepository = course.colab?.repository;
+const colabBranch = course.colab?.branch;
+const colabNotebookRoot = course.colab?.notebookRoot;
+const resourceLabel = (kind: ResourceKind) => ({
+  guide: 'Guide',
+  slides: 'Slides',
+  notes: 'Notes',
+  notebook: 'Demo',
+  worksheet: 'Lab',
+  solution: 'Solution',
+  pdf: 'PDF',
+  data: 'Data',
+})[kind];
+---
+
+<article class={`course-row accent-${lesson.accent}`}>
+  <div class="course-row-lesson">
+    <span class="lesson-marker" aria-hidden="true"></span>
+    <span>{lesson.label}</span>
+  </div>
+
+  <div class="course-row-topic">
+    <a href={withBase(`course/${lesson.slug}/`)}>
+      <strong>{lesson.shortTitle}</strong>
+      <span>{lesson.topics.slice(0, 2).join(' · ')}</span>
+    </a>
+  </div>
+
+  <div class="course-row-resources">
+    <span class="column-label">Lecture</span>
+    {lectureResources.length > 0
+      ? lectureResources.map((item) => item && (
+        <a
+          class={`resource-link resource-${item.kind}`}
+          href={item.kind === 'notebook' && colabRepository ? colabUrl(colabRepository, item.source, colabBranch, colabNotebookRoot) : withBase(item.href)}
+          target={item.kind === 'notebook' && colabRepository ? '_blank' : undefined}
+          rel={item.kind === 'notebook' && colabRepository ? 'noopener' : undefined}
+        ><ResourceIcon kind={item.kind} size={13} />{resourceLabel(item.kind)}</a>
+      ))
+      : <span class="resource-empty">—</span>}
+  </div>
+
+  <div class="course-row-resources">
+    <span class="column-label">Practice</span>
+    {practiceResources.length > 0
+      ? practiceResources.map((item) => item && (
+        <a class={`resource-link resource-${item.kind}`} href={withBase(item.href)}><ResourceIcon kind={item.kind} size={13} />{resourceLabel(item.kind)}</a>
+      ))
+      : <span class="resource-empty">—</span>}
+    <a class="all-files" href={withBase(`course/${lesson.slug}/`)} aria-label={`View all files for ${lesson.title}`}><ResourceIcon kind="all" size={12} />All files</a>
+  </div>
+</article>

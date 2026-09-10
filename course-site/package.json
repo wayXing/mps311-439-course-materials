@@ -1,0 +1,37 @@
+{
+  "name": "course-site",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.19.0"
+  },
+  "scripts": {
+    "sync:course": "node scripts/sync-course-assets.mjs",
+    "sync:public": "node scripts/sync-public-course.mjs",
+    "sync:timetable": "node scripts/sync-timetable.mjs",
+    "sync": "npm run sync:course && npm run sync:timetable",
+    "feedback:qr": "node scripts/generate-feedback-qrs.mjs",
+    "feedback:install": "node scripts/install-feedback-qr.mjs",
+    "predev": "npm run sync",
+    "dev": "astro dev",
+    "prebuild": "npm run sync",
+    "build": "astro build",
+    "package:sites": "node scripts/package-sites.mjs",
+    "package:sites:preview": "node scripts/package-sites.mjs --omit-pdfs",
+    "package:sites:shell-preview": "node scripts/package-sites.mjs --shell-only",
+    "check:sources": "node ../lecture-slids/scripts/check-course-materials.mjs",
+    "check": "npm run check:sources && astro check && node scripts/validate-course-site.mjs",
+    "preview": "astro preview",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "@lucide/astro": "^1.34.0",
+    "astro": "7.2.9"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.6",
+    "sharp": "0.35.4",
+    "typescript": "^5.9.3",
+    "uqr": "^0.1.3"
+  }
+}

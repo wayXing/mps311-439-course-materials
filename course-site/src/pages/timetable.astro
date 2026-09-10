@@ -1,0 +1,107 @@
+---
+import SemesterProgress from '../components/SemesterProgress.astro';
+import { course } from '../data/course';
+import { timetable } from '../data/timetable';
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { withBase } from '../lib/urls';
+import { FileDown } from '@lucide/astro';
+
+const lessonHref = (lesson: number | null) => {
+  if (!lesson || lesson > 10) return null;
+  return withBase(`course/lesson-${String(lesson).padStart(2, '0')}/`);
+};
+
+const formatDate = (date: string) => new Intl.DateTimeFormat('en-GB', {
+  weekday: 'short', day: 'numeric', month: 'short', year: 'numeric',
+}).format(new Date(`${date}T12:00:00`));
+---
+
+<SiteLayout
+  title={`Course plan · ${course.code}`}
+  description={`2026 autumn lesson-by-lesson teaching and assessment timetable for ${course.code} ${course.title}.`}
+>
+  <section class="timetable-hero shell">
+    <div>
+      <span class="eyebrow">{course.title} · {course.academicYear}</span>
+      <h1>Course plan</h1>
+      <p>Lectures, practical labs, optional workshops, and assessment milestones for Autumn 2026. Lesson numbers are independent of calendar weeks.</p>
+    </div>
+    <a class="download-link" href={withBase('data/course-timetable.csv')} download>
+      <FileDown size={14} stroke-width={1.8} aria-hidden="true" /> Download CSV
+    </a>
+  </section>
+
+  <div class="shell timetable-progress">
+    <SemesterProgress />
+  </div>
+
+  <section class="schedule-section shell" aria-labelledby="schedule-heading">
+    <div class="schedule-heading">
+      <div>
+        <span class="section-kicker">Lesson-by-lesson structure</span>
+        <h2 id="schedule-heading">Teaching and assessment timetable</h2>
+      </div>
+      <div class="schedule-legend" aria-label="Event type colours">
+        <span class="event-lecture">Lecture</span>
+        <span class="event-lab">Lab</span>
+        <span class="event-workshop">Workshop</span>
+        <span class="event-assessment">Assessment</span>
+      </div>
+    </div>
+
+    <div class="schedule-table">
+      <div class="schedule-table-head" aria-hidden="true">
+        <span>Lesson</span><span>Dates</span><span>Topic and outcomes</span><span>Assessment</span>
+      </div>
+
+      {timetable.events.map((event) => {
+        const href = lessonHref(event.lesson);
+        const typeClass = event.type.toLowerCase().includes('workshop')
+          ? 'workshop'
+          : event.type.toLowerCase();
+        const hasOutcomes = event.coreOutcomes.length > 0 || event.advancedOutcomes.length > 0;
+
+        return (
+          <article class={`schedule-row event-row-${typeClass}`}>
+            <div class="schedule-lesson">
+              <span class="mobile-column-label">Lesson</span>
+              {event.lesson
+                ? href ? <a href={href}>Lesson {event.lesson}</a> : <span>Lesson {event.lesson}</span>
+                : <span>Course follow-up</span>}
+            </div>
+            <div class="schedule-type">
+              <span class={`event-badge event-${typeClass}`}>{event.type}</span>
+              {event.lectureDate || event.labDate ? (
+                <span class="schedule-dates">
+                  {event.lectureDate && <span>Lecture · {formatDate(event.lectureDate)}</span>}
+                  {event.labDate && <span>Lab · {formatDate(event.labDate)}</span>}
+                </span>
+              ) : <span>—</span>}
+            </div>
+            <div class="schedule-topic">
+              <strong>{event.title}</strong>
+              {event.theme && event.theme !== event.title && <small>{event.theme}</small>}
+              {hasOutcomes && (
+                <details class="outcomes">
+                  <summary>Learning outcomes</summary>
+                  <div class="outcomes-grid">
+                    {event.coreOutcomes.length > 0 && (
+                      <section><h3>Core · all students</h3><ul>{event.coreOutcomes.map((outcome) => <li>{outcome}</li>)}</ul></section>
+                    )}
+                    {event.advancedOutcomes.length > 0 && (
+                      <section><h3>Advanced · MPS439</h3><ul>{event.advancedOutcomes.map((outcome) => <li>{outcome}</li>)}</ul></section>
+                    )}
+                  </div>
+                </details>
+              )}
+            </div>
+            <div class="schedule-assessment">
+              <span class="mobile-column-label">Assessment</span>
+              {event.type === 'Assessment' ? <span>—</span> : event.assessment || <span>—</span>}
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  </section>
+</SiteLayout>

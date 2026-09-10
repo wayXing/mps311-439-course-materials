@@ -1,0 +1,51 @@
+:root {
+  /*
+   * Course visual theme
+   * Change this file to restyle the whole site without touching page markup.
+   */
+  --font-display: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+  --font-sans: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+
+  --ink: #171713;
+  --ink-soft: #55554d;
+  --ink-faint: #77776e;
+  --paper: #f4f1e9;
+  --paper-deep: #ebe6da;
+  --surface: rgba(255, 255, 252, 0.78);
+  --surface-solid: #fffefa;
+  --line: rgba(23, 23, 19, 0.12);
+
+  --coral: #ef6a4d;
+  --coral-soft: #f7b6a6;
+  --blue: #5e7ee8;
+  --blue-soft: #b9c9fb;
+  --sage: #7fa58d;
+  --sage-soft: #c6dccd;
+  --gold: #e1a63d;
+  --gold-soft: #f2d593;
+  --violet: #8e74bd;
+  --violet-soft: #d6c9ea;
+
+  /* Resource colours: consistent everywhere students encounter a file type. */
+  --resource-slides: #3769cf;
+  --resource-slides-soft: #e1e9fb;
+  --resource-notes: #8052a6;
+  --resource-notes-soft: #eee4f4;
+  --resource-demo: #a96c00;
+  --resource-demo-soft: #f7e8c5;
+  --resource-lab: #cc513f;
+  --resource-lab-soft: #f7dfd9;
+  --resource-guide: #507e61;
+  --resource-guide-soft: #dfece2;
+  --resource-data: #167a78;
+  --resource-data-soft: #d9efec;
+
+  --radius-sm: 14px;
+  --radius-md: 24px;
+  --radius-lg: 38px;
+  --radius-pill: 999px;
+
+  --shadow-soft: 0 24px 70px rgba(54, 48, 34, 0.11);
+  --shadow-card: 0 10px 30px rgba(54, 48, 34, 0.07);
+  --max-width: 1180px;
+}

@@ -1,0 +1,86 @@
+---
+import { BrainCircuit, Code, GitBranch, ScanSearch, TrendingUp } from '@lucide/astro';
+import { withBase } from '../lib/urls';
+
+const phases = [
+  {
+    id: 'tools',
+    lessons: 'Foundation · Lesson 01',
+    title: 'Work with data',
+    capability: 'Use Python, Colab, data handling, plots, and AI-assisted debugging with confidence.',
+    Icon: Code,
+    colour: 'sage',
+  },
+  {
+    id: 'predict',
+    lessons: 'Lessons 02–03',
+    title: 'Predict and generalise',
+    capability: 'Fit and evaluate regression models, engineer features, and control overfitting.',
+    Icon: TrendingUp,
+    colour: 'blue',
+  },
+  {
+    id: 'classify',
+    lessons: 'Lessons 04–06',
+    title: 'Make decisions',
+    capability: 'Build, compare, and interpret probabilistic, discriminant, and tree classifiers.',
+    Icon: GitBranch,
+    colour: 'coral',
+  },
+  {
+    id: 'discover',
+    lessons: 'Lessons 07–08',
+    title: 'Discover structure',
+    capability: 'Reduce dimensions and reveal meaningful groups in unlabelled data.',
+    Icon: ScanSearch,
+    colour: 'violet',
+  },
+  {
+    id: 'represent',
+    lessons: 'Lessons 09–10',
+    title: 'Learn representations',
+    capability: 'Train neural networks and understand how convolutional models learn from images.',
+    Icon: BrainCircuit,
+    colour: 'gold',
+  },
+];
+---
+
+<section
+  class="learning-journey"
+  id="journey"
+  aria-labelledby="journey-heading"
+>
+  <div class="journey-heading">
+    <div>
+      <span class="section-kicker">Learning journey</span>
+      <h2 id="journey-heading">From tools to learned representations</h2>
+      <p>The path shows how each part of the course expands what you can do—not simply how much calendar time has passed.</p>
+    </div>
+    <div class="journey-status">
+      <span>Course structure</span>
+      <strong>Five capability stages</strong>
+      <small>Foundation · Lessons 01–10</small>
+    </div>
+  </div>
+
+  <div class="journey-map">
+    <div class="journey-rail" aria-hidden="true"><span style="--journey-progress: 100%"></span></div>
+    {phases.map(({ Icon, ...phase }, index) => (
+      <article
+        class={`journey-phase phase-${phase.colour}`}
+      >
+        <div class="phase-icon"><Icon size={19} stroke-width={1.8} aria-hidden="true" /></div>
+        <span class="phase-index">{String(index + 1).padStart(2, '0')} · {phase.lessons}</span>
+        <h3>{phase.title}</h3>
+        <p>{phase.capability}</p>
+        <small class="phase-state">Stage {index + 1}</small>
+      </article>
+    ))}
+  </div>
+
+  <div class="journey-footer">
+    <p><strong>Reading Week</strong> sits between “Make decisions” and “Discover structure”: pause, consolidate, then move from supervised to unsupervised learning.</p>
+    <a href={withBase('timetable/')}>Lesson-by-lesson course plan <span aria-hidden="true">→</span></a>
+  </div>
+</section>

@@ -1,0 +1,30 @@
+{
+  "name": "slidev",
+  "type": "module",
+  "private": true,
+  "engines": {
+    "node": ">=22.14.0"
+  },
+  "scripts": {
+    "build": "slidev build",
+    "build:standalone": "cross-env BUILD_AIO=true slidev build",
+    "build:course": "node scripts/build-course-materials.mjs",
+    "check:course": "node scripts/check-course-materials.mjs",
+    "dev": "slidev --open",
+    "export": "slidev export",
+    "buildAIO": "cross-env BUILD_AIO=true slidev build",
+    "postinstall": "node scripts/patch-slidev-paths.mjs"
+  },
+  "dependencies": {
+    "@slidev/cli": "52.8.0",
+    "@slidev/theme-default": "0.25.0",
+    "@slidev/theme-seriph": "0.25.0",
+    "slidev-theme-academic": "2.1.0",
+    "vue": "3.5.24"
+  },
+  "devDependencies": {
+    "cross-env": "10.1.0",
+    "playwright-chromium": "1.56.1",
+    "vite-plugin-singlefile": "2.3.0"
+  }
+}

@@ -1,0 +1,52 @@
+---
+import '../styles/global.css';
+import { course } from '../data/course';
+import { withBase } from '../lib/urls';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = `${course.code} · ${course.title}`,
+  description = course.description,
+} = Astro.props;
+const pathname = Astro.url.pathname;
+const isHome = pathname === withBase() || pathname === withBase('index.html');
+const isFeedback = pathname.includes('/feedback');
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" type="image/svg+xml" href={withBase('favicon.svg')} />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content={description} />
+    <meta name="generator" content={Astro.generator} />
+    <title>{title}</title>
+  </head>
+  <body>
+    <header class="site-header">
+      <nav class="nav shell" aria-label="Main navigation">
+        <a class="brand" href={withBase()} aria-label={`${course.code} home`}>
+          <span class="brand-mark">ML</span>
+          <span>{course.code}</span>
+        </a>
+        <div class="nav-links">
+          <a class:list={{ active: isHome }} href={withBase()} aria-current={isHome ? 'page' : undefined}>Home</a>
+          <a class:list={{ active: isFeedback }} href={withBase('feedback/')} aria-current={isFeedback ? 'page' : undefined}>Feedback</a>
+        </div>
+      </nav>
+    </header>
+
+    <main>
+      <slot />
+    </main>
+
+    <footer class="site-footer">
+      <div class="shell">{course.code} · {course.title} · {course.instructor}</div>
+    </footer>
+  </body>
+</html>

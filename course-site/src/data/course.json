@@ -1,0 +1,1005 @@
+{
+  "code": "MPS311 / MPS439",
+  "title": "Machine Learning",
+  "academicYear": "2026/27",
+  "instructor": "Dr Wei Xing",
+  "description": "A practical, visual introduction to machine learning, connecting statistical foundations with modern learning systems.",
+  "colab": {
+    "repository": "wayXing/mps311-439-course-materials",
+    "branch": "main",
+    "notebookRoot": "lecture-slids/lessons"
+  },
+  "lessons": [
+    {
+      "slug": "foundation",
+      "number": "00",
+      "label": "Foundation",
+      "title": "Python preparation",
+      "shortTitle": "Python preparation",
+      "summary": "A focused pre-course guide to the Python concepts and working habits used throughout the module.",
+      "accent": "sage",
+      "type": "preparation",
+      "topics": [
+        "Core Python syntax",
+        "NumPy and data handling",
+        "Preparing for practical labs"
+      ],
+      "resources": [
+        {
+          "label": "Python preparation guide",
+          "description": "Read the complete guide in the browser.",
+          "kind": "guide",
+          "group": "Preparation",
+          "source": "foundation/python_basics_guide.html",
+          "target": "materials/foundation/python-guide.html",
+          "href": "materials/foundation/python-guide.html"
+        },
+        {
+          "label": "Guide PDF",
+          "description": "Download a printable copy.",
+          "kind": "pdf",
+          "group": "Preparation",
+          "source": "foundation/python_basics_guide.pdf",
+          "target": "materials/foundation/python-guide.pdf",
+          "href": "materials/foundation/python-guide.pdf"
+        }
+      ]
+    },
+    {
+      "slug": "lesson-01",
+      "number": "01",
+      "label": "Lesson 01",
+      "title": "Welcome to machine learning",
+      "shortTitle": "Welcome to ML",
+      "summary": "What machines learn, how the course fits together, and how to turn raw data into a careful first insight.",
+      "accent": "coral",
+      "type": "teaching",
+      "topics": [
+        "What machine learning is",
+        "Exploratory data analysis",
+        "From patterns to responsible conclusions"
+      ],
+      "note": "The lab builds on Python Preparation. Complete the preparation guide first if loading data, pandas methods, or error messages are still unfamiliar.",
+      "resources": [
+        {
+          "label": "Interactive slides",
+          "description": "Open the full Slidev presentation.",
+          "kind": "slides",
+          "group": "Lecture",
+          "source": "lesson1/lecture/dist",
+          "target": "materials/lesson1/slides",
+          "href": "materials/lesson1/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Slides PDF",
+          "description": "Download or print the lecture slides.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson1/lecture/slide-export.pdf",
+          "target": "materials/lesson1/slides.pdf",
+          "href": "materials/lesson1/slides.pdf"
+        },
+        {
+          "label": "Lecture notes",
+          "description": "Read the extended explanation online.",
+          "kind": "notes",
+          "group": "Lecture",
+          "source": "lesson1/lecture/note.html",
+          "target": "materials/lesson1/notes.html",
+          "href": "materials/lesson1/notes.html"
+        },
+        {
+          "label": "Notes PDF",
+          "description": "Download the extended lecture notes.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson1/lecture/note.pdf",
+          "target": "materials/lesson1/notes.pdf",
+          "href": "materials/lesson1/notes.pdf"
+        },
+        {
+          "label": "Lab worksheet",
+          "description": "Complete the guided EDA practical in your browser.",
+          "kind": "worksheet",
+          "group": "Lab",
+          "source": "lesson1/lab/lab_worksheet.html",
+          "target": "materials/lesson1/lab.html",
+          "href": "materials/lesson1/lab.html"
+        },
+        {
+          "label": "Lab solution",
+          "description": "Review the fully worked notebook in the browser.",
+          "kind": "solution",
+          "group": "Lab",
+          "source": "lesson1/lab/lab_solution.ipynb",
+          "target": "materials/lesson1/solution",
+          "href": "materials/lesson1/solution/lab_solution.html",
+          "downloadHref": "materials/lesson1/solution/lab_solution.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet (PDF)",
+          "description": "Download a printable copy of the EDA worksheet.",
+          "kind": "pdf",
+          "group": "Lab",
+          "source": "lesson1/lab/lab_worksheet.pdf",
+          "target": "materials/lesson1/lab.pdf",
+          "href": "materials/lesson1/lab.pdf"
+        },
+        {
+          "label": "Bike rentals dataset",
+          "description": "Download the synthetic CSV used throughout Lab 1.",
+          "kind": "data",
+          "group": "Lab",
+          "source": "lesson1/lab/bike_rentals.csv",
+          "target": "materials/lesson1/bike_rentals.csv",
+          "href": "materials/lesson1/bike_rentals.csv"
+        }
+      ]
+    },
+    {
+      "slug": "lesson-02",
+      "number": "02",
+      "label": "Lesson 02",
+      "title": "Predicting the future with lines",
+      "shortTitle": "Linear regression",
+      "summary": "Linear regression as our first complete journey from data and assumptions to prediction.",
+      "accent": "blue",
+      "type": "teaching",
+      "topics": [
+        "Simple and multiple regression",
+        "Loss and model fitting",
+        "Interpreting predictions"
+      ],
+      "resources": [
+        {
+          "label": "Interactive slides",
+          "description": "Open the full Slidev presentation.",
+          "kind": "slides",
+          "group": "Lecture",
+          "source": "lesson2/lecture/dist",
+          "target": "materials/lesson2/slides",
+          "href": "materials/lesson2/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Slides PDF",
+          "description": "Download or print the lecture slides.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson2/lecture/slide-export.pdf",
+          "target": "materials/lesson2/slides.pdf",
+          "href": "materials/lesson2/slides.pdf"
+        },
+        {
+          "label": "Lecture notes",
+          "description": "Read the extended explanation online.",
+          "kind": "notes",
+          "group": "Lecture",
+          "source": "lesson2/lecture/note.html",
+          "target": "materials/lesson2/notes.html",
+          "href": "materials/lesson2/notes.html"
+        },
+        {
+          "label": "Notes PDF",
+          "description": "Download the extended lecture notes.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson2/lecture/note.pdf",
+          "target": "materials/lesson2/notes.pdf",
+          "href": "materials/lesson2/notes.pdf"
+        },
+        {
+          "label": "Demo",
+          "description": "Read the worked examples in the browser.",
+          "kind": "notebook",
+          "group": "Lecture",
+          "source": "lesson2/lecture/demo.ipynb",
+          "target": "materials/lesson2/demo",
+          "href": "materials/lesson2/demo/demo.html",
+          "downloadHref": "materials/lesson2/demo/demo.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet",
+          "description": "Open the guided practical worksheet.",
+          "kind": "worksheet",
+          "group": "Lab",
+          "source": "lesson2/lab/lab_worksheet.html",
+          "target": "materials/lesson2/lab.html",
+          "href": "materials/lesson2/lab.html"
+        },
+        {
+          "label": "Lab solution",
+          "description": "Review the fully worked notebook in the browser.",
+          "kind": "solution",
+          "group": "Lab",
+          "source": "lesson2/lab/lab_solution.ipynb",
+          "target": "materials/lesson2/solution",
+          "href": "materials/lesson2/solution/lab_solution.html",
+          "downloadHref": "materials/lesson2/solution/lab_solution.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet (PDF)",
+          "description": "Download a printable worksheet.",
+          "kind": "pdf",
+          "group": "Lab",
+          "source": "lesson2/lab/lab_worksheet.pdf",
+          "target": "materials/lesson2/lab.pdf",
+          "href": "materials/lesson2/lab.pdf"
+        }
+      ]
+    },
+    {
+      "slug": "lesson-03",
+      "number": "03",
+      "label": "Lesson 03",
+      "title": "From lines to curves",
+      "shortTitle": "Features & regularisation",
+      "summary": "Feature engineering, model complexity, overfitting, and the tools that help a model generalise.",
+      "accent": "violet",
+      "type": "teaching",
+      "topics": [
+        "Polynomial and interaction features",
+        "Ridge and lasso",
+        "Cross-validation"
+      ],
+      "resources": [
+        {
+          "label": "Interactive slides",
+          "description": "Open the full Slidev presentation.",
+          "kind": "slides",
+          "group": "Lecture",
+          "source": "lesson3/lecture/dist",
+          "target": "materials/lesson3/slides",
+          "href": "materials/lesson3/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Slides PDF",
+          "description": "Download or print the lecture slides.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson3/lecture/slide-export.pdf",
+          "target": "materials/lesson3/slides.pdf",
+          "href": "materials/lesson3/slides.pdf"
+        },
+        {
+          "label": "Lecture notes",
+          "description": "Read the extended explanation online.",
+          "kind": "notes",
+          "group": "Lecture",
+          "source": "lesson3/lecture/note.html",
+          "target": "materials/lesson3/notes.html",
+          "href": "materials/lesson3/notes.html"
+        },
+        {
+          "label": "Notes PDF",
+          "description": "Download the extended lecture notes.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson3/lecture/note.pdf",
+          "target": "materials/lesson3/notes.pdf",
+          "href": "materials/lesson3/notes.pdf"
+        },
+        {
+          "label": "Demo",
+          "description": "Read the worked examples in the browser.",
+          "kind": "notebook",
+          "group": "Lecture",
+          "source": "lesson3/lecture/demo.ipynb",
+          "target": "materials/lesson3/demo",
+          "href": "materials/lesson3/demo/demo.html",
+          "downloadHref": "materials/lesson3/demo/demo.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet",
+          "description": "Open the guided practical worksheet.",
+          "kind": "worksheet",
+          "group": "Lab",
+          "source": "lesson3/lab/lab_worksheet.html",
+          "target": "materials/lesson3/lab.html",
+          "href": "materials/lesson3/lab.html"
+        },
+        {
+          "label": "Lab solution",
+          "description": "Review the fully worked notebook in the browser.",
+          "kind": "solution",
+          "group": "Lab",
+          "source": "lesson3/lab/lab_solution.ipynb",
+          "target": "materials/lesson3/solution",
+          "href": "materials/lesson3/solution/lab_solution.html",
+          "downloadHref": "materials/lesson3/solution/lab_solution.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet (PDF)",
+          "description": "Download a printable worksheet.",
+          "kind": "pdf",
+          "group": "Lab",
+          "source": "lesson3/lab/lab_worksheet.pdf",
+          "target": "materials/lesson3/lab.pdf",
+          "href": "materials/lesson3/lab.pdf"
+        }
+      ]
+    },
+    {
+      "slug": "lesson-04",
+      "number": "04",
+      "label": "Lesson 04",
+      "title": "Linear classification",
+      "shortTitle": "Logistic regression",
+      "summary": "Turning linear models into probabilistic classifiers and learning how to evaluate their decisions.",
+      "accent": "gold",
+      "type": "teaching",
+      "topics": [
+        "Sigmoid and probability",
+        "Decision boundaries",
+        "Classification metrics"
+      ],
+      "resources": [
+        {
+          "label": "Interactive slides",
+          "description": "Open the full Slidev presentation.",
+          "kind": "slides",
+          "group": "Lecture",
+          "source": "lesson4/lecture/dist",
+          "target": "materials/lesson4/slides",
+          "href": "materials/lesson4/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Slides PDF",
+          "description": "Download or print the lecture slides.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson4/lecture/slide-export.pdf",
+          "target": "materials/lesson4/slides.pdf",
+          "href": "materials/lesson4/slides.pdf"
+        },
+        {
+          "label": "Lecture notes",
+          "description": "Read the extended explanation online.",
+          "kind": "notes",
+          "group": "Lecture",
+          "source": "lesson4/lecture/note.html",
+          "target": "materials/lesson4/notes.html",
+          "href": "materials/lesson4/notes.html"
+        },
+        {
+          "label": "Notes PDF",
+          "description": "Download the extended lecture notes.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson4/lecture/note.pdf",
+          "target": "materials/lesson4/notes.pdf",
+          "href": "materials/lesson4/notes.pdf"
+        },
+        {
+          "label": "Demo",
+          "description": "Read the worked examples in the browser.",
+          "kind": "notebook",
+          "group": "Lecture",
+          "source": "lesson4/lecture/demo.ipynb",
+          "target": "materials/lesson4/demo",
+          "href": "materials/lesson4/demo/demo.html",
+          "downloadHref": "materials/lesson4/demo/demo.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet",
+          "description": "Open the guided practical worksheet.",
+          "kind": "worksheet",
+          "group": "Lab",
+          "source": "lesson4/lab/lab_worksheet.html",
+          "target": "materials/lesson4/lab.html",
+          "href": "materials/lesson4/lab.html"
+        },
+        {
+          "label": "Lab solution",
+          "description": "Review the fully worked notebook in the browser.",
+          "kind": "solution",
+          "group": "Lab",
+          "source": "lesson4/lab/lab_solution.ipynb",
+          "target": "materials/lesson4/solution",
+          "href": "materials/lesson4/solution/lab_solution.html",
+          "downloadHref": "materials/lesson4/solution/lab_solution.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet (PDF)",
+          "description": "Download a printable worksheet.",
+          "kind": "pdf",
+          "group": "Lab",
+          "source": "lesson4/lab/lab_worksheet.pdf",
+          "target": "materials/lesson4/lab.pdf",
+          "href": "materials/lesson4/lab.pdf"
+        }
+      ]
+    },
+    {
+      "slug": "lesson-05",
+      "number": "05",
+      "label": "Lesson 05",
+      "title": "Finding the best projection",
+      "shortTitle": "Linear discriminant analysis",
+      "summary": "A generative view of classification and the geometry of finding informative projections.",
+      "accent": "sage",
+      "type": "teaching",
+      "topics": [
+        "Class distributions",
+        "Within and between-class variance",
+        "LDA and QDA"
+      ],
+      "resources": [
+        {
+          "label": "Interactive slides",
+          "description": "Open the full Slidev presentation.",
+          "kind": "slides",
+          "group": "Lecture",
+          "source": "lesson5/lecture/dist",
+          "target": "materials/lesson5/slides",
+          "href": "materials/lesson5/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Slides PDF",
+          "description": "Download or print the lecture slides.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson5/lecture/slide-export.pdf",
+          "target": "materials/lesson5/slides.pdf",
+          "href": "materials/lesson5/slides.pdf"
+        },
+        {
+          "label": "Lecture notes",
+          "description": "Read the extended explanation online.",
+          "kind": "notes",
+          "group": "Lecture",
+          "source": "lesson5/lecture/note.html",
+          "target": "materials/lesson5/notes.html",
+          "href": "materials/lesson5/notes.html"
+        },
+        {
+          "label": "Notes PDF",
+          "description": "Download the extended lecture notes.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson5/lecture/note.pdf",
+          "target": "materials/lesson5/notes.pdf",
+          "href": "materials/lesson5/notes.pdf"
+        },
+        {
+          "label": "Demo",
+          "description": "Read the worked examples in the browser.",
+          "kind": "notebook",
+          "group": "Lecture",
+          "source": "lesson5/lecture/demo.ipynb",
+          "target": "materials/lesson5/demo",
+          "href": "materials/lesson5/demo/demo.html",
+          "downloadHref": "materials/lesson5/demo/demo.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet",
+          "description": "Open the guided practical worksheet.",
+          "kind": "worksheet",
+          "group": "Lab",
+          "source": "lesson5/lab/lab_worksheet.html",
+          "target": "materials/lesson5/lab.html",
+          "href": "materials/lesson5/lab.html"
+        },
+        {
+          "label": "Lab solution",
+          "description": "Review the fully worked notebook in the browser.",
+          "kind": "solution",
+          "group": "Lab",
+          "source": "lesson5/lab/lab_solution.ipynb",
+          "target": "materials/lesson5/solution",
+          "href": "materials/lesson5/solution/lab_solution.html",
+          "downloadHref": "materials/lesson5/solution/lab_solution.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet (PDF)",
+          "description": "Download a printable worksheet.",
+          "kind": "pdf",
+          "group": "Lab",
+          "source": "lesson5/lab/lab_worksheet.pdf",
+          "target": "materials/lesson5/lab.pdf",
+          "href": "materials/lesson5/lab.pdf"
+        }
+      ]
+    },
+    {
+      "slug": "lesson-06",
+      "number": "06",
+      "label": "Lesson 06",
+      "title": "Learning through decisions",
+      "shortTitle": "Decision trees",
+      "summary": "From simple questions to hierarchical models, including the strengths and fragility of trees.",
+      "accent": "coral",
+      "type": "teaching",
+      "topics": [
+        "Recursive splitting",
+        "Gini and entropy",
+        "Overfitting and ensembles"
+      ],
+      "resources": [
+        {
+          "label": "Interactive slides",
+          "description": "Open the full Slidev presentation.",
+          "kind": "slides",
+          "group": "Lecture",
+          "source": "lesson6/lecture/dist",
+          "target": "materials/lesson6/slides",
+          "href": "materials/lesson6/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Slides PDF",
+          "description": "Download or print the lecture slides.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson6/lecture/slide-export.pdf",
+          "target": "materials/lesson6/slides.pdf",
+          "href": "materials/lesson6/slides.pdf"
+        },
+        {
+          "label": "Lecture notes",
+          "description": "Read the extended explanation online.",
+          "kind": "notes",
+          "group": "Lecture",
+          "source": "lesson6/lecture/note.html",
+          "target": "materials/lesson6/notes.html",
+          "href": "materials/lesson6/notes.html"
+        },
+        {
+          "label": "Notes PDF",
+          "description": "Download the extended lecture notes.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson6/lecture/note.pdf",
+          "target": "materials/lesson6/notes.pdf",
+          "href": "materials/lesson6/notes.pdf"
+        },
+        {
+          "label": "Demo",
+          "description": "Read the worked examples in the browser.",
+          "kind": "notebook",
+          "group": "Lecture",
+          "source": "lesson6/lecture/demo.ipynb",
+          "target": "materials/lesson6/demo",
+          "href": "materials/lesson6/demo/demo.html",
+          "downloadHref": "materials/lesson6/demo/demo.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet",
+          "description": "Open the guided practical worksheet.",
+          "kind": "worksheet",
+          "group": "Lab",
+          "source": "lesson6/lab/lab_worksheet.html",
+          "target": "materials/lesson6/lab.html",
+          "href": "materials/lesson6/lab.html"
+        },
+        {
+          "label": "Lab solution",
+          "description": "Review the fully worked notebook in the browser.",
+          "kind": "solution",
+          "group": "Lab",
+          "source": "lesson6/lab/lab_solution.ipynb",
+          "target": "materials/lesson6/solution",
+          "href": "materials/lesson6/solution/lab_solution.html",
+          "downloadHref": "materials/lesson6/solution/lab_solution.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet (PDF)",
+          "description": "Download a printable worksheet.",
+          "kind": "pdf",
+          "group": "Lab",
+          "source": "lesson6/lab/lab_worksheet.pdf",
+          "target": "materials/lesson6/lab.pdf",
+          "href": "materials/lesson6/lab.pdf"
+        }
+      ]
+    },
+    {
+      "slug": "reading-week",
+      "number": "",
+      "label": "Reading Week",
+      "title": "Reading week",
+      "shortTitle": "Reading week",
+      "summary": "Time to consolidate the supervised learning ideas from the first half of the course.",
+      "accent": "gold",
+      "type": "break",
+      "topics": [
+        "Review earlier material",
+        "Revisit practical work",
+        "Prepare for unsupervised learning"
+      ],
+      "note": "There is no scheduled lecture or lab material for Reading Week.",
+      "resources": []
+    },
+    {
+      "slug": "lesson-07",
+      "number": "07",
+      "label": "Lesson 07",
+      "title": "Finding structure in dimensions",
+      "shortTitle": "Principal component analysis",
+      "summary": "Discovering low-dimensional structure and learning what information a projection preserves.",
+      "accent": "blue",
+      "type": "teaching",
+      "topics": [
+        "Variance and covariance",
+        "Principal directions",
+        "Reconstruction and compression"
+      ],
+      "resources": [
+        {
+          "label": "Interactive slides",
+          "description": "Open the full Slidev presentation.",
+          "kind": "slides",
+          "group": "Lecture",
+          "source": "lesson7/lecture/dist",
+          "target": "materials/lesson7/slides",
+          "href": "materials/lesson7/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Slides PDF",
+          "description": "Download or print the lecture slides.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson7/lecture/slide-export.pdf",
+          "target": "materials/lesson7/slides.pdf",
+          "href": "materials/lesson7/slides.pdf"
+        },
+        {
+          "label": "Lecture notes",
+          "description": "Read the extended explanation online.",
+          "kind": "notes",
+          "group": "Lecture",
+          "source": "lesson7/lecture/note.html",
+          "target": "materials/lesson7/notes.html",
+          "href": "materials/lesson7/notes.html"
+        },
+        {
+          "label": "Notes PDF",
+          "description": "Download the extended lecture notes.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson7/lecture/note.pdf",
+          "target": "materials/lesson7/notes.pdf",
+          "href": "materials/lesson7/notes.pdf"
+        },
+        {
+          "label": "Demo",
+          "description": "Read the worked examples in the browser.",
+          "kind": "notebook",
+          "group": "Lecture",
+          "source": "lesson7/lecture/demo.ipynb",
+          "target": "materials/lesson7/demo",
+          "href": "materials/lesson7/demo/demo.html",
+          "downloadHref": "materials/lesson7/demo/demo.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet",
+          "description": "Open the guided practical worksheet.",
+          "kind": "worksheet",
+          "group": "Lab",
+          "source": "lesson7/lab/lab_worksheet.html",
+          "target": "materials/lesson7/lab.html",
+          "href": "materials/lesson7/lab.html"
+        },
+        {
+          "label": "Lab solution",
+          "description": "Review the fully worked notebook in the browser.",
+          "kind": "solution",
+          "group": "Lab",
+          "source": "lesson7/lab/lab_solution.ipynb",
+          "target": "materials/lesson7/solution",
+          "href": "materials/lesson7/solution/lab_solution.html",
+          "downloadHref": "materials/lesson7/solution/lab_solution.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet (PDF)",
+          "description": "Download a printable worksheet.",
+          "kind": "pdf",
+          "group": "Lab",
+          "source": "lesson7/lab/lab_worksheet.pdf",
+          "target": "materials/lesson7/lab.pdf",
+          "href": "materials/lesson7/lab.pdf"
+        }
+      ]
+    },
+    {
+      "slug": "lesson-08",
+      "number": "08",
+      "label": "Lesson 08",
+      "title": "Discovering groups",
+      "shortTitle": "Clustering",
+      "summary": "K-means and hierarchical clustering as two different ways of revealing groups in unlabeled data.",
+      "accent": "violet",
+      "type": "teaching",
+      "topics": [
+        "K-means optimisation",
+        "Choosing the number of clusters",
+        "Hierarchical clustering"
+      ],
+      "resources": [
+        {
+          "label": "Interactive slides",
+          "description": "Open the full Slidev presentation.",
+          "kind": "slides",
+          "group": "Lecture",
+          "source": "lesson8/lecture/dist",
+          "target": "materials/lesson8/slides",
+          "href": "materials/lesson8/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Slides PDF",
+          "description": "Download or print the lecture slides.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson8/lecture/slide-export.pdf",
+          "target": "materials/lesson8/slides.pdf",
+          "href": "materials/lesson8/slides.pdf"
+        },
+        {
+          "label": "Lecture notes",
+          "description": "Read the extended explanation online.",
+          "kind": "notes",
+          "group": "Lecture",
+          "source": "lesson8/lecture/note.html",
+          "target": "materials/lesson8/notes.html",
+          "href": "materials/lesson8/notes.html"
+        },
+        {
+          "label": "Notes PDF",
+          "description": "Download the extended lecture notes.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson8/lecture/note.pdf",
+          "target": "materials/lesson8/notes.pdf",
+          "href": "materials/lesson8/notes.pdf"
+        },
+        {
+          "label": "Demo",
+          "description": "Read the worked examples in the browser.",
+          "kind": "notebook",
+          "group": "Lecture",
+          "source": "lesson8/lecture/demo.ipynb",
+          "target": "materials/lesson8/demo",
+          "href": "materials/lesson8/demo/demo.html",
+          "downloadHref": "materials/lesson8/demo/demo.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet",
+          "description": "Open the guided practical worksheet.",
+          "kind": "worksheet",
+          "group": "Lab",
+          "source": "lesson8/lab/lab_worksheet.html",
+          "target": "materials/lesson8/lab.html",
+          "href": "materials/lesson8/lab.html"
+        },
+        {
+          "label": "Lab solution",
+          "description": "Review the fully worked notebook in the browser.",
+          "kind": "solution",
+          "group": "Lab",
+          "source": "lesson8/lab/lab_solution.ipynb",
+          "target": "materials/lesson8/solution",
+          "href": "materials/lesson8/solution/lab_solution.html",
+          "downloadHref": "materials/lesson8/solution/lab_solution.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet (PDF)",
+          "description": "Download a printable worksheet.",
+          "kind": "pdf",
+          "group": "Lab",
+          "source": "lesson8/lab/lab_worksheet.pdf",
+          "target": "materials/lesson8/lab.pdf",
+          "href": "materials/lesson8/lab.pdf"
+        }
+      ]
+    },
+    {
+      "slug": "lesson-09",
+      "number": "09",
+      "label": "Lesson 09",
+      "title": "Learning representations",
+      "shortTitle": "Neural networks",
+      "summary": "From logistic regression to layered networks that learn useful internal representations.",
+      "accent": "coral",
+      "type": "teaching",
+      "topics": [
+        "Hidden units and activations",
+        "Forward and backward passes",
+        "Training neural networks"
+      ],
+      "resources": [
+        {
+          "label": "Interactive slides",
+          "description": "Open the full Slidev presentation.",
+          "kind": "slides",
+          "group": "Lecture",
+          "source": "lesson9/lecture/dist",
+          "target": "materials/lesson9/slides",
+          "href": "materials/lesson9/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Slides PDF",
+          "description": "Download or print the lecture slides.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson9/lecture/slide-export.pdf",
+          "target": "materials/lesson9/slides.pdf",
+          "href": "materials/lesson9/slides.pdf"
+        },
+        {
+          "label": "Lecture notes",
+          "description": "Read the extended explanation online.",
+          "kind": "notes",
+          "group": "Lecture",
+          "source": "lesson9/lecture/note.html",
+          "target": "materials/lesson9/notes.html",
+          "href": "materials/lesson9/notes.html"
+        },
+        {
+          "label": "Notes PDF",
+          "description": "Download the extended lecture notes.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson9/lecture/note.pdf",
+          "target": "materials/lesson9/notes.pdf",
+          "href": "materials/lesson9/notes.pdf"
+        },
+        {
+          "label": "Demo",
+          "description": "Read the worked examples in the browser.",
+          "kind": "notebook",
+          "group": "Lecture",
+          "source": "lesson9/lecture/demo.ipynb",
+          "target": "materials/lesson9/demo",
+          "href": "materials/lesson9/demo/demo.html",
+          "downloadHref": "materials/lesson9/demo/demo.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet",
+          "description": "Open the guided practical worksheet.",
+          "kind": "worksheet",
+          "group": "Lab",
+          "source": "lesson9/lab/lab_worksheet.html",
+          "target": "materials/lesson9/lab.html",
+          "href": "materials/lesson9/lab.html"
+        },
+        {
+          "label": "Lab solution",
+          "description": "Review the fully worked notebook in the browser.",
+          "kind": "solution",
+          "group": "Lab",
+          "source": "lesson9/lab/lab_solution.ipynb",
+          "target": "materials/lesson9/solution",
+          "href": "materials/lesson9/solution/lab_solution.html",
+          "downloadHref": "materials/lesson9/solution/lab_solution.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet (PDF)",
+          "description": "Download a printable worksheet.",
+          "kind": "pdf",
+          "group": "Lab",
+          "source": "lesson9/lab/lab_worksheet.pdf",
+          "target": "materials/lesson9/lab.pdf",
+          "href": "materials/lesson9/lab.pdf"
+        }
+      ]
+    },
+    {
+      "slug": "lesson-10",
+      "number": "10",
+      "label": "Lesson 10",
+      "title": "Learning from images",
+      "shortTitle": "Convolutional neural networks",
+      "summary": "How convolution, feature hierarchies, and pooling make neural networks effective with images.",
+      "accent": "blue",
+      "type": "teaching",
+      "topics": [
+        "Convolution and filters",
+        "Pooling and spatial structure",
+        "CNN architectures"
+      ],
+      "resources": [
+        {
+          "label": "Interactive slides",
+          "description": "Open the full Slidev presentation.",
+          "kind": "slides",
+          "group": "Lecture",
+          "source": "lesson10/lecture/dist",
+          "target": "materials/lesson10/slides",
+          "href": "materials/lesson10/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Slides PDF",
+          "description": "Download or print the lecture slides.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson10/lecture/slide-export.pdf",
+          "target": "materials/lesson10/slides.pdf",
+          "href": "materials/lesson10/slides.pdf"
+        },
+        {
+          "label": "Lecture notes",
+          "description": "Read the extended explanation online.",
+          "kind": "notes",
+          "group": "Lecture",
+          "source": "lesson10/lecture/note.html",
+          "target": "materials/lesson10/notes.html",
+          "href": "materials/lesson10/notes.html"
+        },
+        {
+          "label": "Notes PDF",
+          "description": "Download the extended lecture notes.",
+          "kind": "pdf",
+          "group": "Lecture",
+          "source": "lesson10/lecture/note.pdf",
+          "target": "materials/lesson10/notes.pdf",
+          "href": "materials/lesson10/notes.pdf"
+        },
+        {
+          "label": "Demo",
+          "description": "Read the worked examples in the browser.",
+          "kind": "notebook",
+          "group": "Lecture",
+          "source": "lesson10/lecture/demo.ipynb",
+          "target": "materials/lesson10/demo",
+          "href": "materials/lesson10/demo/demo.html",
+          "downloadHref": "materials/lesson10/demo/demo.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet",
+          "description": "Open the guided practical worksheet.",
+          "kind": "worksheet",
+          "group": "Lab",
+          "source": "lesson10/lab/lab_worksheet.html",
+          "target": "materials/lesson10/lab.html",
+          "href": "materials/lesson10/lab.html"
+        },
+        {
+          "label": "Lab solution",
+          "description": "Review the fully worked notebook in the browser.",
+          "kind": "solution",
+          "group": "Lab",
+          "source": "lesson10/lab/lab_solution.ipynb",
+          "target": "materials/lesson10/solution",
+          "href": "materials/lesson10/solution/lab_solution.html",
+          "downloadHref": "materials/lesson10/solution/lab_solution.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab worksheet (PDF)",
+          "description": "Download a printable worksheet.",
+          "kind": "pdf",
+          "group": "Lab",
+          "source": "lesson10/lab/lab_worksheet.pdf",
+          "target": "materials/lesson10/lab.pdf",
+          "href": "materials/lesson10/lab.pdf"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+---
+import {
+  BookOpenText,
+  Code,
+  Database,
+  FileDown,
+  FileText,
+  FlaskConical,
+  FolderOpen,
+  NotebookText,
+  Presentation,
+} from '@lucide/astro';
+import type { ResourceKind } from '../data/course';
+
+interface Props {
+  kind: ResourceKind | 'all';
+  size?: number;
+}
+
+const { kind, size = 15 } = Astro.props;
+const icons = {
+  slides: Presentation,
+  notes: NotebookText,
+  notebook: Code,
+  worksheet: FlaskConical,
+  solution: NotebookText,
+  pdf: FileDown,
+  guide: BookOpenText,
+  data: Database,
+  all: FolderOpen,
+};
+const Icon = icons[kind] ?? FileText;
+---
+
+<Icon size={size} stroke-width={1.8} aria-hidden="true" />

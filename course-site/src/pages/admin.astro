@@ -1,0 +1,305 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { course } from '../data/course';
+import '../styles/admin.css';
+
+const projectUrl = 'https://whxpzfruhtshrwiksezg.supabase.co';
+const publishableKey = 'sb_publishable_GEKCtohy16BxHMc8_fji6w_TbcrlbPd';
+const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
+---
+
+<SiteLayout title={`Feedback admin · ${course.code}`} description={`Private feedback administration for ${course.code}.`}>
+  <section class="admin-page shell">
+    <header class="admin-heading">
+      <span class="eyebrow">Instructor only</span>
+      <h1>Feedback administration</h1>
+      <p>Browse anonymous suggestions and public questions, then manage the academic years available to students.</p>
+    </header>
+
+    <section class="admin-login admin-card" id="admin-login" aria-labelledby="admin-login-heading">
+      <h2 id="admin-login-heading">Enter admin password</h2>
+      <form id="admin-login-form" class="admin-login-form">
+        <label for="admin-password">Password</label>
+        <input id="admin-password" name="password" type="password" inputmode="numeric" autocomplete="current-password" required />
+        <button type="submit">Enter</button>
+      </form>
+      <p class="admin-status" id="admin-login-status" aria-live="polite"></p>
+    </section>
+
+    <div class="admin-dashboard" id="admin-dashboard" hidden>
+      <section class="admin-card admin-years" aria-labelledby="admin-years-heading">
+        <div class="admin-card-heading">
+          <div>
+            <span class="admin-kicker">Student selector</span>
+            <h2 id="admin-years-heading">Academic years</h2>
+          </div>
+          <form id="admin-year-form" class="admin-year-form">
+            <label class="sr-only" for="admin-year-input">New academic-year name</label>
+            <input id="admin-year-input" name="year" maxlength="80" placeholder="2026 Summer School" required />
+            <button type="submit">Add option</button>
+          </form>
+        </div>
+        <p class="admin-note">Hide keeps a year and its records in this dashboard, but removes it from the student selector. Remove deletes only the year option; records are still kept.</p>
+        <div id="admin-years-list" class="admin-years-list" aria-live="polite"></div>
+      </section>
+
+      <section class="admin-card admin-records" aria-labelledby="admin-records-heading">
+        <div class="admin-card-heading records-heading">
+          <div>
+            <span class="admin-kicker">Private instructor view</span>
+            <h2 id="admin-records-heading">Records</h2>
+          </div>
+          <label class="admin-filter" for="admin-year-filter">
+            <span>Show</span>
+            <select id="admin-year-filter"><option value="">All years</option></select>
+          </label>
+        </div>
+        <p class="admin-status" id="admin-dashboard-status" aria-live="polite"></p>
+
+        <div class="admin-record-section">
+          <div class="admin-section-label"><h3>Anonymous feedback</h3><span id="admin-feedback-count">—</span></div>
+          <div class="admin-empty" id="admin-feedback-empty">Loading feedback…</div>
+          <div class="admin-table-wrap" id="admin-feedback-wrap" hidden>
+            <table>
+              <thead><tr><th>Session</th><th>Ratings</th><th>Suggestion</th><th>Submitted</th></tr></thead>
+              <tbody id="admin-feedback-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="admin-record-section">
+          <div class="admin-section-label"><h3>Class questions</h3><span id="admin-question-count">—</span></div>
+          <div class="admin-empty" id="admin-questions-empty">Loading questions…</div>
+          <div class="admin-table-wrap" id="admin-questions-wrap" hidden>
+            <table>
+              <thead><tr><th>Session</th><th>Name</th><th>Question</th><th>Visibility</th><th>Posted</th></tr></thead>
+              <tbody id="admin-questions-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </section>
+
+  <script is:inline define:vars={{ submissionUrl, publishableKey }}>
+    const tokenStorageKey = 'mps-course-feedback-admin-token-v1';
+    const loginPanel = document.querySelector('#admin-login');
+    const dashboard = document.querySelector('#admin-dashboard');
+    const loginForm = document.querySelector('#admin-login-form');
+    const loginStatus = document.querySelector('#admin-login-status');
+    const dashboardStatus = document.querySelector('#admin-dashboard-status');
+    const yearForm = document.querySelector('#admin-year-form');
+    const yearInput = document.querySelector('#admin-year-input');
+    const yearList = document.querySelector('#admin-years-list');
+    const yearFilter = document.querySelector('#admin-year-filter');
+    const feedbackBody = document.querySelector('#admin-feedback-body');
+    const feedbackEmpty = document.querySelector('#admin-feedback-empty');
+    const feedbackWrap = document.querySelector('#admin-feedback-wrap');
+    const feedbackCount = document.querySelector('#admin-feedback-count');
+    const questionsBody = document.querySelector('#admin-questions-body');
+    const questionsEmpty = document.querySelector('#admin-questions-empty');
+    const questionsWrap = document.querySelector('#admin-questions-wrap');
+    const questionsCount = document.querySelector('#admin-question-count');
+
+    const readError = async (response, fallback) => {
+      try {
+        const body = await response.json();
+        if (typeof body?.error === 'string') return body.error;
+      } catch {}
+      return fallback;
+    };
+
+    const getToken = () => sessionStorage.getItem(tokenStorageKey);
+    const clearSession = () => {
+      sessionStorage.removeItem(tokenStorageKey);
+      dashboard.hidden = true;
+      loginPanel.hidden = false;
+    };
+
+    const requestAdmin = async (action, payload = {}) => {
+      const response = await fetch(submissionUrl, {
+        method: 'POST',
+        headers: { apikey: publishableKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action, admin_token: getToken(), ...payload }),
+      });
+      if (response.status === 401) {
+        clearSession();
+        throw new Error('Your admin session has expired. Please sign in again.');
+      }
+      if (!response.ok) throw new Error(await readError(response, 'Could not complete this admin request.'));
+      return response.json();
+    };
+
+    const formatDate = (value) => {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? '—' : date.toLocaleString([], {
+        year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit',
+      });
+    };
+
+    const sessionLabel = (contextKey) => String(contextKey || '').replace(/^(\d{4}-\d{2})-/, '$1 · ').replaceAll('-', ' ');
+    const createCell = (text, className = '') => {
+      const cell = document.createElement('td');
+      cell.textContent = text;
+      if (className) cell.className = className;
+      return cell;
+    };
+
+    const renderFeedback = (records) => {
+      feedbackBody.replaceChildren();
+      feedbackCount.textContent = `${records.length} record${records.length === 1 ? '' : 's'}`;
+      feedbackEmpty.hidden = records.length > 0;
+      feedbackWrap.hidden = records.length === 0;
+      records.forEach((record) => {
+        const row = document.createElement('tr');
+        row.append(
+          createCell(sessionLabel(record.contextKey)),
+          createCell(`D ${record.difficulty} · P ${record.pace} · C ${record.contentAmount}`, 'ratings-cell'),
+          createCell(record.comment || '—', 'message-cell'),
+          createCell(formatDate(record.createdAt)),
+        );
+        feedbackBody.append(row);
+      });
+      if (records.length === 0) feedbackEmpty.textContent = 'No feedback for this selection.';
+    };
+
+    const renderQuestions = (records) => {
+      questionsBody.replaceChildren();
+      questionsCount.textContent = `${records.length} record${records.length === 1 ? '' : 's'}`;
+      questionsEmpty.hidden = records.length > 0;
+      questionsWrap.hidden = records.length === 0;
+      records.forEach((record) => {
+        const row = document.createElement('tr');
+        row.append(
+          createCell(sessionLabel(record.contextKey)),
+          createCell(record.displayName || 'Anonymous'),
+          createCell(record.question || '—', 'message-cell'),
+          createCell(record.isVisible ? 'Visible' : 'Hidden'),
+          createCell(formatDate(record.createdAt)),
+        );
+        questionsBody.append(row);
+      });
+      if (records.length === 0) questionsEmpty.textContent = 'No class questions for this selection.';
+    };
+
+    const renderYears = (years) => {
+      const previousValue = yearFilter.value;
+      yearList.replaceChildren();
+      yearFilter.replaceChildren(new Option('All years', ''));
+      years.forEach((year) => {
+        const row = document.createElement('div');
+        row.className = 'admin-year-row';
+        row.classList.toggle('is-hidden-option', !year.isVisible);
+        const details = document.createElement('div');
+        const name = document.createElement('strong');
+        name.textContent = year.label;
+        const counts = document.createElement('span');
+        counts.textContent = `${year.isVisible ? 'Visible to students' : 'Hidden from students'} · ${year.feedbackCount} feedback · ${year.questionCount} questions`;
+        details.append(name, counts);
+        const actions = document.createElement('div');
+        actions.className = 'admin-year-actions';
+        const visibility = document.createElement('button');
+        visibility.type = 'button';
+        visibility.className = 'admin-toggle';
+        visibility.textContent = year.isVisible ? 'Hide' : 'Show';
+        visibility.addEventListener('click', async () => {
+          const action = year.isVisible ? 'hide' : 'show';
+          if (!window.confirm(`${action[0].toUpperCase()}${action.slice(1)} ${year.label} for students? Records will remain in this dashboard.`)) return;
+          dashboardStatus.textContent = `${action[0].toUpperCase()}${action.slice(1)}ing academic-year option…`;
+          try {
+            await requestAdmin('admin_set_year_visibility', { year_key: year.key, is_visible: !year.isVisible });
+            await loadOverview(`Academic-year option ${action === 'hide' ? 'hidden' : 'shown'}.`);
+          } catch (error) {
+            dashboardStatus.textContent = error instanceof Error ? error.message : 'Could not update the academic-year option.';
+          }
+        });
+        const remove = document.createElement('button');
+        remove.type = 'button';
+        remove.className = 'admin-remove';
+        remove.textContent = 'Remove';
+        remove.addEventListener('click', async () => {
+          if (!window.confirm(`Remove ${year.label} from the student selector? Existing records will be kept.`)) return;
+          dashboardStatus.textContent = 'Removing academic year…';
+          try {
+            await requestAdmin('admin_delete_year', { year_key: year.key });
+            if (yearFilter.value === year.key) yearFilter.value = '';
+            await loadOverview('Academic year removed from the selector.');
+          } catch (error) {
+            dashboardStatus.textContent = error instanceof Error ? error.message : 'Could not remove the academic year.';
+          }
+        });
+        actions.append(visibility, remove);
+        row.append(details, actions);
+        yearList.append(row);
+        yearFilter.append(new Option(year.label, year.key));
+      });
+      if ([...yearFilter.options].some((option) => option.value === previousValue)) yearFilter.value = previousValue;
+    };
+
+    const renderOverview = (overview, message = '') => {
+      const years = Array.isArray(overview?.years) ? overview.years : [];
+      renderYears(years);
+      renderFeedback(Array.isArray(overview?.feedback) ? overview.feedback : []);
+      renderQuestions(Array.isArray(overview?.questions) ? overview.questions : []);
+      dashboardStatus.textContent = message;
+    };
+
+    const loadOverview = async (message = '') => {
+      dashboardStatus.textContent = 'Loading records…';
+      const result = await requestAdmin('admin_overview', { year_key: yearFilter.value || null });
+      renderOverview(result.overview, message);
+    };
+
+    loginForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const password = new FormData(loginForm).get('password');
+      const button = loginForm.querySelector('button');
+      button.disabled = true;
+      loginStatus.textContent = 'Checking password…';
+      try {
+        const response = await fetch(submissionUrl, {
+          method: 'POST',
+          headers: { apikey: publishableKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'admin_login', password: String(password ?? '') }),
+        });
+        if (!response.ok) throw new Error(await readError(response, 'Could not sign in.'));
+        const result = await response.json();
+        if (typeof result?.token !== 'string') throw new Error('Could not start an admin session.');
+        sessionStorage.setItem(tokenStorageKey, result.token);
+        loginPanel.hidden = true;
+        dashboard.hidden = false;
+        loginForm.reset();
+        await loadOverview();
+      } catch (error) {
+        loginStatus.textContent = error instanceof Error ? error.message : 'Could not sign in.';
+      } finally {
+        button.disabled = false;
+      }
+    });
+
+    yearForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const yearLabel = yearInput.value.trim();
+      dashboardStatus.textContent = 'Adding academic-year option…';
+      try {
+        await requestAdmin('admin_create_year', { year_key: yearLabel });
+        yearInput.value = '';
+        await loadOverview('Academic-year option added to the student selector.');
+      } catch (error) {
+        dashboardStatus.textContent = error instanceof Error ? error.message : 'Could not add the academic-year option.';
+      }
+    });
+
+    yearFilter.addEventListener('change', () => {
+      loadOverview().catch((error) => {
+        dashboardStatus.textContent = error instanceof Error ? error.message : 'Could not load records.';
+      });
+    });
+
+    if (getToken()) {
+      loginPanel.hidden = true;
+      dashboard.hidden = false;
+      loadOverview().catch(() => clearSession());
+    }
+  </script>
+</SiteLayout>

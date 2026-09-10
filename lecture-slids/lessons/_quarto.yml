@@ -1,0 +1,17 @@
+format:
+  html:
+    theme: default
+    embed-resources: true
+    code-copy: true
+    link-external-newwindow: true
+  pdf:
+    pdf-engine: lualatex
+    documentclass: scrartcl
+    papersize: letter
+    mainfont: Helvetica Neue
+    monofont: Menlo
+    geometry:
+      - margin=1in
+    colorlinks: true
+
+lang: en
