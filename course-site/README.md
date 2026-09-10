@@ -22,6 +22,18 @@ npm run check
 
 课程 Demo 的源文件仍是每周 lecture 文件夹中的 `.ipynb`。同步时会用已安装的 Quarto 生成无需执行代码的静态 HTML 阅读版，并同时保留原始 Notebook 下载；因此运行 `dev` 或 `build` 的环境需要能够调用 `quarto`。
 
+## Google Colab 与公开课程镜像
+
+网站的 **Demo** 按钮直接打开 Google Colab，地址由 `src/data/course.json` 的 `colab`
+配置和每个 resource 的 notebook 路径组成。当前公开源为
+[`wayXing/mps311-439-course-materials`](https://github.com/wayXing/mps311-439-course-materials)
+的 `main` 分支；静态 HTML 阅读版与 `.ipynb` 下载仍由本网站提供。
+
+不要直接编辑 `../mps311-439-course-materials/` 中复制出来的文件。课程源或此配置改动后，
+从本目录运行 `npm run sync:public`，再在该镜像目录审核、提交并推送。脚本只重建镜像中的
+`course-site/` 与 `lecture-slids/`，保留其 `.git`；它刻意排除教学管理资料、密钥、部署配置、
+生成 PDF/HTML、依赖和 archive。公开代码使用 MIT，课程材料使用 CC BY-NC-SA 4.0。
+
 ## 更新课程内容并上线
 
 课程资料的**唯一源文件**在相邻的 `../lecture-slids/lessons/`；不要直接编辑

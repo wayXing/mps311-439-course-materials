@@ -33,6 +33,19 @@ sibling directory `../lecture-slids/lessons/`; never edit
   its HTML with Quarto. Website deployments intentionally omit PDF handouts.
 - After any lecture/lab source rebuild, run from this repository:
   `npm run sync:course`, then `npm run check`.
+- The public GitHub mirror used by one-click Colab is the generated sibling
+  `../mps311-439-course-materials/`. When public course source, website course
+  configuration, or demo notebooks change, run `npm run sync:public` here,
+  inspect the mirror, then commit and push it from that directory. Never edit
+  copied mirror files directly; it preserves only `.git` and regenerates the
+  copied `course-site/` and `lecture-slids/` trees.
+- Google Colab paths are assembled from `src/data/course.json` (`colab`) and a
+  resource's notebook path. Keep those values aligned with the public mirror's
+  actual layout before deploying the website.
+- The mirror is strictly public: it must not contain `brief/Admin/`, student or
+  assessment data, feedback administration, `.env` files, credentials,
+  deployment metadata, local agent files, generated PDFs/HTML, dependencies, or
+  archives. Review its staged file list before every push.
 - After website source changes, or after the material sync/check above, deploy
   the production site with `vercel --prod --yes` from this repository. Confirm
   deployment is Ready and that `https://ml.wxing.me` remains its production alias.

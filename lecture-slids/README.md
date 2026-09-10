@@ -90,3 +90,20 @@ Edit Markdown, notebooks, figure-generation scripts, and local figure assets.
 Do not edit `dist/`, exported PDFs, or generated HTML directly. Historical
 versions belong in the nearest `archive/` directory. Optional advanced material
 belongs in `supplementary/` rather than in a second `lessonN` directory.
+
+## Publishing notebooks for Google Colab
+
+This is the canonical private source. The course website's **Demo** links use
+the generated public mirror at
+[`wayXing/mps311-439-course-materials`](https://github.com/wayXing/mps311-439-course-materials),
+not this directory directly. After changing any public lecture notebook or
+course material, regenerate the mirror from `../course-site` with:
+
+```sh
+npm run sync:public
+```
+
+Then inspect, commit and push `../mps311-439-course-materials/`. Do not edit the
+mirror's copied notebooks by hand. Student data, assessments, credentials,
+generated PDFs/HTML, dependencies and `archive/` are private or generated and
+must never enter that public repository.
