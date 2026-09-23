@@ -4,6 +4,7 @@ format:
     embed-resources: true
     code-copy: true
     link-external-newwindow: true
+    format-links: false
   pdf:
     pdf-engine: lualatex
     documentclass: scrartcl
