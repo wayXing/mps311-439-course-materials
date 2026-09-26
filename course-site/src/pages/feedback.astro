@@ -32,22 +32,20 @@ const sessions = sessionTemplates.map((session) => ({
 
 <SiteLayout
   title={`Questions & feedback · ${course.code}`}
-  description={`Public class questions and anonymous, session-specific feedback for ${course.code}.`}
+  description={`Anonymous, session-specific course feedback for ${course.code}.`}
 >
   <section class="feedback-page shell">
     <header class="feedback-heading">
       <div>
-        <span class="eyebrow">30-second check-in & questions</span>
+        <span class="eyebrow">30-second check-in</span>
         <h1>Help shape the next class.</h1>
         <p>
-          Send private anonymous feedback about the difficulty, pace, and content, or post a
-          question you would like answered in class.
+          Send private anonymous feedback about the difficulty, pace, and content.
         </p>
       </div>
       <aside class="privacy-note">
-        <strong>Two separate channels</strong>
-        Ratings and improvement suggestions remain anonymous. Class questions are public,
-        show the name you choose, and are never linked to your feedback.
+        <strong>Private feedback</strong>
+        Ratings and improvement suggestions stay anonymous and are only visible to the instructor.
       </aside>
     </header>
 
@@ -167,49 +165,6 @@ const sessions = sessionTemplates.map((session) => ({
       </section>
     </div>
 
-    <section class="feedback-panel question-panel" aria-labelledby="question-heading">
-      <header class="panel-heading compact-heading">
-        <div>
-          <span class="channel-label public-channel">Public · shown to the class</span>
-          <h2 id="question-heading">Question for class</h2>
-          <p>Leave something you would like me to answer during the lecture or lab.</p>
-        </div>
-      </header>
-
-      <form class="question-form" id="course-question-form">
-        <div class="field compact-field name-field">
-          <label for="question-name">Display name <span aria-hidden="true">(optional)</span></label>
-          <input id="question-name" name="displayName" maxlength="40" autocomplete="nickname" placeholder="Any name" />
-        </div>
-        <div class="field compact-field question-field">
-          <label for="question-text">Your question</label>
-          <textarea
-            id="question-text"
-            name="question"
-            maxlength="1000"
-            required
-            placeholder="What would you like me to explain in class?"
-          ></textarea>
-        </div>
-        <div class="honeypot-field" aria-hidden="true">
-          <label for="question-website">Website</label>
-          <input id="question-website" name="website" tabindex="-1" autocomplete="off" />
-        </div>
-        <div class="question-actions">
-          <button class="feedback-submit" type="submit">Post question</button>
-        </div>
-      </form>
-      <p class="form-status question-status" id="question-status" aria-live="polite"></p>
-
-      <div class="question-feed" aria-live="polite">
-        <div class="question-feed-heading">
-          <h3>Questions from this session</h3>
-          <span id="question-count">—</span>
-        </div>
-        <div class="question-state" id="question-state">Loading questions…</div>
-        <div class="question-list" id="question-list" hidden></div>
-      </div>
-    </section>
   </section>
 
   <script is:inline define:vars={{
@@ -222,16 +177,10 @@ const sessions = sessionTemplates.map((session) => ({
     sessionTemplates,
   }}>
     const feedbackForm = document.querySelector('#course-feedback-form');
-    const questionForm = document.querySelector('#course-question-form');
     const yearSelect = document.querySelector('#feedback-year');
     const sessionSelect = document.querySelector('#feedback-session');
     const feedbackButton = feedbackForm.querySelector('button[type="submit"]');
-    const questionButton = questionForm.querySelector('button[type="submit"]');
     const formStatus = document.querySelector('#form-status');
-    const questionStatus = document.querySelector('#question-status');
-    const questionState = document.querySelector('#question-state');
-    const questionList = document.querySelector('#question-list');
-    const questionCount = document.querySelector('#question-count');
     const resultsState = document.querySelector('#results-state');
     const metricList = document.querySelector('#metric-list');
     const responseCount = document.querySelector('#response-count');
@@ -376,64 +325,6 @@ const sessions = sessionTemplates.map((session) => ({
       }
     };
 
-    const formatQuestionTime = (value) => {
-      const date = new Date(value);
-      if (Number.isNaN(date.getTime())) return '';
-      return date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    };
-
-    const renderQuestions = (questions) => {
-      questionList.replaceChildren();
-      questionCount.textContent = `${questions.length} shown`;
-      questions.forEach((entry) => {
-        const article = document.createElement('article');
-        article.className = 'question-item';
-        const meta = document.createElement('div');
-        meta.className = 'question-meta';
-        const name = document.createElement('strong');
-        name.textContent = entry.display_name || 'Anonymous';
-        const time = document.createElement('time');
-        time.dateTime = entry.created_at;
-        time.textContent = formatQuestionTime(entry.created_at);
-        meta.append(name, time);
-        const text = document.createElement('p');
-        text.textContent = entry.question;
-        article.append(meta, text);
-        questionList.append(article);
-      });
-    };
-
-    const loadQuestions = async () => {
-      questionState.hidden = false;
-      questionState.textContent = 'Loading questions…';
-      questionList.hidden = true;
-      questionCount.textContent = '—';
-      const query = new URLSearchParams({
-        select: 'id,display_name,question,created_at',
-        context_key: `eq.${sessionSelect.value}`,
-        is_visible: 'eq.true',
-        order: 'created_at.desc',
-        limit: '30',
-      });
-      try {
-        const response = await fetch(`${projectUrl}/rest/v1/course_questions?${query}`, {
-          headers: { apikey: publishableKey },
-        });
-        if (!response.ok) throw new Error(await readError(response, 'Could not load class questions.'));
-        const questions = await response.json();
-        if (!Array.isArray(questions) || questions.length === 0) {
-          questionState.textContent = 'No questions yet for this session.';
-          questionCount.textContent = '0 shown';
-          return;
-        }
-        renderQuestions(questions);
-        questionState.hidden = true;
-        questionList.hidden = false;
-      } catch (error) {
-        questionState.textContent = error instanceof Error ? error.message : 'Could not load class questions.';
-      }
-    };
-
     document.querySelectorAll('input[type="range"]').forEach((input) => {
       const output = document.querySelector(`[data-output="${input.name}"]`);
       input.addEventListener('input', () => { output.textContent = input.value; });
@@ -444,12 +335,9 @@ const sessions = sessionTemplates.map((session) => ({
       url.searchParams.set('year', yearSelect.value);
       url.searchParams.set('session', sessionSelect.value);
       window.history.replaceState({}, '', url);
-      [formStatus, questionStatus].forEach((status) => {
-        status.textContent = '';
-        status.removeAttribute('data-state');
-      });
+      formStatus.textContent = '';
+      formStatus.removeAttribute('data-state');
       loadResults();
-      loadQuestions();
     };
 
     yearSelect.addEventListener('change', () => {
@@ -458,34 +346,6 @@ const sessions = sessionTemplates.map((session) => ({
     });
 
     sessionSelect.addEventListener('change', updateSelection);
-
-    questionForm.addEventListener('submit', async (event) => {
-      event.preventDefault();
-      questionButton.disabled = true;
-      questionButton.textContent = 'Posting…';
-      questionStatus.textContent = '';
-      questionStatus.removeAttribute('data-state');
-      const data = new FormData(questionForm);
-      try {
-        await submitEntry({
-          action: 'question',
-          context_key: sessionSelect.value,
-          display_name: String(data.get('displayName') ?? ''),
-          question: String(data.get('question') ?? ''),
-          website: String(data.get('website') ?? ''),
-        });
-        questionStatus.textContent = 'Your question is now visible to the class.';
-        questionStatus.dataset.state = 'success';
-        questionForm.querySelector('#question-text').value = '';
-        await loadQuestions();
-      } catch (error) {
-        questionStatus.textContent = error instanceof Error ? error.message : 'Could not post your question.';
-        questionStatus.dataset.state = 'error';
-      } finally {
-        questionButton.disabled = false;
-        questionButton.textContent = 'Post question';
-      }
-    });
 
     feedbackForm.addEventListener('submit', async (event) => {
       event.preventDefault();
@@ -532,7 +392,6 @@ const sessions = sessionTemplates.map((session) => ({
       renderAcademicYears(years, initialYear);
       populateSessions(initialYear, requestedSession);
       loadResults();
-      loadQuestions();
     };
 
     initialiseFeedbackPage();

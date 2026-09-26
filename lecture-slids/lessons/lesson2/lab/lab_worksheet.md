@@ -10,7 +10,7 @@ pagetitle: "Lab 2: Linear Regression"
 
 ## Introduction
 
-Today, you'll build your first **predictive model** from scratch. By the end of this session, you'll be able to predict diabetes progression in patients using real medical data.
+Today, you'll build your first **predictive model** using scikit-learn. By the end of this session, you'll be able to predict diabetes progression in patients using real medical data and judge the evidence for that prediction.
 
 ### What You'll Learn
 
@@ -27,6 +27,8 @@ Today, you'll build your first **predictive model** from scratch. By the end of 
 **Dataset:** Diabetes dataset (built into scikit-learn)  
 **Required Libraries:** numpy, matplotlib, sklearn (all pre-installed in Colab)
 
+**Remember:** This lab uses a fill-in-the-blanks approach. Complete only the parts marked with `____`; the surrounding code shows the workflow. Focus on what each modelling step does rather than memorising syntax.
+
 ---
 
 ## Part 0: Setup and Data Exploration (5 minutes)
@@ -42,58 +44,50 @@ The diabetes dataset contains measurements from 442 patients. Our task is to pre
 **Task 0.1:** Import libraries and load the data
 
 ```python
-# TODO: Import numpy, matplotlib.pyplot, and load_diabetes from sklearn.datasets
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import ____
 
+diabetes = ____()
 
-
-# TODO: Load the diabetes dataset using load_diabetes()
-
-
-# TODO: Extract features (X) and target (y) from the dataset
-X = 
-y = 
+# Extract the feature matrix and target vector
+X = diabetes.____
+y = diabetes.____
 ```
 
 **Task 0.2:** Explore the data structure
 
 ```python
-# TODO: Print the shape of X and y
-
-
-
-# TODO: Print the feature names
-
-
-# TODO: Print the first 500 characters of the dataset description
-
+print("X shape:", X.____)
+print("y shape:", y.____)
+print("\nFeatures:", diabetes.____)
+print("\nDescription:")
+print(diabetes.____[:500])
 ```
 
 **Task 0.3:** Create a scatter plot of BMI vs disease progression
 
 ```python
-# TODO: Extract the BMI column (feature index 2) from X
-bmi = 
+bmi = X[:, ____]
 
-# TODO: Create a figure with size (8, 5)
-
-
-# TODO: Create a scatter plot of BMI vs target (y)
-# Use alpha=0.5 and color='steelblue'
-
-
-# TODO: Add labels and title
-
-
-
-# TODO: Add a grid and show the plot
-
-
+plt.figure(figsize=(8, 5))
+plt.____(bmi, y, alpha=0.5)
+plt.xlabel('BMI')
+plt.ylabel('Disease Progression')
+plt.title('BMI vs Diabetes Progression')
+plt.grid(True, alpha=0.3)
+plt.____()
 ```
 
 **Questions to Answer:**
+
 - How many patients are in the dataset?
 - How many features do we have?
 - Do you see a relationship between BMI and disease progression?
+
+> Patients: __________  Features: __________
+>
+> Relationship observed: _______________________________________________
 
 ### Hints
 - Hint: Use `X[:, 2]` to extract column index 2
@@ -115,74 +109,64 @@ Build a simple linear regression model using just ONE feature (BMI).
 ### Background
 Linear regression finds the line of best fit: **ŷ = w × x + b**
 
-The workflow: Prepare → Create → Fit → Predict → Visualize
+The workflow: Prepare -> Create -> Fit -> Predict -> Visualize
 
 ### Your Tasks
 
 **Task 1.1:** Prepare the data (reshape for sklearn)
 
 ```python
-# TODO: Import LinearRegression from sklearn.linear_model
+from sklearn.linear_model import ____
 
+# sklearn expects a 2D feature matrix
+X_bmi = X[:, ____].reshape(____, ____)
 
-# TODO: Extract BMI and reshape it to 2D array (442, 1)
-# sklearn requires 2D arrays, use .reshape(-1, 1)
-X_bmi = 
-
-# TODO: Print the shape before and after reshaping
-
-
+print("Original shape:", X[:, 2].shape)
+print("Reshaped:", X_bmi.____)
 ```
 
 **Task 1.2:** Create and train the model
 
 ```python
-# TODO: Create a LinearRegression model
+model = ____()
+model.____(X_bmi, ____)
 
-
-# TODO: Fit the model using X_bmi and y
-
-
-# TODO: Print the learned weight (slope) and bias (intercept)
-print("Weight (w):", )
-print("Bias (b):", )
+print("Weight (w):", model.____[0])
+print("Bias (b):", model.____)
 ```
 
 **Task 1.3:** Make predictions
 
 ```python
-# TODO: Use the trained model to predict y values for all X_bmi
+y_pred = model.____(____)
 
-
-# TODO: Print predictions for the first 3 patients
-
-
+print("First 3 predictions:", y_pred[:____])
+print("First 3 actual:", y[:____])
 ```
 
 **Task 1.4:** Visualize the fitted line
 
 ```python
-# TODO: Create a figure with size (10, 6)
-
-
-# TODO: Plot scatter of actual data (X_bmi vs y)
-
-
-# TODO: Plot the fitted line (X_bmi vs y_pred)
-# Use color='red' and linewidth=2
-
-
-# TODO: Add labels, title, legend, and grid
-
-
-
-
+plt.figure(figsize=(10, 6))
+plt.____(X_bmi, y, alpha=0.5)
+plt.____(X_bmi, y_pred, color='red', linewidth=2)
+plt.xlabel('BMI')
+plt.ylabel('Disease Progression')
+plt.title(f'Fitted Line: y = {model.coef_[0]:.1f} * BMI + {model.intercept_:.1f}')
+plt.____()
 ```
 
 **Questions to Answer:**
+
 - What is the weight? What does it mean?
 - What is the bias? What does it represent?
 - Does the line fit the data well?
+
+> Weight and interpretation: ___________________________________________
+>
+> Bias and interpretation: _____________________________________________
+>
+> Evidence about fit: __________________________________________________
 
 ### Hints
 - Hint: `.reshape(-1, 1)` converts (442,) to (442, 1)
@@ -211,61 +195,53 @@ Quantify model performance using MSE and R² score.
 **Task 2.1:** Calculate MSE manually
 
 ```python
-# TODO: Calculate residuals (errors): y_true - y_pred
-residuals = 
+residuals = ____ - ____
+squared_residuals = residuals ** ____
+mse_manual = np.____(squared_residuals)
 
-# TODO: Square the residuals
-
-
-# TODO: Calculate the mean of squared residuals (MSE)
-
-
-# TODO: Print MSE and RMSE (square root of MSE)
-
-
+print("MSE (manual):", mse_manual)
+print("RMSE:", np.____(mse_manual))
 ```
 
 **Task 2.2:** Calculate metrics using sklearn
 
 ```python
-# TODO: Import mean_squared_error and r2_score from sklearn.metrics
+from sklearn.metrics import mean_squared_error, r2_score
 
+mse_sklearn = ____(y, y_pred)
+r2 = ____(y, y_pred)
 
-# TODO: Calculate MSE using sklearn function
-
-
-# TODO: Calculate R² score
-
-
-# TODO: Print both metrics
-
-
+print("MSE (sklearn):", mse_sklearn)
+print("R² score:", r2)
 ```
 
 **Task 2.3:** Try a different feature (blood pressure)
 
 ```python
-# TODO: Extract blood pressure (feature index 3) and reshape
+X_bp = X[:, ____].reshape(-1, 1)
 
+model_bp = ____()
+model_bp.____(X_bp, y)
+y_pred_bp = model_bp.____(X_bp)
 
-# TODO: Create and fit a new model
+mse_bp = mean_squared_error(y, ____)
+r2_bp = r2_score(y, ____)
 
-
-# TODO: Make predictions
-
-
-# TODO: Calculate MSE and R² for this model
-
-
-# TODO: Print comparison with BMI model
-
-
+print("BMI          - MSE:", mse_sklearn, "R²:", r2)
+print("Blood Press  - MSE:", mse_bp, "R²:", r2_bp)
 ```
 
 **Questions to Answer:**
+
 - Which feature is a better predictor: BMI or blood pressure?
 - What does an R² of 0.03 mean?
 - Why isn't R² close to 1.0?
+
+> Better single feature: _______________________________________________
+>
+> Interpretation of R²: ________________________________________________
+>
+> Why performance is limited: _________________________________________
 
 ### Hints
 - Hint: MSE = np.mean((y - y_pred)**2)
@@ -294,95 +270,79 @@ Use multiple features and properly evaluate using train/test split.
 **Task 3.1:** Split the data
 
 ```python
-# TODO: Import train_test_split from sklearn.model_selection
+from sklearn.model_selection import ____
 
+# Select BMI (2), blood pressure (3), and feature 8
+X_multi = X[:, [____, ____, ____]]
 
-# TODO: Select 3 features: BMI (2), blood pressure (3), and feature 8
-X_multi = 
+X_train, X_test, y_train, y_test = train_test_split(
+    X_multi, y, test_size=____, random_state=____
+)
 
-# TODO: Split data into train (80%) and test (20%) sets
-# Use random_state=42 for reproducibility
-X_train, X_test, y_train, y_test = 
-
-# TODO: Print the sizes of train and test sets
-
-
+print("Training set:", X_train.shape[0], "samples")
+print("Test set:", X_test.shape[0], "samples")
 ```
 
 **Task 3.2:** Train model on training data
 
 ```python
-# TODO: Create a new LinearRegression model
+model_multi = ____()
+model_multi.____(____, ____)
 
-
-# TODO: Fit on TRAINING data only (X_train, y_train)
-
-
-# TODO: Print the learned weights and bias
-
-
+print("Weights:", model_multi.____)
+print("Bias:", model_multi.____)
 ```
 
 **Task 3.3:** Evaluate on both train and test sets
 
 ```python
-# TODO: Make predictions on training set
+y_train_pred = model_multi.____(X_train)
+y_test_pred = model_multi.____(X_test)
 
+train_mse = mean_squared_error(____, y_train_pred)
+test_mse = mean_squared_error(____, y_test_pred)
 
-# TODO: Make predictions on test set
+train_r2 = r2_score(y_train, ____)
+test_r2 = r2_score(y_test, ____)
 
-
-# TODO: Calculate MSE for training set
-
-
-# TODO: Calculate MSE for test set
-
-
-# TODO: Calculate R² for training set
-
-
-# TODO: Calculate R² for test set
-
-
-# TODO: Print all metrics in a formatted way
-
-
+print("Training - MSE:", train_mse, "R²:", train_r2)
+print("Test     - MSE:", test_mse, "R²:", test_r2)
 ```
 
 **Task 3.4:** Visualize predictions
 
 ```python
-# TODO: Create a figure with 2 subplots side by side
+plt.figure(figsize=(12, 5))
 
+plt.subplot(1, 2, 1)
+plt.scatter(____, ____, alpha=0.5)
+plt.plot([y.min(), y.max()], [y.min(), y.max()], 'r--', linewidth=2)
+plt.xlabel('Actual')
+plt.ylabel('Predicted')
+plt.title('Training Set')
 
-# Subplot 1: Training predictions
-# TODO: Scatter plot of y_train vs y_train_pred
+plt.subplot(1, 2, 2)
+plt.scatter(____, ____, alpha=0.5)
+plt.plot([y.min(), y.max()], [y.min(), y.max()], 'r--', linewidth=2)
+plt.xlabel('Actual')
+plt.ylabel('Predicted')
+plt.title('Test Set')
 
-
-# TODO: Plot perfect prediction line (y=y)
-
-
-# TODO: Add labels and title
-
-
-# Subplot 2: Test predictions  
-# TODO: Scatter plot of y_test vs y_test_pred
-
-
-# TODO: Plot perfect prediction line
-
-
-# TODO: Add labels and title
-
-
-# TODO: Show the plot
-
+plt.tight_layout()
+plt.____()
 ```
 
 **Questions to Answer:**
+
 - Is test MSE higher or lower than training MSE?
 - Is this expected? Why?
 - How much better is the 3-feature model compared to single feature?
+
+> Train versus test MSE: _______________________________________________
+>
+> Is this expected? Why? _______________________________________________
+>
+> Improvement over one feature: _______________________________________
 
 ### Hints
 - Hint: `train_test_split(X, y, test_size=0.2, random_state=42)`
@@ -409,49 +369,57 @@ Experiment independently to find the best model!
 **Challenge 4.1:** Find the best single feature
 
 ```python
-# TODO: Write a loop to test all 10 features
-# For each feature:
-#   1. Extract and reshape
-#   2. Split into train/test
-#   3. Fit model
-#   4. Calculate test MSE
-#   5. Track which feature gives lowest MSE
+best_mse = float('inf')
+best_feature_idx = None
+mse_list = []
 
-# Your code here:
+for i in range(____):
+    X_feature = X[:, ____].reshape(-1, 1)
+    X_tr, X_te, y_tr, y_te = train_test_split(
+        X_feature, y, test_size=0.2, random_state=42
+    )
 
+    model = ____()
+    model.____(X_tr, y_tr)
+    y_pred = model.____(X_te)
 
+    mse = mean_squared_error(____, ____)
+    mse_list.append(mse)
 
+    if mse < best_mse:
+        best_mse = ____
+        best_feature_idx = ____
 
-# TODO: Print which feature is best
-
+print("Best feature:", diabetes.feature_names[____])
+print("Test MSE:", best_mse)
 ```
 
 **Challenge 4.2:** Use ALL features
 
 ```python
-# TODO: Use all 10 features (X directly, no slicing needed)
+X_train_all, X_test_all, y_train_all, y_test_all = train_test_split(
+    ____, ____, test_size=0.2, random_state=42
+)
 
+model_all = ____()
+model_all.____(X_train_all, y_train_all)
+y_test_pred_all = model_all.____(X_test_all)
 
-# TODO: Split into train/test
+mse_all = mean_squared_error(____, y_test_pred_all)
+r2_all = r2_score(____, y_test_pred_all)
 
-
-# TODO: Train and evaluate
-
-
-# TODO: Compare with 3-feature model
-
-
+print("All features - MSE:", mse_all, "R²:", r2_all)
+print("3 features   - MSE:", test_mse, "R²:", test_r2)
+print("Best single  - MSE:", best_mse)
 ```
 
 **Challenge 4.3:** Beat the benchmark
 Can you get test R² > 0.50 using any combination of features?
 
 ```python
-# Your experiments here:
-
-
-
-
+# Choose a set of feature indices, then reuse the split-fit-predict-evaluate
+# workflow above. Record the test R² before changing the feature set again.
+feature_indices = [____]
 ```
 
 ### Hints
@@ -481,9 +449,10 @@ By the end of this lab, you should be able to:
 
 ### What's Next?
 
-**Next week:** Feature engineering and regularization (Ridge & Lasso)
+**Next lesson:** Feature engineering and regularization (Ridge & Lasso)
 
 **Reflection Questions:**
+
 1. Why is train/test split crucial?
 2. Does more features always mean better performance?
 3. What would happen if we trained and tested on the same data?
@@ -493,10 +462,13 @@ By the end of this lab, you should be able to:
 ## Advanced Section (MPS439 Students Only)
 
 Continue to implement linear regression from scratch using:
+
 1. The Normal Equation
 2. Gradient Descent
 
-See the advanced section below.
+```{=latex}
+\newpage
+```
 
 ---
 
@@ -515,32 +487,33 @@ def normal_equation(X, y):
     Compute optimal weights using the normal equation.
     Returns: w (array with bias as first element)
     """
-    # TODO: Get number of samples
-    n = 
+    n = X.shape[____]
     
-    # TODO: Add column of ones to X for bias
-    X_with_bias = 
+    X_with_bias = np.column_stack([np.____(n), X])
     
-    # TODO: Compute X^T X (use @ or np.dot)
-    XtX = 
+    XtX = X_with_bias.____ @ X_with_bias
     
-    # TODO: Compute inverse of X^T X
-    XtX_inv = 
+    XtX_inv = np.linalg.____(XtX)
     
-    # TODO: Compute X^T y
-    Xty = 
+    Xty = X_with_bias.____ @ y
     
-    # TODO: Compute final weights: (X^T X)^-1 X^T y
-    w = 
+    w = ____ @ ____
     
     return w
 
-# TODO: Test on 3-feature model
-X_multi = 
-w_normal = 
+X_multi = X[:, [____, ____, ____]]
+w_normal = normal_equation(____, ____)
 
-# TODO: Print results and compare with sklearn
+print("Normal Equation:")
+print("Bias:", w_normal[0])
+print("Weights:", w_normal[1:])
 
+model_compare = ____()
+model_compare.____(X_multi, y)
+
+print("\nsklearn:")
+print("Bias:", model_compare.____)
+print("Weights:", model_compare.____)
 ```
 
 **Task 5A.2:** Make predictions with your implementation
@@ -548,19 +521,19 @@ w_normal =
 ```python
 def predict_normal(X, w):
     """Make predictions using normal equation weights"""
-    # TODO: Add bias column to X
-    
-    
-    # TODO: Compute predictions: X @ w
-    
-    
-    return 
+    n = X.shape[0]
+    X_with_bias = np.column_stack([np.____(n), X])
+    return X_with_bias @ ____
 
-# TODO: Make predictions
+y_pred_normal = predict_normal(____, ____)
+y_pred_sklearn = model_compare.____(X_multi)
 
+mse_normal = np.mean((y - y_pred_normal) ** 2)
+mse_sklearn = mean_squared_error(y, ____)
 
-# TODO: Calculate MSE and compare with sklearn
-
+print("MSE (Normal Eq):", mse_normal)
+print("MSE (sklearn):", mse_sklearn)
+print("Match:", np.allclose(____, ____))
 ```
 
 ### Hints
@@ -586,84 +559,97 @@ Implement iterative optimization: **w = w - α × gradient**
 **Task 5B.1:** Implement gradient descent
 
 ```python
-def gradient_descent(X, y, learning_rate=0.01, iterations=1000):
+def gradient_descent(X, y, learning_rate=0.5, iterations=1000):
     """
     Perform gradient descent to learn weights.
     Returns: w (weights), losses (list of MSE per iteration)
     """
     n, p = X.shape
     
-    # TODO: Add bias column
-    X_with_bias = 
+    X_with_bias = np.column_stack([np.____(n), X])
     
-    # TODO: Initialize weights to zero
-    w = 
+    w = np.____(p + 1)
     
-    # TODO: Create empty list to track losses
     losses = []
     
-    # TODO: Loop for 'iterations' times
-    for i in range(iterations):
-        # TODO: Compute predictions
-        y_pred = 
+    for i in range(____):
+        y_pred = X_with_bias @ ____
         
-        # TODO: Compute MSE loss
-        loss = 
+        loss = np.mean((y - y_pred) ** ____)
         
-        # TODO: Append loss to losses list
+        losses.____(loss)
         
+        gradient = (2/n) * X_with_bias.____ @ (y_pred - y)
         
-        # TODO: Compute gradient: (2/n) * X^T @ (y_pred - y)
-        gradient = 
+        w = w - ____ * gradient
         
-        # TODO: Update weights: w = w - learning_rate * gradient
-        w = 
-        
-        # TODO: Print progress every 100 iterations
-        if (i + 1) % 100 == 0:
+        if (i + 1) % 200 == 0:
             print(f"Iteration {i+1}: Loss = {loss:.2f}")
     
     return w, losses
 
-# TODO: Run gradient descent
-w_gd, losses = 
+w_gd, losses = gradient_descent(
+    X_multi, y, learning_rate=____, iterations=____
+)
 
-# TODO: Print final weights
+print("Bias:", w_gd[0])
+print("Weights:", w_gd[1:])
+```
 
+```{=latex}
+\newpage
 ```
 
 **Task 5B.2:** Visualize convergence
 
 ```python
-# TODO: Plot loss vs iterations (2 subplots: full and zoomed)
+plt.figure(figsize=(12, 4))
 
+plt.subplot(1, 2, 1)
+plt.plot(____)
+plt.xlabel('Iteration')
+plt.ylabel('MSE Loss')
+plt.title('Full Convergence')
 
+plt.subplot(1, 2, 2)
+plt.plot(losses[____:])
+plt.xlabel('Iteration')
+plt.ylabel('MSE Loss')
+plt.title('Convergence (zoomed)')
 
-
+plt.tight_layout()
+plt.show()
 ```
 
 **Task 5B.3:** Compare all three methods
 
 ```python
-# TODO: Compute MSE for sklearn, normal equation, and gradient descent
+y_pred_gd = predict_normal(X_multi, ____)
+mse_gd = np.mean((y - ____) ** 2)
 
-
-
-
-# TODO: Print comparison
-
-
+print("Normal Equation  - MSE:", mse_normal)
+print("sklearn          - MSE:", mse_sklearn)
+print("Gradient Descent - MSE:", mse_gd)
 ```
 
 **Task 5B.4:** Experiment with learning rates
 
 ```python
-# TODO: Try learning rates: [0.01, 0.1, 0.5, 1.0]
-# Plot loss curves for each on the same plot
+learning_rates = [0.01, 0.1, 0.5, 1.0]
+plt.figure(figsize=(10, 5))
 
+for lr in ____:
+    _, losses_lr = gradient_descent(
+        X_multi, y, learning_rate=____, iterations=500
+    )
+    plt.plot(losses_lr, label=f'α = {lr}')
 
-
-
+plt.xlabel('Iteration')
+plt.ylabel('MSE Loss')
+plt.title('Learning Rate Comparison')
+plt.legend()
+plt.yscale('log')
+plt.show()
 ```
 
 ### Hints
@@ -685,6 +671,7 @@ w_gd, losses =
 Save your completed notebook as: `Lab2_YourName.ipynb`
 
 Include:
+
 - All completed code cells
 - Output from all cells
 - Answers to reflection questions

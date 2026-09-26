@@ -1,0 +1,15 @@
+[project]
+name = "mps311-lesson1-quarto-draft"
+version = "0.1.0"
+requires-python = ">=3.11"
+dependencies = [
+  "ipykernel>=6.29",
+  "jupyter-client>=8.6",
+  "matplotlib>=3.9",
+  "nbclient>=0.10",
+  "numpy>=2.0",
+  "pyyaml>=6.0",
+]
+
+[tool.uv]
+package = false

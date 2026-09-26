@@ -1,0 +1,192 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { course } from '../data/course';
+import '../styles/feedback.css';
+
+const projectUrl = 'https://whxpzfruhtshrwiksezg.supabase.co';
+const publishableKey = 'sb_publishable_GEKCtohy16BxHMc8_fji6w_TbcrlbPd';
+const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
+const academicYearsUrl = `${projectUrl}/rest/v1/course_academic_years?select=year_key,label&order=year_key.desc`;
+const questionBoardsUrl = `${projectUrl}/rest/v1/course_question_boards`;
+const academicYearKey = course.academicYear.replace(/[^0-9]+/g, '-').replace(/^-|-$/g, '');
+const teachingLessons = course.lessons.filter((lesson) => lesson.type === 'teaching');
+const sessionTemplates = teachingLessons.flatMap((lesson) => [
+  { suffix: `${lesson.slug}-lecture`, label: `${lesson.label} · Lecture — ${lesson.shortTitle}` },
+  { suffix: `${lesson.slug}-lab`, label: `${lesson.label} · Lab — ${lesson.shortTitle}` },
+]);
+---
+
+<SiteLayout title={`Question board · ${course.code}`} description={`Live and archived class questions for ${course.code}.`}>
+  <section class="feedback-page question-board-page shell">
+    <header class="feedback-heading">
+      <div>
+        <span class="eyebrow">Class question board</span>
+        <h1>Ask when it matters.</h1>
+        <p>Use this board during class to ask a question or vote for a question you want answered. Each completed class stays here as a read-only archive.</p>
+      </div>
+      <aside class="privacy-note">
+        <strong>One shared board</strong>
+        You can use any display name or stay anonymous. Questions are public to the class; feedback is collected separately.
+      </aside>
+    </header>
+
+    <div class="session-bar feedback-panel">
+      <div class="field academic-year-field">
+        <label for="board-year">Academic year</label>
+        <select id="board-year" required></select>
+        <span class="field-help">Choose an earlier session to open its archive.</span>
+      </div>
+      <div class="field session-field">
+        <label for="board-session">Question board</label>
+        <select id="board-session" required></select>
+      </div>
+    </div>
+
+    <section class="feedback-panel question-panel standalone-question-panel" aria-labelledby="question-heading">
+      <header class="panel-heading compact-heading">
+        <div>
+          <span class="channel-label public-channel">Public · shown to the class</span>
+          <h2 id="question-heading">Questions for this class</h2>
+          <p>Questions are ranked by votes. The instructor decides what to answer and can mark questions as answered.</p>
+        </div>
+      </header>
+      <p class="question-board-status" id="question-board-status" aria-live="polite">Finding the current board…</p>
+
+      <form class="question-form" id="course-question-form">
+        <div class="field compact-field name-field">
+          <label for="question-name">Display name <span aria-hidden="true">(optional)</span></label>
+          <input id="question-name" name="displayName" maxlength="40" autocomplete="nickname" placeholder="Any name" />
+        </div>
+        <div class="field compact-field question-field">
+          <label for="question-text">Your question</label>
+          <textarea id="question-text" name="question" maxlength="1000" required placeholder="What would you like me to explain in class?"></textarea>
+        </div>
+        <div class="honeypot-field" aria-hidden="true"><label for="question-website">Website</label><input id="question-website" name="website" tabindex="-1" autocomplete="off" /></div>
+        <div class="question-actions"><button class="feedback-submit" type="submit">Post question</button></div>
+      </form>
+      <p class="form-status question-status" id="question-status" aria-live="polite"></p>
+
+      <div class="question-feed" aria-live="polite">
+        <div class="question-feed-heading"><h3>Questions</h3><span id="question-count">—</span></div>
+        <div class="question-state" id="question-state">Loading questions…</div>
+        <div class="question-list" id="question-list" hidden></div>
+      </div>
+    </section>
+  </section>
+
+  <script is:inline define:vars={{ projectUrl, publishableKey, submissionUrl, academicYearsUrl, questionBoardsUrl, academicYearKey, sessionTemplates }}>
+    const yearSelect = document.querySelector('#board-year');
+    const sessionSelect = document.querySelector('#board-session');
+    const questionForm = document.querySelector('#course-question-form');
+    const questionButton = questionForm.querySelector('button[type="submit"]');
+    const questionStatus = document.querySelector('#question-status');
+    const questionBoardStatus = document.querySelector('#question-board-status');
+    const questionState = document.querySelector('#question-state');
+    const questionList = document.querySelector('#question-list');
+    const questionCount = document.querySelector('#question-count');
+    const deviceStorageKey = 'mps-course-feedback-device-v1';
+    const voteStorageKey = 'mps-course-question-votes-v1';
+    let boardIsLive = false;
+    let refreshTimer = null;
+
+    const getDeviceId = () => {
+      try {
+        const current = localStorage.getItem(deviceStorageKey);
+        if (current && /^[a-zA-Z0-9-]{20,100}$/.test(current)) return current;
+        const created = crypto.randomUUID(); localStorage.setItem(deviceStorageKey, created); return created;
+      } catch { return crypto.randomUUID(); }
+    };
+    const deviceId = getDeviceId();
+    const readError = async (response, fallback) => { try { const body = await response.json(); return typeof body?.error === 'string' ? body.error : fallback; } catch { return fallback; } };
+    const requestApi = async (body) => {
+      const response = await fetch(submissionUrl, { method: 'POST', headers: { apikey: publishableKey, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, device_id: deviceId }) });
+      if (!response.ok) throw new Error(await readError(response, 'Could not save this submission.'));
+      return response.json();
+    };
+    const votedIds = () => { try { const ids = JSON.parse(localStorage.getItem(voteStorageKey) || '[]'); return new Set(Array.isArray(ids) ? ids.filter((id) => Number.isSafeInteger(id)) : []); } catch { return new Set(); } };
+    const saveVotedIds = (ids) => { try { localStorage.setItem(voteStorageKey, JSON.stringify([...ids])); } catch {} };
+
+    const populateSessions = (yearKey, requested = null) => {
+      sessionSelect.replaceChildren();
+      sessionTemplates.forEach((session) => sessionSelect.append(new Option(session.label, `${yearKey}-${session.suffix}`)));
+      if (requested && [...sessionSelect.options].some((option) => option.value === requested)) sessionSelect.value = requested;
+    };
+    const loadYears = async () => {
+      try {
+        const response = await fetch(academicYearsUrl, { headers: { apikey: publishableKey } });
+        if (!response.ok) throw new Error();
+        const rows = await response.json();
+        return Array.isArray(rows) && rows.length ? rows.map((row) => ({ key: row.year_key, label: row.label })) : [{ key: academicYearKey, label: academicYearKey.replace('-', '/') }];
+      } catch { return [{ key: academicYearKey, label: academicYearKey.replace('-', '/') }]; }
+    };
+    const formatTime = (value) => { const date = new Date(value); return Number.isNaN(date.getTime()) ? '' : date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); };
+
+    const renderQuestions = (questions) => {
+      questionList.replaceChildren(); questionCount.textContent = `${questions.length} shown`;
+      const voted = votedIds();
+      questions.forEach((entry) => {
+        const article = document.createElement('article'); article.className = `question-item${entry.is_answered ? ' is-answered' : ''}`;
+        const vote = document.createElement('button'); vote.type = 'button'; vote.className = 'question-vote';
+        const hasVoted = voted.has(entry.id); vote.classList.toggle('is-voted', hasVoted); vote.setAttribute('aria-pressed', String(hasVoted)); vote.setAttribute('aria-label', `${hasVoted ? 'Remove' : 'Add'} vote for this question`); vote.textContent = `↑ ${Number(entry.vote_count || 0)}`; vote.disabled = !boardIsLive;
+        vote.addEventListener('click', async () => {
+          vote.disabled = true;
+          try {
+            const result = await requestApi({ action: 'vote', context_key: sessionSelect.value, question_id: entry.id });
+            const outcome = Array.isArray(result?.vote) ? result.vote[0] : result?.vote;
+            if (typeof outcome?.voted !== 'boolean') throw new Error('Could not update this vote.');
+            const ids = votedIds(); if (outcome.voted) ids.add(entry.id); else ids.delete(entry.id); saveVotedIds(ids);
+            await loadBoard(true);
+          } catch (error) { questionStatus.textContent = error instanceof Error ? error.message : 'Could not update this vote.'; questionStatus.dataset.state = 'error'; }
+          finally { vote.disabled = !boardIsLive; }
+        });
+        const content = document.createElement('div'); content.className = 'question-content';
+        const meta = document.createElement('div'); meta.className = 'question-meta';
+        const name = document.createElement('strong'); name.textContent = entry.display_name || 'Anonymous';
+        const time = document.createElement('time'); time.dateTime = entry.created_at; time.textContent = formatTime(entry.created_at); meta.append(name, time);
+        if (entry.is_answered) { const answered = document.createElement('span'); answered.className = 'question-answered'; answered.textContent = 'Answered'; meta.append(answered); }
+        const text = document.createElement('p'); text.textContent = entry.question; content.append(meta, text); article.append(vote, content); questionList.append(article);
+      });
+    };
+
+    const loadBoard = async (quiet = false) => {
+      if (!quiet) { questionState.hidden = false; questionState.textContent = 'Loading questions…'; questionList.hidden = true; questionCount.textContent = '—'; }
+      clearInterval(refreshTimer);
+      try {
+        const boardQuery = new URLSearchParams({ select: 'status', context_key: `eq.${sessionSelect.value}`, limit: '1' });
+        const boardResponse = await fetch(`${questionBoardsUrl}?${boardQuery}`, { headers: { apikey: publishableKey } });
+        if (!boardResponse.ok) throw new Error(await readError(boardResponse, 'Could not load this question board.'));
+        const boards = await boardResponse.json(); const board = Array.isArray(boards) ? boards[0] : null; boardIsLive = board?.status === 'live';
+        questionForm.querySelectorAll('input, textarea, button').forEach((control) => { control.disabled = !boardIsLive; });
+        questionBoardStatus.textContent = boardIsLive ? 'Live now · ask a question or vote for the ones you want answered.' : board ? 'Archived · questions and votes are now read-only.' : 'This question board has not been opened yet.';
+        questionBoardStatus.dataset.state = boardIsLive ? 'live' : 'archived';
+        const questionQuery = new URLSearchParams({ select: 'id,display_name,question,created_at,vote_count,is_answered', context_key: `eq.${sessionSelect.value}`, is_visible: 'eq.true', order: 'is_answered.asc,vote_count.desc,created_at.asc', limit: '50' });
+        const response = await fetch(`${projectUrl}/rest/v1/course_questions?${questionQuery}`, { headers: { apikey: publishableKey } });
+        if (!response.ok) throw new Error(await readError(response, 'Could not load class questions.'));
+        const questions = await response.json();
+        if (!Array.isArray(questions) || questions.length === 0) { questionState.textContent = 'No questions yet for this session.'; questionCount.textContent = '0 shown'; return; }
+        renderQuestions(questions); questionState.hidden = true; questionList.hidden = false;
+      } catch (error) { questionState.textContent = error instanceof Error ? error.message : 'Could not load class questions.'; }
+      finally { if (boardIsLive) refreshTimer = setInterval(() => loadBoard(true), 10_000); }
+    };
+    const updateSelection = () => { const url = new URL(location.href); url.searchParams.set('year', yearSelect.value); url.searchParams.set('session', sessionSelect.value); history.replaceState({}, '', url); questionStatus.textContent = ''; questionStatus.removeAttribute('data-state'); loadBoard(); };
+    yearSelect.addEventListener('change', () => { populateSessions(yearSelect.value); updateSelection(); });
+    sessionSelect.addEventListener('change', updateSelection);
+    questionForm.addEventListener('submit', async (event) => {
+      event.preventDefault(); questionButton.disabled = true; questionButton.textContent = 'Posting…'; questionStatus.textContent = '';
+      const data = new FormData(questionForm);
+      try { await requestApi({ action: 'question', context_key: sessionSelect.value, display_name: String(data.get('displayName') ?? ''), question: String(data.get('question') ?? ''), website: String(data.get('website') ?? '') }); questionStatus.textContent = 'Your question is now visible to the class.'; questionStatus.dataset.state = 'success'; questionForm.querySelector('#question-text').value = ''; await loadBoard(true); }
+      catch (error) { questionStatus.textContent = error instanceof Error ? error.message : 'Could not post your question.'; questionStatus.dataset.state = 'error'; }
+      finally { questionButton.disabled = !boardIsLive; questionButton.textContent = 'Post question'; }
+    });
+    const initialise = async () => {
+      const years = await loadYears(); const params = new URLSearchParams(location.search); const requestedSession = params.get('session'); const requestedYear = params.get('year');
+      const sessionYear = requestedSession?.match(/^(\d{4}-\d{2})-/)?.[1]; const initialYear = years.some((year) => year.key === requestedYear) ? requestedYear : years.some((year) => year.key === sessionYear) ? sessionYear : years[0]?.key || academicYearKey;
+      years.forEach((year) => yearSelect.append(new Option(year.label, year.key))); yearSelect.value = initialYear; populateSessions(initialYear, requestedSession);
+      if (!requestedSession) {
+        try { const response = await fetch(`${questionBoardsUrl}?${new URLSearchParams({ select: 'context_key', status: 'eq.live', order: 'opened_at.desc', limit: '1' })}`, { headers: { apikey: publishableKey } }); const boards = await response.json(); const context = Array.isArray(boards) ? boards[0]?.context_key : null; const match = typeof context === 'string' && context.match(/^(\d{4}-\d{2})-/); if (match && years.some((year) => year.key === match[1])) { yearSelect.value = match[1]; populateSessions(match[1], context); } } catch {}
+      }
+      loadBoard();
+    };
+    initialise();
+  </script>
+</SiteLayout>

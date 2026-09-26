@@ -182,7 +182,7 @@ Deno.serve(async (request: Request) => {
     return jsonResponse({ ok: true }, 200, origin);
   }
 
-  const action = payload.action;
+  const action = typeof payload.action === 'string' ? payload.action : '';
 
   if (action === 'admin_login') {
     const password = typeof payload.password === 'string' ? payload.password : '';
@@ -197,6 +197,10 @@ Deno.serve(async (request: Request) => {
     || action === 'admin_create_year'
     || action === 'admin_delete_year'
     || action === 'admin_set_year_visibility'
+    || action === 'admin_open_question_board'
+    || action === 'admin_archive_question_board'
+    || action === 'admin_set_question_answered'
+    || action === 'admin_set_question_visibility'
   ) {
     if (!await hasValidAdminToken(payload.admin_token, serviceRoleKey)) {
       return jsonResponse({ error: 'Your admin session has expired. Please sign in again.' }, 401, origin);
@@ -211,11 +215,35 @@ Deno.serve(async (request: Request) => {
         return jsonResponse({ ok: true, overview }, 200, origin);
       }
 
-      if (!yearKey) {
+      if (!yearKey && ['admin_create_year', 'admin_delete_year', 'admin_set_year_visibility'].includes(action)) {
         return jsonResponse({ error: 'An academic year is required.' }, 400, origin);
       }
 
-      if (action === 'admin_set_year_visibility') {
+      if (action === 'admin_open_question_board' || action === 'admin_archive_question_board') {
+        const contextKey = typeof payload.context_key === 'string' ? payload.context_key : '';
+        await callRpc(
+          projectUrl,
+          serviceRoleKey,
+          action === 'admin_open_question_board' ? 'open_course_question_board' : 'archive_course_question_board',
+          { p_context_key: contextKey },
+        );
+      } else if (action === 'admin_set_question_answered' || action === 'admin_set_question_visibility') {
+        const questionId = Number(payload.question_id);
+        const setting = action === 'admin_set_question_answered' ? payload.is_answered : payload.is_visible;
+        if (!Number.isSafeInteger(questionId) || typeof setting !== 'boolean') {
+          return jsonResponse({ error: 'A valid question and setting are required.' }, 400, origin);
+        }
+        await callRpc(
+          projectUrl,
+          serviceRoleKey,
+          action === 'admin_set_question_answered'
+            ? 'admin_set_course_question_answered'
+            : 'admin_set_course_question_visibility',
+          action === 'admin_set_question_answered'
+            ? { p_question_id: questionId, p_is_answered: setting }
+            : { p_question_id: questionId, p_is_visible: setting },
+        );
+      } else if (action === 'admin_set_year_visibility') {
         if (typeof payload.is_visible !== 'boolean') {
           return jsonResponse({ error: 'A visibility setting is required.' }, 400, origin);
         }
@@ -223,7 +251,7 @@ Deno.serve(async (request: Request) => {
           p_year_key: yearKey,
           p_is_visible: payload.is_visible,
         });
-      } else {
+      } else if (action === 'admin_create_year' || action === 'admin_delete_year') {
         await callRpc(
           projectUrl,
           serviceRoleKey,
@@ -294,7 +322,7 @@ Deno.serve(async (request: Request) => {
     }
 
     if (action === 'question') {
-      const id = await callRpc(projectUrl, serviceRoleKey, 'submit_course_question_v1', {
+      const id = await callRpc(projectUrl, serviceRoleKey, 'submit_course_question_v2', {
         p_context_key: contextKey,
         p_display_name: payload.display_name,
         p_question: payload.question,
@@ -302,6 +330,20 @@ Deno.serve(async (request: Request) => {
         p_ip_key_hash: ipKeyHash,
       });
       return jsonResponse({ ok: true, id }, 200, origin);
+    }
+
+    if (action === 'vote') {
+      const questionId = Number(payload.question_id);
+      if (!Number.isSafeInteger(questionId)) {
+        return jsonResponse({ error: 'Invalid question.' }, 400, origin);
+      }
+      const vote = await callRpc(projectUrl, serviceRoleKey, 'toggle_course_question_vote_v1', {
+        p_question_id: questionId,
+        p_context_key: contextKey,
+        p_voter_key_hash: deviceKeyHash,
+        p_ip_key_hash: ipKeyHash,
+      });
+      return jsonResponse({ ok: true, vote }, 200, origin);
     }
 
     return jsonResponse({ error: 'Unknown submission type.' }, 400, origin);
@@ -312,6 +354,9 @@ Deno.serve(async (request: Request) => {
     }
     if (message.includes('rate_limit_ip')) {
       return jsonResponse({ error: 'This network is receiving many submissions. Please try again shortly.' }, 429, origin);
+    }
+    if (message.includes('board_closed')) {
+      return jsonResponse({ error: 'This question board has been archived.' }, 409, origin);
     }
     if (message.includes('must be') || message.includes('Invalid')) {
       return jsonResponse({ error: message }, 400, origin);

@@ -1,8 +1,8 @@
 ---
-pagetitle: "Lab 10: Neural Networks - Classification and Regression"
+pagetitle: "Lab 9: Neural Networks - Classification and Regression"
 ---
 
-# Lab 10: Neural Networks - Classification and Regression
+# Lab 9: Neural Networks - Classification and Regression
 ## MPS311/439 - Machine Learning
 **Lesson 9 Lab Session | Duration: 50 minutes**
 
@@ -10,7 +10,7 @@ pagetitle: "Lab 10: Neural Networks - Classification and Regression"
 
 ## Introduction
 
-Welcome to Lab 10! Today you'll explore **Neural Networks** - powerful models that can learn complex, non-linear patterns by stacking simple operations in layers.
+Welcome to Lab 9! Today you'll explore **Neural Networks** - powerful models that can learn complex, non-linear patterns by stacking simple operations in layers.
 
 **What you'll learn today:**
 - How to build neural networks using Keras for classification and regression

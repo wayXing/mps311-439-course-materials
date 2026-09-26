@@ -1,8 +1,8 @@
 ---
-pagetitle: "Lab 8: Principal Component Analysis"
+pagetitle: "Lab 7: Principal Component Analysis"
 ---
 
-# Lab 8: Principal Component Analysis
+# Lab 7: Principal Component Analysis
 ## MPS311/439 - Machine Learning
 **Lesson 7 Lab Session | Duration: 50 minutes**
 
@@ -10,7 +10,7 @@ pagetitle: "Lab 8: Principal Component Analysis"
 
 ## Introduction
 
-Welcome to Lab 8! Today you'll explore **Principal Component Analysis (PCA)** - a powerful technique for reducing dimensionality and understanding the structure of high-dimensional data.
+Welcome to Lab 7! Today you'll explore **Principal Component Analysis (PCA)** - a powerful technique for reducing dimensionality and understanding the structure of high-dimensional data.
 
 **What you'll learn today:**
 - How to apply PCA to reduce dimensions while preserving information

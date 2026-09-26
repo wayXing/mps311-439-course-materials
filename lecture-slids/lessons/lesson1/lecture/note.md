@@ -93,13 +93,12 @@ This cycle is iterative. Results from validation often reveal that we need to re
 
 The course progresses from fundamental predictive models to methods that learn more complex structure:
 
-- **Weeks 1–3:** foundations, linear regression, feature engineering, and regularisation;
-- **Weeks 4–6:** classification methods and decision trees;
-- **Reading Week:** reading week;
-- **Weeks 8–9:** unsupervised learning with PCA and clustering;
-- **Weeks 10–11:** neural networks and convolutional neural networks.
+- **Lessons 1–3:** foundations, linear regression, feature engineering, and regularisation;
+- **Lessons 4–6:** classification methods and decision trees;
+- **Lessons 7–8:** unsupervised learning with PCA and clustering;
+- **Lessons 9–10:** neural networks and convolutional neural networks.
 
-Each teaching week combines a lecture with a practical lab. The lecture develops the core ideas; the lab turns those ideas into a reproducible workflow using Python.
+Each lesson combines a lecture with a practical lab. The lecture develops the core ideas; the lab turns those ideas into a reproducible workflow using Python.
 
 MPS311 students should focus first on the core learning outcomes. MPS439 students complete the same core work and then explore the additional mathematical or implementation detail identified in each week's materials.
 

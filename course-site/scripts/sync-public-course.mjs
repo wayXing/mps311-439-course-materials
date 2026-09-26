@@ -11,13 +11,15 @@ const sourceCourseSite = projectRoot;
 const sourceSlides = resolve(workspaceRoot, 'lecture-slids');
 
 const courseSiteIgnored = new Set([
-  '.git', '.astro', '.openai', '.sites-artifacts', '.sites-stage', '.vercel', 'CLAUDE.md',
+  '.git', '.astro', '.openai', '.sites-artifacts', '.sites-stage', '.vercel', 'AGENTS.md', 'CLAUDE.md',
   'dist', 'node_modules', 'public/materials', 'supabase/.temp',
 ]);
 const lessonIgnoredNames = new Set([
-  '.DS_Store', 'archive', 'dist', 'node_modules', 'note.html', 'note.pdf',
+  '.DS_Store', '.venv', 'AGENTS.md', 'SLIDE_DESIGN_SYSTEM.md', 'archive', 'dist', 'node_modules',
+  '01_narrative.md', '02_teaching_script.md', '03_slide_spec.md', 'redesign_storyboard.md',
+  'note.html', 'note.pdf',
   'note.png', 'note_files', 'slide-export.pdf', 'lab_worksheet.html',
-  'lab_worksheet.pdf', 'lab_solution.html',
+  'lab_worksheet.pdf', 'lab_solution.html', 'slide.html',
 ]);
 
 function relativeParts(root, source) {
@@ -33,7 +35,7 @@ function shouldCopyCourseSite(source) {
 function shouldCopySlides(source) {
   const parts = relativeParts(sourceSlides, source);
   if (parts.includes('admin') || parts.some((part) => lessonIgnoredNames.has(part))) return false;
-  return !parts.some((part) => part.endsWith('.pdf') || part.endsWith('.webloc'));
+  return !parts.some((part) => part.endsWith('.html') || part.endsWith('.pdf') || part.endsWith('.webloc'));
 }
 
 await mkdir(publicRoot, { recursive: true });

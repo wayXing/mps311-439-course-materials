@@ -3,6 +3,10 @@
 This directory is one shared Slidev project. Each teaching lesson has its own
 Slidev entry file at `lessons/lessonN/lecture/slide.md`.
 
+The shared visual language and classroom readability standards are defined in
+[`SLIDE_DESIGN_SYSTEM.md`](./SLIDE_DESIGN_SYSTEM.md). Agent-facing production
+rules for every lesson live in [`lessons/AGENTS.md`](./lessons/AGENTS.md).
+
 ## Canonical course structure
 
 ```text
@@ -26,8 +30,8 @@ lessons/lessonN/
     └── archive/             # superseded lab material
 ```
 
-Reading Week is a calendar break and therefore has no lesson directory. The
-`foundation` directory contains pre-course Python preparation.
+The `foundation` directory contains pre-course Python preparation. Teaching
+materials are organised as Lessons 1–10 rather than calendar weeks.
 
 ## Canonical Slidev entries
 

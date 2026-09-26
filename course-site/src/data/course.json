@@ -49,23 +49,32 @@
       "slug": "lesson-01",
       "number": "01",
       "label": "Lesson 01",
-      "title": "Welcome to machine learning",
-      "shortTitle": "Welcome to ML",
-      "summary": "What machines learn, how the course fits together, and how to turn raw data into a careful first insight.",
+      "title": "Why machine learning?",
+      "shortTitle": "Why machine learning?",
+      "summary": "Why machine learning still matters when AI can write the code—and how to judge whether a model solves the real problem.",
       "accent": "coral",
       "type": "teaching",
       "topics": [
-        "What machine learning is",
-        "Exploratory data analysis",
-        "From patterns to responsible conclusions"
+        "Machine learning after large language models",
+        "Five questions for every data problem",
+        "From accurate-looking predictions to trustworthy decisions"
       ],
       "note": "The lab builds on Python Preparation. Complete the preparation guide first if loading data, pandas methods, or error messages are still unfamiliar.",
       "resources": [
         {
           "label": "Interactive slides",
-          "description": "Open the full Slidev presentation.",
+          "description": "Open the redesigned 2026/27 Quarto lecture.",
           "kind": "slides",
           "group": "Lecture",
+          "source": "lesson1/lecture/quarto/slide.html",
+          "target": "materials/lesson1/slides-2026/index.html",
+          "href": "materials/lesson1/slides-2026/index.html"
+        },
+        {
+          "label": "Original slides (reference)",
+          "description": "Open the earlier Slidev version retained for comparison and reference.",
+          "kind": "slides",
+          "group": "Reference",
           "source": "lesson1/lecture/dist",
           "target": "materials/lesson1/slides",
           "href": "materials/lesson1/slides/index.html",
@@ -81,10 +90,10 @@
           "href": "materials/lesson1/slides.pdf"
         },
         {
-          "label": "Lecture notes",
-          "description": "Read the extended explanation online.",
+          "label": "Original lecture notes (reference)",
+          "description": "Read the notes that accompanied the earlier version of this lecture.",
           "kind": "notes",
-          "group": "Lecture",
+          "group": "Reference",
           "source": "lesson1/lecture/note.html",
           "target": "materials/lesson1/notes.html",
           "href": "materials/lesson1/notes.html"
@@ -607,23 +616,6 @@
           "href": "materials/lesson6/lab.pdf"
         }
       ]
-    },
-    {
-      "slug": "reading-week",
-      "number": "",
-      "label": "Reading Week",
-      "title": "Reading week",
-      "shortTitle": "Reading week",
-      "summary": "Time to consolidate the supervised learning ideas from the first half of the course.",
-      "accent": "gold",
-      "type": "break",
-      "topics": [
-        "Review earlier material",
-        "Revisit practical work",
-        "Prepare for unsupervised learning"
-      ],
-      "note": "There is no scheduled lecture or lab material for Reading Week.",
-      "resources": []
     },
     {
       "slug": "lesson-07",

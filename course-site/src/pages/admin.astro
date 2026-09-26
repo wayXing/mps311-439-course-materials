@@ -6,6 +6,13 @@ import '../styles/admin.css';
 const projectUrl = 'https://whxpzfruhtshrwiksezg.supabase.co';
 const publishableKey = 'sb_publishable_GEKCtohy16BxHMc8_fji6w_TbcrlbPd';
 const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
+const academicYearKey = course.academicYear.replace(/[^0-9]+/g, '-').replace(/^-|-$/g, '');
+const sessionTemplates = course.lessons
+  .filter((lesson) => lesson.type === 'teaching')
+  .flatMap((lesson) => [
+    { suffix: `${lesson.slug}-lecture`, label: `${lesson.label} · Lecture — ${lesson.shortTitle}` },
+    { suffix: `${lesson.slug}-lab`, label: `${lesson.label} · Lab — ${lesson.shortTitle}` },
+  ]);
 ---
 
 <SiteLayout title={`Feedback admin · ${course.code}`} description={`Private feedback administration for ${course.code}.`}>
@@ -27,6 +34,24 @@ const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
     </section>
 
     <div class="admin-dashboard" id="admin-dashboard" hidden>
+      <section class="admin-card admin-boards" aria-labelledby="admin-boards-heading">
+        <div class="admin-card-heading">
+          <div>
+            <span class="admin-kicker">Classroom controls</span>
+            <h2 id="admin-boards-heading">Question board</h2>
+          </div>
+        </div>
+        <p class="admin-note">Start opens one live board for students. Starting another board archives the current one; archived boards remain read-only.</p>
+        <form id="admin-board-form" class="admin-board-form">
+          <label><span>Academic year</span><select id="admin-board-year" required></select></label>
+          <label><span>Lecture or lab</span><select id="admin-board-session" required></select></label>
+          <button type="submit">Start board</button>
+          <button type="button" class="admin-toggle" id="admin-archive-board">Archive live board</button>
+        </form>
+        <p class="admin-status" id="admin-board-status" aria-live="polite"></p>
+        <div class="admin-boards-list" id="admin-boards-list"></div>
+      </section>
+
       <section class="admin-card admin-years" aria-labelledby="admin-years-heading">
         <div class="admin-card-heading">
           <div>
@@ -72,7 +97,7 @@ const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
           <div class="admin-empty" id="admin-questions-empty">Loading questions…</div>
           <div class="admin-table-wrap" id="admin-questions-wrap" hidden>
             <table>
-              <thead><tr><th>Session</th><th>Name</th><th>Question</th><th>Visibility</th><th>Posted</th></tr></thead>
+              <thead><tr><th>Session</th><th>Name</th><th>Question</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
               <tbody id="admin-questions-body"></tbody>
             </table>
           </div>
@@ -81,7 +106,7 @@ const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
     </div>
   </section>
 
-  <script is:inline define:vars={{ submissionUrl, publishableKey }}>
+  <script is:inline define:vars={{ submissionUrl, publishableKey, academicYearKey, sessionTemplates }}>
     const tokenStorageKey = 'mps-course-feedback-admin-token-v1';
     const loginPanel = document.querySelector('#admin-login');
     const dashboard = document.querySelector('#admin-dashboard');
@@ -100,6 +125,12 @@ const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
     const questionsEmpty = document.querySelector('#admin-questions-empty');
     const questionsWrap = document.querySelector('#admin-questions-wrap');
     const questionsCount = document.querySelector('#admin-question-count');
+    const boardForm = document.querySelector('#admin-board-form');
+    const boardYear = document.querySelector('#admin-board-year');
+    const boardSession = document.querySelector('#admin-board-session');
+    const archiveBoard = document.querySelector('#admin-archive-board');
+    const boardStatus = document.querySelector('#admin-board-status');
+    const boardsList = document.querySelector('#admin-boards-list');
 
     const readError = async (response, fallback) => {
       try {
@@ -174,12 +205,66 @@ const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
           createCell(sessionLabel(record.contextKey)),
           createCell(record.displayName || 'Anonymous'),
           createCell(record.question || '—', 'message-cell'),
-          createCell(record.isVisible ? 'Visible' : 'Hidden'),
+          createCell(`${record.isVisible ? 'Visible' : 'Hidden'} · ${record.isAnswered ? 'Answered' : 'Open'} · ↑ ${record.voteCount || 0}`),
           createCell(formatDate(record.createdAt)),
         );
+        const actions = document.createElement('td');
+        const answered = document.createElement('button');
+        answered.type = 'button';
+        answered.className = 'admin-toggle';
+        answered.textContent = record.isAnswered ? 'Reopen' : 'Answered';
+        answered.addEventListener('click', async () => {
+          try {
+            await requestAdmin('admin_set_question_answered', { question_id: record.id, is_answered: !record.isAnswered });
+            await loadOverview(record.isAnswered ? 'Question reopened.' : 'Question marked answered.');
+          } catch (error) { dashboardStatus.textContent = error instanceof Error ? error.message : 'Could not update this question.'; }
+        });
+        const visibility = document.createElement('button');
+        visibility.type = 'button';
+        visibility.className = 'admin-toggle';
+        visibility.textContent = record.isVisible ? 'Hide' : 'Show';
+        visibility.addEventListener('click', async () => {
+          try {
+            await requestAdmin('admin_set_question_visibility', { question_id: record.id, is_visible: !record.isVisible });
+            await loadOverview(record.isVisible ? 'Question hidden.' : 'Question shown.');
+          } catch (error) { dashboardStatus.textContent = error instanceof Error ? error.message : 'Could not update this question.'; }
+        });
+        actions.append(answered, visibility);
+        row.append(actions);
         questionsBody.append(row);
       });
       if (records.length === 0) questionsEmpty.textContent = 'No class questions for this selection.';
+    };
+
+    const populateBoardSessions = () => {
+      boardSession.replaceChildren();
+      sessionTemplates.forEach((session) => boardSession.append(new Option(session.label, session.suffix)));
+    };
+
+    const renderBoards = (boards, years) => {
+      const selectedYear = boardYear.value || academicYearKey;
+      boardYear.replaceChildren();
+      years.forEach((year) => boardYear.append(new Option(year.label, year.key)));
+      boardYear.value = [...boardYear.options].some((option) => option.value === selectedYear)
+        ? selectedYear : years[0]?.key || academicYearKey;
+      populateBoardSessions();
+      boardsList.replaceChildren();
+      const live = boards.find((board) => board.status === 'live');
+      archiveBoard.disabled = !live;
+      if (boards.length === 0) {
+        boardsList.textContent = 'No boards have been opened yet.';
+        return;
+      }
+      boards.forEach((board) => {
+        const row = document.createElement('div');
+        row.className = `admin-board-row${board.status === 'live' ? ' is-live' : ''}`;
+        const title = document.createElement('strong');
+        title.textContent = sessionLabel(board.contextKey);
+        const detail = document.createElement('span');
+        detail.textContent = `${board.status === 'live' ? 'Live now' : 'Archived'} · ${board.questionCount || 0} questions`;
+        row.append(title, detail);
+        boardsList.append(row);
+      });
     };
 
     const renderYears = (years) => {
@@ -239,6 +324,7 @@ const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
     const renderOverview = (overview, message = '') => {
       const years = Array.isArray(overview?.years) ? overview.years : [];
       renderYears(years);
+      renderBoards(Array.isArray(overview?.boards) ? overview.boards : [], years);
       renderFeedback(Array.isArray(overview?.feedback) ? overview.feedback : []);
       renderQuestions(Array.isArray(overview?.questions) ? overview.questions : []);
       dashboardStatus.textContent = message;
@@ -287,6 +373,38 @@ const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
         await loadOverview('Academic-year option added to the student selector.');
       } catch (error) {
         dashboardStatus.textContent = error instanceof Error ? error.message : 'Could not add the academic-year option.';
+      }
+    });
+
+    boardForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const contextKey = `${boardYear.value}-${boardSession.value}`;
+      boardStatus.textContent = 'Starting question board…';
+      try {
+        await requestAdmin('admin_open_question_board', { context_key: contextKey });
+        await loadOverview('Question board is live.');
+        boardStatus.textContent = 'Question board is live.';
+      } catch (error) {
+        boardStatus.textContent = error instanceof Error ? error.message : 'Could not start the question board.';
+      }
+    });
+
+    archiveBoard.addEventListener('click', async () => {
+      const liveRow = [...boardsList.querySelectorAll('.admin-board-row.is-live')][0];
+      if (!liveRow) return;
+      const liveBoard = liveRow.querySelector('strong')?.textContent;
+      const boards = await requestAdmin('admin_overview', { year_key: null });
+      const live = Array.isArray(boards?.overview?.boards)
+        ? boards.overview.boards.find((board) => board.status === 'live') : null;
+      if (!live) return;
+      if (!window.confirm(`Archive ${liveBoard || 'the live board'}? Students will only be able to read it.`)) return;
+      boardStatus.textContent = 'Archiving question board…';
+      try {
+        await requestAdmin('admin_archive_question_board', { context_key: live.contextKey });
+        await loadOverview('Question board archived.');
+        boardStatus.textContent = 'Question board archived.';
+      } catch (error) {
+        boardStatus.textContent = error instanceof Error ? error.message : 'Could not archive the question board.';
       }
     });
 

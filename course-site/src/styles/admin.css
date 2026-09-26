@@ -97,7 +97,8 @@
 }
 
 .admin-years,
-.admin-records {
+.admin-records,
+.admin-boards {
   padding: 24px;
 }
 
@@ -120,6 +121,81 @@
   display: flex;
   gap: 8px;
 }
+
+.admin-board-form {
+  display: grid;
+  align-items: end;
+  gap: 10px;
+  grid-template-columns: minmax(120px, 0.3fr) minmax(240px, 1fr) auto auto;
+  margin-top: 18px;
+}
+
+.admin-board-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--ink-faint);
+  font-size: 10px;
+  font-weight: 720;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.admin-board-form select {
+  min-height: 42px;
+  min-width: 0;
+  padding: 0 10px;
+  color: var(--ink);
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  font: inherit;
+  text-transform: none;
+}
+
+.admin-board-form > button {
+  min-height: 42px;
+  padding: 0 14px;
+  color: white;
+  background: var(--ink);
+  border: 0;
+  border-radius: 9px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 720;
+}
+
+.admin-board-form .admin-toggle {
+  color: var(--ink-soft);
+  background: transparent;
+  border: 1px solid var(--line);
+}
+
+.admin-board-form .admin-toggle:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.admin-boards-list {
+  display: grid;
+  gap: 8px;
+  margin-top: 16px;
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.admin-board-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 11px 0;
+  border-top: 1px solid var(--line);
+}
+
+.admin-board-row strong { font-size: 12px; }
+.admin-board-row span { color: var(--ink-faint); font-size: 11px; }
+.admin-board-row.is-live strong { color: color-mix(in srgb, var(--blue) 75%, var(--ink)); }
 
 .admin-year-form input {
   width: 105px;
@@ -165,6 +241,10 @@
   color: #a3362d;
   background: transparent;
   border: 1px solid color-mix(in srgb, #a3362d 35%, var(--line));
+}
+
+.admin-table-wrap .admin-toggle {
+  margin: 0 4px 4px 0;
 }
 
 .admin-filter {
@@ -303,6 +383,7 @@
   .admin-page { padding-top: 34px; }
   .admin-years,
   .admin-records,
+  .admin-boards,
   .admin-login { padding: 19px; }
   .admin-card-heading,
   .records-heading { align-items: start; flex-direction: column; }
@@ -310,4 +391,6 @@
   .admin-year-form input { flex: 1; width: auto; }
   .admin-filter { width: 100%; justify-content: space-between; }
   .admin-filter select { flex: 1; max-width: none; }
+  .admin-board-form { grid-template-columns: 1fr; }
+  .admin-board-form > button { width: 100%; }
 }

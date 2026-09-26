@@ -1,8 +1,8 @@
 ---
-pagetitle: "Lab 11: Convolutional Neural Networks"
+pagetitle: "Lab 10: Convolutional Neural Networks"
 ---
 
-# Lab 11: Convolutional Neural Networks
+# Lab 10: Convolutional Neural Networks
 ## MPS311/439 - Machine Learning
 **Lesson 10 Lab Session | Duration: 50 minutes**
 
@@ -10,7 +10,7 @@ pagetitle: "Lab 11: Convolutional Neural Networks"
 
 ## Introduction
 
-Welcome to Lab 11! Today you'll build your first **Convolutional Neural Network (CNN)** - the architecture that revolutionized computer vision!
+Welcome to Lab 10! Today you'll build your first **Convolutional Neural Network (CNN)** - the architecture that revolutionized computer vision!
 
 **What you'll learn today:**
 - How to build a CNN using Keras (Conv2D, MaxPooling2D, Flatten, Dense)

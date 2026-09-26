@@ -1,8 +1,8 @@
 ---
-pagetitle: "Lab 9: K-means and Hierarchical Clustering"
+pagetitle: "Lab 8: K-means and Hierarchical Clustering"
 ---
 
-# Lab 9: K-means and Hierarchical Clustering
+# Lab 8: K-means and Hierarchical Clustering
 ## MPS311/439 - Machine Learning
 **Lesson 8 Lab Session | Duration: 50 minutes**
 
@@ -10,7 +10,7 @@ pagetitle: "Lab 9: K-means and Hierarchical Clustering"
 
 ## Introduction
 
-Welcome to Lab 9! Today you'll explore **Clustering** - finding natural groups in data without labels. This is unsupervised learning at its finest!
+Welcome to Lab 8! Today you'll explore **Clustering** - finding natural groups in data without labels. This is unsupervised learning at its finest!
 
 **What you'll learn today:**
 - How to apply K-means clustering using sklearn
