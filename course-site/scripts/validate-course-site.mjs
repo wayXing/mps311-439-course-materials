@@ -1,6 +1,7 @@
 import { access, readFile } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { htmlFiles, pdfLinks } from './public-html.mjs';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const course = JSON.parse(await readFile(join(projectRoot, 'src/data/course.json'), 'utf8'));
@@ -40,6 +41,14 @@ for (const path of expected) {
 
 if (missing.length > 0) {
   throw new Error(`Missing generated paths:\n${missing.map((path) => `- ${path}`).join('\n')}`);
+}
+
+const pagesWithPdfLinks = [];
+for await (const path of htmlFiles(join(projectRoot, 'dist'))) {
+  if (pdfLinks(await readFile(path, 'utf8')).length) pagesWithPdfLinks.push(path);
+}
+if (pagesWithPdfLinks.length > 0) {
+  throw new Error(`Public pages must not offer PDF downloads:\n${pagesWithPdfLinks.join('\n')}`);
 }
 
 const slideCount = course.lessons.reduce(

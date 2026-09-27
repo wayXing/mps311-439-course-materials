@@ -4,7 +4,7 @@ import { fileURLToPath } from 'node:url';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const sourceName = 'MPS311_439_TimeTable-byLessons-2026.csv';
-const source = resolve(projectRoot, `../${sourceName}`);
+const source = resolve(projectRoot, '../timetable', sourceName);
 const jsonTarget = join(projectRoot, 'src/data/timetable.json');
 const csvTarget = join(projectRoot, 'public/data/course-timetable.csv');
 

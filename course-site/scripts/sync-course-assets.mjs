@@ -4,6 +4,7 @@ import { tmpdir } from 'node:os';
 import { basename, dirname, join, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
+import { removePublicPdfLinks } from './public-html.mjs';
 
 const execFileAsync = promisify(execFile);
 
@@ -98,4 +99,8 @@ for (const lesson of course.lessons) {
   }
 }
 
-console.log(`Synced ${copied} public course resources (${rendered} notebooks rendered as HTML).`);
+// Quarto's alternate-format controls belong to the Blackboard archive. Strip
+// PDF links only from the website copies, including links labelled PDF whose
+// generated href incorrectly points to another HTML file.
+const removedPdfLinks = await removePublicPdfLinks(outputRoot);
+console.log(`Synced ${copied} public course resources (${rendered} notebooks rendered as HTML; ${removedPdfLinks} PDF links removed).`);
