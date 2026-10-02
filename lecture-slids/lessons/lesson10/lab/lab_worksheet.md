@@ -975,7 +975,9 @@ ___________________________________________________________
 
 ## 30-second feedback
 
-Scan the code to share anonymous feedback or post a question for this lab. It opens the correct **Lesson 10 lab** record automatically.
+What would help you learn better next time?
+
+Scan to share anonymous feedback on today's lab.
 
 ![Feedback QR code for Lesson 10 lab](./feedback-qr.png){fig-align="center" width="180px"}
 <!-- COURSE_FEEDBACK_QR:END -->

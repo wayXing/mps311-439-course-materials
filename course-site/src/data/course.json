@@ -16,7 +16,7 @@
       "label": "Foundation",
       "title": "Python preparation",
       "shortTitle": "Python preparation",
-      "summary": "A focused pre-course guide to the Python concepts and working habits used throughout the module.",
+      "summary": "Build the Python and data-handling confidence needed to focus on modelling rather than tooling.",
       "accent": "sage",
       "type": "preparation",
       "topics": [
@@ -51,7 +51,7 @@
       "label": "Lesson 01",
       "title": "Why machine learning?",
       "shortTitle": "Why machine learning?",
-      "summary": "Why machine learning still matters when AI can write the code—and how to judge whether a model solves the real problem.",
+      "summary": "Before choosing algorithms, we need a shared way to turn real questions into problems that data can answer.",
       "accent": "coral",
       "type": "teaching",
       "topics": [
@@ -108,6 +108,17 @@
           "href": "materials/lesson1/notes.pdf"
         },
         {
+          "label": "Lab workbook",
+          "description": "Open the guided working copy in Google Colab, or download it and work locally.",
+          "kind": "workbook",
+          "group": "Lab",
+          "source": "lesson1/lab/lab_workbook.ipynb",
+          "target": "materials/lesson1/workbook",
+          "href": "materials/lesson1/workbook/lab_workbook.html",
+          "downloadHref": "materials/lesson1/workbook/lab_workbook.ipynb",
+          "render": "quarto"
+        },
+        {
           "label": "Lab worksheet",
           "description": "Complete the guided EDA practical in your browser.",
           "kind": "worksheet",
@@ -153,7 +164,7 @@
       "label": "Lesson 02",
       "title": "Predicting the future with lines",
       "shortTitle": "Linear regression",
-      "summary": "Linear regression as our first complete journey from data and assumptions to prediction.",
+      "summary": "We need a first complete model for predicting a continuous value and seeing how data, objective, solution, and evidence fit together.",
       "accent": "blue",
       "type": "teaching",
       "topics": [
@@ -247,7 +258,7 @@
       "label": "Lesson 03",
       "title": "From lines to curves",
       "shortTitle": "Features & regularisation",
-      "summary": "Feature engineering, model complexity, overfitting, and the tools that help a model generalise.",
+      "summary": "A straight line cannot express every useful pattern, but greater flexibility also makes it easier to learn noise.",
       "accent": "violet",
       "type": "teaching",
       "topics": [
@@ -341,7 +352,7 @@
       "label": "Lesson 04",
       "title": "Linear classification",
       "shortTitle": "Logistic regression",
-      "summary": "Turning linear models into probabilistic classifiers and learning how to evaluate their decisions.",
+      "summary": "Many real decisions require a class or probability, so the output and objective used for regression are no longer enough.",
       "accent": "gold",
       "type": "teaching",
       "topics": [
@@ -435,7 +446,7 @@
       "label": "Lesson 05",
       "title": "Finding the best projection",
       "shortTitle": "Linear discriminant analysis",
-      "summary": "A generative view of classification and the geometry of finding informative projections.",
+      "summary": "Classification can also start from assumptions about how each class generates its data, giving a different route to a decision boundary.",
       "accent": "sage",
       "type": "teaching",
       "topics": [
@@ -529,7 +540,7 @@
       "label": "Lesson 06",
       "title": "Learning through decisions",
       "shortTitle": "Decision trees",
-      "summary": "From simple questions to hierarchical models, including the strengths and fragility of trees.",
+      "summary": "Linear boundaries struggle with conditional and irregular regions; trees build decisions from a sequence of simple questions.",
       "accent": "coral",
       "type": "teaching",
       "topics": [
@@ -623,7 +634,7 @@
       "label": "Lesson 07",
       "title": "Finding structure in dimensions",
       "shortTitle": "Principal component analysis",
-      "summary": "Discovering low-dimensional structure and learning what information a projection preserves.",
+      "summary": "When no target label is available, we need a new objective for finding a useful low-dimensional representation.",
       "accent": "blue",
       "type": "teaching",
       "topics": [
@@ -717,7 +728,7 @@
       "label": "Lesson 08",
       "title": "Discovering groups",
       "shortTitle": "Clustering",
-      "summary": "K-means and hierarchical clustering as two different ways of revealing groups in unlabeled data.",
+      "summary": "A projection reveals directions of variation, but finding groups requires a different objective and different evidence.",
       "accent": "violet",
       "type": "teaching",
       "topics": [
@@ -811,7 +822,7 @@
       "label": "Lesson 09",
       "title": "Learning representations",
       "shortTitle": "Neural networks",
-      "summary": "From logistic regression to layered networks that learn useful internal representations.",
+      "summary": "Hand-designed features limit what a model can express; neural networks learn useful representations together with the prediction rule.",
       "accent": "coral",
       "type": "teaching",
       "topics": [
@@ -905,7 +916,7 @@
       "label": "Lesson 10",
       "title": "Learning from images",
       "shortTitle": "Convolutional neural networks",
-      "summary": "How convolution, feature hierarchies, and pooling make neural networks effective with images.",
+      "summary": "Ordinary neural networks ignore the spatial structure of images; convolution builds that structure into the model.",
       "accent": "blue",
       "type": "teaching",
       "topics": [

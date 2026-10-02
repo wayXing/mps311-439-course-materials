@@ -1,0 +1,18 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "MPS311 / MPS439 Machine Learning"
+  navbar: false
+
+format:
+  html:
+    theme: [cosmo, note-theme.scss]
+    toc: true
+    toc-depth: 2
+    toc-location: right
+    smooth-scroll: true
+    anchor-sections: true
+    page-layout: article
+

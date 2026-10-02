@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN"
+  "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg xmlns:xlink="http://www.w3.org/1999/xlink" width="854.28pt" height="383.184pt" viewBox="0 0 854.28 383.184" xmlns="http://www.w3.org/2000/svg" version="1.1">
+ <metadata>
+  <rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:cc="http://creativecommons.org/ns#" xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+   <cc:Work>
+    <dc:type rdf:resource="http://purl.org/dc/dcmitype/StillImage"/>
+    <dc:date>2026-10-02T00:53:42.098592</dc:date>
+    <dc:format>image/svg+xml</dc:format>
+    <dc:creator>
+     <cc:Agent>
+      <dc:title>Matplotlib v3.9.4, https://matplotlib.org/</dc:title>
+     </cc:Agent>
+    </dc:creator>
+   </cc:Work>
+  </rdf:RDF>
+ </metadata>
+ <defs>
+  <style type="text/css">*{stroke-linejoin: round; stroke-linecap: butt}</style>
+ </defs>
+ <g id="figure_1">
+  <g id="patch_1">
+   <path d="M 0 383.184 
+L 854.28 383.184 
+L 854.28 0 
+L 0 0 
+z
+" style="fill: #fafbfc"/>
+  </g>
+  <g id="axes_1">
+   <g id="patch_2">
+    <path d="M 53.28 168.0696 
+L 245.79 152.388 
+L 435.51 135.13824 
+L 625.23 116.32032 
+L 814.95 96.45696 
+L 814.95 286.72704 
+L 625.23 266.86368 
+L 435.51 248.04576 
+L 245.79 230.796 
+L 53.28 215.1144 
+z
+" clip-path="url(#p97e36c1bc2)" style="fill: #ddebf2"/>
+   </g>
+   <g id="line2d_1">
+    <path d="M 123.03 191.592 
+L 692.19 191.592 
+" clip-path="url(#p97e36c1bc2)" style="fill: none; stroke: #fafbfc; stroke-width: 7; stroke-linecap: round"/>
+   </g>
+   <g id="patch_3">
+    <path d="M 125.026415 191.592 
+Q 438.298365 191.592 748.887034 191.592 
+" clip-path="url(#p97e36c1bc2)" style="fill: none; opacity: 0.72; stroke: #20313f; stroke-width: 2.4; stroke-linecap: round"/>
+    <path d="M 739.287034 186.792 
+L 748.887034 191.592 
+L 739.287034 196.392 
+z
+" clip-path="url(#p97e36c1bc2)" style="fill: #20313f; opacity: 0.72; stroke: #20313f; stroke-width: 2.4; stroke-linecap: round"/>
+   </g>
+   <g id="patch_4">
+    <path d="M 123.03 214.06896 
+C 129.393283 214.06896 135.496799 211.700646 139.99632 207.485611 
+C 144.495841 203.270576 147.024 197.552959 147.024 191.592 
+C 147.024 185.631041 144.495841 179.913424 139.99632 175.698389 
+C 135.496799 171.483354 129.393283 169.11504 123.03 169.11504 
+C 116.666717 169.11504 110.563201 171.483354 106.06368 175.698389 
+C 101.564159 179.913424 99.036 185.631041 99.036 191.592 
+C 99.036 197.552959 101.564159 203.270576 106.06368 207.485611 
+C 110.563201 211.700646 116.666717 214.06896 123.03 214.06896 
+z
+" clip-path="url(#p97e36c1bc2)" style="fill: #3e6f8e; stroke: #fafbfc; stroke-width: 3.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_1">
+    <text style="fill: #6e7b85; font: 700 13px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif; text-anchor: middle" x="123.03" y="73.674554" transform="rotate(-0 123.03 73.674554)">STAGE 1</text>
+   </g>
+   <g id="text_2">
+    <text style="fill: #20313f; font: 500 19px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif" transform="translate(90.722578 119.706013)">Predict</text>
+    <text style="fill: #20313f; font: 500 19px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif" transform="translate(79.131094 141.214131)">a number</text>
+   </g>
+   <g id="patch_5">
+    <path d="M 312.75 219.29616 
+C 320.593116 219.29616 328.116055 216.377075 333.661976 211.181799 
+C 339.207897 205.986524 342.324 198.939229 342.324 191.592 
+C 342.324 184.244771 339.207897 177.197476 333.661976 172.002201 
+C 328.116055 166.806925 320.593116 163.88784 312.75 163.88784 
+C 304.906884 163.88784 297.383945 166.806925 291.838024 172.002201 
+C 286.292103 177.197476 283.176 184.244771 283.176 191.592 
+C 283.176 198.939229 286.292103 205.986524 291.838024 211.181799 
+C 297.383945 216.377075 304.906884 219.29616 312.75 219.29616 
+z
+" clip-path="url(#p97e36c1bc2)" style="fill: #4b788e; stroke: #fafbfc; stroke-width: 3.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_3">
+    <text style="fill: #6e7b85; font: 700 13px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif; text-anchor: middle" x="312.75" y="73.674554" transform="rotate(-0 312.75 73.674554)">STAGE 2</text>
+   </g>
+   <g id="text_4">
+    <text style="fill: #20313f; font: 500 19px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif" transform="translate(217.635703 119.706013)">Make a classification</text>
+    <text style="fill: #20313f; font: 500 19px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif" transform="translate(274.096875 141.214131)">decision</text>
+   </g>
+   <g id="patch_6">
+    <path d="M 502.47 224.52336 
+C 511.79295 224.52336 520.735311 221.053504 527.327632 214.877988 
+C 533.919953 208.702472 537.624 200.325499 537.624 191.592 
+C 537.624 182.858501 533.919953 174.481528 527.327632 168.306012 
+C 520.735311 162.130496 511.79295 158.66064 502.47 158.66064 
+C 493.14705 158.66064 484.204689 162.130496 477.612368 168.306012 
+C 471.020047 174.481528 467.316 182.858501 467.316 191.592 
+C 467.316 200.325499 471.020047 208.702472 477.612368 214.877988 
+C 484.204689 221.053504 493.14705 224.52336 502.47 224.52336 
+z
+" clip-path="url(#p97e36c1bc2)" style="fill: #3d8279; stroke: #fafbfc; stroke-width: 3.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_5">
+    <text style="fill: #6e7b85; font: 700 13px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif; text-anchor: middle" x="502.47" y="73.674554" transform="rotate(-0 502.47 73.674554)">STAGE 3</text>
+   </g>
+   <g id="text_6">
+    <text style="fill: #20313f; font: 500 19px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif" transform="translate(418.837344 119.706013)">Discover structure</text>
+    <text style="fill: #20313f; font: 500 19px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif" transform="translate(436.796797 141.214131)">without labels</text>
+   </g>
+   <g id="patch_7">
+    <path d="M 692.19 229.75056 
+C 702.992783 229.75056 713.354566 225.729933 720.993288 218.574177 
+C 728.632009 211.41842 732.924 201.711768 732.924 191.592 
+C 732.924 181.472232 728.632009 171.76558 720.993288 164.609823 
+C 713.354566 157.454067 702.992783 153.43344 692.19 153.43344 
+C 681.387217 153.43344 671.025434 157.454067 663.386712 164.609823 
+C 655.747991 171.76558 651.456 181.472232 651.456 191.592 
+C 651.456 201.711768 655.747991 211.41842 663.386712 218.574177 
+C 671.025434 225.729933 681.387217 229.75056 692.19 229.75056 
+z
+" clip-path="url(#p97e36c1bc2)" style="fill: #766e9e; stroke: #fafbfc; stroke-width: 3.2; stroke-linejoin: miter"/>
+   </g>
+   <g id="text_7">
+    <text style="fill: #6e7b85; font: 700 13px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif; text-anchor: middle" x="692.19" y="73.674554" transform="rotate(-0 692.19 73.674554)">STAGE 4</text>
+   </g>
+   <g id="text_8">
+    <text style="fill: #20313f; font: 500 19px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif" transform="translate(636.232031 119.706013)">Learn useful</text>
+    <text style="fill: #20313f; font: 500 19px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif" transform="translate(619.841562 141.214131)">representations</text>
+   </g>
+   <g id="text_9">
+    <text style="fill: #3e6f8e; font: 700 14px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif; text-anchor: start" x="56.07" y="349.405963" transform="rotate(-0 56.07 349.405963)">EACH STAGE KEEPS EARLIER SKILLS</text>
+   </g>
+   <g id="text_10">
+    <text style="fill: #766e9e; font: 700 14px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif; text-anchor: end" x="798.21" y="349.405963" transform="rotate(-0 798.21 349.405963)">AND EXPANDS THE PROBLEMS YOU CAN HANDLE</text>
+   </g>
+   <g id="text_11">
+    <text style="fill: #ffffff; font: 700 21px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif; text-anchor: middle" x="123.03" y="197.009344" transform="rotate(-0 123.03 197.009344)">1</text>
+   </g>
+   <g id="text_12">
+    <text style="fill: #ffffff; font: 700 22px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif; text-anchor: middle" x="312.75" y="197.267313" transform="rotate(-0 312.75 197.267313)">2</text>
+   </g>
+   <g id="text_13">
+    <text style="fill: #ffffff; font: 700 23px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif; text-anchor: middle" x="502.47" y="197.525281" transform="rotate(-0 502.47 197.525281)">3</text>
+   </g>
+   <g id="text_14">
+    <text style="fill: #ffffff; font: 700 24px 'Avenir Next', 'Avenir', 'DejaVu Sans', sans-serif; text-anchor: middle" x="692.19" y="197.78325" transform="rotate(-0 692.19 197.78325)">4</text>
+   </g>
+  </g>
+ </g>
+ <defs>
+  <clipPath id="p97e36c1bc2">
+   <rect x="8.64" y="8.64" width="837" height="365.904"/>
+  </clipPath>
+ </defs>
+</svg>

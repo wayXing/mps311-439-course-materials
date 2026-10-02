@@ -1,0 +1,14 @@
+---
+title: "Why Learn Machine Learning?"
+subtitle: "Lesson 1 · MPS311 / MPS439"
+description: "Machine learning begins with a real problem—not with an algorithm."
+filters: [visual-design.lua]
+format:
+  html:
+    css: styles.css
+    fig-responsive: true
+    html-math-method: katex
+    include-after-body: page-footer.html
+---
+
+{{< include ../../note_draft.md >}}

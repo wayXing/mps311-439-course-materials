@@ -1,198 +1,170 @@
 ---
-pagetitle: "Lab 1: From Data to Insight"
+pagetitle: "Lab 1: Getting Started with Data and AI"
 ---
 
-# Lab 1: From Data to Insight
-## MPS311/439 - Machine Learning
-**Lesson 1 Lab Session | Duration: 50 minutes**
+# Lab 1: Getting Started with Data and AI
+## MPS311/439 — Machine Learning
+**Lesson 1 Lab Session | Core duration: 50 minutes**
 
----
+## What this lab is for
 
-## Introduction
+This first lab is a low-pressure return to Python. You may be opening a notebook for the first time, or you may have learned Python before and forgotten some of it. Both are expected.
 
-Welcome to your first machine learning lab. Before we train a model, we need to understand the data in front of us. This process is called **exploratory data analysis (EDA)**.
+Today you will practise three things:
 
-EDA helps us answer four questions:
+1. load a dataset into a notebook;
+2. inspect it and make a few simple plots;
+3. use AI when you are stuck, then check whether its suggestion works.
 
-1. What does each row and column represent?
-2. Is the data complete and plausible?
-3. What patterns can we see?
-4. What can we responsibly conclude from those patterns?
+You are **not** expected to build a machine-learning model today. Most code is provided. Your job is to run it, complete small gaps, make simple changes, and understand the output.
 
-Today you will investigate hourly bicycle rentals. By the end of the lab, you should be able to inspect a dataset, identify simple data-quality issues, choose a suitable basic visualisation, and communicate one evidence-based finding.
+## Choose how you want to work
 
-### Core learning outcomes
+Both routes complete the same lab:
 
-By the end of the core lab, you should be able to:
+- **Guided route — recommended if Colab or Python feels unfamiliar:** open the **Lab workbook** from the course website. It contains the task structure, setup code, small gaps, and spaces for your answers.
+- **From-scratch route — if you prefer to type everything yourself:** create a blank Colab notebook and use this worksheet as your guide. Copy or type each code example as you reach it.
 
-- load a CSV file into a pandas DataFrame;
-- inspect rows, columns, data types, and summary statistics;
-- identify missing values and duplicate rows;
-- create and label a histogram, bar chart, scatter plot, and line plot;
-- distinguish a **feature** from a **target**;
-- describe a pattern without claiming more than the data supports;
-- use AI to diagnose an error, then verify the proposed fix.
+The workbook is not the solution. It does not contain completed answers or final outputs. Use the worked solution only after attempting the tasks, to check your work.
 
-> **Need Python help?** Use the Python Preparation guide for variables, methods, imports, and error messages. You do not need to memorise Python syntax to complete this lab.
+### If you are stuck
 
-### Files you need
+Use the same routine throughout this lab:
 
-- This worksheet as a Jupyter Notebook.
-- [bike_rentals.csv](./bike_rentals.csv)
+1. Read the final line of the error message.
+2. Check spelling, quotation marks, brackets, and whether the cell above has been run.
+3. If the problem remains, give an AI assistant:
+   - what you are trying to do;
+   - the relevant code;
+   - the complete error message.
+4. Try the smallest suggested change and check the result.
 
-The dataset is synthetic and was created for teaching. It contains 14 days of hourly bicycle-rental observations. The patterns are realistic enough for EDA, but the data must not be presented as measurements from a real city.
+Do not ask only “fix my code”. Ask the AI to explain what was wrong so that you can recognise the problem next time.
 
----
+## Setup: open, run, and save (5 minutes)
 
-## Setup: Open, run, and save the notebook (5 minutes)
+### If you are using Google Colab for the first time
 
-Download `bike_rentals.csv` from the Lesson 1 page and place it beside this notebook. If you are using Google Colab, the setup cell will ask you to upload the CSV when it cannot find the file.
+1. On the course website, select **Lab workbook**. Colab will open in a new browser tab.
+2. Sign in to your Google account if Colab asks you to.
+3. Select **File → Save a copy in Drive**. Work in the copied notebook so that your changes are saved.
+4. Run a code cell by selecting the round **▶** button on its left. You can also press **Shift + Enter**.
+5. Run the setup cell and wait until you see `Dataset loaded successfully.` The dataset is loaded automatically from the public course repository.
+
+Colab saves your Drive copy automatically. You can also select **File → Save** before leaving.
+
+The main setup is intentionally short. It uses a public data address that has been tested with `pandas`. If it does not work, continue to the backup appendix at the end of this worksheet.
 
 Run the following cell without changing it.
 
 ```python
-from pathlib import Path
-
 import matplotlib.pyplot as plt
 import pandas as pd
 
-DATA_FILE = "bike_rentals.csv"
+DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/lesson1/lab/bike_rentals.csv"
+df = pd.read_csv(DATA_URL)
 
-if not Path(DATA_FILE).exists():
-    try:
-        from google.colab import files
-        print("Choose bike_rentals.csv from your computer.")
-        files.upload()
-    except ImportError:
-        raise FileNotFoundError(
-            "bike_rentals.csv was not found. Place it in the same folder as this notebook."
-        )
-
-df = pd.read_csv(DATA_FILE)
 print("Dataset loaded successfully.")
+print("Rows and columns:", df.shape)
 ```
 
-Now check that the object named `df` is a pandas DataFrame.
+**Success check:** You should see `Dataset loaded successfully.` followed by the number of rows and columns.
 
-```python
-type(df)
-```
-
-You should see `pandas.core.frame.DataFrame`.
-
-### Notebook check
-
-1. Change the message below.
-2. Run the cell.
-3. Change it again and re-run it.
+Now confirm that you can edit and re-run a cell.
 
 ```python
 message = "My Lesson 1 notebook is working."
 print(message)
 ```
 
-Save a copy of the notebook before continuing.
+Change the message, run the cell again, and save your own copy of the notebook.
 
-- **Google Colab:** File -> Save a copy in Drive
-- **Jupyter:** File -> Save Notebook
-
----
+> **Python reminder:** Text inside quotation marks is a string. `print(...)` displays a value.
 
 ## Part 1: Meet the dataset (8 minutes)
 
-### Background
+### 1.1 Look at the first rows
 
-A DataFrame is a table with labelled rows and columns. Before plotting anything, we should understand what one row represents and what each column means.
-
-### Task 1.1: Preview the first rows
-
-Complete the method name.
+Complete the method name and run the cell.
 
 ```python
 df.____()
 ```
 
-**Hint:** The method is `.head()`.
+**Hint:** Use `head`.
 
-### Task 1.2: Inspect the size and columns
+> **Python reminder:** A method belongs to an object. We call it with a dot and round brackets: `object.method()`.
 
-Fill in the blanks.
+The dataset records hourly bicycle rentals. The columns are:
+
+- `date`: calendar date;
+- `day`: day of the week;
+- `hour`: hour from 0 to 23;
+- `temperature_c`: temperature in degrees Celsius;
+- `humidity_pct`: relative humidity;
+- `wind_speed_kmh`: wind speed;
+- `weather`: Clear, Cloudy, or Rain;
+- `is_weekend`: 1 at weekends, otherwise 0;
+- `rentals`: bicycles rented during that hour.
+
+**Question:** What does one row represent?
+
+> ______________________________________________________________________
+
+### 1.2 Check the size and column names
+
+Fill in the two attributes.
 
 ```python
 print("Rows and columns:", df.____)
 print("Column names:", df.____.tolist())
 ```
 
-**Hints:**
+**Hints:** Use `shape` and `columns`.
 
-- `df.shape` gives `(number of rows, number of columns)`.
-- `df.columns` stores the column labels.
+> **Python reminder:** Attributes such as `df.shape` do not use round brackets. Methods such as `df.head()` do.
 
-Record your result:
+Record the result:
 
-> Number of rows: __________  Number of columns: __________
+> Rows: __________  Columns: __________
 
-### Task 1.3: Understand the variables
+## Part 2: Inspect the data (8 minutes)
 
-Run the following cell.
+### 2.1 Data types and missing entries
+
+Run the complete command below.
 
 ```python
 df.info()
 ```
 
-Use the table and the descriptions below.
+**Success check:** You should see every column name, its number of non-missing values, and its data type.
 
-| Column | Meaning |
-|---|---|
-| `date` | Calendar date |
-| `day` | Day of the week |
-| `hour` | Hour of the day, from 0 to 23 |
-| `temperature_c` | Temperature in degrees Celsius |
-| `humidity_pct` | Relative humidity as a percentage |
-| `wind_speed_kmh` | Wind speed in kilometres per hour |
-| `weather` | Clear, Cloudy, or Rain |
-| `is_weekend` | 1 for Saturday/Sunday, otherwise 0 |
-| `rentals` | Number of bicycle rentals in that hour |
-
-Answer in your own words:
-
-1. What does one row represent?
+Which columns appear to have missing entries?
 
 > ______________________________________________________________________
 
-2. If our future goal is to predict bicycle rentals, which column is the **target**?
+### 2.2 Simple numerical summary
 
-> Target: ______________________________
-
-3. Give three columns that could be used as **features**.
-
-> Features: ____________________, ____________________, ____________________
-
-### Task 1.4: Summary statistics
-
-Complete and run the code.
+Complete and run the method.
 
 ```python
 df.____()
 ```
 
-**Hint:** Use `.describe()`.
+**Hint:** Use `describe`.
 
-Look at `rentals`. Record its minimum, mean, and maximum.
+Find the minimum, mean, and maximum for `rentals`.
 
 > Minimum: __________  Mean: __________  Maximum: __________
 
-**Think:** Does the mean describe a typical hour well, or might the distribution be uneven?
+**Question:** Which of these three numbers is largest? Does that make sense?
 
----
+> ______________________________________________________________________
 
-## Part 2: Check data quality (8 minutes)
+## Part 3: Check data quality and use AI (10 minutes)
 
-### Background
-
-Real datasets are rarely perfect. Missing values, repeated rows, and implausible values can change our conclusions. Code running without an error does not guarantee that the data is trustworthy.
-
-### Task 2.1: Find missing values
+### 3.1 Count missing values
 
 Fill in the method name.
 
@@ -201,413 +173,244 @@ missing_values = df.____().sum()
 print(missing_values)
 ```
 
-**Hint:** Use `.isna()`.
+**Hint:** Use `isna`.
 
-Which columns contain missing values?
+### 3.2 Count duplicate rows
 
-> ______________________________________________________________________
-
-How many missing cells are there in total?
-
-```python
-total_missing = missing_values.____()
-print("Total missing cells:", total_missing)
-```
-
-### Task 2.2: Find duplicate rows
-
-Complete the code.
+Fill in the method name.
 
 ```python
 duplicate_rows = df.____().sum()
 print("Duplicate rows:", duplicate_rows)
 ```
 
-**Hint:** Use `.duplicated()`.
+**Hint:** Use `duplicated`.
 
-### Task 2.3: Create a clean working copy
-
-For this first lab, we will remove the duplicate row and the small number of rows containing missing values. In a real project, this decision would require more thought.
+For today, use the provided cleaning code. In a real project, removing data would require more thought.
 
 ```python
-df_clean = (
-    df.drop_duplicates()
-      .dropna()
-      .copy()
-)
+df_clean = df.drop_duplicates().dropna().copy()
 
 print("Original shape:", df.shape)
 print("Clean shape:   ", df_clean.shape)
 ```
 
-How many rows were removed?
+### 3.3 Diagnose an error with AI
+
+The following code contains a common mistake. Run it and read the error.
 
 ```python
-rows_removed = len(____) - len(____)
-print("Rows removed:", rows_removed)
-```
-
-### Task 2.4: Debug with AI, then verify
-
-The code below contains an error. Run it and read the final line of the error message.
-
-```python
-average_rentals = df_clean["rental"].mean()
-print(average_rentals)
+df_clean["weather_type"].value_counts()
 ```
 
 Ask an AI assistant:
 
-> I am learning pandas. Explain this error, identify the likely cause, and suggest the smallest change. Do not rewrite the full exercise.
+> I am trying to count the rows in each weather category in a pandas DataFrame. My code is `df_clean["weather_type"].value_counts()`. The error is pasted below. Explain the cause and show the smallest correction. The available columns are: date, day, hour, temperature_c, humidity_pct, wind_speed_kmh, weather, is_weekend, rentals.
 
-Then answer:
+Paste the complete error after the prompt. Then make the correction and run the code again.
 
-1. What caused the error?
-
-> ______________________________________________________________________
-
-2. What is the corrected line?
-
-```python
-average_rentals = _______________________________________________
-```
-
-3. How did you verify that the fix was correct?
+**What was wrong?**
 
 > ______________________________________________________________________
 
----
-
-## Part 3: Explore individual variables (10 minutes)
-
-### Background
-
-Univariate analysis studies one variable at a time. A histogram helps us see where numerical values are concentrated, while a bar chart helps us compare category counts.
-
-### Task 3.1: Distribution of rentals
-
-Complete the column name, number of bins, and labels.
-
-```python
-plt.figure(figsize=(8, 5))
-plt.hist(df_clean["____"], bins=____, color="steelblue", edgecolor="white")
-plt.xlabel("____________________")
-plt.ylabel("____________________")
-plt.title("____________________")
-plt.tight_layout()
-plt.show()
-```
-
-**Hints:**
-
-- Plot the `rentals` column.
-- Start with `bins=20`.
-- Every plot should say what the horizontal and vertical axes represent.
-
-Describe the shape of the distribution:
+**How did you check that the correction worked?**
 
 > ______________________________________________________________________
 
-Are most observations near the low, middle, or high end?
+## Part 4: Make three simple plots (15 minutes)
 
-> ______________________________________________________________________
+### 4.1 First plot: run a complete example
 
-### Task 3.2: Count weather categories
-
-```python
-weather_counts = df_clean["weather"].____()
-print(weather_counts)
-```
-
-**Hint:** Use `.value_counts()`.
-
-Now draw a bar chart.
+Run this code to see the distribution of hourly rentals.
 
 ```python
 plt.figure(figsize=(7, 4))
-weather_counts.plot(kind="____", color=["#5e7ee8", "#e1a63d", "#7fa58d"])
+plt.hist(df_clean["rentals"], bins=15, edgecolor="white")
+plt.xlabel("Hourly bicycle rentals")
+plt.ylabel("Number of hours")
+plt.title("Distribution of hourly rentals")
+plt.show()
+```
+
+**Question:** Are most hours near the lower, middle, or upper end of the rental range?
+
+> ______________________________________________________________________
+
+### 4.2 Second plot: complete a group comparison
+
+Calculate the average rentals for each weather category.
+
+```python
+rentals_by_weather = df_clean.groupby("____")["____"].mean()
+print(rentals_by_weather)
+```
+
+**Hints:** Group by `weather` and calculate the mean of `rentals`.
+
+Now complete the plot type.
+
+```python
+rentals_by_weather.plot(kind="____", color="#4C78A8")
 plt.xlabel("Weather")
-plt.ylabel("Number of hourly observations")
-plt.title("Weather conditions in the dataset")
-plt.xticks(rotation=0)
-plt.tight_layout()
+plt.ylabel("Average hourly rentals")
+plt.title("Average rentals by weather")
 plt.show()
 ```
 
-Which weather category is most common?
+**Hint:** Use `bar`.
+
+**Question:** Which weather category has the highest average rentals?
 
 > ______________________________________________________________________
 
----
+### 4.3 Third plot: modify a successful template
 
-## Part 4: Explore relationships (10 minutes)
-
-### Background
-
-Bivariate analysis studies the relationship between two variables. We will begin with a question:
-
-> Do warmer hours tend to have more bicycle rentals?
-
-### Task 4.1: Temperature and rentals
-
-Fill in the column names.
+This code calculates average rentals for every hour of the day.
 
 ```python
-plt.figure(figsize=(8, 5))
-plt.scatter(
-    df_clean["________________"],
-    df_clean["________________"],
-    alpha=0.55,
-    color="#3769cf"
-)
-plt.xlabel("Temperature (C)")
-plt.ylabel("Bicycle rentals per hour")
-plt.title("Temperature and bicycle rentals")
-plt.grid(alpha=0.2)
-plt.tight_layout()
-plt.show()
-```
+rentals_by_hour = df_clean.groupby("hour")["rentals"].mean()
 
-Answer carefully:
-
-1. Is the overall relationship positive, negative, or unclear?
-
-> ______________________________________________________________________
-
-2. Are there points that do not follow the overall pattern?
-
-> ______________________________________________________________________
-
-3. Does this plot prove that higher temperature **causes** more rentals? Why or why not?
-
-> ______________________________________________________________________
->
-> ______________________________________________________________________
-
-### Task 4.2: Hourly pattern
-
-Calculate the mean rentals for each hour.
-
-```python
-hourly_rentals = df_clean.groupby("____")["____"].mean()
-
-plt.figure(figsize=(9, 5))
-plt.plot(hourly_rentals.index, hourly_rentals.values, marker="o", color="#cc513f")
+rentals_by_hour.plot(kind="line", marker="o", color="#E07A5F")
 plt.xlabel("Hour of day")
-plt.ylabel("Mean bicycle rentals")
-plt.title("Average rental pattern across the day")
-plt.xticks(range(0, 24, 2))
-plt.grid(alpha=0.2)
-plt.tight_layout()
+plt.ylabel("Average rentals")
+plt.title("Average rentals through the day")
 plt.show()
 ```
 
-At what times do rentals peak? Suggest one realistic explanation.
+Run it once. Then change the line colour or marker and run it again.
+
+**Question:** At approximately which hours are rentals highest?
 
 > ______________________________________________________________________
->
-> ______________________________________________________________________
 
----
+## Part 5: Finish and reflect (4 minutes)
 
-## Part 5: Compare groups and investigate (6 minutes)
+Write one simple observation that is directly supported by your output.
 
-### Task 5.1: Weekday versus weekend
+> The data show that ____________________________________________________
 
-Complete the group and target columns.
+Write one sentence about how AI helped you today.
+
+> AI helped me __________________________________________________________
+
+Before finishing, make sure that you can:
+
+- run and re-run a notebook cell;
+- load and preview a CSV file;
+- inspect columns and simple summaries;
+- complete and modify a small plotting example;
+- use an error message to ask AI for focused help;
+- check whether the proposed fix works.
+
+# MPS439 extension — choose at least one option
+
+MPS439 students should complete at least one option below. MPS311 students may explore any option if they finish early or want an additional challenge. These tasks do not require a machine-learning model.
+
+## Option A: Does a pattern change between groups?
+
+Compare the hourly rental pattern for weekdays and weekends.
 
 ```python
-weekend_comparison = df_clean.groupby("___________")["___________"].mean()
-weekend_comparison.index = ["Weekday", "Weekend"]
+hourly_by_group = (
+    df_clean.groupby(["hour", "is_weekend"])["rentals"]
+            .mean()
+            .unstack()
+)
 
-plt.figure(figsize=(6, 4))
-weekend_comparison.plot(kind="bar", color=["#5e7ee8", "#ef6a4d"])
-plt.xlabel("")
-plt.ylabel("Mean bicycle rentals")
-plt.title("Average rentals: weekday vs weekend")
-plt.xticks(rotation=0)
-plt.tight_layout()
+hourly_by_group.plot(marker="o", figsize=(8, 4))
+plt.xlabel("Hour of day")
+plt.ylabel("Average rentals")
+plt.title("Hourly rentals: weekdays and weekends")
+plt.legend(["Weekday", "Weekend"])
 plt.show()
 ```
 
-Which group has the higher overall mean?
+Identify one similarity and one difference between the two lines.
+
+> Similarity: ___________________________________________________________
+
+> Difference: ___________________________________________________________
+
+Why might the overall hourly pattern hide this difference?
 
 > ______________________________________________________________________
 
-Why might an overall mean hide important hourly differences?
+## Option B: Turn a repeated analysis into a function
 
-> ______________________________________________________________________
-
-### Task 5.2: Your mini-investigation
-
-Choose **one** question:
-
-1. How does humidity relate to rentals?
-2. How do rentals differ across Clear, Cloudy, and Rain conditions?
-3. Does the hourly rental pattern differ between weekdays and weekends?
-
-Create one appropriate plot. You may adapt code from earlier parts. Give the plot a meaningful title and label every axis.
+Complete the function so that it plots the distribution of any numerical column.
 
 ```python
-# Write or adapt your code here.
+def plot_distribution(data, column):
+    plt.figure(figsize=(7, 4))
+    plt.hist(data[____], bins=15, edgecolor="white")
+    plt.xlabel(____)
+    plt.ylabel("Number of rows")
+    plt.title(f"Distribution of {____}")
+    plt.show()
 
-
+plot_distribution(df_clean, "temperature_c")
 ```
 
-Write two evidence-based sentences:
+Test the same function with `humidity_pct` or `wind_speed_kmh`.
 
-> Finding 1: ____________________________________________________________
->
-> Finding 2: ____________________________________________________________
-
-Write one conclusion that your plot **cannot** support:
-
-> Limitation: ___________________________________________________________
-
-**AI Help:** You may ask AI to recommend a plot type, but include the names and meanings of your variables. Decide for yourself whether its suggestion matches your question.
-
----
-
-## Reflection and readiness check (3 minutes)
-
-Answer without running new code.
-
-1. What is the difference between a feature and a target?
+What is the advantage of using a function here?
 
 > ______________________________________________________________________
 
-2. Why should we inspect missing values before creating a model?
+## Option C: Ask AI for an analysis, then audit it
+
+Give an AI assistant the column names and ask it to propose one simple question and a pandas/matplotlib analysis. Before running the answer, check:
+
+1. Does every column in the code exist?
+2. Does the proposed plot match the question?
+3. Is the code using `df_clean`?
+4. Does the conclusion say more than the graph shows?
+
+Run the checked code. Record at least one change you made to the AI response.
+
+> I changed _____________________________________________________________
+
+> because ______________________________________________________________
+
+## Option D: Create a mini evidence report
+
+Choose one question about bicycle rentals. Reuse or modify two analyses from this lab, then write:
+
+**Question:**
 
 > ______________________________________________________________________
 
-3. A scatter plot shows that rentals are higher in warmer hours. Give one possible confounding variable.
+**Evidence from two outputs:**
 
 > ______________________________________________________________________
 
-4. When AI suggests a code fix, what should you do before accepting it?
+**Conclusion:**
 
 > ______________________________________________________________________
 
-### Readiness checklist
+**One limitation:**
 
-- [ ] I can load a CSV file into pandas.
-- [ ] I can inspect rows, columns, and data types.
-- [ ] I can check missing values and duplicates.
-- [ ] I can create a labelled plot.
-- [ ] I can describe a pattern without confusing association with causation.
-- [ ] I can read an error message and verify a proposed fix.
+> ______________________________________________________________________
 
-If two or more items remain unclear, revisit the relevant section of Python Preparation before Lesson 2.
+## Appendix: only if the data did not load
 
----
+Do not use this section if the main setup worked.
 
-## Core summary
-
-Today you completed the first stage of a machine learning workflow:
-
-> **Question -> Data -> Check -> Visualise -> Interpret**
-
-You learned how to:
-
-- inspect a DataFrame;
-- identify simple data-quality issues;
-- explore numerical and categorical variables;
-- compare variables and groups visually;
-- distinguish features from a target;
-- communicate findings with appropriate caution.
-
-In Lesson 2, we will continue the workflow:
-
-> **Features + Target -> Model -> Prediction -> Evaluation**
-
----
-
-# MPS439 Extension: Question-led EDA (30 minutes)
-
-The extension is intentionally open-ended. Do not produce extra plots without a purpose. Begin with a question, choose a visualisation that answers it, and explain what the result means.
-
-## Extension 1: Build a reusable data audit (10 minutes)
-
-Write a function called `audit_dataframe(data)` that returns or prints:
-
-- number of rows and columns;
-- data type of every column;
-- missing-value count for every column;
-- number of duplicate rows;
-- numerical summary statistics.
+First try the independent CDN copy:
 
 ```python
-def audit_dataframe(data):
-    """Produce a compact quality report for a pandas DataFrame."""
-    # Your implementation here.
-    pass
-
-
-audit_dataframe(df)
+BACKUP_URL = "https://cdn.jsdelivr.net/gh/wayXing/mps311-439-course-materials@main/lecture-slids/lessons/lesson1/lab/bike_rentals.csv"
+df = pd.read_csv(BACKUP_URL)
 ```
 
-**Challenge:** Make the output concise enough that you would genuinely use it at the start of a future project.
-
-## Extension 2: Multivariable visual exploration (10 minutes)
-
-Choose one of the following:
-
-### Option A: Weather changes the temperature-rentals relationship
-
-Create a scatter plot of temperature against rentals, using colour to distinguish `weather`.
-
-### Option B: Weekday and weekend hourly patterns
-
-Create two lines on the same plot: mean hourly rentals for weekdays and weekends.
-
-### Option C: Correlation heatmap
-
-Calculate correlations between numerical variables and create an annotated heatmap. Explain why correlation with `hour` or `is_weekend` must be interpreted carefully.
-
-You may use seaborn:
+If both websites are unavailable, download `bike_rentals.csv` from the course materials and use Colab's **Files → Upload** button. Then run:
 
 ```python
-import seaborn as sns
+df = pd.read_csv("bike_rentals.csv")
 ```
-
-Your visualisation must include:
-
-- a clear analytical question;
-- an appropriate plot type;
-- readable labels and legend;
-- a caption explaining the main pattern.
-
-## Extension 3: EDA mini-report (10 minutes)
-
-Write a short report containing:
-
-1. **Question:** What did you investigate?
-2. **Evidence:** Which visual pattern supports your conclusion?
-3. **Interpretation:** What real-world mechanism might explain it?
-4. **Limitation:** What alternative explanation or missing variable matters?
-5. **Next step:** What would you investigate or model next?
-
-Aim for 150-250 words. Analytical depth matters more than the number of plots.
-
-## Extension reflection
-
-1. Which visualisation was most informative, and why?
-2. Did any plot change your initial assumption?
-3. Which variable would be most dangerous to interpret causally?
-4. What additional data would make the analysis more credible?
-
----
-
-## Lab complete
-
-Keep your completed notebook. The EDA habits from this lab - checking quality, choosing purposeful plots, and explaining limitations - will be expected throughout the course and in both assessments.
-
-<!-- COURSE_FEEDBACK_QR:START -->
----
 
 ## 30-second feedback
 
-Scan the code to share anonymous feedback or post a question for this lab. It opens the correct **Lesson 01 lab** record automatically.
+Scan the feedback QR code and submit one thing that helped you today, one point that remained difficult, or one question for the next session.
 
-![Feedback QR code for Lesson 01 lab](./feedback-qr.png){fig-align="center" width="180px"}
-<!-- COURSE_FEEDBACK_QR:END -->
+![](feedback-qr.png){fig-alt="Feedback QR code for Lesson 1 lab" width="35%"}

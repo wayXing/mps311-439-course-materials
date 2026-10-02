@@ -1,0 +1,290 @@
+---
+title: "Lesson 1: Why Learn Machine Learning?"
+subtitle: "When AI can write the code"
+author: "Dr Wei Xing"
+institute: "MPS311/439 Machine Learning<br>2026–27"
+format:
+  revealjs:
+    theme: [default, course-theme.scss]
+    css: styles.css
+    include-after-body: random-cover.html
+    width: 1600
+    height: 900
+    margin: 0.06
+    center: false
+    transition: slide
+    background-transition: fade
+    slide-number: true
+    controls: false
+    progress: true
+    hash: true
+    history: false
+    embed-resources: true
+    self-contained-math: true
+title-slide-attributes:
+  class: "course-title"
+  data-background-image: "assets/course-cover-books.webp"
+  data-background-size: "cover"
+  data-background-position: "center"
+  data-background-color: "#05080f"
+  data-background-opacity: "0.58"
+---
+
+## The capability this course builds {.promise-slide}
+
+::: {.course-promise}
+Given a new real-world question and an unfamiliar dataset, you should be able to build a modelling process that you can **explain and defend**.
+:::
+
+::: {.outcome-list}
+<div><span>01</span><b>Define the task</b><p>Turn a vague requirement into a question that data can answer.</p></div>
+<div><span>02</span><b>Build a fair comparison</b><p>Know what a more complicated model must improve upon.</p></div>
+<div><span>03</span><b>Use evidence</b><p>Test the result in the situation where you intend to use it.</p></div>
+<div><span>04</span><b>Limit the conclusion</b><p>Say what the result supports and where it may fail.</p></div>
+:::
+
+::: {.level-note}
+<b>MPS311</b> applies and explains the process. <b>MPS439</b> also investigates its assumptions, implementation, and limits.
+:::
+
+::: {.notes}
+**讲：** 这门课训练的不是算法清单，而是面对新问题时能够定义任务、比较方案、检查证据并限制结论。
+
+**问：** AI 已能写代码和画图，为什么还要学习机器学习？
+
+**转：** 先不回答，用股票预测来看。
+:::
+
+## A tempting request
+
+::: {.prompt-stage}
+<p class="prompt-label">Prompt to an AI assistant</p>
+
+> Use historical stock-market data to predict tomorrow's closing price. Write the code and compare the predictions with what actually happened.
+:::
+
+::: {.big-question}
+If the predicted line almost matches reality, would you trust it with your own money?
+:::
+
+::: {.notes}
+**讲：** 把历史价格交给 AI，请它写程序预测明天并画出结果。
+
+**问：** 如果两条线几乎重合，你会相信它、用它投资吗？
+
+**转：** 先记住现在的判断。
+:::
+
+## The prediction looks remarkable
+
+![](../figures/fig_ai_prediction.png){fig-alt="Actual S&P 500 closing level and an AI-generated prediction across 2020 to 2024" .hero-chart}
+
+::: {.question-line}
+Has the model solved the problem?
+:::
+
+::: {.notes}
+**讲：** 五年里，预测线几乎一直贴着真实市场。
+
+**问：** 只根据这张图，它已经解决问题了吗？
+
+**转：** 再看一个完全不需要训练的方法。
+:::
+
+## Yesterday looks just as convincing
+
+::: {.evidence-pair-slide}
+<div>
+
+![](../figures/fig_ai_prediction.png){fig-alt="Actual market and AI-generated prediction"}
+
+<p>AI-generated model</p>
+</div>
+<div>
+
+![](../figures/fig_yesterday_baseline.png){fig-alt="Actual market and yesterday's closing level"}
+
+<p>Use yesterday's value</p>
+</div>
+:::
+
+::: {.turning-point}
+A convincing-looking prediction is not yet evidence of useful knowledge.
+:::
+
+::: {.notes}
+**讲：** 右边只是把昨天的价格当作今天的预测，也能得到同样漂亮的长期曲线。
+
+**问：** 现在能判断哪个方法真的更有用吗？
+
+**转：** 把尺度拉近，看每天真正发生的变化。
+:::
+
+## A closer look changes the verdict
+
+![](../figures/fig_level_vs_change.png){fig-alt="Twenty-day close-up of daily changes and five-year comparison with an always-up rule" .bridge-chart}
+
+::: {.notes}
+**讲：** 放大后错误变得可见；完整五年里，AI 约为 48/100，永远预测上涨约为 54/100。
+
+**问：** 那条几乎重合的长期曲线究竟证明了什么？
+
+**转：** 区分它实际支持的四种说法。
+:::
+
+## What did the graph establish?
+
+::: {.claim-ladder}
+<div><span>01</span><b>The program runs</b><p>We have evidence that the implementation can execute.</p></div>
+<div><span>02</span><b>The predicted price is close</b><p>We have evidence about the price level.</p></div>
+<div><span>03</span><b>The model anticipates tomorrow</b><p>The previous evidence does not establish this claim.</p></div>
+<div><span>04</span><b>The result supports investment</b><p>This requires a decision, a fair comparison, and stronger evidence.</p></div>
+:::
+
+::: {.notes}
+**讲：** 程序能运行、价格接近、预见明天、支持投资，是四个不同层级的结论。
+
+**问：** 从第二层到第三层、再到第四层，分别缺少什么证据？
+
+**转：** 问题可能在选择模型之前就已经出现。
+:::
+
+## Machine learning begins before the model {.framework-slide}
+
+![](../figures/fig_modelling_path.png){fig-alt="Six connected questions from a real problem to a justified conclusion" .framework-chart}
+
+::: {.framework-caption}
+The same questions return whenever the problem, data, or model changes.
+:::
+
+::: {.notes}
+**讲：** 依次解释现实问题、数据表示、好答案、寻找答案、证据和局限；证据不足时要返回前面重新检查。
+
+**问：** 股票方案最早在哪一步就可能出问题？
+
+**转：** 用六问完整重审一次。
+:::
+
+## The six-question audit
+
+::: {.audit-grid}
+<div><span>01</span><b>Real problem</b><p>Support an investment decision, not merely reproduce the price level.</p></div>
+<div><span>04</span><b>Find an answer</b><p>Use earlier prices to build a rule for the next prediction.</p></div>
+<div><span>02</span><b>Data representation</b><p>Use only information available before each prediction.</p></div>
+<div><span>05</span><b>Evidence</b><p>Compare unseen days with yesterday and an always-up rule.</p></div>
+<div><span>03</span><b>What counts as good</b><p>Add information about the change that matters for the decision.</p></div>
+<div><span>06</span><b>Limits</b><p>The graph does not show foresight or profitable investment.</p></div>
+:::
+
+::: {.audit-conclusion}
+The model produced a close line. The evidence did not support the original claim.
+:::
+
+::: {.notes}
+**讲：** 目标是支持投资，不是复现价格；信息、标准和比较都必须匹配这个目标。
+
+**必须落点：** 模型和图没有变，改变的是解释——现有证据不足以支持原结论。
+
+**转：** 六问将成为整门课的共同方法。
+:::
+
+## The problems become harder and more realistic
+
+![](../figures/fig_course_progression.png){fig-alt="Four cumulative stages of modelling capability" .progression-chart}
+
+::: {.progression-note}
+Each stage keeps the earlier skills and expands the problems you can handle.
+:::
+
+::: {.notes}
+**讲：** 四阶段不是算法目录，而是能处理的问题逐渐变难；每一阶段保留前面的能力。
+
+**转：** 每一周也会重复同一种学习节奏。
+:::
+
+## The same reasoning returns every week
+
+::: {.weekly-loop}
+<div><span>01</span><b>A problem or failure</b></div>
+<div><span>02</span><b>A clear task and standard</b></div>
+<div><span>03</span><b>A way to find an answer</b></div>
+<div><span>04</span><b>Evidence on new cases</b></div>
+<div><span>05</span><b>A limitation that motivates the next step</b></div>
+:::
+
+::: {.material-line}
+<b>Lecture</b> builds the reasoning. <b>Note</b> provides the complete explanation. <b>Demo</b> makes a mechanism visible. <b>Lab</b> asks you to reconstruct it.
+:::
+
+::: {.notes}
+**讲：** 从问题或失败开始，定义任务和标准，寻找答案，检查证据，再由局限推动下一步。
+
+**补充：** Lecture、Note、Demo、Lab 都在训练同一种能力。
+
+**转：** 这也解释了 AI 时代为什么仍需要学习这套过程。
+:::
+
+## Learning with AI
+
+::: {.responsibility-columns}
+<div class="ai-side">
+<h3>AI can accelerate</h3>
+<ul>
+<li>writing and debugging code</li>
+<li>trying an implementation</li>
+<li>producing a first graph</li>
+<li>explaining unfamiliar syntax</li>
+</ul>
+</div>
+<div class="student-side">
+<h3>You remain responsible</h3>
+<ul>
+<li>the question worth answering</li>
+<li>the information that may be used</li>
+<li>the comparison and evidence</li>
+<li>the conclusion you communicate</li>
+</ul>
+</div>
+:::
+
+::: {.ai-habit}
+Use it. Test it. Check the evidence. Explain the result.
+:::
+
+::: {.notes}
+**讲：** AI 加速实现，但不能替你决定问题、信息边界、比较、证据和结论。
+
+**问：** 股票案例里 AI 完成了什么，哪些关键判断仍由人负责？
+
+**转：** 用新的判断方式回到最初那张图。
+:::
+
+## Before you trust the result {.final-slide}
+
+::: {.exit-question}
+The prediction line almost perfectly matches the real market.
+
+**What would you ask first now?**
+:::
+
+::: {.closing-thought}
+Machine learning gives us a way to move from a real problem to a conclusion the evidence can support.
+:::
+
+::: {.notes}
+**问：** 这一次，在相信结果以前，你首先会问什么？
+
+**收束：** 能提出关于问题、信息、标准、比较、证据和局限的问题，就已经开始使用这门课的建模思维。
+:::
+
+## 30-second feedback {.feedback-slide}
+
+Scan this code to share anonymous feedback or post a question for this lecture.
+
+![](../feedback-qr.svg){fig-alt="Feedback QR code for Lesson 1 lecture" width="360"}
+
+<p class="feedback-meta">MPS311/439 · 2026–27 · Lesson 01 lecture</p>
+
+::: {.notes}
+留出时间，让学生当场提交反馈或问题。
+:::

@@ -1,0 +1,21 @@
+/*-- scss:defaults --*/
+$font-family-sans-serif: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+$headings-font-family: "Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;
+$body-bg: #f4f1e9;
+$body-color: #171713;
+$link-color: #c65f3d;
+$headings-color: #171713;
+$font-size-root: 16.5px;
+$line-height-base: 1.62;
+$border-radius: .4rem;
+
+/*-- scss:rules --*/
+:root {
+  --note-bg: #f4f1e9; --note-paper: #fffefa; --note-text: #171713; --note-muted: #55554d;
+  --note-primary: #c65f3d; --note-primary-soft: #f7e4dc;
+  --note-accent: #cc513f; --note-accent-soft: #f7dfd9;
+  --note-success: #507e61; --note-success-soft: #dfece2;
+  --note-purple: #8052a6; --note-purple-soft: #eee4f4;
+  --note-yellow: #a96c00; --note-yellow-soft: #f7e8c5;
+  --note-line: rgba(23, 23, 19, .12); --note-max: 920px; --note-wide: 920px;
+}

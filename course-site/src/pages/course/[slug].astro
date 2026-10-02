@@ -30,12 +30,14 @@ const primaryResource = visibleResources.find((resource) => resource.kind === 's
 const colabRepository = course.colab?.repository;
 const colabBranch = course.colab?.branch;
 const colabNotebookRoot = course.colab?.notebookRoot;
+const opensInColab = (kind: string) => kind === 'notebook' || kind === 'workbook';
 
 const resourceLabels: Record<string, string> = {
   slides: 'Interactive',
   pdf: 'PDF',
   notes: 'Notes',
   notebook: 'Google Colab demo',
+  workbook: 'Lab workbook',
   worksheet: 'Worksheet',
   solution: 'Worked solution',
   guide: 'Guide',
@@ -91,23 +93,23 @@ const resourceLabels: Record<string, string> = {
             <div class={`resource-card resource-${resource.kind}`}>
               <a
                 class="resource-card-main"
-                href={resource.kind === 'notebook' && colabRepository
+                href={opensInColab(resource.kind) && colabRepository
                   ? colabUrl(colabRepository, resource.source, colabBranch, colabNotebookRoot)
                   : withBase(resource.href)}
-                target={resource.kind === 'notebook' && colabRepository ? '_blank' : undefined}
-                rel={resource.kind === 'notebook' && colabRepository ? 'noopener' : undefined}
+                target={opensInColab(resource.kind) && colabRepository ? '_blank' : undefined}
+                rel={opensInColab(resource.kind) && colabRepository ? 'noopener' : undefined}
               >
                 <span class={`resource-icon resource-${resource.kind}`}><ResourceIcon kind={resource.kind} size={17} /></span>
                 <span class="resource-card-copy">
                   <span class="resource-kind">{resourceLabels[resource.kind]}</span>
                   <strong>{resource.label}</strong>
-                  <small>{resource.kind === 'notebook' && colabRepository ? 'Run and adapt the examples in Google Colab.' : resource.description}</small>
+                  <small>{resource.description}</small>
                 </span>
                 <span class="resource-arrow" aria-hidden="true">↗</span>
               </a>
-              {(resource.downloadHref || (resource.kind === 'notebook' && colabRepository)) && (
+              {(resource.downloadHref || (opensInColab(resource.kind) && colabRepository)) && (
                 <div class="resource-actions">
-                  {resource.kind === 'notebook' && colabRepository && (
+                  {opensInColab(resource.kind) && colabRepository && (
                     <a class="resource-read" href={withBase(resource.href)}>
                       <ResourceIcon kind="notes" size={13} />
                       Read online

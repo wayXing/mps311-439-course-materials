@@ -9,36 +9,40 @@ const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
 const academicYearsUrl = `${projectUrl}/rest/v1/course_academic_years?select=year_key,label&order=year_key.desc`;
 const questionBoardsUrl = `${projectUrl}/rest/v1/course_question_boards`;
 const academicYearKey = course.academicYear.replace(/[^0-9]+/g, '-').replace(/^-|-$/g, '');
-const teachingLessons = course.lessons.filter((lesson) => lesson.type === 'teaching');
-const sessionTemplates = teachingLessons.flatMap((lesson) => [
-  { suffix: `${lesson.slug}-lecture`, label: `${lesson.label} · Lecture — ${lesson.shortTitle}` },
-  { suffix: `${lesson.slug}-lab`, label: `${lesson.label} · Lab — ${lesson.shortTitle}` },
-]);
 ---
 
-<SiteLayout title={`Question board · ${course.code}`} description={`Live and archived class questions for ${course.code}.`}>
+<SiteLayout title={`Classroom board · ${course.code}`} description={`A shared classroom board for ${course.code}.`}>
   <section class="feedback-page question-board-page shell">
     <header class="feedback-heading">
       <div>
-        <span class="eyebrow">Class question board</span>
-        <h1>Ask when it matters.</h1>
-        <p>Use this board during class to ask a question or vote for a question you want answered. Each completed class stays here as a read-only archive.</p>
+        <span class="eyebrow">Classroom board</span>
+        <h1>Ask, share, discuss.</h1>
+        <p>Post a question or observation, support a post with a vote, or add a reply. We can discuss it together in class.</p>
       </div>
       <aside class="privacy-note">
         <strong>One shared board</strong>
-        You can use any display name or stay anonymous. Questions are public to the class; feedback is collected separately.
+        You can use any display name or stay anonymous. Posts and replies are public to the class; private feedback is collected separately.
       </aside>
     </header>
 
-    <div class="session-bar feedback-panel">
+    <div class="session-bar feedback-panel classroom-toolbar">
       <div class="field academic-year-field">
         <label for="board-year">Academic year</label>
         <select id="board-year" required></select>
-        <span class="field-help">Choose an earlier session to open its archive.</span>
       </div>
-      <div class="field session-field">
-        <label for="board-session">Question board</label>
-        <select id="board-session" required></select>
+      <div class="field">
+        <label for="board-window">Show</label>
+        <select id="board-window">
+          <option value="recent">Last 3 days</option>
+          <option value="all">All posts</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="board-sort">Sort by</label>
+        <select id="board-sort">
+          <option value="recent">Latest activity</option>
+          <option value="top">Most votes</option>
+        </select>
       </div>
     </div>
 
@@ -46,41 +50,42 @@ const sessionTemplates = teachingLessons.flatMap((lesson) => [
       <header class="panel-heading compact-heading">
         <div>
           <span class="channel-label public-channel">Public · shown to the class</span>
-          <h2 id="question-heading">Questions for this class</h2>
-          <p>Questions are ranked by votes. The instructor decides what to answer and can mark questions as answered.</p>
+          <h2 id="question-heading">Classroom conversation</h2>
+          <p>Older posts stay available under “All posts”. The instructor may respond here or discuss a post in class.</p>
         </div>
       </header>
-      <p class="question-board-status" id="question-board-status" aria-live="polite">Finding the current board…</p>
+      <p class="question-board-status" id="question-board-status" aria-live="polite">Loading classroom board…</p>
 
       <form class="question-form" id="course-question-form">
         <div class="field compact-field name-field">
           <label for="question-name">Display name <span aria-hidden="true">(optional)</span></label>
-          <input id="question-name" name="displayName" maxlength="40" autocomplete="nickname" placeholder="Any name" />
+          <input id="question-name" name="displayName" maxlength="40" autocomplete="nickname" placeholder="Anonymous" />
         </div>
         <div class="field compact-field question-field">
-          <label for="question-text">Your question</label>
-          <textarea id="question-text" name="question" maxlength="1000" required placeholder="What would you like me to explain in class?"></textarea>
+          <label for="question-text">Question or observation</label>
+          <textarea id="question-text" name="question" maxlength="1000" required placeholder="What would you like the class to think about or explain?"></textarea>
         </div>
         <div class="honeypot-field" aria-hidden="true"><label for="question-website">Website</label><input id="question-website" name="website" tabindex="-1" autocomplete="off" /></div>
-        <div class="question-actions"><button class="feedback-submit" type="submit">Post question</button></div>
+        <div class="question-actions"><button class="feedback-submit" type="submit">Post to board</button></div>
       </form>
       <p class="form-status question-status" id="question-status" aria-live="polite"></p>
 
       <div class="question-feed" aria-live="polite">
-        <div class="question-feed-heading"><h3>Questions</h3><span id="question-count">—</span></div>
-        <div class="question-state" id="question-state">Loading questions…</div>
+        <div class="question-feed-heading"><h3>Posts</h3><span id="question-count">—</span></div>
+        <div class="question-state" id="question-state">Loading posts…</div>
         <div class="question-list" id="question-list" hidden></div>
       </div>
     </section>
   </section>
 
-  <script is:inline define:vars={{ projectUrl, publishableKey, submissionUrl, academicYearsUrl, questionBoardsUrl, academicYearKey, sessionTemplates }}>
+  <script is:inline define:vars={{ projectUrl, publishableKey, submissionUrl, academicYearsUrl, questionBoardsUrl, academicYearKey }}>
     const yearSelect = document.querySelector('#board-year');
-    const sessionSelect = document.querySelector('#board-session');
+    const windowSelect = document.querySelector('#board-window');
+    const sortSelect = document.querySelector('#board-sort');
     const questionForm = document.querySelector('#course-question-form');
     const questionButton = questionForm.querySelector('button[type="submit"]');
     const questionStatus = document.querySelector('#question-status');
-    const questionBoardStatus = document.querySelector('#question-board-status');
+    const boardStatus = document.querySelector('#question-board-status');
     const questionState = document.querySelector('#question-state');
     const questionList = document.querySelector('#question-list');
     const questionCount = document.querySelector('#question-count');
@@ -88,6 +93,7 @@ const sessionTemplates = teachingLessons.flatMap((lesson) => [
     const voteStorageKey = 'mps-course-question-votes-v1';
     let boardIsLive = false;
     let refreshTimer = null;
+    const boardKey = () => `${yearSelect.value}-classroom`;
 
     const getDeviceId = () => {
       try {
@@ -100,16 +106,14 @@ const sessionTemplates = teachingLessons.flatMap((lesson) => [
     const readError = async (response, fallback) => { try { const body = await response.json(); return typeof body?.error === 'string' ? body.error : fallback; } catch { return fallback; } };
     const requestApi = async (body) => {
       const response = await fetch(submissionUrl, { method: 'POST', headers: { apikey: publishableKey, 'Content-Type': 'application/json' }, body: JSON.stringify({ ...body, device_id: deviceId }) });
-      if (!response.ok) throw new Error(await readError(response, 'Could not save this submission.'));
+      if (!response.ok) throw new Error(await readError(response, 'Could not save this post.'));
       return response.json();
     };
     const votedIds = () => { try { const ids = JSON.parse(localStorage.getItem(voteStorageKey) || '[]'); return new Set(Array.isArray(ids) ? ids.filter((id) => Number.isSafeInteger(id)) : []); } catch { return new Set(); } };
     const saveVotedIds = (ids) => { try { localStorage.setItem(voteStorageKey, JSON.stringify([...ids])); } catch {} };
-
-    const populateSessions = (yearKey, requested = null) => {
-      sessionSelect.replaceChildren();
-      sessionTemplates.forEach((session) => sessionSelect.append(new Option(session.label, `${yearKey}-${session.suffix}`)));
-      if (requested && [...sessionSelect.options].some((option) => option.value === requested)) sessionSelect.value = requested;
+    const formatTime = (value) => {
+      const date = new Date(value);
+      return Number.isNaN(date.getTime()) ? '' : date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
     };
     const loadYears = async () => {
       try {
@@ -119,19 +123,31 @@ const sessionTemplates = teachingLessons.flatMap((lesson) => [
         return Array.isArray(rows) && rows.length ? rows.map((row) => ({ key: row.year_key, label: row.label })) : [{ key: academicYearKey, label: academicYearKey.replace('-', '/') }];
       } catch { return [{ key: academicYearKey, label: academicYearKey.replace('-', '/') }]; }
     };
-    const formatTime = (value) => { const date = new Date(value); return Number.isNaN(date.getTime()) ? '' : date.toLocaleString([], { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' }); };
 
-    const renderQuestions = (questions) => {
-      questionList.replaceChildren(); questionCount.textContent = `${questions.length} shown`;
+    const renderQuestions = (questions, replies) => {
+      questionList.replaceChildren();
+      questionCount.textContent = `${questions.length} shown`;
       const voted = votedIds();
+      const groupedReplies = new Map();
+      replies.forEach((reply) => {
+        if (!groupedReplies.has(reply.question_id)) groupedReplies.set(reply.question_id, []);
+        groupedReplies.get(reply.question_id).push(reply);
+      });
       questions.forEach((entry) => {
-        const article = document.createElement('article'); article.className = `question-item${entry.is_answered ? ' is-answered' : ''}`;
-        const vote = document.createElement('button'); vote.type = 'button'; vote.className = 'question-vote';
-        const hasVoted = voted.has(entry.id); vote.classList.toggle('is-voted', hasVoted); vote.setAttribute('aria-pressed', String(hasVoted)); vote.setAttribute('aria-label', `${hasVoted ? 'Remove' : 'Add'} vote for this question`); vote.textContent = `↑ ${Number(entry.vote_count || 0)}`; vote.disabled = !boardIsLive;
+        const article = document.createElement('article');
+        article.className = `question-item classroom-post${entry.is_answered ? ' is-answered' : ''}`;
+        const vote = document.createElement('button');
+        vote.type = 'button'; vote.className = 'question-vote';
+        const hasVoted = voted.has(entry.id);
+        vote.classList.toggle('is-voted', hasVoted);
+        vote.setAttribute('aria-pressed', String(hasVoted));
+        vote.setAttribute('aria-label', `${hasVoted ? 'Remove' : 'Add'} vote for this post`);
+        vote.textContent = `↑ ${Number(entry.vote_count || 0)}`;
+        vote.disabled = !boardIsLive;
         vote.addEventListener('click', async () => {
           vote.disabled = true;
           try {
-            const result = await requestApi({ action: 'vote', context_key: sessionSelect.value, question_id: entry.id });
+            const result = await requestApi({ action: 'vote', context_key: boardKey(), question_id: entry.id });
             const outcome = Array.isArray(result?.vote) ? result.vote[0] : result?.vote;
             if (typeof outcome?.voted !== 'boolean') throw new Error('Could not update this vote.');
             const ids = votedIds(); if (outcome.voted) ids.add(entry.id); else ids.delete(entry.id); saveVotedIds(ids);
@@ -142,50 +158,103 @@ const sessionTemplates = teachingLessons.flatMap((lesson) => [
         const content = document.createElement('div'); content.className = 'question-content';
         const meta = document.createElement('div'); meta.className = 'question-meta';
         const name = document.createElement('strong'); name.textContent = entry.display_name || 'Anonymous';
-        const time = document.createElement('time'); time.dateTime = entry.created_at; time.textContent = formatTime(entry.created_at); meta.append(name, time);
-        if (entry.is_answered) { const answered = document.createElement('span'); answered.className = 'question-answered'; answered.textContent = 'Answered'; meta.append(answered); }
-        const text = document.createElement('p'); text.textContent = entry.question; content.append(meta, text); article.append(vote, content); questionList.append(article);
+        const time = document.createElement('time'); time.dateTime = entry.created_at; time.textContent = formatTime(entry.created_at);
+        meta.append(name, time);
+        if (entry.is_answered) { const discussed = document.createElement('span'); discussed.className = 'question-answered'; discussed.textContent = 'Discussed'; meta.append(discussed); }
+        const body = document.createElement('p'); body.textContent = entry.question;
+        content.append(meta, body);
+
+        const thread = document.createElement('div'); thread.className = 'classroom-replies';
+        const threadHeading = document.createElement('h4');
+        const threadItems = groupedReplies.get(entry.id) || [];
+        threadHeading.textContent = `Replies (${threadItems.length})`;
+        thread.append(threadHeading);
+        threadItems.forEach((reply) => {
+          const item = document.createElement('div'); item.className = 'classroom-reply';
+          const replyMeta = document.createElement('div'); replyMeta.className = 'question-meta';
+          const replyName = document.createElement('strong'); replyName.textContent = reply.display_name || 'Anonymous';
+          const replyTime = document.createElement('time'); replyTime.dateTime = reply.created_at; replyTime.textContent = formatTime(reply.created_at);
+          const replyBody = document.createElement('p'); replyBody.textContent = reply.reply;
+          replyMeta.append(replyName, replyTime); item.append(replyMeta, replyBody); thread.append(item);
+        });
+        if (boardIsLive) {
+          const form = document.createElement('form'); form.className = 'classroom-reply-form';
+          const replyName = document.createElement('input'); replyName.name = 'displayName'; replyName.maxLength = 40; replyName.placeholder = 'Your name (optional)'; replyName.setAttribute('aria-label', 'Display name for reply');
+          const replyText = document.createElement('textarea'); replyText.name = 'reply'; replyText.maxLength = 1000; replyText.required = true; replyText.rows = 2; replyText.placeholder = 'Add a reply…'; replyText.setAttribute('aria-label', 'Reply to this post');
+          const replyButton = document.createElement('button'); replyButton.type = 'submit'; replyButton.textContent = 'Reply';
+          const replyStatus = document.createElement('span'); replyStatus.className = 'form-status'; replyStatus.setAttribute('aria-live', 'polite');
+          form.append(replyName, replyText, replyButton, replyStatus);
+          form.addEventListener('submit', async (event) => {
+            event.preventDefault(); replyButton.disabled = true; replyStatus.textContent = '';
+            try {
+              await requestApi({ action: 'reply', context_key: boardKey(), question_id: entry.id, display_name: replyName.value, reply: replyText.value });
+              await loadBoard(true);
+            } catch (error) { replyStatus.textContent = error instanceof Error ? error.message : 'Could not post reply.'; replyButton.disabled = false; }
+          });
+          thread.append(form);
+        }
+        content.append(thread); article.append(vote, content); questionList.append(article);
       });
     };
 
     const loadBoard = async (quiet = false) => {
-      if (!quiet) { questionState.hidden = false; questionState.textContent = 'Loading questions…'; questionList.hidden = true; questionCount.textContent = '—'; }
+      if (!quiet) { questionState.hidden = false; questionState.textContent = 'Loading posts…'; questionList.hidden = true; questionCount.textContent = '—'; }
       clearInterval(refreshTimer);
       try {
-        const boardQuery = new URLSearchParams({ select: 'status', context_key: `eq.${sessionSelect.value}`, limit: '1' });
+        const key = boardKey();
+        const boardQuery = new URLSearchParams({ select: 'status', context_key: `eq.${key}`, limit: '1' });
         const boardResponse = await fetch(`${questionBoardsUrl}?${boardQuery}`, { headers: { apikey: publishableKey } });
-        if (!boardResponse.ok) throw new Error(await readError(boardResponse, 'Could not load this question board.'));
-        const boards = await boardResponse.json(); const board = Array.isArray(boards) ? boards[0] : null; boardIsLive = board?.status === 'live';
+        if (!boardResponse.ok) throw new Error(await readError(boardResponse, 'Could not load this board.'));
+        const boards = await boardResponse.json();
+        const board = Array.isArray(boards) ? boards[0] : null;
+        boardIsLive = board?.status === 'live';
         questionForm.querySelectorAll('input, textarea, button').forEach((control) => { control.disabled = !boardIsLive; });
-        questionBoardStatus.textContent = boardIsLive ? 'Live now · ask a question or vote for the ones you want answered.' : board ? 'Archived · questions and votes are now read-only.' : 'This question board has not been opened yet.';
-        questionBoardStatus.dataset.state = boardIsLive ? 'live' : 'archived';
-        const questionQuery = new URLSearchParams({ select: 'id,display_name,question,created_at,vote_count,is_answered', context_key: `eq.${sessionSelect.value}`, is_visible: 'eq.true', order: 'is_answered.asc,vote_count.desc,created_at.asc', limit: '50' });
+        boardStatus.textContent = boardIsLive ? 'Open now · post, vote, or reply at any time.' : board ? 'Archived · this board is read-only.' : 'This academic-year board is not available yet.';
+        boardStatus.dataset.state = boardIsLive ? 'live' : 'archived';
+        const questionQuery = new URLSearchParams({ select: 'id,display_name,question,created_at,last_activity_at,vote_count,is_answered', context_key: `eq.${key}`, is_visible: 'eq.true', order: 'last_activity_at.desc', limit: '1000' });
+        if (windowSelect.value === 'recent') questionQuery.set('last_activity_at', `gte.${new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString()}`);
         const response = await fetch(`${projectUrl}/rest/v1/course_questions?${questionQuery}`, { headers: { apikey: publishableKey } });
-        if (!response.ok) throw new Error(await readError(response, 'Could not load class questions.'));
+        if (!response.ok) throw new Error(await readError(response, 'Could not load posts.'));
         const questions = await response.json();
-        if (!Array.isArray(questions) || questions.length === 0) { questionState.textContent = 'No questions yet for this session.'; questionCount.textContent = '0 shown'; return; }
-        renderQuestions(questions); questionState.hidden = true; questionList.hidden = false;
-      } catch (error) { questionState.textContent = error instanceof Error ? error.message : 'Could not load class questions.'; }
+        if (!Array.isArray(questions) || questions.length === 0) {
+          questionState.textContent = windowSelect.value === 'recent' ? 'No activity in the last 3 days. Choose “All posts” to see older discussions.' : 'No posts yet for this board.';
+          questionCount.textContent = '0 shown'; return;
+        }
+        if (sortSelect.value === 'top') questions.sort((a, b) => Number(b.vote_count || 0) - Number(a.vote_count || 0) || new Date(b.last_activity_at) - new Date(a.last_activity_at));
+        const ids = questions.map((question) => question.id).join(',');
+        const replyQuery = new URLSearchParams({ select: 'id,question_id,display_name,reply,created_at', question_id: `in.(${ids})`, context_key: `eq.${key}`, is_visible: 'eq.true', order: 'created_at.asc', limit: '1000' });
+        const replyResponse = await fetch(`${projectUrl}/rest/v1/course_question_replies?${replyQuery}`, { headers: { apikey: publishableKey } });
+        if (!replyResponse.ok) throw new Error(await readError(replyResponse, 'Could not load replies.'));
+        const replies = await replyResponse.json();
+        renderQuestions(questions, Array.isArray(replies) ? replies : []);
+        questionState.hidden = true; questionList.hidden = false;
+      } catch (error) { questionState.hidden = false; questionState.textContent = error instanceof Error ? error.message : 'Could not load posts.'; }
       finally { if (boardIsLive) refreshTimer = setInterval(() => loadBoard(true), 10_000); }
     };
-    const updateSelection = () => { const url = new URL(location.href); url.searchParams.set('year', yearSelect.value); url.searchParams.set('session', sessionSelect.value); history.replaceState({}, '', url); questionStatus.textContent = ''; questionStatus.removeAttribute('data-state'); loadBoard(); };
-    yearSelect.addEventListener('change', () => { populateSessions(yearSelect.value); updateSelection(); });
-    sessionSelect.addEventListener('change', updateSelection);
+    const updateSelection = () => {
+      const url = new URL(location.href); url.searchParams.set('year', yearSelect.value); url.searchParams.delete('session');
+      history.replaceState({}, '', url); questionStatus.textContent = ''; questionStatus.removeAttribute('data-state'); loadBoard();
+    };
+    yearSelect.addEventListener('change', updateSelection);
+    windowSelect.addEventListener('change', () => loadBoard());
+    sortSelect.addEventListener('change', () => loadBoard());
     questionForm.addEventListener('submit', async (event) => {
       event.preventDefault(); questionButton.disabled = true; questionButton.textContent = 'Posting…'; questionStatus.textContent = '';
       const data = new FormData(questionForm);
-      try { await requestApi({ action: 'question', context_key: sessionSelect.value, display_name: String(data.get('displayName') ?? ''), question: String(data.get('question') ?? ''), website: String(data.get('website') ?? '') }); questionStatus.textContent = 'Your question is now visible to the class.'; questionStatus.dataset.state = 'success'; questionForm.querySelector('#question-text').value = ''; await loadBoard(true); }
-      catch (error) { questionStatus.textContent = error instanceof Error ? error.message : 'Could not post your question.'; questionStatus.dataset.state = 'error'; }
-      finally { questionButton.disabled = !boardIsLive; questionButton.textContent = 'Post question'; }
+      try {
+        await requestApi({ action: 'question', context_key: boardKey(), display_name: String(data.get('displayName') ?? ''), question: String(data.get('question') ?? ''), website: String(data.get('website') ?? '') });
+        questionStatus.textContent = 'Your post is visible to the class.'; questionStatus.dataset.state = 'success';
+        questionForm.querySelector('#question-text').value = ''; await loadBoard(true);
+      } catch (error) { questionStatus.textContent = error instanceof Error ? error.message : 'Could not post.'; questionStatus.dataset.state = 'error'; }
+      finally { questionButton.disabled = !boardIsLive; questionButton.textContent = 'Post to board'; }
     });
     const initialise = async () => {
-      const years = await loadYears(); const params = new URLSearchParams(location.search); const requestedSession = params.get('session'); const requestedYear = params.get('year');
-      const sessionYear = requestedSession?.match(/^(\d{4}-\d{2})-/)?.[1]; const initialYear = years.some((year) => year.key === requestedYear) ? requestedYear : years.some((year) => year.key === sessionYear) ? sessionYear : years[0]?.key || academicYearKey;
-      years.forEach((year) => yearSelect.append(new Option(year.label, year.key))); yearSelect.value = initialYear; populateSessions(initialYear, requestedSession);
-      if (!requestedSession) {
-        try { const response = await fetch(`${questionBoardsUrl}?${new URLSearchParams({ select: 'context_key', status: 'eq.live', order: 'opened_at.desc', limit: '1' })}`, { headers: { apikey: publishableKey } }); const boards = await response.json(); const context = Array.isArray(boards) ? boards[0]?.context_key : null; const match = typeof context === 'string' && context.match(/^(\d{4}-\d{2})-/); if (match && years.some((year) => year.key === match[1])) { yearSelect.value = match[1]; populateSessions(match[1], context); } } catch {}
-      }
-      loadBoard();
+      const years = await loadYears();
+      const params = new URLSearchParams(location.search);
+      const requestedYear = params.get('year');
+      years.forEach((year) => yearSelect.append(new Option(year.label, year.key)));
+      yearSelect.value = years.some((year) => year.key === requestedYear) ? requestedYear : years.some((year) => year.key === academicYearKey) ? academicYearKey : years[0]?.key || academicYearKey;
+      updateSelection();
     };
     initialise();
   </script>

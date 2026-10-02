@@ -228,6 +228,79 @@
   overflow-y: auto;
 }
 
+.classroom-toolbar {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.question-board-page .question-list {
+  max-height: none;
+  overflow: visible;
+}
+
+.classroom-post {
+  padding-block: 21px;
+}
+
+.classroom-post.is-answered {
+  opacity: 1;
+}
+
+.classroom-replies {
+  display: grid;
+  gap: 10px;
+  margin-top: 12px;
+  padding-top: 13px;
+  border-top: 1px solid var(--line);
+}
+
+.classroom-replies h4 {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.classroom-reply {
+  padding: 10px 12px;
+  background: color-mix(in srgb, var(--blue) 4%, var(--surface-solid));
+  border-radius: 10px;
+}
+
+.classroom-reply-form {
+  display: grid;
+  gap: 8px;
+  grid-template-columns: minmax(0, 150px) minmax(0, 1fr) auto;
+  align-items: start;
+}
+
+.classroom-reply-form input,
+.classroom-reply-form textarea {
+  width: 100%;
+  min-height: 38px;
+  padding: 9px 10px;
+  color: var(--ink);
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  font: inherit;
+  font-size: 12px;
+}
+
+.classroom-reply-form textarea { resize: vertical; }
+.classroom-reply-form button {
+  min-height: 38px;
+  padding: 0 13px;
+  color: white;
+  background: var(--ink);
+  border: 0;
+  border-radius: 9px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.classroom-reply-form .form-status { grid-column: 1 / -1; }
+
 .question-item {
   display: grid;
   gap: 12px;
@@ -337,6 +410,13 @@
   padding: 28px;
 }
 
+.rating-intro {
+  margin: 0 0 22px;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
 .field,
 .rating-field {
   margin: 0 0 26px;
@@ -349,7 +429,7 @@
   display: block;
   margin-bottom: 9px;
   color: var(--ink);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 720;
 }
 
@@ -399,13 +479,18 @@
 }
 
 .rating-ends {
-  display: flex;
-  justify-content: space-between;
-  gap: 16px;
-  margin: 6px 55px 0 0;
-  color: var(--ink-faint);
-  font-size: 10px;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  margin: 10px 55px 0 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 650;
+  line-height: 1.35;
 }
+
+.rating-ends span:nth-child(2) { text-align: center; }
+.rating-ends span:last-child { text-align: right; }
 
 .feedback-actions {
   display: flex;
@@ -605,6 +690,10 @@
 }
 
 @media (max-width: 560px) {
+  .classroom-toolbar,
+  .classroom-reply-form {
+    grid-template-columns: 1fr;
+  }
   .feedback-page {
     padding: 42px 0 58px;
   }

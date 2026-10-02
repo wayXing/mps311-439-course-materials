@@ -207,6 +207,10 @@ dd {
   line-height: 1.6;
 }
 
+.journey-heading p + p {
+  margin-top: 10px;
+}
+
 .journey-status {
   display: flex;
   flex-direction: column;
@@ -521,11 +525,9 @@ dd {
 }
 
 .course-row-topic span {
-  overflow: hidden;
   color: var(--ink-faint);
-  font-size: 11px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: 12px;
+  line-height: 1.45;
 }
 
 .course-row-topic a:hover strong {
@@ -567,7 +569,8 @@ dd {
   --resource-soft: var(--resource-notes-soft);
 }
 
-.resource-notebook {
+.resource-notebook,
+.resource-workbook {
   --resource-color: var(--resource-demo);
   --resource-soft: var(--resource-demo-soft);
 }
@@ -1368,6 +1371,10 @@ dd {
 
   .course-row-topic strong {
     font-size: 24px;
+  }
+
+  .course-row-topic span {
+    font-size: 13px;
   }
 
   .column-label {

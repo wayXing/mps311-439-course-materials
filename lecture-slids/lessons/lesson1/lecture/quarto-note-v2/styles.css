@@ -1,0 +1,73 @@
+body { background: var(--note-bg); color: var(--note-text); }
+#quarto-content { max-width: 1280px; margin-inline: auto; }
+main.content { max-width: var(--note-max); }
+#title-block-header { margin-block: 2.4rem 2.8rem; }
+.quarto-title .title { max-width: 24ch; font-size: clamp(2.35rem, 4.5vw, 4rem); line-height: 1.02; letter-spacing: -.035em; }
+.quarto-title .subtitle { margin-top: .9rem; color: var(--note-primary); font-weight: 700; letter-spacing: .035em; font-size: .78rem; }
+.description { color: var(--note-muted); max-width: 64ch; font-size: 1rem; }
+h2 { margin-top: 3.5rem; padding-top: .15rem; font-size: clamp(1.55rem, 2.3vw, 2.05rem); line-height: 1.18; letter-spacing: -.025em; }
+h3 { margin-top: 2rem; color: var(--note-primary); font-size: 1.15rem; letter-spacing: -.01em; }
+p { margin-block: .75rem; }
+strong { color: var(--note-text); }
+.lead-intro { font-size: 1.03rem; line-height: 1.65; color: var(--note-muted); }
+.learning-outcomes { margin: 1.1rem 0 2.4rem; padding: 1rem 1.3rem .85rem; border-block: 1px solid var(--note-line); }
+.learning-outcomes li { margin: .38rem 0; padding-left: .3rem; }
+.learning-outcomes li::marker { color: var(--note-primary); content: "✓  "; font-weight: 800; }
+.note-prompt, .note-question, .key-insight { margin: 1.4rem 0; border: 0; border-left: 3px solid var(--note-primary); padding: .9rem 1.15rem; background: var(--note-primary-soft); }
+.note-prompt::before, .note-question::before, .key-insight::before, .ability-check::before, .extension::before { display: block; margin-bottom: .5rem; font: 650 .76rem/1.2 var(--bs-body-font-family); letter-spacing: .025em; }
+.note-prompt { background: var(--note-purple-soft); border-color: var(--note-purple); font-family: ui-monospace, "SFMono-Regular", Consolas, monospace; font-size: .94rem; }
+.note-prompt::before { content: "Prompt to an AI assistant"; color: var(--note-purple); }
+.note-question { margin-block: 1.7rem; background: transparent; border-color: var(--note-accent); font-size: 1.06rem; font-weight: 650; color: #71372d; }
+.note-question::before { content: "Pause and think"; color: var(--note-accent); }
+.key-insight { background: var(--note-yellow-soft); border-color: var(--note-yellow); font-size: 1.02rem; }
+.key-insight::before { content: "Key insight"; color: var(--note-yellow); }
+.wide-figure { width: min(760px, 100%); margin: 1.5rem auto; }
+.bridge-figure { width: min(820px, 100%); margin: 1.5rem auto; }
+.evidence-pair { width: min(var(--note-wide), 100%); margin: 1.5rem auto; }
+.wide-figure figure, .evidence-pair figure, .bridge-figure figure { margin: 0; }
+.wide-figure img, .evidence-pair img, .bridge-figure img { display: block; width: 100%; max-height: 560px; object-fit: contain; background: var(--note-paper); border-radius: .25rem; }
+.evidence-pair img { max-height: 360px; }
+.figure p:last-child { margin-top: .7rem; color: var(--note-muted); font-size: .84rem; line-height: 1.45; }
+.evidence-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: .8rem; background: var(--note-paper); border: 1px solid var(--note-line); border-radius: .45rem; }
+.evidence-pair > .pair-conclusion { grid-column: 1 / -1; margin: .4rem .35rem 0; padding-left: 1rem; border-left: 3px solid var(--note-accent); color: #71372d; font-weight: 650; }
+.reasoning-question { padding-left: 0; }
+.audit-step { padding-left: 1.2rem; border-left: 2px solid var(--note-line); }
+.capability-list { counter-reset: capability; list-style: none; padding-left: 0; }
+.capability-list li { counter-increment: capability; display: grid; grid-template-columns: 2.2rem 1fr; gap: .6rem; margin: .55rem 0; align-items: baseline; }
+.capability-list li::before { content: counter(capability, decimal-leading-zero); color: var(--note-primary); font: 700 .75rem ui-monospace, monospace; }
+.course-stage { padding-left: 0; }
+.role-map { padding: .25rem 0; border-block: 1px solid var(--note-line); }
+.role-map ul { list-style: none; margin: 0; padding: 0; }
+.role-map li { display: block; padding: .5rem .2rem; border-bottom: 1px solid var(--note-line); }
+.role-map li:last-child { border-bottom: 0; }
+.role-map strong { color: var(--note-primary); }
+.responsibility-grid { display: grid; grid-template-columns: .88fr 1.12fr; gap: .8rem; width: min(920px, 100%); margin: 1.5rem auto; }
+.responsibility-grid > div { padding: 1rem 1.15rem; background: rgba(255, 254, 250, .72); border-radius: .35rem; }
+.responsibility-grid > .you-own { background: var(--note-success-soft); border-left: 4px solid var(--note-success); }
+.responsibility-grid h3 { margin: 0 0 .8rem; font-size: 1rem; }
+.extension { margin: 2.2rem 0; padding: 1.15rem 1.35rem; background: var(--note-purple-soft); border-left: 3px solid var(--note-purple); border-radius: 0 .35rem .35rem 0; }
+.extension::before { content: "MPS439 · Optional extension"; color: var(--note-purple); }
+.extension h2 { margin-top: .2rem; padding-top: 0; font-size: 1.65rem; }
+.takeaways { margin-top: 1.2rem; padding: 1.1rem 1.3rem; background: var(--note-success-soft); border-radius: .35rem; }
+.ability-check { margin: 2.2rem 0; padding: 1.35rem 1.5rem; border-top: 3px solid var(--note-primary); background: var(--note-paper); }
+.ability-check::before { content: "Check your understanding"; color: var(--note-primary); }
+.course-footer { display: flex; justify-content: space-between; gap: 1rem; max-width: var(--note-wide); margin: 4rem auto 2rem; padding-top: 1rem; border-top: 1px solid var(--note-line); color: var(--note-muted); font-size: .78rem; }
+@media (max-width: 900px) {
+  .evidence-pair, .responsibility-grid { grid-template-columns: 1fr; width: calc(100% - 1rem); margin-inline: auto; }
+  .wide-figure, .bridge-figure { width: calc(100% - 1rem); margin-inline: auto; }
+  .course-footer { flex-direction: column; }
+}
+@media (max-width: 640px) {
+  .wide-figure, .bridge-figure, .evidence-pair { width: calc(100% - .75rem); margin-inline: auto; }
+  .evidence-pair img { max-height: 285px; }
+  #title-block-header { margin-block: 1.6rem 2rem; }
+  h2 { margin-top: 2.8rem; }
+}
+@media print {
+  body { background: #fff; color: #111; font-size: 10.5pt; }
+  nav, #quarto-margin-sidebar, .quarto-title-meta { display: none !important; }
+  main.content { max-width: none; }
+  .wide-figure, .evidence-pair, .bridge-figure, .responsibility-grid { width: 100%; margin-inline: 0; transform: none; break-inside: avoid; }
+  .extension, .note-prompt, .note-question, .key-insight, .takeaways, .ability-check { background: #fff !important; break-inside: avoid; }
+  img, figure, h2, h3 { break-inside: avoid; }
+}

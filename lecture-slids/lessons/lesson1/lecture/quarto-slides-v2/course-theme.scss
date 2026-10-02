@@ -1,0 +1,48 @@
+/*-- scss:defaults --*/
+
+$body-bg: #ffffff;
+$body-color: #172033;
+$link-color: #2563eb;
+$selection-bg: #bfdbfe;
+$selection-color: #172033;
+
+$font-family-sans-serif: "Avenir Next", Avenir, "Segoe UI", Arial, sans-serif;
+$font-family-monospace: "SFMono-Regular", Menlo, Consolas, monospace;
+$presentation-heading-font: "Avenir Next", Avenir, "Segoe UI", Arial, sans-serif;
+$presentation-heading-color: #172033;
+$presentation-heading-font-weight: 600;
+$presentation-font-size-root: 32px;
+$presentation-line-height: 1.28;
+
+$code-block-bg: #f8fafc;
+$code-color: #172033;
+$border-radius: 10px;
+
+/*-- scss:rules --*/
+
+.reveal .controls,
+.reveal .slide-menu-button,
+.reveal .playback {
+  display: none !important;
+}
+
+.reveal .progress {
+  background: rgba(148, 163, 184, 0.3);
+  height: 3px;
+}
+
+.reveal .progress span {
+  background: #2563eb;
+}
+
+.reveal .slide-number {
+  bottom: 13px;
+  right: 18px;
+}
+
+.reveal:has(.course-title.present) .progress,
+.reveal:has(.course-title.present) .slide-number,
+.reveal:has(.feedback-slide.present) .progress,
+.reveal:has(.feedback-slide.present) .slide-number {
+  opacity: 0;
+}

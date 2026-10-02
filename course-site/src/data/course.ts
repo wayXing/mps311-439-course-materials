@@ -2,7 +2,7 @@ import courseJson from './course.json';
 
 export type Accent = 'coral' | 'blue' | 'sage' | 'gold' | 'violet';
 export type LessonType = 'preparation' | 'teaching';
-export type ResourceKind = 'slides' | 'pdf' | 'notes' | 'notebook' | 'worksheet' | 'solution' | 'guide' | 'data';
+export type ResourceKind = 'slides' | 'pdf' | 'notes' | 'notebook' | 'workbook' | 'worksheet' | 'solution' | 'guide' | 'data';
 
 export interface CourseResource {
   label: string;

@@ -520,7 +520,9 @@ class: text-center
 
 # 30-second feedback
 
-<p class="text-xl mb-4">Scan this code to share anonymous feedback or post a question for this lecture.</p>
+<p class="text-3xl mb-4">What would help you learn better next time?</p>
+
+<p class="text-2xl mb-4">Scan to share anonymous feedback on today's lecture.</p>
 
 <img src="./feedback-qr.svg" alt="Feedback QR code for Lesson 03 lecture" class="w-44 mx-auto rounded-lg shadow" />
 

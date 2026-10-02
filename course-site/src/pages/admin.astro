@@ -7,12 +7,6 @@ const projectUrl = 'https://whxpzfruhtshrwiksezg.supabase.co';
 const publishableKey = 'sb_publishable_GEKCtohy16BxHMc8_fji6w_TbcrlbPd';
 const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
 const academicYearKey = course.academicYear.replace(/[^0-9]+/g, '-').replace(/^-|-$/g, '');
-const sessionTemplates = course.lessons
-  .filter((lesson) => lesson.type === 'teaching')
-  .flatMap((lesson) => [
-    { suffix: `${lesson.slug}-lecture`, label: `${lesson.label} · Lecture — ${lesson.shortTitle}` },
-    { suffix: `${lesson.slug}-lab`, label: `${lesson.label} · Lab — ${lesson.shortTitle}` },
-  ]);
 ---
 
 <SiteLayout title={`Feedback admin · ${course.code}`} description={`Private feedback administration for ${course.code}.`}>
@@ -41,11 +35,10 @@ const sessionTemplates = course.lessons
             <h2 id="admin-boards-heading">Question board</h2>
           </div>
         </div>
-        <p class="admin-note">Start opens one live board for students. Starting another board archives the current one; archived boards remain read-only.</p>
+        <p class="admin-note">The current academic year's classroom board stays open. You can archive it here when needed; reopening an archived board also archives any other live board.</p>
         <form id="admin-board-form" class="admin-board-form">
           <label><span>Academic year</span><select id="admin-board-year" required></select></label>
-          <label><span>Lecture or lab</span><select id="admin-board-session" required></select></label>
-          <button type="submit">Start board</button>
+          <button type="submit">Reopen board</button>
           <button type="button" class="admin-toggle" id="admin-archive-board">Archive live board</button>
         </form>
         <p class="admin-status" id="admin-board-status" aria-live="polite"></p>
@@ -93,12 +86,22 @@ const sessionTemplates = course.lessons
         </div>
 
         <div class="admin-record-section">
-          <div class="admin-section-label"><h3>Class questions</h3><span id="admin-question-count">—</span></div>
+          <div class="admin-section-label"><h3>Classroom posts</h3><span id="admin-question-count">—</span></div>
           <div class="admin-empty" id="admin-questions-empty">Loading questions…</div>
           <div class="admin-table-wrap" id="admin-questions-wrap" hidden>
             <table>
-              <thead><tr><th>Session</th><th>Name</th><th>Question</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
+              <thead><tr><th>Board</th><th>Name</th><th>Post</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
               <tbody id="admin-questions-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="admin-record-section">
+          <div class="admin-section-label"><h3>Classroom replies</h3><span id="admin-reply-count">—</span></div>
+          <div class="admin-empty" id="admin-replies-empty">Loading replies…</div>
+          <div class="admin-table-wrap" id="admin-replies-wrap" hidden>
+            <table>
+              <thead><tr><th>Board</th><th>Name</th><th>Reply</th><th>Status</th><th>Posted</th><th>Actions</th></tr></thead>
+              <tbody id="admin-replies-body"></tbody>
             </table>
           </div>
         </div>
@@ -106,7 +109,7 @@ const sessionTemplates = course.lessons
     </div>
   </section>
 
-  <script is:inline define:vars={{ submissionUrl, publishableKey, academicYearKey, sessionTemplates }}>
+  <script is:inline define:vars={{ submissionUrl, publishableKey, academicYearKey }}>
     const tokenStorageKey = 'mps-course-feedback-admin-token-v1';
     const loginPanel = document.querySelector('#admin-login');
     const dashboard = document.querySelector('#admin-dashboard');
@@ -125,9 +128,12 @@ const sessionTemplates = course.lessons
     const questionsEmpty = document.querySelector('#admin-questions-empty');
     const questionsWrap = document.querySelector('#admin-questions-wrap');
     const questionsCount = document.querySelector('#admin-question-count');
+    const repliesBody = document.querySelector('#admin-replies-body');
+    const repliesEmpty = document.querySelector('#admin-replies-empty');
+    const repliesWrap = document.querySelector('#admin-replies-wrap');
+    const repliesCount = document.querySelector('#admin-reply-count');
     const boardForm = document.querySelector('#admin-board-form');
     const boardYear = document.querySelector('#admin-board-year');
-    const boardSession = document.querySelector('#admin-board-session');
     const archiveBoard = document.querySelector('#admin-archive-board');
     const boardStatus = document.querySelector('#admin-board-status');
     const boardsList = document.querySelector('#admin-boards-list');
@@ -205,18 +211,18 @@ const sessionTemplates = course.lessons
           createCell(sessionLabel(record.contextKey)),
           createCell(record.displayName || 'Anonymous'),
           createCell(record.question || '—', 'message-cell'),
-          createCell(`${record.isVisible ? 'Visible' : 'Hidden'} · ${record.isAnswered ? 'Answered' : 'Open'} · ↑ ${record.voteCount || 0}`),
+          createCell(`${record.isVisible ? 'Visible' : 'Hidden'} · ${record.isAnswered ? 'Discussed' : 'Open'} · ↑ ${record.voteCount || 0}`),
           createCell(formatDate(record.createdAt)),
         );
         const actions = document.createElement('td');
         const answered = document.createElement('button');
         answered.type = 'button';
         answered.className = 'admin-toggle';
-        answered.textContent = record.isAnswered ? 'Reopen' : 'Answered';
+        answered.textContent = record.isAnswered ? 'Reopen' : 'Discussed';
         answered.addEventListener('click', async () => {
           try {
             await requestAdmin('admin_set_question_answered', { question_id: record.id, is_answered: !record.isAnswered });
-            await loadOverview(record.isAnswered ? 'Question reopened.' : 'Question marked answered.');
+            await loadOverview(record.isAnswered ? 'Post reopened.' : 'Post marked discussed.');
           } catch (error) { dashboardStatus.textContent = error instanceof Error ? error.message : 'Could not update this question.'; }
         });
         const visibility = document.createElement('button');
@@ -233,12 +239,36 @@ const sessionTemplates = course.lessons
         row.append(actions);
         questionsBody.append(row);
       });
-      if (records.length === 0) questionsEmpty.textContent = 'No class questions for this selection.';
+      if (records.length === 0) questionsEmpty.textContent = 'No classroom posts for this selection.';
     };
 
-    const populateBoardSessions = () => {
-      boardSession.replaceChildren();
-      sessionTemplates.forEach((session) => boardSession.append(new Option(session.label, session.suffix)));
+    const renderReplies = (records) => {
+      repliesBody.replaceChildren();
+      repliesCount.textContent = `${records.length} record${records.length === 1 ? '' : 's'}`;
+      repliesEmpty.hidden = records.length > 0;
+      repliesWrap.hidden = records.length === 0;
+      records.forEach((record) => {
+        const row = document.createElement('tr');
+        row.append(
+          createCell(sessionLabel(record.contextKey)),
+          createCell(record.displayName || 'Anonymous'),
+          createCell(record.reply || '—', 'message-cell'),
+          createCell(record.isVisible ? 'Visible' : 'Hidden'),
+          createCell(formatDate(record.createdAt)),
+        );
+        const actions = document.createElement('td');
+        const visibility = document.createElement('button');
+        visibility.type = 'button'; visibility.className = 'admin-toggle';
+        visibility.textContent = record.isVisible ? 'Hide' : 'Show';
+        visibility.addEventListener('click', async () => {
+          try {
+            await requestAdmin('admin_set_reply_visibility', { reply_id: record.id, is_visible: !record.isVisible });
+            await loadOverview(record.isVisible ? 'Reply hidden.' : 'Reply shown.');
+          } catch (error) { dashboardStatus.textContent = error instanceof Error ? error.message : 'Could not update this reply.'; }
+        });
+        actions.append(visibility); row.append(actions); repliesBody.append(row);
+      });
+      if (records.length === 0) repliesEmpty.textContent = 'No classroom replies for this selection.';
     };
 
     const renderBoards = (boards, years) => {
@@ -247,7 +277,6 @@ const sessionTemplates = course.lessons
       years.forEach((year) => boardYear.append(new Option(year.label, year.key)));
       boardYear.value = [...boardYear.options].some((option) => option.value === selectedYear)
         ? selectedYear : years[0]?.key || academicYearKey;
-      populateBoardSessions();
       boardsList.replaceChildren();
       const live = boards.find((board) => board.status === 'live');
       archiveBoard.disabled = !live;
@@ -327,6 +356,7 @@ const sessionTemplates = course.lessons
       renderBoards(Array.isArray(overview?.boards) ? overview.boards : [], years);
       renderFeedback(Array.isArray(overview?.feedback) ? overview.feedback : []);
       renderQuestions(Array.isArray(overview?.questions) ? overview.questions : []);
+      renderReplies(Array.isArray(overview?.replies) ? overview.replies : []);
       dashboardStatus.textContent = message;
     };
 
@@ -378,7 +408,7 @@ const sessionTemplates = course.lessons
 
     boardForm.addEventListener('submit', async (event) => {
       event.preventDefault();
-      const contextKey = `${boardYear.value}-${boardSession.value}`;
+      const contextKey = `${boardYear.value}-classroom`;
       boardStatus.textContent = 'Starting question board…';
       try {
         await requestAdmin('admin_open_question_board', { context_key: contextKey });

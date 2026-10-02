@@ -75,13 +75,14 @@ const sessions = sessionTemplates.map((session) => ({
 
     <div class="feedback-grid">
       <form class="feedback-panel feedback-form-panel" id="course-feedback-form">
+        <p class="rating-intro">For each slider, choose a number from 1 to 10. Scores of 5–6 mean about right.</p>
         <fieldset class="rating-field">
           <legend>Difficulty</legend>
           <div class="rating-control">
             <input id="difficulty" name="difficulty" type="range" min="1" max="10" value="5" required />
             <output for="difficulty" data-output="difficulty">5</output>
           </div>
-          <div class="rating-ends"><span>1 · Too easy</span><span>10 · Too difficult</span></div>
+          <div class="rating-ends"><span>1 · Too easy</span><span>5–6 · About right</span><span>10 · Too difficult</span></div>
         </fieldset>
 
         <fieldset class="rating-field">
@@ -90,7 +91,7 @@ const sessions = sessionTemplates.map((session) => ({
             <input id="pace" name="pace" type="range" min="1" max="10" value="5" required />
             <output for="pace" data-output="pace">5</output>
           </div>
-          <div class="rating-ends"><span>1 · Too slow</span><span>10 · Too fast</span></div>
+          <div class="rating-ends"><span>1 · Too slow</span><span>5–6 · About right</span><span>10 · Too fast</span></div>
         </fieldset>
 
         <fieldset class="rating-field">
@@ -99,16 +100,16 @@ const sessions = sessionTemplates.map((session) => ({
             <input id="content-amount" name="contentAmount" type="range" min="1" max="10" value="5" required />
             <output for="content-amount" data-output="contentAmount">5</output>
           </div>
-          <div class="rating-ends"><span>1 · Too little</span><span>10 · Too much</span></div>
+          <div class="rating-ends"><span>1 · Too little</span><span>5–6 · About right</span><span>10 · Too much</span></div>
         </fieldset>
 
         <div class="field">
-          <label for="comment">How could I improve the class? <span aria-hidden="true">(optional)</span></label>
+          <label for="comment">What would help you learn better next time? <span>(optional)</span></label>
           <textarea
             id="comment"
             name="comment"
             maxlength="2000"
-            placeholder="Something to clarify, change, add, or revisit…"
+            placeholder="More examples, practice, time for questions, or something you’d like me to explain differently?"
           ></textarea>
           <span class="field-help">Private and anonymous. Only the instructor can read this suggestion.</span>
         </div>
