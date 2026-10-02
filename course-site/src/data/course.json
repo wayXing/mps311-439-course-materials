@@ -71,41 +71,51 @@
           "href": "materials/lesson1/slides-2026/index.html"
         },
         {
-          "label": "Original slides (reference)",
-          "description": "Open the earlier Slidev version retained for comparison and reference.",
-          "kind": "slides",
-          "group": "Reference",
-          "source": "lesson1/lecture/dist",
-          "target": "materials/lesson1/slides",
-          "href": "materials/lesson1/slides/index.html",
+          "label": "Lecture notes",
+          "description": "Read the redesigned notes for this lesson.",
+          "kind": "notes",
+          "group": "Lecture",
+          "source": "lesson1/lecture/quarto-note-v2/_site",
+          "target": "materials/lesson1/notes-2026",
+          "href": "materials/lesson1/notes-2026/note.html",
           "directory": true
         },
         {
-          "label": "Slides PDF",
-          "description": "Download or print the lecture slides.",
+          "label": "Slides (UoS 2025)",
+          "description": "Open the earlier Slidev version retained in the course archive.",
+          "kind": "slides",
+          "group": "Archive",
+          "source": "lesson1/lecture/dist",
+          "target": "materials/lesson1/archive/uos-2025/slides",
+          "href": "materials/lesson1/archive/uos-2025/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Slides PDF (UoS 2025)",
+          "description": "Download or print the archived lecture slides.",
           "kind": "pdf",
-          "group": "Lecture",
+          "group": "Archive",
           "source": "lesson1/lecture/slide-export.pdf",
-          "target": "materials/lesson1/slides.pdf",
-          "href": "materials/lesson1/slides.pdf"
+          "target": "materials/lesson1/archive/uos-2025/slides.pdf",
+          "href": "materials/lesson1/archive/uos-2025/slides.pdf"
         },
         {
-          "label": "Original lecture notes (reference)",
-          "description": "Read the notes that accompanied the earlier version of this lecture.",
+          "label": "Lecture notes (UoS 2025)",
+          "description": "Read the notes that accompanied the archived lecture.",
           "kind": "notes",
-          "group": "Reference",
+          "group": "Archive",
           "source": "lesson1/lecture/note.html",
-          "target": "materials/lesson1/notes.html",
-          "href": "materials/lesson1/notes.html"
+          "target": "materials/lesson1/archive/uos-2025/notes.html",
+          "href": "materials/lesson1/archive/uos-2025/notes.html"
         },
         {
-          "label": "Notes PDF",
-          "description": "Download the extended lecture notes.",
+          "label": "Lecture notes PDF (UoS 2025)",
+          "description": "Download the archived lecture notes.",
           "kind": "pdf",
-          "group": "Lecture",
+          "group": "Archive",
           "source": "lesson1/lecture/note.pdf",
-          "target": "materials/lesson1/notes.pdf",
-          "href": "materials/lesson1/notes.pdf"
+          "target": "materials/lesson1/archive/uos-2025/notes.pdf",
+          "href": "materials/lesson1/archive/uos-2025/notes.pdf"
         },
         {
           "label": "Lab workbook",

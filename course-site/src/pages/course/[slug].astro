@@ -24,7 +24,8 @@ interface Props {
 const { lesson, previousLesson, nextLesson } = Astro.props;
 // Keep printable files in the source archive, but do not list them on the website.
 const visibleResources = lesson.resources.filter((resource) => resource.kind !== 'pdf');
-const groups = [...new Set(visibleResources.map((resource) => resource.group))];
+const groups = [...new Set(visibleResources.map((resource) => resource.group))]
+  .sort((left, right) => Number(left === 'Archive') - Number(right === 'Archive'));
 const primaryResource = visibleResources.find((resource) => resource.kind === 'slides')
   ?? visibleResources.find((resource) => resource.kind === 'guide');
 const colabRepository = course.colab?.repository;
