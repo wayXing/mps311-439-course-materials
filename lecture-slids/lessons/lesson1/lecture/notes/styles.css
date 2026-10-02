@@ -30,6 +30,7 @@ strong { color: var(--note-text); }
 .figure p:last-child { margin-top: .7rem; color: var(--note-muted); font-size: .84rem; line-height: 1.45; }
 .evidence-pair { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; padding: .8rem; background: var(--note-paper); border: 1px solid var(--note-line); border-radius: .45rem; }
 .evidence-pair > .pair-conclusion { grid-column: 1 / -1; margin: .4rem .35rem 0; padding-left: 1rem; border-left: 3px solid var(--note-accent); color: #71372d; font-weight: 650; }
+
 .reasoning-question { padding-left: 0; }
 .audit-step { padding-left: 1.2rem; border-left: 2px solid var(--note-line); }
 .capability-list { counter-reset: capability; list-style: none; padding-left: 0; }

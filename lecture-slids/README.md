@@ -4,7 +4,7 @@ This directory is one shared Slidev project. Each teaching lesson has its own
 Slidev entry file at `lessons/lessonN/lecture/slide.md`.
 
 The shared visual language and classroom readability standards are defined in
-[`SLIDE_DESIGN_SYSTEM.md`](./SLIDE_DESIGN_SYSTEM.md). Agent-facing production
+[`SLIDE_DESIGN_SYSTEM.md`](./lessons/shared/design/SLIDE_DESIGN_SYSTEM.md). Agent-facing production
 rules for every lesson live in [`lessons/AGENTS.md`](./lessons/AGENTS.md).
 
 ## Canonical course structure

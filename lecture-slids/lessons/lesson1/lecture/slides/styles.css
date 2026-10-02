@@ -1127,6 +1127,156 @@
   padding: 0.4em 0.7em;
 }
 
+.reveal .audit-story {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0.35rem auto 0;
+  max-width: 1180px;
+}
+
+.reveal .audit-story > div {
+  display: grid;
+  grid-template-columns: 235px 1fr;
+  align-items: center;
+  min-height: 92px;
+  padding: 0.7rem 1.15rem;
+  border-left: 8px solid var(--blue);
+  border-radius: 0 18px 18px 0;
+  background: rgba(255, 255, 255, 0.91);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+}
+
+.reveal .audit-story > div:nth-child(2) { border-color: var(--yellow); }
+.reveal .audit-story > div:nth-child(3) { border-color: var(--green); }
+.reveal .audit-story > div.audit-verdict { border-color: var(--orange); background: #fff6ef; }
+
+.reveal .audit-story span {
+  color: var(--muted);
+  font-size: 0.58em;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.reveal .audit-story b {
+  color: var(--ink);
+  font-size: 0.9em;
+  line-height: 1.18;
+}
+
+.reveal .rare-scenario {
+  max-width: 1120px;
+  margin: 0.45rem auto 0;
+  text-align: center;
+  color: var(--ink);
+  font-size: 0.94em;
+  line-height: 1.35;
+}
+
+.reveal .rare-score {
+  margin: 0.5rem auto 0.25rem;
+  color: var(--orange);
+  font-size: 3.35em;
+  font-weight: 800;
+  line-height: 0.92;
+  text-align: center;
+}
+
+.reveal .rare-score span {
+  display: block;
+  margin-top: 0.2rem;
+  color: var(--muted);
+  font-size: 0.19em;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.reveal .rare-breakdown {
+  display: grid;
+  grid-template-columns: 3fr 1fr;
+  gap: 1rem;
+  margin-top: 0.45rem;
+}
+
+.reveal .rare-breakdown .population {
+  min-height: 170px;
+  padding: 1rem 1.2rem;
+  border-radius: 22px;
+  background: #eef8f4;
+  border: 2px solid #afdccc;
+}
+
+.reveal .rare-breakdown .patients {
+  background: #fff1ea;
+  border-color: #f2ae8e;
+}
+
+.reveal .rare-breakdown span {
+  display: block;
+  color: var(--green);
+  font-size: 2.05em;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.reveal .rare-breakdown .patients span { color: var(--orange); }
+.reveal .rare-breakdown b { display: block; margin-top: 0.3rem; font-size: 0.76em; }
+.reveal .rare-breakdown p { margin: 0.2rem 0 0; color: var(--muted); font-size: 0.56em; }
+
+.reveal .rare-result {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  margin-top: 0.65rem;
+}
+
+.reveal .rare-result > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 0.55rem 1rem;
+  border-radius: 16px;
+  background: #f5f7fa;
+}
+
+.reveal .rare-result .failure { background: #fff1ea; }
+.reveal .rare-result span { color: var(--muted); font-size: 0.58em; font-weight: 750; }
+.reveal .rare-result b { color: var(--ink); font-size: 1.08em; }
+.reveal .rare-result .failure b { color: var(--orange); }
+
+.reveal .transfer-takeaway {
+  margin: 0.65rem auto 0;
+  max-width: 1180px;
+  color: var(--ink);
+  font-size: 0.66em;
+  font-weight: 700;
+  text-align: center;
+}
+
+.reveal .quick-judgements {
+  display: grid;
+  gap: 1rem;
+  margin: 0.55rem auto 0;
+  max-width: 1230px;
+}
+
+.reveal .quick-judgements > div {
+  box-sizing: border-box;
+  min-height: 155px;
+  padding: 1.15rem 1.35rem;
+  border-left: 8px solid var(--purple);
+  border-radius: 0 20px 20px 0;
+  background: rgba(255, 255, 255, 0.93);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.07);
+}
+
+.reveal .quick-judgements > div:nth-child(2) { border-color: var(--green); }
+.reveal .quick-judgements span { display: block; color: var(--purple); font-size: 0.48em; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; }
+.reveal .quick-judgements > div:nth-child(2) span { color: var(--green); }
+.reveal .quick-judgements b { display: block; margin-top: 0.2rem; color: var(--ink); font-size: 0.94em; }
+.reveal .quick-judgements p { margin: 0.28rem 0 0; color: var(--muted); font-size: 0.7em; }
+
 .reveal img.progression-chart {
   display: block;
   margin: 0 auto;

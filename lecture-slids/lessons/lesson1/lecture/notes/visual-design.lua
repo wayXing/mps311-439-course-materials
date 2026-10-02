@@ -45,6 +45,8 @@ function Pandoc(doc)
           fig(figures.."fig_yesterday_baseline.png", "Actual market and yesterday's closing level", "A rule using yesterday's value looks equally persuasive."),
           pandoc.Div({pandoc.Para({pandoc.Strong("A convincing-looking prediction is not yet evidence of useful knowledge.")})}, pandoc.Attr("", {"pair-conclusion"}, {}))
         }, pandoc.Attr("", {"evidence-pair"}, {})); emit(pair)
+      elseif b.text:match("short%-window daily changes") then
+        emit(wide(figures.."fig_level_vs_change.png", "Daily changes and full-period direction comparison", "A close view reveals the errors; the full-period comparison shows that this is not a cherry-picked window."))
       elseif b.text:match("recurring modelling process") then emit(wide(figures.."fig_modelling_path.png", "The six connected modelling questions", "A reusable path from a real question to a conclusion that the evidence can support."))
       elseif b.text:match("four course stages") then emit(wide(figures.."fig_course_progression.png", "Four cumulative stages of modelling capability", "Each stage expands the range of problems that students can handle.")) end
     elseif b.t == "BlockQuote" then
@@ -70,7 +72,7 @@ function Pandoc(doc)
       if t:match("Market levels usually change") then
         emit(b)
       elseif t:match("Look more closely at a short") then
-        emit(b); emit(wide(figures.."fig_level_vs_change.png", "A close-up of daily changes and a full-period baseline comparison", "The last 20 days make individual misses visible; across all unseen days, the model gets about 48 directions right per 100, while an always-up rule gets about 54.", "bridge-figure"))
+        emit(b)
       elseif section == "Applying the six questions to the stock example" and t:match("^What") then emit(pandoc.Div({b}, pandoc.Attr("", {"audit-step"}, {})))
       elseif t:match("This audit used no new algorithm") or t:match("The course therefore does not move") then emit(pandoc.Div({b}, pandoc.Attr("", {"key-insight"}, {})))
       elseif t:match("Before finishing, check whether") then emit(pandoc.Div({b}, pandoc.Attr("", {"ability-check"}, {})))

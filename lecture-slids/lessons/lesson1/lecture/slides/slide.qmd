@@ -93,20 +93,7 @@ Has the model solved the problem?
 
 ## Yesterday looks just as convincing
 
-::: {.evidence-pair-slide}
-<div>
-
-![](../figures/fig_ai_prediction.png){fig-alt="Actual market and AI-generated prediction"}
-
-<p>AI-generated model</p>
-</div>
-<div>
-
-![](../figures/fig_yesterday_baseline.png){fig-alt="Actual market and yesterday's closing level"}
-
-<p>Use yesterday's value</p>
-</div>
-:::
+![](../figures/fig_yesterday_baseline.png){fig-alt="Actual S&P 500 closing level, an AI-generated prediction, and yesterday's price across 2020 to 2024" .hero-chart}
 
 ::: {.turning-point}
 A convincing-looking prediction is not yet evidence of useful knowledge.
@@ -122,7 +109,7 @@ A convincing-looking prediction is not yet evidence of useful knowledge.
 
 ## A closer look changes the verdict
 
-![](../figures/fig_level_vs_change.png){fig-alt="Twenty-day close-up of daily changes and five-year comparison with an always-up rule" .bridge-chart}
+![](../figures/fig_level_vs_change.png){fig-alt="A close comparison of actual and predicted daily changes, alongside five-year direction accuracy" .hero-chart}
 
 ::: {.notes}
 **讲：** 放大后错误变得可见；完整五年里，AI 约为 48/100，永远预测上涨约为 54/100。
@@ -165,15 +152,13 @@ The same questions return whenever the problem, data, or model changes.
 **转：** 用六问完整重审一次。
 :::
 
-## The six-question audit
+## What the audit changed
 
-::: {.audit-grid}
-<div><span>01</span><b>Real problem</b><p>Support an investment decision, not merely reproduce the price level.</p></div>
-<div><span>04</span><b>Find an answer</b><p>Use earlier prices to build a rule for the next prediction.</p></div>
-<div><span>02</span><b>Data representation</b><p>Use only information available before each prediction.</p></div>
-<div><span>05</span><b>Evidence</b><p>Compare unseen days with yesterday and an always-up rule.</p></div>
-<div><span>03</span><b>What counts as good</b><p>Add information about the change that matters for the decision.</p></div>
-<div><span>06</span><b>Limits</b><p>The graph does not show foresight or profitable investment.</p></div>
+::: {.audit-story}
+<div><span>We wanted</span><b>Support an investment decision</b></div>
+<div><span>We measured</span><b>How closely the price level was reproduced</b></div>
+<div><span>We compared</span><b>Yesterday's price and an always-up rule</b></div>
+<div class="audit-verdict"><span>We can conclude</span><b>A close line is not evidence of foresight or profit</b></div>
 :::
 
 ::: {.audit-conclusion}
@@ -185,7 +170,71 @@ The model produced a close line. The evidence did not support the original claim
 
 **必须落点：** 模型和图没有变，改变的是解释——现有证据不足以支持原结论。
 
-**转：** 六问将成为整门课的共同方法。
+**转：** 如果这真是一套通用的判断方法，换一个完全不同的问题，它也应该有用。
+:::
+
+## Is 99.9% a good result? {.rare-question-slide}
+
+::: {.rare-scenario}
+A rare disease affects **10 people in every 10,000**.
+
+A system predicts that everyone is healthy.
+:::
+
+::: {.rare-score}
+99.9%
+<span>accuracy</span>
+:::
+
+::: {.big-question}
+Would you call this an excellent system?
+:::
+
+::: {.notes}
+**讲：** 不解释答案，只说明疾病很少见，系统把所有人都说成健康。
+
+**问：** 99.9% 是不是很好？如果这是医院要使用的系统，你会接受吗？
+
+**转：** 把这个数字拆开。
+:::
+
+## The number is correct. The system still fails.
+
+::: {.rare-breakdown}
+<div class="population healthy"><span>9,990</span><b>healthy people</b><p>predicted healthy</p></div>
+<div class="population patients"><span>10</span><b>people with the disease</b><p>all missed</p></div>
+:::
+
+::: {.rare-result}
+<div><span>Overall accuracy</span><b>99.9%</b></div>
+<div class="failure"><span>Patients found</span><b>0 / 10</b></div>
+:::
+
+::: {.transfer-takeaway}
+A score is useful only when it reflects the purpose and the failure that matters.
+:::
+
+::: {.notes}
+**讲：** 数字完全正确，但系统没有找到任何一位需要帮助的人。评价回答了总体判断正确多少次，却没有回答真正的任务。
+
+**问：** 在这个情境中，哪一种错误最重要？
+
+**转：** 再快速判断两个不同问题。
+:::
+
+## Two quick judgements
+
+::: {.quick-judgements}
+<div><span>Available information</span><b>Predict whether a student will pass <em>before</em> the final exam</b><p>The model uses the final-exam mark as an input. What is wrong?</p></div>
+<div><span>Fair comparison</span><b>Predict tomorrow's demand for shared bikes</b><p>What simple rule should a complicated model beat?</p></div>
+:::
+
+::: {.notes}
+**问：** 第一个方案为什么无法真正使用？第二个复杂模型至少应该超过什么？
+
+**讲：** 期末成绩在预测时还不存在；单车模型应至少与昨天、上周同一天或近期平均值比较。
+
+**转：** 问题不断改变，但定义目的、信息、比较和证据的能力会保留下来。
 :::
 
 ## The problems become harder and more realistic

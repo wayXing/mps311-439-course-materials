@@ -59,6 +59,7 @@
         "Five questions for every data problem",
         "From accurate-looking predictions to trustworthy decisions"
       ],
+      "revisionNote": "What changed after your feedback: the stock-market opening and course journey remain, while repeated explanations have been combined and new examples now let you apply the modelling questions to other situations.",
       "note": "The lab builds on Python Preparation. Complete the preparation guide first if loading data, pandas methods, or error messages are still unfamiliar.",
       "resources": [
         {
@@ -66,7 +67,7 @@
           "description": "Open the redesigned 2026/27 Quarto lecture.",
           "kind": "slides",
           "group": "Lecture",
-          "source": "lesson1/lecture/quarto-slides-v2/slide.html",
+          "source": "lesson1/lecture/slides/slide.html",
           "target": "materials/lesson1/slides-2026/index.html",
           "href": "materials/lesson1/slides-2026/index.html"
         },
@@ -75,17 +76,26 @@
           "description": "Read the redesigned notes for this lesson.",
           "kind": "notes",
           "group": "Lecture",
-          "source": "lesson1/lecture/quarto-note-v2/_site",
+          "source": "lesson1/lecture/notes/_site",
           "target": "materials/lesson1/notes-2026",
           "href": "materials/lesson1/notes-2026/note.html",
           "directory": true
+        },
+        {
+          "label": "Slides (first delivery, UoS 2026)",
+          "description": "Open the version used in the first class, before the feedback-led rhythm revision.",
+          "kind": "slides",
+          "group": "Archive",
+          "source": "lesson1/lecture/archive/uos-2026-first-delivery/slides/slide.html",
+          "target": "materials/lesson1/archive/uos-2026-first-delivery/slides/index.html",
+          "href": "materials/lesson1/archive/uos-2026-first-delivery/slides/index.html"
         },
         {
           "label": "Slides (UoS 2025)",
           "description": "Open the earlier Slidev version retained in the course archive.",
           "kind": "slides",
           "group": "Archive",
-          "source": "lesson1/lecture/dist",
+          "source": "lesson1/lecture/archive/uos-2025/dist",
           "target": "materials/lesson1/archive/uos-2025/slides",
           "href": "materials/lesson1/archive/uos-2025/slides/index.html",
           "directory": true
@@ -95,7 +105,7 @@
           "description": "Download or print the archived lecture slides.",
           "kind": "pdf",
           "group": "Archive",
-          "source": "lesson1/lecture/slide-export.pdf",
+          "source": "lesson1/lecture/archive/uos-2025/slide-export.pdf",
           "target": "materials/lesson1/archive/uos-2025/slides.pdf",
           "href": "materials/lesson1/archive/uos-2025/slides.pdf"
         },
@@ -104,7 +114,7 @@
           "description": "Read the notes that accompanied the archived lecture.",
           "kind": "notes",
           "group": "Archive",
-          "source": "lesson1/lecture/note.html",
+          "source": "lesson1/lecture/archive/uos-2025/note.html",
           "target": "materials/lesson1/archive/uos-2025/notes.html",
           "href": "materials/lesson1/archive/uos-2025/notes.html"
         },
@@ -113,7 +123,7 @@
           "description": "Download the archived lecture notes.",
           "kind": "pdf",
           "group": "Archive",
-          "source": "lesson1/lecture/note.pdf",
+          "source": "lesson1/lecture/archive/uos-2025/note.pdf",
           "target": "materials/lesson1/archive/uos-2025/notes.pdf",
           "href": "materials/lesson1/archive/uos-2025/notes.pdf"
         },

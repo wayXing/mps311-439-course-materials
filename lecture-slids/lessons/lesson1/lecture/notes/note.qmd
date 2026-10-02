@@ -11,4 +11,4 @@ format:
     include-after-body: page-footer.html
 ---
 
-{{< include ../../note_draft.md >}}
+{{< include content.md >}}

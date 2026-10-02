@@ -15,12 +15,12 @@ const courseSiteIgnored = new Set([
   'dist', 'node_modules', 'public/materials', 'supabase',
 ]);
 const lessonIgnoredNames = new Set([
-  '.DS_Store', '.venv', '_site', 'AGENTS.md', 'SLIDE_DESIGN_SYSTEM.md', 'NOTE_VISUAL_SYSTEM.md',
-  'COURSE_MATERIAL_WORKFLOW.md', 'archive', 'dist', 'node_modules',
+  '.DS_Store', '.quarto', '.venv', '_site', 'shared', 'AGENTS.md', 'SLIDE_DESIGN_SYSTEM.md', 'NOTE_VISUAL_SYSTEM.md',
+  'COURSE_MATERIAL_WORKFLOW.md', 'archive', 'planning', 'dist', 'node_modules',
   '01_narrative.md', '02_teaching_script.md', '03_slide_spec.md', 'redesign_storyboard.md',
   'design_goal.md', 'lab_plan.md', 'narrative.md', 'note_plan.md', 'note_draft.md', 'note_draft_zh.md',
   'slide_plan.md', 'figure_spec.md', 'note_visual_plan.md',
-  'lecture_script_zh.md', 'lecture_script_zh_detailed.md', 'lecture_script_zh_rehearsal.md',
+  'teaching_script_zh.md', 'lecture_script_zh.md', 'lecture_script_zh_detailed.md', 'lecture_script_zh_rehearsal.md',
   'note.html', 'note.pdf',
   'note.png', 'note_files', 'slide-export.pdf', 'lab_worksheet.html',
   'lab_worksheet.pdf', 'lab_solution.html', 'slide.html',

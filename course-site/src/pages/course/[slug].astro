@@ -78,6 +78,8 @@ const resourceLabels: Record<string, string> = {
   </section>
 
   <section class="resource-section shell" aria-labelledby="materials-heading">
+    {lesson.revisionNote && <aside class="note-panel"><strong>What changed</strong><p>{lesson.revisionNote}</p></aside>}
+
     <div class="section-heading detail-heading">
       <h2 id="materials-heading">Materials</h2>
       <p>Everything for this lesson, collected in one place.</p>

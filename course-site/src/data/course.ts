@@ -30,6 +30,7 @@ export interface CourseLesson {
   type: LessonType;
   topics: string[];
   note?: string;
+  revisionNote?: string;
   resources: CourseResource[];
 }
 
