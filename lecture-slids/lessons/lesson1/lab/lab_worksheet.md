@@ -95,7 +95,7 @@ df.____()
 
 > **Python reminder:** A method belongs to an object. We call it with a dot and round brackets: `object.method()`.
 
-The dataset records hourly bicycle rentals. The columns are:
+This is a synthetic teaching dataset of hourly bicycle rentals. Its patterns are for practising analysis and are not evidence about a real city. One row represents one hour. The columns are:
 
 - `date`: calendar date;
 - `day`: day of the week;
@@ -158,7 +158,7 @@ Find the minimum, mean, and maximum for `rentals`.
 
 > Minimum: __________  Mean: __________  Maximum: __________
 
-**Question:** Which of these three numbers is largest? Does that make sense?
+**Question:** Would the mean alone describe both quiet and busy hours well? Use the minimum and maximum to explain your answer.
 
 > ______________________________________________________________________
 
@@ -302,95 +302,54 @@ Before finishing, make sure that you can:
 - use an error message to ask AI for focused help;
 - check whether the proposed fix works.
 
-# MPS439 extension — choose at least one option
+# Advanced Study — choose one investigation
 
-MPS439 students should complete at least one option below. MPS311 students may explore any option if they finish early or want an additional challenge. These tasks do not require a machine-learning model.
+MPS311 students are encouraged to explore. MPS439 students should complete at least one investigation below. Allow about 30 minutes for a first investigation; finding and analysing a new dataset may take longer and can be continued after the lab. You may let AI write the code. You are responsible for the question, checks and interpretation. No machine-learning model is required.
 
-## Option A: Does a pattern change between groups?
+## Breadth A: Direct AI to build a richer visual analysis
 
-Compare the hourly rental pattern for weekdays and weekends.
+**Question:** Does the overall hourly rental pattern hide differences between weekdays and weekends?
 
-```python
-hourly_by_group = (
-    df_clean.groupby(["hour", "is_weekend"])["rentals"]
-            .mean()
-            .unstack()
-)
+Ask AI to propose two complementary views: a grouped hourly line plot and a box plot of rentals by weekday/weekend. Give it the actual column names and explain that `is_weekend` is 0 for weekdays and 1 for weekends. Ask it to show the number of observations in each group as well as the plots. Do not accept a plot merely because it looks impressive.
 
-hourly_by_group.plot(marker="o", figsize=(8, 4))
-plt.xlabel("Hour of day")
-plt.ylabel("Average rentals")
-plt.title("Hourly rentals: weekdays and weekends")
-plt.legend(["Weekday", "Weekend"])
-plt.show()
-```
+Start with this prompt, then refine it:
 
-Identify one similarity and one difference between the two lines.
+> I have a synthetic hourly bicycle-rental dataset in `df_clean`. Columns are date, day, hour, temperature_c, humidity_pct, wind_speed_kmh, weather, is_weekend, rentals. Does the overall hourly pattern hide weekday/weekend differences? Suggest two complementary plots and explain what each answers. Generate pandas/matplotlib code for Colab, include group counts, label units, and do not invent results. Use only these columns.
 
-> Similarity: ___________________________________________________________
+Before running the code, check its column names and grouping. After running it, check one plotted value against a printed pandas summary. Then ask AI for one useful revision, such as separate panels or a heatmap of mean rentals by day and hour. Explain whether the revision makes the comparison clearer.
 
-> Difference: ___________________________________________________________
+**Deliver:** two plots, group counts, one numerical check, one revision with its reason, and a conclusion that explains what the overall mean hides. A box plot shows spread; a mean curve does not.
 
-Why might the overall hourly pattern hide this difference?
+## Breadth B: Find data you want to investigate
 
-> ______________________________________________________________________
+Find a small tabular dataset about a topic you care about, such as sport, transport, energy or entertainment. Start at [Kaggle Datasets](https://www.kaggle.com/datasets) or [data.gov.uk](https://www.data.gov.uk/search). Search for your topic plus `CSV`. Read the dataset description and original source before downloading. Choose one CSV with documented columns, a numerical variable and a meaningful grouping or time variable. If finding suitable data takes more than ten minutes, continue with Breadth A and return to this later.
 
-## Option B: Turn a repeated analysis into a function
+Download and unzip the CSV if necessary. In Colab, open **Files → Upload**, upload the CSV, and ask AI to help load it with pandas. Give AI the column names and a few non-sensitive sample rows. Check the row count, types, missing entries and units before analysing it; ask about unfamiliar codes rather than guessing.
 
-Complete the function so that it plots the distribution of any numerical column.
+Write your own question before requesting plots. Ask AI for two different plots that help answer it, then run and inspect the code. Revise at least one suggestion and check one plotted quantity against a numerical summary.
 
-```python
-def plot_distribution(data, column):
-    plt.figure(figsize=(7, 4))
-    plt.hist(data[____], bins=15, edgecolor="white")
-    plt.xlabel(____)
-    plt.ylabel("Number of rows")
-    plt.title(f"Distribution of {____}")
-    plt.show()
+**Deliver:** the dataset page and original source, what one row represents, units for the variables used, your question, two plots, one verified value, and a short conclusion with one limitation. Explain why each plot helps answer your question. Keep the notebook runnable from the uploaded CSV; record its filename. There is no single model answer for this investigation.
 
-plot_distribution(df_clean, "temperature_c")
-```
+## Depth C: Audit a claim and a cleaning decision
 
-Test the same function with `humidity_pct` or `wind_speed_kmh`.
+**Claim to investigate:** “Clear weather causes more bicycle rentals.”
 
-What is the advantage of using a function here?
+Use the course data. First calculate mean rentals and group counts by weather. Then compare weather categories separately within weekdays and weekends. You may ask AI to write the grouped analysis and plot, but check its calculations yourself. Does the grouped view strengthen, qualify or weaken the original description? Explain why neither view establishes causation.
 
-> ______________________________________________________________________
+Now investigate the provided cleaning rule. Compare two versions: (1) remove duplicates and all rows with missing values; (2) remove duplicates and only rows missing the variables needed for the weather/rentals comparison. Print the number of rows retained and weather means for both. Do missing temperature, humidity or wind values prevent this particular calculation? Explain which cleaning rule you would use for this question and why. Do not claim the better rule must apply to every analysis.
 
-## Option C: Ask AI for an analysis, then audit it
+**Deliver:** a table or plot with group counts, the two cleaning comparisons, one checked value, a revised evidence-based claim, and one unresolved limitation. An unchanged conclusion is acceptable if you support it with the comparison.
 
-Give an AI assistant the column names and ask it to propose one simple question and a pandas/matplotlib analysis. Before running the answer, check:
+## Your investigation record
 
-1. Does every column in the code exist?
-2. Does the proposed plot match the question?
-3. Is the code using `df_clean`?
-4. Does the conclusion say more than the graph shows?
+For whichever option you choose, finish with:
 
-Run the checked code. Record at least one change you made to the AI response.
+- **Question and choice:** what did you investigate, and why this data/view?
+- **Evidence:** what do your outputs show?
+- **AI audit:** what did you check or change, and how?
+- **Conclusion and limit:** what can you say, and what remains unsupported?
 
-> I changed _____________________________________________________________
-
-> because ______________________________________________________________
-
-## Option D: Create a mini evidence report
-
-Choose one question about bicycle rentals. Reuse or modify two analyses from this lab, then write:
-
-**Question:**
-
-> ______________________________________________________________________
-
-**Evidence from two outputs:**
-
-> ______________________________________________________________________
-
-**Conclusion:**
-
-> ______________________________________________________________________
-
-**One limitation:**
-
-> ______________________________________________________________________
+Save your code and outputs in your own notebook. The aim is a defensible analysis, not a large number of plots.
 
 ## Appendix: only if the data did not load
 

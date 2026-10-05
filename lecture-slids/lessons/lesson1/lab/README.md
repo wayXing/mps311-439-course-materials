@@ -7,4 +7,4 @@
 - `lab_solution.ipynb`: canonical instructor solution, matching Weeks 2–11.
 - `archive/lab_solution.md`: retained legacy Markdown solution; do not edit or publish it.
 
-The student worksheet is designed for 50 minutes of core work plus a 30-minute MPS439 extension. Students may use the guided workbook or create a blank notebook and type the same tasks themselves. Update `lab_worksheet.md` and keep the workbook task order aligned before rebuilding the rendered worksheet formats; edit the solution directly in `lab_solution.ipynb`.
+The student worksheet is designed for 50 minutes of core work plus an Advanced Study investigation (about 30 minutes initially; new-data exploration may continue afterwards). MPS311 students are encouraged to explore; MPS439 students complete at least one investigation. Students may use the guided workbook or create a blank notebook and type the same tasks themselves. Update `lab_worksheet.md` and keep the workbook task order aligned before rebuilding the rendered worksheet formats; edit the solution directly in `lab_solution.ipynb`.
