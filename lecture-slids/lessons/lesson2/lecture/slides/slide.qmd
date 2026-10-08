@@ -7,7 +7,12 @@ format:
   revealjs:
     theme: [default, course-theme.scss]
     css: styles.css
-    include-after-body: random-cover.html
+    include-after-body:
+      - random-cover.html
+      - text: '<script data-external="1" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>'
+    # 当前 Quarto Reveal 模板仍注册 MathJax 2 插件；直接加载与 Note 相同的 MathJax 3。
+    variables:
+      mathjax: ""
     width: 1600
     height: 900
     margin: 0
