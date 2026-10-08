@@ -115,10 +115,10 @@ const assignmentOutput = join(projectRoot, 'public/assignments/assignment-one');
 await rm(join(projectRoot, 'public/assignments'), { recursive: true, force: true });
 if (await stat(assignmentRoot).then(() => true).catch(() => false)) {
   await mkdir(assignmentOutput, { recursive: true });
-  await cp(join(assignmentRoot, 'assignment_1_california_en_v9.html'), join(assignmentOutput, 'brief.html'));
+  await cp(join(assignmentRoot, 'assignment_1_california_en_v10.html'), join(assignmentOutput, 'brief.html'));
   for (const name of ['train.csv', 'test.csv', 'full.csv']) {
     await cp(join(assignmentRoot, 'data', name), join(assignmentOutput, name));
   }
   await removePublicPdfLinks(assignmentOutput);
-  console.log('Synced Assignment One student brief and datasets.');
+  console.log('Synced Assignment 1 student brief and datasets.');
 }

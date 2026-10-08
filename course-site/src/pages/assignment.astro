@@ -5,92 +5,106 @@ import { assignmentOne } from '../data/assignment';
 import { withBase } from '../lib/urls';
 const resources = withBase('assignments/assignment-one/');
 ---
-
-<SiteLayout title={`Assignment · ${course.code}`} description="Assignment One brief, data and Blackboard submission information.">
-  <section class="assignment-page shell accent-blue">
+<SiteLayout title={`Assignment 1 · ${course.code}`} description="Assignment 1 brief, data, deadline and Blackboard submission information.">
+  <section class="assignment-page shell">
     <header class="assignment-heading">
       <span class="eyebrow">{course.academicYear} · MPS311 / MPS439</span>
-      <h1>Assignment One</h1>
+      <h1>Assignment 1</h1>
       <p>California Housing Prices</p>
     </header>
+    <section class="deadline-banner" aria-labelledby="deadline-heading">
+      <div class="deadline-copy">
+        <h2 id="deadline-heading">Submission deadline</h2>
+        <time datetime={assignmentOne.deadlineAt}>{assignmentOne.deadlineLabel} <strong>14:00</strong></time>
+        <span class="timezone">UK time · GMT</span>
+      </div>
+      <div class="countdown" data-deadline={assignmentOne.deadlineAt} role="timer" aria-label="Time remaining until submission deadline">
+        <div><strong data-unit="days">—</strong><span>Days</span></div>
+        <div><strong data-unit="hours">—</strong><span>Hours</span></div>
+        <div><strong data-unit="minutes">—</strong><span>Minutes</span></div>
+        <div><strong data-unit="seconds">—</strong><span>Seconds</span></div>
+      </div>
+      <p class="deadline-ended" hidden>Deadline has passed</p>
+    </section>
     <div class="assignment-grid">
-      <article class="assignment-materials">
-        <h2>Predict, improve, explain.</h2>
-        <p>Build a baseline on 500 California census blocks, improve your features and models, then evaluate your final model and explain its errors.</p>
-        <a class="button button-primary" href={`${resources}brief.html`}>Read the assignment brief <span aria-hidden="true">↗</span></a>
-        <div class="assignment-data">
-          <h3>Download the data</h3>
-          <p>Use train.csv and test.csv for the main assignment. The MPS439 extension also uses full.csv for options A and B.</p>
-          <div class="data-links">
-            <a href={`${resources}train.csv`} download>train.csv <small>500 blocks</small></a>
-            <a href={`${resources}test.csv`} download>test.csv <small>2,000 blocks</small></a>
-            <a href={`${resources}full.csv`} download>full.csv <small>18,640 blocks · raw data</small></a>
-          </div>
+      <article class="assignment-card brief-card">
+        <span class="step">01 · Start here</span>
+        <h2>Read the brief</h2>
+        <p>Build and improve a model to predict California housing prices. Read the tasks and marking standard before you begin.</p>
+        <a class="button button-primary" href={`${resources}brief.html`}>Open assignment brief <span aria-hidden="true">↗</span></a>
+      </article>
+      <article class="assignment-card data-card">
+        <span class="step">02 · Get the files</span>
+        <h2>Download the data</h2>
+        <div class="data-links">
+          <a href={`${resources}train.csv`} download><span>train.csv <small>500 blocks · training data</small></span><span aria-hidden="true">↓</span></a>
+          <a href={`${resources}test.csv`} download><span>test.csv <small>2,000 blocks · final evaluation</small></span><span aria-hidden="true">↓</span></a>
+          <a href={`${resources}full.csv`} download><span>full.csv <small>18,640 blocks · MPS439 options A / B</small></span><span aria-hidden="true">↓</span></a>
         </div>
       </article>
-      <aside class="assignment-deadline">
-        <span class="eyebrow">Deadline</span>
-        <h2><time datetime={assignmentOne.deadlineAt ?? assignmentOne.deadlineDate}>{assignmentOne.deadlineLabel}</time></h2>
-        <p class="countdown" data-deadline={assignmentOne.deadlineAt ?? undefined} data-deadline-date={assignmentOne.deadlineDate}>Deadline: {assignmentOne.deadlineLabel}</p>
-        <p class="deadline-note">Check the Assignment One submission area in Blackboard for your submission details.</p>
-        <div class="submission-note">
-          <h3>Submit on Blackboard</h3>
-          <p>Upload one PDF report and your notebook (.ipynb or .py) to the Assignment One submission area in Blackboard.</p>
-          <p>This website provides the brief and data. All submissions are made on Blackboard.</p>
-        </div>
-      </aside>
+      <article class="assignment-card submission-card">
+        <span class="step">03 · Hand in</span>
+        <h2>Submit on Blackboard</h2>
+        <p>Upload these two files to the <strong>Assignment 1 submission area</strong> in Blackboard:</p>
+        <ul><li>One PDF report</li><li>One notebook (.ipynb or .py)</li></ul>
+        <div class="filename-note"><strong>Use your registration number only.</strong><p>For example: <code>123456789.pdf</code> and <code>123456789.ipynb</code>. No name, version number or “final”.</p></div>
+        <p class="submission-footer">All submissions are made on Blackboard.</p>
+      </article>
     </div>
   </section>
   <script>
-    const counter = document.querySelector<HTMLElement>('[data-deadline-date]');
-    if (counter) {
-      const deadline = counter.dataset.deadline ? Date.parse(counter.dataset.deadline) : null;
+    const timer = document.querySelector<HTMLElement>('[data-deadline]');
+    if (timer?.dataset.deadline) {
+      const deadline = Date.parse(timer.dataset.deadline);
+      const units = ['days', 'hours', 'minutes', 'seconds'];
+      const fields = units.map((unit) => timer.querySelector<HTMLElement>(`[data-unit="${unit}"]`));
+      let interval: number | undefined;
       const update = () => {
-        if (deadline === null) {
-          const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
-          const part = (name: string) => parts.find((entry) => entry.type === name)?.value;
-          const today = Date.parse(`${part('year')}-${part('month')}-${part('day')}T00:00:00Z`);
-          const days = Math.round((Date.parse(`${counter.dataset.deadlineDate}T00:00:00Z`) - today) / 86400000);
-          counter.textContent = days > 0 ? `${days} ${days === 1 ? 'day' : 'days'} until the deadline date` : days === 0 ? 'Due today · check Blackboard for the time' : 'Deadline date has passed';
-          return;
+        const total = Math.max(0, Math.ceil((deadline - Date.now()) / 1000));
+        const values = [Math.floor(total / 86400), Math.floor(total % 86400 / 3600), Math.floor(total % 3600 / 60), total % 60];
+        fields.forEach((field, index) => { if (field) field.textContent = String(values[index]).padStart(2, '0'); });
+        if (total === 0) {
+          timer.hidden = true;
+          const ended = document.querySelector<HTMLElement>('.deadline-ended');
+          if (ended) ended.hidden = false;
+          window.clearInterval(interval);
+          return false;
         }
-        const remaining = deadline - Date.now();
-        if (remaining <= 0) {
-          counter.textContent = 'Deadline has passed';
-          return;
-        }
-        const minutes = Math.ceil(remaining / 60000);
-        const days = Math.floor(minutes / 1440);
-        const hours = Math.floor(minutes % 1440 / 60);
-        counter.textContent = `${days}d ${hours}h ${minutes % 60}m remaining`;
+        return true;
       };
-      update();
-      window.setInterval(update, 1000);
+      if (update()) interval = window.setInterval(update, 1000);
     }
   </script>
 </SiteLayout>
-
 <style>
-  .assignment-page { padding: 70px 0 110px; }
-  .assignment-heading { padding-bottom: 38px; border-bottom: 1px solid var(--ink); }
-  .assignment-heading h1 { margin: 16px 0; font-family: var(--font-display); font-size: clamp(44px, 7vw, 76px); font-weight: 500; letter-spacing: -0.05em; line-height: 1.05; }
+  .assignment-page { padding: 48px 0 80px; }
+  .assignment-heading { margin-bottom: 28px; }
+  .assignment-heading h1 { margin: 12px 0 8px; font-family: var(--font-display); font-size: clamp(42px, 6vw, 62px); font-weight: 500; letter-spacing: -0.04em; line-height: 1.1; }
   .assignment-heading p { margin: 0; color: var(--ink-soft); font-size: 21px; }
-  .assignment-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 80px; padding-top: 42px; }
-  .assignment-materials h2 { font-family: var(--font-display); font-size: 32px; font-weight: 500; letter-spacing: -0.025em; }
-  .assignment-materials p, .assignment-deadline p { color: var(--ink-soft); font-size: 15px; line-height: 1.65; }
-  .assignment-materials > p { max-width: 620px; margin-bottom: 26px; }
-  .assignment-data { margin-top: 42px; }
-  h3 { font-size: 14px; }
-  .data-links { display: grid; border-top: 1px solid var(--line); }
-  .data-links a { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 16px 0; border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 650; }
-  .data-links a:hover { color: var(--blue); }
-  .data-links small { color: var(--ink-faint); font-size: 12px; font-weight: 400; }
-  .assignment-deadline { padding-top: 20px; border-top: 2px solid var(--blue); }
-  .assignment-deadline h2 { margin: 15px 0; font-family: var(--font-display); font-size: 28px; font-weight: 500; }
-  .assignment-deadline .countdown { margin: 0 0 16px; color: var(--blue); font-size: 23px; font-variant-numeric: tabular-nums; }
-  .assignment-deadline .deadline-note { font-size: 12px; }
-  .submission-note { margin-top: 26px; padding-top: 24px; border-top: 1px solid var(--line); }
-  .submission-note p { font-size: 13px; }
-  @media (max-width: 900px) { .assignment-grid { grid-template-columns: 1fr; gap: 36px; } }
-  @media (max-width: 640px) { .assignment-page { padding: 46px 0 70px; } }
+  .deadline-banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; padding: 24px 28px; margin-bottom: 28px; background: #fff0df; border: 1px solid #e8bd8b; border-left: 5px solid #b94c0b; border-radius: 12px; color: #913a08; }
+  .deadline-copy h2 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
+  .deadline-copy time { display: block; font-size: 21px; font-weight: 650; }
+  .deadline-copy time strong { margin-left: 10px; }
+  .timezone { display: block; margin-top: 7px; font-size: 12px; }
+  .countdown { display: grid; grid-template-columns: repeat(4, minmax(48px,1fr)); gap: 18px; text-align: center; }
+  .countdown[hidden], .deadline-ended[hidden] { display: none; }
+  .countdown strong { display: block; font-size: 36px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+  .countdown span { display: block; margin-top: 5px; font-size: 11px; }
+  .deadline-ended { font-size: 23px; font-weight: 700; }
+  .assignment-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 22px; }
+  .assignment-card { background: var(--surface-solid); border: 1px solid var(--line); border-radius: 12px; padding: 28px; }
+  .step { color: var(--ink-faint); font-size: 11px; text-transform: uppercase; letter-spacing: .08em; font-weight: 700; }
+  .assignment-card h2 { margin: 12px 0 16px; font-size: 23px; letter-spacing: -.02em; }
+  .assignment-card p { color: var(--ink-soft); font-size: 14px; line-height: 1.65; }
+  .brief-card .button { margin-top: 10px; }
+  .data-links a { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 14px; font-weight: 650; }
+  .data-links a:hover { color: var(--resource-data); }
+  .data-links small { display: block; color: var(--ink-faint); font-size: 12px; font-weight: 400; margin-top: 4px; }
+  .submission-card { grid-column: 1 / -1; }
+  .submission-card ul { display: flex; flex-wrap: wrap; gap: 12px 32px; padding-left: 20px; font-size: 14px; }
+  .filename-note { margin-top: 20px; padding: 16px 18px; background: var(--paper); border-radius: 8px; font-size: 14px; }
+  .filename-note p { margin: 6px 0 0; }
+  code { font-size: 12px; overflow-wrap: anywhere; }
+  .submission-card .submission-footer { margin: 16px 0 0; font-size: 12px; }
+  @media (max-width: 640px) { .assignment-page { padding: 32px 0 60px; } .assignment-grid { grid-template-columns: 1fr; gap: 16px; } .assignment-card { padding: 22px; } .deadline-banner { padding: 20px; gap: 20px; } .countdown { width: 100%; gap: 8px; } .countdown strong { font-size: 32px; } .deadline-copy time { font-size: 19px; } }
 </style>
