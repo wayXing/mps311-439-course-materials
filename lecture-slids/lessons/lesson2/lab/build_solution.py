@@ -1,70 +1,97 @@
-"""Validate lab_worksheet.qmd and build lab_solution.ipynb.
-1. Fill the blanks of every Core code block with the answer values below.
-2. Check every Answer code line appears in the filled block.
-3. Execute the filled sequence plus Advanced Study solutions in a fresh kernel.
-Run from this folder: python build_solution.py
-"""
-import re, sys, nbformat
+"""从当前 Worksheet 生成带题号、文字答案和执行输出的 Solution。"""
+from pathlib import Path
+import re
+import sys
+import nbformat
 from nbclient import NotebookClient
+from jupyter_client import KernelManager
 
+ROOT = Path(__file__).resolve().parent
 FILLS = [
- ["198", "4341"], ["horsepower", "mpg"], ["0.2"], ["LinearRegression", "y_train"],
- ["100"], ["grid"], ["2", "y3"], ["mean"], ["y_pred", "0.5", "baseline_mse"],
- ["features"], ["features"], ["corr"], ["car"], ["all_features"], ["residuals"],
+    ["198", "4341"], ["horsepower", "mpg"], ["0.2"], ["LinearRegression", "y_train"],
+    ["100"], ["grid"], ["2", "y3"], ["mean"], ["y_pred", "0.5", "baseline_mse"],
+    ["features"], ["features"], ["corr"], ["car"], ["all_features"], ["residuals"],
 ]
-
-qmd = open("lab_worksheet.qmd").read()
+qmd = (ROOT / "lab_worksheet.qmd").read_text()
 core = qmd.split("# Advanced Study: choose one investigation")[0]
 fence = re.compile(r"```python\n(.*?)```", re.S)
-
-# walk blocks in order; remember the answer block that follows a blank block
-blocks = [(m.start(), m.group(1)) for m in fence.finditer(core)]
-def is_ans(pos):
-    seg = core[:pos]; k = seg.rfind('title="Answer"')
-    return k != -1 and "\n:::" not in seg[k:]
-cells, fi, errors = [], 0, 0
-i = 0
-while i < len(blocks):
-    pos, code = blocks[i]
-    # is this an Answer block? (inside a callout-note collapse) -> skip, handled with its blank block
-    if is_ans(pos):
-        i += 1; continue
-    if "____" in code:
-        filled = code
-        for v in FILLS[fi]:
-            filled = filled.replace("____", v, 1)
-        assert "____" not in filled, f"unfilled blank in block {fi}"
-        # answer block: next block that follows an Answer callout
-        j = i + 1
-        ans = []
-        while j < len(blocks) and is_ans(blocks[j][0]):
-            ans.append(blocks[j][1]); j += 1
-            break
-        for a in ans:
-            for line in a.strip().splitlines():
-                if line.strip() and line.strip() not in filled:
-                    print(f"MISMATCH block {fi}: {line!r}"); errors += 1
-        fi += 1
-        cells.append(filled)
-    else:
-        cells.append(code)
-    i += 1
-assert fi == len(FILLS), (fi, len(FILLS))
-print("blank blocks:", fi, "mismatches:", errors)
-
-AS = open("as_solutions.py").read().split("#%%")
-cells_all = cells + [c.strip("\n") + "\n" for c in AS if c.strip()]
-
 nb = nbformat.v4.new_notebook()
+nb.metadata["kernelspec"] = {"display_name": "Python 3", "language": "python", "name": "python3"}
 nb.cells.append(nbformat.v4.new_markdown_cell(
- "# Lab 2 Solution: Linear Regression\n\nFull code for every task, executed top to bottom. Open it only after you have tried the worksheet. "
- "In the worksheet, `DATA_URL` points to the course repository; here the same file is read from the local copy."))
-for c in cells_all:
-    c = c.replace('DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/lesson2/lab/auto_mpg.csv"',
-                  'DATA_URL = "auto_mpg.csv"')
-    # skip appendix cells
-    if "BACKUP_URL" in c or 'read_csv("auto_mpg.csv")' in c: continue
-    nb.cells.append(nbformat.v4.new_code_cell(c))
-NotebookClient(nb, timeout=300, kernel_name="python3", resources={"metadata": {"path": "."}}).execute()
-nbformat.write(nb, "lab_solution.ipynb")
-print("solution cells:", len(nb.cells))
+    "# Lab 2 Solution: Linear Regression\n\n"
+    "This solution follows the current worksheet, task by task, including written answers. "
+    "Run Core tasks from top to bottom; then choose an Advanced investigation. "
+    "The data URL is the same as in the worksheet and works in a blank Colab notebook. "
+    "Try the worksheet before opening these answers."
+))
+fi = 0
+for match in re.finditer(r"^### (\d\.\d [^\n]+)\n(.*?)(?=^### |^## |\Z)", core, re.M | re.S):
+    title, body = match.groups()
+    answer = re.search(r'::: \{[^\n]*title="Answer"[^\n]*\}\n(.*?)\n:::', body, re.S)
+    task_body = body[:answer.start()] if answer else body
+    nb.cells.append(nbformat.v4.new_markdown_cell("## " + title))
+    filled_blocks = []
+    for code in fence.findall(task_body):
+        if "____" in code:
+            assert code.count("____") == len(FILLS[fi]), f"Blank count changed in {title}"
+            for value in FILLS[fi]:
+                code = code.replace("____", value, 1)
+            fi += 1
+        filled_blocks.append(code)
+        nb.cells.append(nbformat.v4.new_code_cell(code))
+    if answer:
+        for code in fence.findall(answer.group(1)):
+            for line in code.strip().splitlines():
+                assert not line.strip() or any(line.strip() in block for block in filled_blocks), (
+                    f"Worksheet Answer differs from filled solution in {title}: {line}"
+                )
+        prose = fence.sub("", answer.group(1)).strip()
+        if prose:
+            nb.cells.append(nbformat.v4.new_markdown_cell(prose))
+assert fi == len(FILLS), (fi, len(FILLS))
+nb.cells.append(nbformat.v4.new_markdown_cell(
+    "# Advanced Study\n\nRun the Core tasks first. A, B and C below are worked investigations, "
+    "including the worksheet self-checks. B can be run without first running A."
+))
+sections = (ROOT / "as_solutions.py").read_text().split("#%%")
+for section in sections:
+    section = section.strip()
+    if not section:
+        continue
+    for key, title in [("A", "Solve the same regression in different ways"),
+                       ("B", "Gradient descent"), ("C", "How much can a coefficient move?")]:
+        if f"# ---- Advanced Study {key} ----" in section:
+            nb.cells.append(nbformat.v4.new_markdown_cell(f"## {key}. {title}"))
+    nb.cells.append(nbformat.v4.new_code_cell(section + "\n"))
+    if "np.linalg.cond(A)" in section:
+        nb.cells.append(nbformat.v4.new_markdown_cell(
+            "All three solvers reproduce the sklearn fit to numerical precision. Standardising "
+            "reduces the six-feature condition numbers from about 8.8e4 and 7.7e9 to 11 and 116. "
+            "The nearly singular 2×2 system changes from (2, 0) to (1, 1) after a 0.0001 change "
+            "in the second right-hand-side entry. Squaring the condition number in XᵀX makes "
+            "numerical errors more serious; an explicit inverse is unnecessary."
+        ))
+    elif "standardised, eta =" in section:
+        nb.cells.append(nbformat.v4.new_markdown_cell(
+            "For the scalar loss, eta=0.5 reaches 3 in one step, eta=0.1 converges gradually, "
+            "and eta=1.1 oscillates with growing error. On standardised car features, eta=0.1 "
+            "and 500 steps agree with least squares (training MSE about 17.98; test RMSE "
+            "about 4.22). Raw features overflow at eta=0.1; a much smaller step avoids overflow "
+            "but converges slowly. Standardised eta=0.01 is slower and eta=0.6 diverges."
+        ))
+    elif "b6 = boot_hp" in section:
+        nb.cells.append(nbformat.v4.new_markdown_cell(
+            "The hp + weight interval remains below zero, whereas the six-feature interval "
+            "contains zero. The horsepower coefficient is sensitive to the feature set and "
+            "training sample, especially with strongly correlated predictors; it is not a "
+            "causal effect. These bootstrap intervals describe resampling variability.\n\n"
+            "## Advanced Study log\n\nRecord your chosen investigation, what you found, how AI "
+            "helped and what you corrected, and your own self-check result."
+        ))
+# 强制使用执行本脚本的 Python 环境，避免命中其他环境的内核。
+km = KernelManager(kernel_name="python3")
+km.kernel_spec.argv = [sys.executable, "-m", "ipykernel_launcher", "-f", "{connection_file}"]
+NotebookClient(nb, timeout=300, kernel_manager=km,
+               resources={"metadata": {"path": str(ROOT)}}).execute()
+nbformat.write(nb, ROOT / "lab_solution.ipynb")
+print(f"Validated {fi} blank blocks, all Core task answers and Advanced A/B/C; wrote {len(nb.cells)} cells.")

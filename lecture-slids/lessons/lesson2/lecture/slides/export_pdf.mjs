@@ -1,18 +1,27 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname, join, resolve, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-chromium';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const html = await readFile(join(here, 'slide.html'));
-const server = createServer((request, response) => {
-  if (request.url?.startsWith('/slide.html')) {
-    response.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
-    response.end(html);
-  } else {
-    response.writeHead(404);
-    response.end();
+const source = await readFile(join(here, 'slide.qmd'), 'utf8');
+const expectedSlides = (source.match(/^## /gm) ?? []).length + 1;
+const mimeTypes = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript',
+  '.css': 'text/css', '.woff2': 'font/woff2', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
+const server = createServer(async (request, response) => {
+  const pathname = decodeURIComponent(new URL(request.url, 'http://localhost').pathname);
+  const path = resolve(here, `.${pathname}`);
+  if (!path.startsWith(`${here}/`)) {
+    response.writeHead(403).end();
+    return;
+  }
+  try {
+    const body = await readFile(path);
+    response.writeHead(200, { 'Content-Type': mimeTypes[extname(path)] ?? 'application/octet-stream' });
+    response.end(body);
+  } catch {
+    response.writeHead(404).end();
   }
 });
 await new Promise((resolve) => server.listen(0, '127.0.0.1', resolve));
@@ -26,9 +35,11 @@ try {
   const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
   await page.goto(`http://127.0.0.1:${server.address().port}/slide.html?print-pdf`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => window.Reveal?.isReady?.(), { timeout: 30000 });
-  await page.waitForTimeout(1500);
+  await page.waitForFunction(() => [...document.querySelectorAll('.math')].every((el) => el.querySelector('.katex')), { timeout: 30000 });
+  if (await page.locator('.katex-error').count()) throw new Error('Math rendering failed');
+  await page.waitForTimeout(500);
   const count = await page.locator('.reveal .slides section.slide, .reveal .slides section.course-title').count();
-  if (count !== 21) throw new Error(`Expected 21 slides; rendered ${count}`);
+  if (count !== expectedSlides) throw new Error(`Expected ${expectedSlides} slides; rendered ${count}`);
   await page.pdf({ path: join(here, 'slide.pdf'), printBackground: true, preferCSSPageSize: true });
   console.log(`Exported ${count} Quarto/RevealJS slides to slide.pdf`);
 } finally {

@@ -13,6 +13,7 @@ export interface CourseResource {
   target: string;
   href: string;
   directory?: boolean;
+  assets?: { source: string; target: string }[];
   downloadSource?: string;
   downloadTarget?: string;
   downloadHref?: string;

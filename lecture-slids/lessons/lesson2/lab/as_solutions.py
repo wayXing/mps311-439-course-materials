@@ -33,6 +33,8 @@ for eta in (0.1, 0.5, 1.1):
     print(eta, [float(gradient_descent(lambda w: 2 * (w - 3), 0.0, eta, s)) for s in (1, 2, 5, 20)])
 print(gradient_descent(lambda w: 2 * (w - 3), 0.0, 0.5, 1))
 #%%
+ytr = y_train.to_numpy()
+Xtr2 = X_train[features].to_numpy()
 mu, sd = X_train[features].mean(), X_train[features].std()
 Zb = np.c_[np.ones(len(X_train)), ((X_train[features] - mu) / sd).to_numpy()]
 Zbt = np.c_[np.ones(len(X_test)), ((X_test[features] - mu) / sd).to_numpy()]
