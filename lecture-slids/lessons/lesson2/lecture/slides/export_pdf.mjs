@@ -35,8 +35,8 @@ try {
   const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
   await page.goto(`http://127.0.0.1:${server.address().port}/slide.html?print-pdf`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => window.Reveal?.isReady?.(), { timeout: 30000 });
-  await page.waitForFunction(() => [...document.querySelectorAll('.math')].every((el) => el.querySelector('.katex')), { timeout: 30000 });
-  if (await page.locator('.katex-error').count()) throw new Error('Math rendering failed');
+  await page.waitForFunction(() => [...document.querySelectorAll('.math')].every((el) => el.querySelector('mjx-container, .MathJax')), { timeout: 30000 });
+  if (await page.locator('mjx-merror, [data-mjx-error]').count()) throw new Error('Math rendering failed');
   await page.waitForTimeout(500);
   const count = await page.locator('.reveal .slides section.slide, .reveal .slides section.course-title').count();
   if (count !== expectedSlides) throw new Error(`Expected ${expectedSlides} slides; rendered ${count}`);

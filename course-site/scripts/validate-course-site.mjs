@@ -29,7 +29,6 @@ const expected = [
   'dist/data/course-timetable.csv',
   ...course.lessons.map((lesson) => `dist/course/${lesson.slug}/index.html`),
   ...publicResources.map((resource) => `dist/${resource.href}`),
-  ...publicResources.flatMap((resource) => (resource.assets ?? []).map((asset) => `dist/${asset.target}`)),
   ...publicResources.flatMap((resource) => (
     resource.downloadHref ? [`dist/${resource.downloadHref}`] : []
   )),

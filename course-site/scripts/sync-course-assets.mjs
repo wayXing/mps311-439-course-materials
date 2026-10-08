@@ -98,12 +98,6 @@ for (const lesson of course.lessons) {
       await mkdir(dirname(downloadTarget), { recursive: true });
       await cp(downloadSource, downloadTarget);
     }
-    for (const asset of resource.assets ?? []) {
-      const assetSource = join(lessonRoot, asset.source);
-      const assetTarget = join(projectRoot, 'public', asset.target);
-      await mkdir(dirname(assetTarget), { recursive: true });
-      await cp(assetSource, assetTarget, { recursive: true });
-    }
     copied += 1;
   }
 }

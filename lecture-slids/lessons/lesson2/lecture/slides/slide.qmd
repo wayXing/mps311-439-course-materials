@@ -20,9 +20,7 @@ format:
     hash: true
     history: false
     embed-resources: true
-    html-math-method:
-      method: katex
-      url: "katex/"
+    html-math-method: mathjax
 title-slide-attributes:
   class: "course-title"
   data-background-image: "cover-fallback.webp"

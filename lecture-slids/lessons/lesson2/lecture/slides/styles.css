@@ -31,9 +31,9 @@
 .reveal .flow div{box-sizing:border-box;border:2px solid var(--rule);border-radius:14px;padding:34px 12px;text-align:center;font-size:1.3em;font-weight:650;background:var(--panel)}
 .reveal .flow span{display:block;color:var(--muted);font-size:.8em;margin-bottom:8px}
 .reveal .formula{text-align:center}
-.reveal .formula .katex-display{font-size:1.5em}
-.reveal .katex-display{margin:.4em 0}
-.reveal .say .katex,.reveal .ask .katex{font-size:1.05em}
+.reveal .formula mjx-container[display="true"]{font-size:1.5em!important}
+.reveal mjx-container[display="true"]{margin:.4em 0}
+.reveal .say mjx-container,.reveal .ask mjx-container{font-size:1.05em!important}
 .reveal .two{display:grid;grid-template-columns:1.25fr 1fr;gap:50px;align-items:center}
 .reveal .two.even{grid-template-columns:1fr 1fr}
 .reveal .two>*{min-width:0}
@@ -73,7 +73,7 @@
 .reveal .fig-f2{width:900px}
 .reveal .fig-f5{width:1320px;height:auto;max-width:none;margin:0 auto;display:block}
 .reveal .two.f5t{grid-template-columns:1.6fr 1fr;gap:50px;margin-top:10px}
-.reveal .formula .katex-display{font-size:2.0em}
+.reveal .formula mjx-container[display="true"]{font-size:2.0em!important}
 .reveal .wbox{zoom:1.25}
 .reveal #w-i3 svg{width:640px;max-width:640px!important}
 .reveal .final-slide .qr img{width:340px;height:340px}
@@ -84,14 +84,14 @@
 .reveal .steps{display:flex;flex-direction:column;gap:26px}
 .reveal .step{display:grid;grid-template-columns:300px 1fr;gap:0 24px;align-items:center;border-top:2px solid var(--rule);padding-top:14px}
 .reveal .step .lab{font-size:.95em;font-weight:700;color:var(--slate);line-height:1.25}
-.reveal .step .katex-display{margin:.2em 0;text-align:left;font-size:1.08em}
+.reveal .step mjx-container[display="true"]{margin:.2em 0;text-align:left;font-size:1.08em!important}
 .reveal .step>p{margin:0}
-.reveal .step .katex-display>.katex{text-align:left}
+.reveal .step mjx-container[display="true"]{text-align:left}
 
 .reveal h2 .stg{color:var(--slate);font-weight:600;margin-right:.3em}
 
-.reveal .formula.m1 .katex-display{font-size:1.5em}
-.reveal .formula.m2 .katex-display{font-size:1.25em}
+.reveal .formula.m1 mjx-container[display="true"]{font-size:1.5em!important}
+.reveal .formula.m2 mjx-container[display="true"]{font-size:1.25em!important}
 
 .reveal .stage.tight{gap:22px}
 .reveal .stage.tight .tile{padding:20px 34px}

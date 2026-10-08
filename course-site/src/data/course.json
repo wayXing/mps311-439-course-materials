@@ -191,13 +191,7 @@
           "group": "Lecture",
           "source": "lesson2/lecture/slides/slide.html",
           "target": "materials/lesson2/slides/index.html",
-          "href": "materials/lesson2/slides/index.html",
-          "assets": [
-            {
-              "source": "lesson2/lecture/slides/katex",
-              "target": "materials/lesson2/slides/katex"
-            }
-          ]
+          "href": "materials/lesson2/slides/index.html"
         },
         {
           "label": "Lecture notes",
