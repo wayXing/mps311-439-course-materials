@@ -14,6 +14,7 @@ const {
 } = Astro.props;
 const pathname = Astro.url.pathname;
 const isHome = pathname === withBase() || pathname === withBase('index.html');
+const isAssignment = pathname.includes('/assignment');
 const isFeedback = pathname.includes('/feedback');
 const isQuestions = pathname.includes('/questions');
 ---
@@ -37,6 +38,7 @@ const isQuestions = pathname.includes('/questions');
         </a>
         <div class="nav-links">
           <a class:list={{ active: isHome }} href={withBase()} aria-current={isHome ? 'page' : undefined}>Home</a>
+          <a class:list={{ active: isAssignment }} href={withBase('assignment/')} aria-current={isAssignment ? 'page' : undefined}>Assignment</a>
           <a class:list={{ active: isQuestions }} href={withBase('questions/')} aria-current={isQuestions ? 'page' : undefined}>Questions</a>
           <a class:list={{ active: isFeedback }} href={withBase('feedback/')} aria-current={isFeedback ? 'page' : undefined}>Feedback</a>
         </div>

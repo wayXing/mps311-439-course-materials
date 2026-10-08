@@ -1,0 +1,96 @@
+---
+import SiteLayout from '../layouts/SiteLayout.astro';
+import { course } from '../data/course';
+import { assignmentOne } from '../data/assignment';
+import { withBase } from '../lib/urls';
+const resources = withBase('assignments/assignment-one/');
+---
+
+<SiteLayout title={`Assignment · ${course.code}`} description="Assignment One brief, data and Blackboard submission information.">
+  <section class="assignment-page shell accent-blue">
+    <header class="assignment-heading">
+      <span class="eyebrow">{course.academicYear} · MPS311 / MPS439</span>
+      <h1>Assignment One</h1>
+      <p>California Housing Prices</p>
+    </header>
+    <div class="assignment-grid">
+      <article class="assignment-materials">
+        <h2>Predict, improve, explain.</h2>
+        <p>Build a baseline on 500 California census blocks, improve your features and models, then evaluate your final model and explain its errors.</p>
+        <a class="button button-primary" href={`${resources}brief.html`}>Read the assignment brief <span aria-hidden="true">↗</span></a>
+        <div class="assignment-data">
+          <h3>Download the data</h3>
+          <p>Use train.csv and test.csv for the main assignment. The MPS439 extension also uses full.csv for options A and B.</p>
+          <div class="data-links">
+            <a href={`${resources}train.csv`} download>train.csv <small>500 blocks</small></a>
+            <a href={`${resources}test.csv`} download>test.csv <small>2,000 blocks</small></a>
+            <a href={`${resources}full.csv`} download>full.csv <small>18,640 blocks · raw data</small></a>
+          </div>
+        </div>
+      </article>
+      <aside class="assignment-deadline">
+        <span class="eyebrow">Deadline</span>
+        <h2><time datetime={assignmentOne.deadlineAt ?? assignmentOne.deadlineDate}>{assignmentOne.deadlineLabel}</time></h2>
+        <p class="countdown" data-deadline={assignmentOne.deadlineAt ?? undefined} data-deadline-date={assignmentOne.deadlineDate}>Deadline: {assignmentOne.deadlineLabel}</p>
+        <p class="deadline-note">Check the Assignment One submission area in Blackboard for your submission details.</p>
+        <div class="submission-note">
+          <h3>Submit on Blackboard</h3>
+          <p>Upload one PDF report and your notebook (.ipynb or .py) to the Assignment One submission area in Blackboard.</p>
+          <p>This website provides the brief and data. All submissions are made on Blackboard.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+  <script>
+    const counter = document.querySelector<HTMLElement>('[data-deadline-date]');
+    if (counter) {
+      const deadline = counter.dataset.deadline ? Date.parse(counter.dataset.deadline) : null;
+      const update = () => {
+        if (deadline === null) {
+          const parts = new Intl.DateTimeFormat('en-GB', { timeZone: 'Europe/London', year: 'numeric', month: '2-digit', day: '2-digit' }).formatToParts(new Date());
+          const part = (name: string) => parts.find((entry) => entry.type === name)?.value;
+          const today = Date.parse(`${part('year')}-${part('month')}-${part('day')}T00:00:00Z`);
+          const days = Math.round((Date.parse(`${counter.dataset.deadlineDate}T00:00:00Z`) - today) / 86400000);
+          counter.textContent = days > 0 ? `${days} ${days === 1 ? 'day' : 'days'} until the deadline date` : days === 0 ? 'Due today · check Blackboard for the time' : 'Deadline date has passed';
+          return;
+        }
+        const remaining = deadline - Date.now();
+        if (remaining <= 0) {
+          counter.textContent = 'Deadline has passed';
+          return;
+        }
+        const minutes = Math.ceil(remaining / 60000);
+        const days = Math.floor(minutes / 1440);
+        const hours = Math.floor(minutes % 1440 / 60);
+        counter.textContent = `${days}d ${hours}h ${minutes % 60}m remaining`;
+      };
+      update();
+      window.setInterval(update, 1000);
+    }
+  </script>
+</SiteLayout>
+
+<style>
+  .assignment-page { padding: 70px 0 110px; }
+  .assignment-heading { padding-bottom: 38px; border-bottom: 1px solid var(--ink); }
+  .assignment-heading h1 { margin: 16px 0; font-family: var(--font-display); font-size: clamp(44px, 7vw, 76px); font-weight: 500; letter-spacing: -0.05em; line-height: 1.05; }
+  .assignment-heading p { margin: 0; color: var(--ink-soft); font-size: 21px; }
+  .assignment-grid { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 80px; padding-top: 42px; }
+  .assignment-materials h2 { font-family: var(--font-display); font-size: 32px; font-weight: 500; letter-spacing: -0.025em; }
+  .assignment-materials p, .assignment-deadline p { color: var(--ink-soft); font-size: 15px; line-height: 1.65; }
+  .assignment-materials > p { max-width: 620px; margin-bottom: 26px; }
+  .assignment-data { margin-top: 42px; }
+  h3 { font-size: 14px; }
+  .data-links { display: grid; border-top: 1px solid var(--line); }
+  .data-links a { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; padding: 16px 0; border-bottom: 1px solid var(--line); font-size: 14px; font-weight: 650; }
+  .data-links a:hover { color: var(--blue); }
+  .data-links small { color: var(--ink-faint); font-size: 12px; font-weight: 400; }
+  .assignment-deadline { padding-top: 20px; border-top: 2px solid var(--blue); }
+  .assignment-deadline h2 { margin: 15px 0; font-family: var(--font-display); font-size: 28px; font-weight: 500; }
+  .assignment-deadline .countdown { margin: 0 0 16px; color: var(--blue); font-size: 23px; font-variant-numeric: tabular-nums; }
+  .assignment-deadline .deadline-note { font-size: 12px; }
+  .submission-note { margin-top: 26px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .submission-note p { font-size: 13px; }
+  @media (max-width: 900px) { .assignment-grid { grid-template-columns: 1fr; gap: 36px; } }
+  @media (max-width: 640px) { .assignment-page { padding: 46px 0 70px; } }
+</style>

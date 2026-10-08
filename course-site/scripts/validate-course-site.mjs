@@ -24,6 +24,9 @@ if (timetable.source !== 'MPS311 _439_TimeTable-byLessons-2026.xlsx') {
 
 const expected = [
   'dist/index.html',
+  'dist/assignment/index.html',
+  'dist/assignments/assignment-one/brief.html',
+  ...['train.csv', 'test.csv', 'full.csv'].map((name) => `dist/assignments/assignment-one/${name}`),
   'dist/style-samples/index.html',
   'dist/timetable/index.html',
   'dist/data/course-timetable.csv',

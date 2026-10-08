@@ -1245,10 +1245,14 @@ dd {
     min-height: 64px;
   }
 
-  .nav-links a:first-child,
-  .nav-links a:nth-child(2),
-  .nav-links a:last-child {
-    display: none;
+  .nav {
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-block: 12px;
+  }
+
+  .nav-links {
+    flex-wrap: wrap;
   }
 
   .nav-links {
