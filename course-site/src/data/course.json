@@ -82,15 +82,6 @@
           "directory": true
         },
         {
-          "label": "Slides (first delivery, UoS 2026)",
-          "description": "Open the version used in the first class, before the feedback-led rhythm revision.",
-          "kind": "slides",
-          "group": "Archive",
-          "source": "lesson1/lecture/archive/uos-2026-first-delivery/slides/slide.html",
-          "target": "materials/lesson1/archive/uos-2026-first-delivery/slides/index.html",
-          "href": "materials/lesson1/archive/uos-2026-first-delivery/slides/index.html"
-        },
-        {
           "label": "Slides (UoS 2025)",
           "description": "Open the earlier Slidev version retained in the course archive.",
           "kind": "slides",
@@ -182,64 +173,34 @@
       "slug": "lesson-02",
       "number": "02",
       "label": "Lesson 02",
-      "title": "Predicting the future with lines",
+      "title": "From a question to a tested model",
       "shortTitle": "Linear regression",
-      "summary": "We need a first complete model for predicting a continuous value and seeing how data, objective, solution, and evidence fit together.",
+      "summary": "Build a first numerical model from a clear problem, loss and solution; then use unseen cars to test its value and limits.",
       "accent": "blue",
       "type": "teaching",
       "topics": [
-        "Simple and multiple regression",
-        "Loss and model fitting",
-        "Interpreting predictions"
+        "Problem, model, loss and solution",
+        "Simple linear regression",
+        "Training and test evidence"
       ],
       "resources": [
         {
           "label": "Interactive slides",
-          "description": "Open the full Slidev presentation.",
+          "description": "Open the full Quarto/RevealJS presentation.",
           "kind": "slides",
           "group": "Lecture",
-          "source": "lesson2/lecture/dist",
-          "target": "materials/lesson2/slides",
-          "href": "materials/lesson2/slides/index.html",
-          "directory": true
-        },
-        {
-          "label": "Slides PDF",
-          "description": "Download or print the lecture slides.",
-          "kind": "pdf",
-          "group": "Lecture",
-          "source": "lesson2/lecture/slide-export.pdf",
-          "target": "materials/lesson2/slides.pdf",
-          "href": "materials/lesson2/slides.pdf"
+          "source": "lesson2/lecture/slides/slide.html",
+          "target": "materials/lesson2/slides/index.html",
+          "href": "materials/lesson2/slides/index.html"
         },
         {
           "label": "Lecture notes",
           "description": "Read the extended explanation online.",
           "kind": "notes",
           "group": "Lecture",
-          "source": "lesson2/lecture/note.html",
+          "source": "lesson2/lecture/note_en.html",
           "target": "materials/lesson2/notes.html",
           "href": "materials/lesson2/notes.html"
-        },
-        {
-          "label": "Notes PDF",
-          "description": "Download the extended lecture notes.",
-          "kind": "pdf",
-          "group": "Lecture",
-          "source": "lesson2/lecture/note.pdf",
-          "target": "materials/lesson2/notes.pdf",
-          "href": "materials/lesson2/notes.pdf"
-        },
-        {
-          "label": "Demo",
-          "description": "Read the worked examples in the browser.",
-          "kind": "notebook",
-          "group": "Lecture",
-          "source": "lesson2/lecture/demo.ipynb",
-          "target": "materials/lesson2/demo",
-          "href": "materials/lesson2/demo/demo.html",
-          "downloadHref": "materials/lesson2/demo/demo.ipynb",
-          "render": "quarto"
         },
         {
           "label": "Lab worksheet",
@@ -249,6 +210,15 @@
           "source": "lesson2/lab/lab_worksheet.html",
           "target": "materials/lesson2/lab.html",
           "href": "materials/lesson2/lab.html"
+        },
+        {
+          "label": "Auto MPG data (CSV)",
+          "description": "Download the historical car dataset used in Lab 2.",
+          "kind": "data",
+          "group": "Lab",
+          "source": "lesson2/lab/auto_mpg.csv",
+          "target": "materials/lesson2/auto_mpg.csv",
+          "href": "materials/lesson2/auto_mpg.csv"
         },
         {
           "label": "Lab solution",
@@ -262,13 +232,32 @@
           "render": "quarto"
         },
         {
-          "label": "Lab worksheet (PDF)",
-          "description": "Download a printable worksheet.",
-          "kind": "pdf",
-          "group": "Lab",
-          "source": "lesson2/lab/lab_worksheet.pdf",
-          "target": "materials/lesson2/lab.pdf",
-          "href": "materials/lesson2/lab.pdf"
+          "label": "Slides (UoS 2025)",
+          "description": "Open the 2025 lecture retained in the course archive.",
+          "kind": "slides",
+          "group": "Archive",
+          "source": "lesson2/archive/uos-2025/lecture/dist",
+          "target": "materials/lesson2/archive/uos-2025/slides",
+          "href": "materials/lesson2/archive/uos-2025/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Lecture notes (UoS 2025)",
+          "description": "Read the notes accompanying the 2025 lecture.",
+          "kind": "notes",
+          "group": "Archive",
+          "source": "lesson2/archive/uos-2025/lecture/note.html",
+          "target": "materials/lesson2/archive/uos-2025/notes.html",
+          "href": "materials/lesson2/archive/uos-2025/notes.html"
+        },
+        {
+          "label": "Lab worksheet (UoS 2025)",
+          "description": "Open the 2025 practical worksheet.",
+          "kind": "worksheet",
+          "group": "Archive",
+          "source": "lesson2/archive/uos-2025/lab/lab_worksheet.html",
+          "target": "materials/lesson2/archive/uos-2025/lab.html",
+          "href": "materials/lesson2/archive/uos-2025/lab.html"
         }
       ]
     },

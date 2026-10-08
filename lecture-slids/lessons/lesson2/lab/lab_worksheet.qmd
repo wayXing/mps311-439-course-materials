@@ -1,0 +1,647 @@
+---
+pagetitle: "Lab 2: Linear Regression"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-copy: true
+    embed-resources: true
+    theme: default
+---
+
+# Lab 2: Linear Regression
+## MPS311/439 Machine Learning
+**Lesson 2 Lab Session | Core duration: 50 minutes**
+
+## What this lab is for
+
+In the lecture you ran five steps on one set of cars: problem, model, loss, solution, validation. Today you run the same five steps in code.
+
+You will see two things for yourself:
+
+1. a coefficient can change when you add another feature;
+2. a low error on the cars used for fitting does not mean the model works on new cars.
+
+Most code is provided. Your job is to fill the blanks `____`, run the cell, and check your result against the **Success check**. You do not need to write a whole program.
+
+## How to work
+
+1. Open a **blank** Colab notebook (**File → New notebook in Drive**), as in Lab 1.
+2. Copy each code block into a cell, fill in the blanks, and run it. Cells depend on the cells above, so run them from top to bottom.
+3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
+4. Each task has a one-line **Hint**, an **Ask AI** prompt, and a folded **Answer**. Try first. Open the Answer only to check your work.
+
+### Using AI in this lab
+
+Every task has an **Ask AI** box. It tells you something worth delegating to an AI assistant: explaining a line, writing a small piece of code, or criticising your answer. Use the same routine as in Lab 1:
+
+1. Give the AI your goal, the relevant code, and the complete output or error.
+2. Try its suggestion on a small piece.
+3. **Check it against the Success check.** If the numbers do not match, the AI or your question is wrong. Find out which.
+
+## Part 0: Look at the data (5 minutes)
+
+### 0.1 Load the data
+
+Run the cell without changing it. The data are loaded from the public course repository.
+
+```python
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.metrics import mean_squared_error, mean_absolute_error
+
+DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/lesson2/lab/auto_mpg.csv"
+cars = pd.read_csv(DATA_URL)
+
+print("Rows and columns:", cars.shape)
+cars.head()
+```
+
+**Success check:** `Rows and columns: (392, 7)`, and the columns are `mpg`, `cylinders`, `displacement`, `horsepower`, `weight`, `acceleration`, `model_year`. If the data do not load, use the backup at the end of this worksheet.
+
+::: {.callout-tip title="Ask AI"}
+Paste the code and its output. Ask: *"Explain each printed line in one sentence."* Then check that the AI's description of `cars.shape` matches what you see.
+:::
+
+### 0.2 Find the car from the lecture
+
+The first slide showed a car with 198 hp and weight 4341 lb. Complete the filter to find its row.
+
+```python
+cars[(cars["horsepower"] == ____) & (cars["weight"] == ____)]
+```
+
+**Hint:** copy the two numbers from the first slide.
+
+**Success check:** one row, with index `5` and `mpg` equal to `15.0`.
+
+::: {.callout-tip title="Ask AI"}
+Ask the AI to write one line of pandas that selects this car by its horsepower and weight. Run its line and compare it with the row you found.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+cars[(cars["horsepower"] == 198) & (cars["weight"] == 4341)]
+```
+:::
+
+### 0.3 Plot the problem
+
+Plot horsepower against mpg. Fill in the two column names.
+
+```python
+plt.scatter(cars["____"], cars["____"], s=15)
+plt.xlabel("Horsepower")
+plt.ylabel("mpg")
+plt.show()
+```
+
+**Hint:** the first column goes on the x-axis.
+
+**Question:** Describe the direction of the pattern *and* the scatter around it. Does this plot show that more horsepower causes lower mpg?
+
+::: {.callout-tip title="Ask AI"}
+Ask the AI to add a title and a grid to your plot and to explain what each line does. Check that the points are still the same.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+plt.scatter(cars["horsepower"], cars["mpg"], s=15)
+```
+
+Higher horsepower goes with lower mpg, but the points are widely scattered around the trend. The plot shows an association in these historical cars. It does not show that horsepower causes the lower mpg.
+:::
+
+## Part 1: Your first model (15 minutes)
+
+### 1.1 Split before fitting
+
+Keep 20% of the cars aside as test cars. They take no part in fitting.
+
+```python
+X = cars.drop(columns="mpg")
+y = cars["mpg"]
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=____, random_state=42)
+print(len(X_train), len(X_test))
+```
+
+**Hint:** 20% is `0.2`.
+
+**Success check:** `313 79`.
+
+**Question:** Why do we split *before* fitting the line?
+
+::: {.callout-tip title="Ask AI"}
+Ask: *"What does `random_state=42` do in `train_test_split`?"* Then change it to 0, rerun, and see which numbers change and which do not. Change it back to 42 before you continue.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+```
+
+If the line were chosen using the same cars it is judged on, a good score could just mean it fits those cars. Only cars that took no part in fitting can show whether it works on new cars.
+:::
+
+### 1.2 Fit a line on horsepower
+
+Fit the model on the training cars, using horsepower as the only feature.
+
+```python
+model = ____()
+model.fit(X_train[["horsepower"]], ____)
+
+print("Intercept b:", model.intercept_)
+print("Slope w:", model.coef_[0])
+```
+
+**Hint:** the model is `LinearRegression`, and the target of the training cars is `y_train`.
+
+**Success check:** `b` is about `40.606` and `w` is about `-0.1626`.
+
+**Question:** Say what the slope means in mpg per horsepower. Why is the intercept not the mpg of a real car?
+
+> **Python reminder:** `X_train[["horsepower"]]` with double brackets is a table with one column. sklearn expects a table of features, even when there is only one.
+
+::: {.callout-tip title="Ask AI"}
+Ask: *"Why does sklearn want `X_train[['horsepower']]` and not `X_train['horsepower']`?"* Then test its answer: remove one pair of brackets, run the cell, and read the error.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+model = LinearRegression()
+model.fit(X_train[["horsepower"]], y_train)
+```
+
+Each extra horsepower lowers the predicted mpg by about 0.163. A car with zero horsepower does not exist in the data, so the intercept is only the line's starting value.
+:::
+
+### 1.3 Predict for a new car
+
+Predict the mpg of a car with 100 hp.
+
+```python
+new_car = pd.DataFrame({"horsepower": [____]})
+print(model.predict(new_car))
+```
+
+**Success check:** about `24.35`.
+
+::: {.callout-tip title="Ask AI"}
+Ask the AI to turn this into a function `predict_mpg(hp)`. Check that `predict_mpg(100)` gives the same number.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+new_car = pd.DataFrame({"horsepower": [100]})
+```
+:::
+
+### 1.4 Plot the fitted line
+
+```python
+grid = pd.DataFrame({"horsepower": np.linspace(40, 230, 100)})
+
+plt.scatter(X_train["horsepower"], y_train, s=15, label="training cars")
+plt.plot(grid["horsepower"], model.predict(____), color="#C84B00", label="fitted line")
+plt.xlabel("Horsepower")
+plt.ylabel("mpg")
+plt.legend()
+plt.show()
+```
+
+**Hint:** predict on the table of horsepower values you just built.
+
+**Question:** At which horsepower values does the line look too high or too low?
+
+::: {.callout-tip title="Ask AI"}
+Ask the AI to change the line colour and add a title. Run the new version and check that the line itself has not moved.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+plt.plot(grid["horsepower"], model.predict(grid), color="#C84B00", label="fitted line")
+```
+
+The line tends to sit too low for light, low-horsepower cars and for the most powerful cars, and too high in the middle. Keep this in mind for Part 4.
+:::
+
+## Part 2: How good is the line? (10 minutes)
+
+### 2.1 Score two lines by hand
+
+Use the three cars from the lecture, with horsepower 130, 165, 150 and mpg 18, 15, 18. Line A is `mpg = 40 - 0.15 x` and line B is `mpg = 40 - 0.16 x`.
+
+```python
+x3 = np.array([130, 165, 150])
+y3 = np.array([18, 15, 18])
+
+pred_A = 40 + (-0.15) * x3
+pred_B = 40 + (-0.16) * x3
+mse_A = np.mean((y3 - pred_A) ** ____)
+mse_B = np.mean((____ - pred_B) ** 2)
+
+print("MSE of line A:", mse_A)
+print("MSE of line B:", mse_B)
+```
+
+**Hint:** MSE squares the residuals, and the residual is the measured value minus the predicted one.
+
+**Success check:** about `2.19` for A and `2.47` for B.
+
+**Question:** Which line is better on these three cars? Does that say anything about other cars?
+
+::: {.callout-tip title="Ask AI"}
+Ask the AI to write the same calculation with an ordinary `for` loop and no numpy. Check that it also gives 2.19.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+mse_A = np.mean((y3 - pred_A) ** 2)
+mse_B = np.mean((y3 - pred_B) ** 2)
+```
+
+Line A is better on these three cars. The score applies only to the cars it was computed on.
+:::
+
+### 2.2 The baseline
+
+A baseline always guesses the same number: the mean mpg of the **training** cars.
+
+```python
+baseline = y_train.____()
+baseline_pred = np.full(len(y_test), baseline)
+baseline_mse = mean_squared_error(y_test, baseline_pred)
+
+print("Baseline guess:", baseline)
+print("Baseline test RMSE:", baseline_mse ** 0.5)
+```
+
+**Hint:** the mean of a column is `mean`.
+
+**Success check:** guess about `23.60` and test RMSE about `7.18`.
+
+::: {.callout-tip title="Ask AI"}
+Ask: *"Why must the baseline use the mean of `y_train` and not of `y_test`?"* Put the answer into your own words in a text cell.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+baseline = y_train.mean()
+```
+
+The test cars must not influence anything we use to judge the model, and that includes the baseline.
+:::
+
+### 2.3 Score the line on the test cars
+
+```python
+y_pred = model.predict(X_test[["horsepower"]])
+
+mse = mean_squared_error(y_test, ____)
+rmse = mse ** ____
+r2 = 1 - mse / ____
+
+print("Test RMSE:", rmse)
+print("R2:", r2)
+```
+
+**Hint:** compare the predictions with the measured test values, take the square root with the power `0.5`, and divide by the baseline MSE.
+
+**Success check:** RMSE about `4.71` and R² about `0.57`.
+
+Fill in the table:
+
+| Method | Test RMSE (mpg) |
+|---|---:|
+| Training-mean baseline | |
+| Horsepower line | |
+
+**Question:** Which method is better? Does a lower RMSE mean every single prediction is close?
+
+::: {.callout-tip title="Ask AI"}
+Ask: *"What is the difference between RMSE and MAE?"* Then use `mean_absolute_error` to compute the MAE of the line on the test cars and compare it with the RMSE.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+mse = mean_squared_error(y_test, y_pred)
+rmse = mse ** 0.5
+r2 = 1 - mse / baseline_mse
+```
+
+The line (4.71) is better than the baseline (7.18). R² says the line removes about 57% of the baseline's squared error. A lower RMSE describes the typical error. Individual predictions can still be far off.
+:::
+
+## Part 3: More features, and the test cars (15 minutes)
+
+### 3.1 Add weight
+
+```python
+features = ["horsepower", "weight"]
+
+model2 = LinearRegression().fit(X_train[____], y_train)
+
+print("Intercept:", model2.intercept_)
+print("Coefficients (horsepower, weight):", model2.coef_)
+```
+
+**Hint:** use the list of features defined above.
+
+**Success check:** intercept about `46.59`, horsepower coefficient about `-0.0521`, weight coefficient about `-0.00587`.
+
+::: {.callout-tip title="Ask AI"}
+Ask the AI to write a loop over `[["horsepower"], ["horsepower", "weight"]]` that fits each model and prints its coefficients. Check that the numbers match both of your models.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+model2 = LinearRegression().fit(X_train[features], y_train)
+```
+:::
+
+### 3.2 Training error and test error
+
+The function below is provided. It computes the RMSE of a model on a set of cars.
+
+```python
+def rmse(model, columns, X, y):
+    return mean_squared_error(y, model.predict(X[columns])) ** 0.5
+
+print("Model 1 (hp):         train", rmse(model, ["horsepower"], X_train, y_train),
+      "test", rmse(model, ["horsepower"], X_test, y_test))
+print("Model 2 (hp, weight): train", rmse(model2, features, X_train, y_train),
+      "test", rmse(model2, ____, X_test, y_test))
+```
+
+**Hint:** Model 2 uses the same columns as in 3.1.
+
+**Success check:** Model 1 is about `4.95` on train and `4.71` on test. Model 2 is about `4.24` on train and `4.22` on test.
+
+**Question:** The test error is not higher than the training error here. Does this contradict the lecture's message that a low training error does not mean the model works on new cars?
+
+::: {.callout-tip title="Ask AI"}
+Ask the AI whether a test error below the training error is a mistake. Then check it: change `random_state` in 1.1, rerun from there, and see whether the order stays the same. Change it back to 42 afterwards.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+print("Model 2 (hp, weight): train", rmse(model2, features, X_train, y_train),
+      "test", rmse(model2, features, X_test, y_test))
+```
+
+There is no contradiction. With 313 training cars the line is not tailored to a few points, and the two errors are close. A small gap in either direction is ordinary variation between two sets of cars. In the lecture, the large gap came from a line fitted to only three cars.
+:::
+
+### 3.3 Why did the horsepower coefficient change?
+
+The coefficient of horsepower was `-0.163` in Model 1 and `-0.052` in Model 2. Look at how horsepower and weight are related.
+
+```python
+print(X_train[features].____())
+```
+
+**Hint:** the method that gives the correlations between columns is `corr`.
+
+**Success check:** the correlation between horsepower and weight is about `0.86`.
+
+**Question:** Use this number to explain why the horsepower coefficient got smaller in size when weight was added.
+
+::: {.callout-tip title="Ask AI"}
+Ask: *"Explain with a small numerical example why a coefficient can change when a correlated feature is added to a linear regression."* Compare its example with your own correlation value.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+print(X_train[features].corr())
+```
+
+Heavy cars also tend to have high horsepower (correlation 0.86). In Model 1, horsepower carries the effect of weight as well. In Model 2, the two features share the credit, so the horsepower coefficient shrinks.
+:::
+
+### 3.4 Back to the car
+
+Use Model 2 to predict the car from 0.2 (row 5).
+
+```python
+car = cars.loc[[5], features]
+
+print("Predicted mpg:", model2.predict(____))
+print("Measured mpg:", cars.loc[5, "mpg"])
+```
+
+**Hint:** predict on the one-row table you just selected.
+
+**Success check:** predicted about `10.8`, measured `15.0`.
+
+**Question:** The error is about 4.2 mpg. Is that surprising, given Model 2's test RMSE of 4.22?
+
+::: {.callout-tip title="Ask AI"}
+Ask the AI to predict the mpg of a car with 120 hp and weight 3000 lb using your model. Check that its code uses the same column names and order as `features`.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+print("Predicted mpg:", model2.predict(car))
+```
+
+No. An error of 4.2 mpg is about the typical size of Model 2's error on cars it has never seen.
+:::
+
+## Part 4: Explore and conclude (5 minutes)
+
+### 4.1 Use all six features
+
+```python
+all_features = list(X_train.columns)
+
+model6 = LinearRegression().fit(X_train[____], y_train)
+
+print("hp coefficient:", model6.coef_[all_features.index("horsepower")])
+print("Test RMSE:", rmse(model6, all_features, X_test, y_test))
+```
+
+**Hint:** use the list of all feature names defined above.
+
+**Success check:** horsepower coefficient about `-0.0023`, test RMSE about `3.24`.
+
+Fill in the table:
+
+| Model | hp coefficient | Test RMSE (mpg) |
+|---|---:|---:|
+| Baseline | | |
+| 1: hp | | |
+| 2: hp, weight | | |
+| 3: all six features | | |
+
+These test numbers are for reading. Do not use them to pick features again and again, because every pick leaks the test cars into the choice.
+
+::: {.callout-tip title="Ask AI"}
+Ask the AI to print the six coefficients of `model6` in a table, sorted by size. Check that the horsepower value is `-0.0023`.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+model6 = LinearRegression().fit(X_train[all_features], y_train)
+```
+
+| Model | hp coefficient | Test RMSE (mpg) |
+|---|---:|---:|
+| Baseline | | 7.18 |
+| 1: hp | -0.163 | 4.71 |
+| 2: hp, weight | -0.052 | 4.22 |
+| 3: all six features | -0.002 | 3.24 |
+:::
+
+### 4.2 Look at the residuals
+
+Plot the training residuals of Model 1 against horsepower.
+
+```python
+residuals = y_train - model.predict(X_train[["horsepower"]])
+
+plt.scatter(X_train["horsepower"], ____, s=15)
+plt.axhline(0, color="black")
+plt.xlabel("Horsepower")
+plt.ylabel("Residual (measured - predicted)")
+plt.show()
+```
+
+**Hint:** plot the residuals you just computed.
+
+**Question:** Are the errors scattered evenly around zero at every horsepower, or is there a pattern?
+
+::: {.callout-tip title="Ask AI"}
+Ask: *"What pattern in a residual plot suggests that a straight line is not enough?"* Compare its answer with your own plot.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+plt.scatter(X_train["horsepower"], residuals, s=15)
+```
+
+The residuals form a curve: mostly positive at low and at high horsepower, and negative in the middle. This is the same pattern as in 1.4. A straight line misses some of the curvature in these data.
+:::
+
+### 4.3 Write your conclusion
+
+Write three sentences in a text cell:
+
+1. What the comparison on the test cars shows for these historical cars.
+2. One reason the line is still limited, based on the RMSE or the residual plot.
+3. What this model is still missing, and why the result does not show that horsepower *causes* low mpg or applies to modern cars.
+
+::: {.callout-tip title="Ask AI"}
+Paste your three sentences and ask: *"Which claim goes beyond the evidence in my output? Suggest a more careful wording."* Decide yourself which changes to keep.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+For example: On 79 cars the model never saw, the horsepower line has a typical error of 4.71 mpg, against 7.18 for always guessing the mean. The residual plot is curved, so a straight line is not the whole story. Weight, the year and the other features are not in this model, and these data are old cars from one source, so the result does not show a cause or what happens for modern cars.
+:::
+
+# Advanced Study: choose one investigation
+
+MPS311 students are encouraged to try one. MPS439 students complete at least one of A or B, and record it in the log at the end. Allow about 30 minutes for each. C is an extra for everyone. Each investigation is about writing your own code, and you may ask AI for help, but you are responsible for checking the result. Use the **Self-check** cell after your own code.
+
+## A. Solve the same regression in different ways
+
+**Tasks**
+
+1. Using the training cars and the features horsepower and weight, add a column of ones to the feature table and solve the normal equation in three ways: `np.linalg.solve`, an explicit inverse `np.linalg.inv`, and `np.linalg.lstsq`. Name the results `w_solve`, `w_inv` and `w_lstsq`.
+2. Predict the test cars with each result and compare with `model2.predict`. How large is the largest difference?
+3. For all six features (with a column of ones), compute the condition number of the feature matrix and of its product with its transpose, first with the raw features, then after standardising each feature. Compare with the numbers in Advanced Study 1 of the Note.
+4. Take the small 2×2 example in Advanced Study 1 of the Note, with matrix `[[1, 1], [1, 1.0001]]`. Solve it with right-hand side `[2, 2]`, then change the second entry to `2.0001` and solve again. Describe what happens to the solution, and compute the condition number of the matrix.
+
+::: {.callout-tip title="Ask AI"}
+Ask: *"Why do numerical libraries avoid computing the inverse of XᵀX?"* Then write in one sentence what your condition numbers in task 3 say about that.
+:::
+
+::: {.callout-note collapse="true" title="Hint"}
+Add the column of ones with `np.c_[np.ones(len(X)), X]`. The product with the transpose is `Xb.T @ Xb`. `np.linalg.cond` gives the condition number. To standardise, subtract the column mean and divide by the column standard deviation (`.mean()` and `.std()` of the pandas table, as in the Note).
+:::
+
+**Self-check** (run after your code)
+
+```python
+print(np.allclose(w_solve, np.r_[model2.intercept_, model2.coef_]),
+      np.allclose(w_inv, w_solve), np.allclose(w_lstsq, w_solve))
+```
+
+The three values should be `True True True`. Condition numbers for six features: about 8.8e4 and 7.7e9 raw, and about 11 and 116 after standardising.
+
+## B. Gradient descent
+
+**Tasks**
+
+1. Write a function `gradient_descent(grad, w0, eta, steps)` that returns the final `w` after repeating `w = w - eta * grad(w)` for the given number of steps. Test it on `J(w) = (w - 3)^2`, whose gradient is `2 * (w - 3)`, with `eta` equal to 0.1, 0.5 and 1.1. Compare with the table in Advanced Study 2 of the Note.
+2. Use it to fit the regression on standardised horsepower and weight (with a column of ones), starting from zeros, with `eta = 0.1` and 500 steps. The gradient of the loss is `2 / n * Xb.T @ (Xb @ w - y)`. Compare the result with `np.linalg.lstsq` and with `model2`, and compare the test RMSE.
+3. Remove the standardisation and run the same loop on the raw features. What happens with `eta = 0.1`? Try a much smaller `eta`. Then try `eta = 0.01` and `eta = 0.6` on the standardised features.
+
+::: {.callout-tip title="Ask AI"}
+Ask the AI to write `gradient_descent`, then audit it: is the step *minus* the gradient? Is the loop over steps correct? Run it on the test function and compare it with your own version.
+:::
+
+::: {.callout-note collapse="true" title="Hint"}
+Standardise with the **training** mean and `.std()` (pandas), and apply the same numbers to the test cars. The loop is `for _ in range(steps): w = w - eta * grad(w)`. With the raw features the numbers overflow, which shows up as `inf` or `nan`.
+:::
+
+**Self-check** (run after your code)
+
+```python
+print(gradient_descent(lambda w: 2 * (w - 3), 0.0, 0.5, 1))
+```
+
+The result should be `3.0`. After task 2, `w` should be close to `(23.60, -2.00, -4.94)` and the training MSE about `17.98`.
+
+## C. How much can a coefficient move?
+
+**Tasks**
+
+1. Draw 200 random samples of the training cars with replacement, each as large as the training set. On each, fit the model and keep the horsepower coefficient. Do this for horsepower and weight, and for all six features.
+2. Draw a histogram of each set of 200 coefficients and compute the 95% interval (the 2.5th and 97.5th percentiles).
+3. Compare the two intervals. Does either contain zero? What does that say about reading the horsepower coefficient?
+
+::: {.callout-tip title="Ask AI"}
+Ask the AI to explain bootstrap resampling in your own context and to write the loop. Check that it samples **with replacement** and that each sample has as many rows as the training set.
+:::
+
+::: {.callout-note collapse="true" title="Hint"}
+`rng = np.random.default_rng(0)` and `idx = rng.integers(0, n, n)` give the row numbers of one sample. `np.percentile(values, [2.5, 97.5])` gives the interval.
+:::
+
+**Self-check**
+
+Your numbers depend on the random seed, but the conclusion should not. The interval for horsepower and weight stays below zero. The interval for all six features contains zero.
+
+## Advanced Study log
+
+Copy this into a text cell at the end of your notebook.
+
+> **Investigation chosen (A, B or C):**
+>
+> **What I found:**
+>
+> **How AI helped, and what I had to correct:**
+>
+> **Self-check result (passed or not):**
+
+# Appendix: only if the data did not load
+
+Do not run these cells if the setup in 0.1 worked. First try the independent CDN copy.
+
+```python
+BACKUP_URL = "https://cdn.jsdelivr.net/gh/wayXing/mps311-439-course-materials@main/lecture-slids/lessons/lesson2/lab/auto_mpg.csv"
+cars = pd.read_csv(BACKUP_URL)
+print("Rows and columns:", cars.shape)
+```
+
+If both websites are unavailable, download `auto_mpg.csv`, use Colab's **Files → Upload** button, and then run this cell.
+
+```python
+cars = pd.read_csv("auto_mpg.csv")
+print("Rows and columns:", cars.shape)
+```

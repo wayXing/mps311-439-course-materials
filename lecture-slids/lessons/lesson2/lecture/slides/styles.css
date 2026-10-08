@@ -1,0 +1,99 @@
+:root{--data:#0072B2;--model:#00795A;--loss:#C84B00;--ink:#172033;--muted:#586779;--rule:#d5dde8;--panel:#f3f6fa;--slate:#475569}
+.reveal{color:var(--ink)}
+.reveal .slides>section,.reveal .slides>section>section{box-sizing:border-box;width:1600px!important;left:0!important;height:900px;padding:44px 90px 0;text-align:left;top:0!important}
+.reveal h2{font-size:1.5em;font-weight:650;margin:0 0 .45em;line-height:1.15}
+.reveal p{margin:0}
+.reveal .stage{height:700px;display:flex;flex-direction:column;justify-content:center;gap:40px;box-sizing:border-box}
+.reveal .stage.top{justify-content:flex-start;gap:28px}
+.reveal .say{font-size:1.42em;line-height:1.36}
+.reveal .say.xl{font-size:1.9em;line-height:1.28}
+.reveal .muted{color:var(--muted);font-size:1.0em;line-height:1.4}
+.reveal .small{font-size:.86em}
+.reveal .c-data{color:var(--data);font-weight:600}
+.reveal .c-model{color:var(--model);font-weight:600}
+.reveal .c-loss{color:var(--loss);font-weight:600}
+.reveal .center{text-align:center}
+.reveal .ask{border-left:8px solid var(--slate);padding:6px 0 6px 34px;font-size:1.5em;line-height:1.34}
+.reveal .ask small{display:block;font-size:.5em;letter-spacing:.1em;text-transform:uppercase;color:var(--slate);margin-bottom:10px;font-weight:700}
+.reveal .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:32px}
+.reveal .tiles.two{grid-template-columns:repeat(2,1fr)}
+.reveal .tile{box-sizing:border-box;border:2px solid var(--rule);border-radius:16px;padding:32px 36px;background:#fff}
+.reveal .tile span{display:block;font-size:.7em;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.reveal .tile b{display:block;font-size:2.3em;line-height:1.15;margin-top:8px}
+.reveal .tile.txt b{font-size:1.6em}
+.reveal .tile p{font-size:.85em;color:var(--muted);margin-top:10px;line-height:1.3}
+.reveal .rows{display:flex;flex-direction:column;gap:22px}
+.reveal .rows>div{display:grid;grid-template-columns:90px 1fr;gap:0 24px;align-items:baseline;border-top:2px solid var(--rule);padding-top:22px}
+.reveal .rows .n{color:var(--muted);font-weight:700;font-size:1.0em}
+.reveal .rows b{font-size:1.35em}
+.reveal .rows p{font-size:.9em;color:var(--muted);margin-top:6px}
+.reveal .flow{display:grid;grid-template-columns:repeat(5,1fr);gap:20px}
+.reveal .flow div{box-sizing:border-box;border:2px solid var(--rule);border-radius:14px;padding:34px 12px;text-align:center;font-size:1.3em;font-weight:650;background:var(--panel)}
+.reveal .flow span{display:block;color:var(--muted);font-size:.8em;margin-bottom:8px}
+.reveal .formula{text-align:center}
+.reveal .formula .katex-display{font-size:1.5em}
+.reveal .katex-display{margin:.4em 0}
+.reveal .say .katex,.reveal .ask .katex{font-size:1.05em}
+.reveal .two{display:grid;grid-template-columns:1.25fr 1fr;gap:50px;align-items:center}
+.reveal .two.even{grid-template-columns:1fr 1fr}
+.reveal .two>*{min-width:0}
+.reveal .two>div{display:flex;flex-direction:column;gap:36px}
+.reveal .fig{display:block;margin:0 auto;max-width:100%;height:auto}
+.reveal .fig-wide{width:1300px}.reveal .fig-mid{width:1100px}
+.reveal .fig-h{height:560px;width:auto}
+.reveal figure{margin:0}
+.reveal .splitbar{display:flex;height:200px;border-radius:16px;overflow:hidden;border:2px solid var(--data)}
+.reveal .splitbar>div{display:flex;flex-direction:column;justify-content:center;padding:0 36px;font-size:1.1em}
+.reveal .splitbar b{font-size:1.8em}
+.reveal .splitbar span{font-size:.75em;opacity:.95}
+.reveal .splitbar .train{flex:313;background:var(--data);color:#fff}
+.reveal .splitbar .test{flex:79;background:#fff;color:var(--data);border-left:2px solid var(--data)}
+.reveal .bars{display:flex;flex-direction:column;gap:20px}
+.reveal .bars>div{display:grid;grid-template-columns:480px 1fr 100px;gap:0 24px;align-items:center;font-size:1.1em}
+.reveal .bars .bar{height:54px;border-radius:6px;background:var(--loss)}
+.reveal .bars .base .bar{background:#9aa6b4}
+.reveal .bars .v{font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.reveal .bars .lab small{display:block;font-size:.7em;color:var(--muted)}
+.reveal .wbox{font-size:1.0em;margin:0;padding:14px 18px;box-sizing:border-box;width:100%}
+.reveal .wbox svg{max-width:none!important;margin:0 auto;display:block}
+.reveal #w-i3 svg{width:1000px;max-width:1000px!important;height:auto}
+.reveal .wbox .cap{display:none}
+.reveal pre{width:100%;font-size:.95em;box-shadow:none;border:2px solid var(--rule);border-radius:14px;background:#f8fafc;margin:0}
+.reveal pre code{max-height:none;padding:28px 34px;line-height:1.55}
+.reveal .answer{font-size:1.9em;font-weight:700;color:var(--loss);line-height:1.1}
+.reveal .final-slide .takeaway{display:grid;grid-template-columns:1fr 420px;gap:70px;align-items:center;height:700px}
+.reveal .final-slide .qr{text-align:center}
+.reveal .final-slide .qr img{width:380px;height:380px;display:block;margin:0 auto 16px}
+.reveal .final-slide .qr p{font-size:.85em;color:var(--muted);margin-top:6px}
+.reveal .final-slide .qr b{font-size:1.1em;display:block}
+.reveal .slides section.course-title{padding:230px 90px 80px;text-align:center}
+.reveal .course-title .title{font-size:2.3em;line-height:1.12}
+.reveal .course-title .subtitle{font-size:1.1em}
+
+.reveal .fig-f2{width:900px}
+.reveal .fig-f5{width:1320px;height:auto;max-width:none;margin:0 auto;display:block}
+.reveal .two.f5t{grid-template-columns:1.6fr 1fr;gap:50px;margin-top:10px}
+.reveal .formula .katex-display{font-size:2.0em}
+.reveal .wbox{zoom:1.25}
+.reveal #w-i3 svg{width:640px;max-width:640px!important}
+.reveal .final-slide .qr img{width:340px;height:340px}
+.reveal .two.f7{grid-template-columns:560px 1fr;gap:40px}
+.reveal .two.f7 .fig{width:100%}
+
+
+.reveal .steps{display:flex;flex-direction:column;gap:26px}
+.reveal .step{display:grid;grid-template-columns:300px 1fr;gap:0 24px;align-items:center;border-top:2px solid var(--rule);padding-top:14px}
+.reveal .step .lab{font-size:.95em;font-weight:700;color:var(--slate);line-height:1.25}
+.reveal .step .katex-display{margin:.2em 0;text-align:left;font-size:1.08em}
+.reveal .step>p{margin:0}
+.reveal .step .katex-display>.katex{text-align:left}
+
+.reveal h2 .stg{color:var(--slate);font-weight:600;margin-right:.3em}
+
+.reveal .formula.m1 .katex-display{font-size:1.5em}
+.reveal .formula.m2 .katex-display{font-size:1.25em}
+
+.reveal .stage.tight{gap:22px}
+.reveal .stage.tight .tile{padding:20px 34px}
+.reveal .stage.tight .tile.txt b{font-size:1.45em}
+

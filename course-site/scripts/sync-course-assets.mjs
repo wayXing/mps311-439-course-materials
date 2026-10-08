@@ -21,6 +21,9 @@ let rendered = 0;
 
 for (const lesson of course.lessons) {
   for (const resource of lesson.resources) {
+    if (resource.group === 'Archive' && !resource.source.split('/').includes('uos-2025')) {
+      throw new Error(`Only complete UoS 2025 archives may be published: ${resource.source}`);
+    }
     const source = join(lessonRoot, resource.source);
     const target = join(projectRoot, 'public', resource.target);
 

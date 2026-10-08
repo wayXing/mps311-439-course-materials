@@ -1,47 +1,30 @@
-# MPS311/439 Machine Learning — Slidev course
+# MPS311/439 Machine Learning — course material sources
 
-This directory is one shared Slidev project. Each teaching lesson has its own
-Slidev entry file at `lessons/lessonN/lecture/slide.md`.
+Lessons 1 and 2 use Quarto/RevealJS QMD slides. Lessons 3–10 currently retain their existing Slidev sources. New slide work should follow the approved lesson workflow and the canonical source for that lesson.
 
 The shared visual language and classroom readability standards are defined in
 [`SLIDE_DESIGN_SYSTEM.md`](./lessons/shared/design/SLIDE_DESIGN_SYSTEM.md). Agent-facing production
 rules for every lesson live in [`lessons/AGENTS.md`](./lessons/AGENTS.md).
 
-## Canonical course structure
+## Canonical slide entries
 
-```text
-lessons/lessonN/
-├── lecture/
-│   ├── slide.md             # canonical Slidev source
-│   ├── note.md              # canonical lecture-note source, when available
-│   ├── demo.ipynb           # lecture demonstration, when available
-│   ├── figures/             # local slide/note assets
-│   ├── figure_gen.py        # figure generator, when available
-│   ├── slide-export.pdf     # generated Slidev PDF
-│   ├── note.html            # generated lecture note
-│   ├── note.pdf             # generated lecture note
-│   ├── dist/                # generated standalone Slidev build (double-clickable)
-│   └── archive/             # superseded drafts and alternative designs
-└── lab/
-    ├── lab_worksheet.md     # canonical student worksheet source
-    ├── lab_worksheet.html   # generated worksheet
-    ├── lab_worksheet.pdf    # generated worksheet
-    ├── lab_solution.ipynb   # canonical solution notebook
-    └── archive/             # superseded lab material
-```
+- Lesson 1: `lessons/lesson1/lecture/slides/slide.qmd`
+- Lesson 2: `lessons/lesson2/lecture/slides/slide.qmd`
+- Lessons 3–10: `lessons/lessonN/lecture/slide.md` (existing Slidev sources)
 
-The `foundation` directory contains pre-course Python preparation. Teaching
-materials are organised as Lessons 1–10 rather than calendar weeks.
-
-## Canonical Slidev entries
-
-The lecture entries are:
-
-- `lessons/lesson1/lecture/slide.md` through `lessons/lesson10/lecture/slide.md`
+Notes, figures, labs, and solutions remain under each lesson's `lecture/` and `lab/` directories. Superseded usable versions belong in that lesson's `archive/` directory. The `foundation` directory contains pre-course Python preparation.
 
 ## Run, build, and export
 
-Run these commands from this directory. Replace `lesson3` with the required lesson.
+For Lesson 2, render the canonical QMD and export its PDF from this directory:
+
+```bash
+python3 lessons/lesson2/lecture/slides/build_demo_embed.py
+quarto render lessons/lesson2/lecture/slides/slide.qmd --to revealjs
+node lessons/lesson2/lecture/slides/export_pdf.mjs
+```
+
+For an existing Slidev lesson such as Lesson 3:
 
 ```bash
 npm ci
@@ -69,10 +52,9 @@ quarto render note.md --to html --output note.html
 quarto render note.md --to pdf --output note.pdf
 ```
 
-The package scripts intentionally do not choose a default lesson. Always pass an
-entry file explicitly. Slidev resolves the standalone `--out` directory relative
-to the entry file, while it resolves PDF `--output` from this project root; use
-the full lesson path shown above for PDF exports. The standalone build embeds the
+The package scripts intentionally do not choose a default Slidev lesson. Pass an
+entry file explicitly. For the legacy Slidev lessons, `--out` resolves relative
+to the entry file while PDF `--output` resolves from this project root. The standalone build embeds the
 JavaScript, CSS, and local assets in `dist/index.html`, and the canonical entries
 use hash routing, so that file can be opened directly without a web server. A
 normal `npm run build` is a multi-file website build and should be served over

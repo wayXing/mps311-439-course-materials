@@ -14,13 +14,13 @@ async function fileStat(relativePath) {
 }
 
 for (const lesson of teachingLessons) {
-  const slideSource = lesson === 1
-    ? 'lessons/lesson1/lecture/slides/slide.qmd'
+  const slideSource = lesson <= 2
+    ? `lessons/lesson${lesson}/lecture/slides/slide.qmd`
     : `lessons/lesson${lesson}/lecture/slide.md`;
-  const slideBuild = lesson === 1
-    ? 'lessons/lesson1/lecture/slides/slide.html'
+  const slideBuild = lesson <= 2
+    ? `lessons/lesson${lesson}/lecture/slides/slide.html`
     : `lessons/lesson${lesson}/lecture/dist/index.html`;
-  const labSource = `lessons/lesson${lesson}/lab/lab_worksheet.md`;
+  const labSource = `lessons/lesson${lesson}/lab/lab_worksheet.${lesson === 2 ? "qmd" : "md"}`;
   const labBuild = `lessons/lesson${lesson}/lab/lab_worksheet.html`;
   const solution = `lessons/lesson${lesson}/lab/lab_solution.ipynb`;
 
