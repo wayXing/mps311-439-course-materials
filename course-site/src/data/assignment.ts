@@ -6,6 +6,6 @@ export const assignmentOne = {
 
 export const assignmentTwo = {
   deadlineDate: '2027-01-20',
-  deadlineAt: null as string | null,
+  deadlineAt: '2027-01-20T14:00:00Z',
   deadlineLabel: '20 January 2027',
 };
