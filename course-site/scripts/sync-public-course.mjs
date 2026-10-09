@@ -20,7 +20,7 @@ const lessonIgnoredNames = new Set([
   '01_narrative.md', '02_teaching_script.md', '03_slide_spec.md', 'redesign_storyboard.md',
   'design_goal.md', 'lab_plan.md', 'narrative.md', 'note_plan.md', 'note_draft.md', 'note_draft_zh.md',
   'slide_plan.md', 'figure_spec.md', 'note_visual_plan.md',
-  'slide_table_zh.md', 'teaching_script_zh.md', 'lecture_script_zh.md', 'lecture_script_zh_detailed.md', 'lecture_script_zh_rehearsal.md',
+  'slide_table_zh_v2.md', 'lecture_script_zh_v2.md', 'slide_table_zh.md', 'teaching_script_zh.md', 'lecture_script_zh.md', 'lecture_script_zh_detailed.md', 'lecture_script_zh_rehearsal.md',
   'note.html', 'note.pdf',
   'note.png', 'note_files', 'slide-export.pdf', 'lab_worksheet.html',
   'lab_worksheet.pdf', 'lab_solution.html', 'slide.html',

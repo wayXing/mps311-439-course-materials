@@ -189,7 +189,7 @@
           "description": "Open the full Quarto/RevealJS presentation.",
           "kind": "slides",
           "group": "Lecture",
-          "source": "lesson2/lecture/slides/slide.html",
+          "source": "lesson2/lecture/slides/slide_v2.html",
           "target": "materials/lesson2/slides/index.html",
           "href": "materials/lesson2/slides/index.html"
         },

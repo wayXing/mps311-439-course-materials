@@ -5,7 +5,9 @@ import { fileURLToPath } from 'node:url';
 import { chromium } from 'playwright-chromium';
 
 const here = dirname(fileURLToPath(import.meta.url));
-const source = await readFile(join(here, 'slide.qmd'), 'utf8');
+const stem = process.argv[2] ?? 'slide_v2';
+if (!/^slide(?:_v\d+)?$/.test(stem)) throw new Error('Invalid slide source name');
+const source = await readFile(join(here, `${stem}.qmd`), 'utf8');
 const expectedSlides = (source.match(/^## /gm) ?? []).length + 1;
 const mimeTypes = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript',
   '.css': 'text/css', '.woff2': 'font/woff2', '.webp': 'image/webp', '.svg': 'image/svg+xml' };
@@ -33,15 +35,15 @@ const browser = await chromium.launch({
 });
 try {
   const page = await browser.newPage({ viewport: { width: 1600, height: 900 } });
-  await page.goto(`http://127.0.0.1:${server.address().port}/slide.html?print-pdf`, { waitUntil: 'networkidle' });
+  await page.goto(`http://127.0.0.1:${server.address().port}/${stem}.html?print-pdf`, { waitUntil: 'networkidle' });
   await page.waitForFunction(() => window.Reveal?.isReady?.(), { timeout: 30000 });
   await page.waitForFunction(() => [...document.querySelectorAll('.math')].every((el) => el.querySelector('mjx-container, .MathJax')), { timeout: 30000 });
   if (await page.locator('mjx-merror, [data-mjx-error]').count()) throw new Error('Math rendering failed');
   await page.waitForTimeout(500);
   const count = await page.locator('.reveal .slides section.slide, .reveal .slides section.course-title').count();
   if (count !== expectedSlides) throw new Error(`Expected ${expectedSlides} slides; rendered ${count}`);
-  await page.pdf({ path: join(here, 'slide.pdf'), printBackground: true, preferCSSPageSize: true });
-  console.log(`Exported ${count} Quarto/RevealJS slides to slide.pdf`);
+  await page.pdf({ path: join(here, `${stem}.pdf`), printBackground: true, preferCSSPageSize: true });
+  console.log(`Exported ${count} Quarto/RevealJS slides to ${stem}.pdf`);
 } finally {
   await browser.close();
   await new Promise((resolve) => server.close(resolve));

@@ -1,0 +1,18 @@
+/* extras for slide_v2 only; base look comes from styles.css */
+.reveal .fig-s2{width:960px}
+.reveal .fig-f4{width:1300px}
+.reveal .fig-f4b{width:1050px}
+.reveal .fig-f13{width:1060px}
+.reveal .fig-f14{width:720px}
+.reveal .fig-f17{width:980px}
+.reveal #w-i3 svg{width:700px;max-width:700px!important}
+.reveal .two.f14{grid-template-columns:1fr 760px;gap:50px;align-items:center}
+.reveal .splitbar.mini{height:150px}
+.reveal .splitbar.mini b{font-size:1.5em}
+.reveal .final-slide .steps{gap:20px}
+.reveal .final-slide .step{grid-template-columns:200px 1fr}
+.reveal .final-slide .takeaway{grid-template-columns:minmax(0,1fr) 380px;gap:50px}
+.reveal .final-slide .steps,.reveal .final-slide .step>*{min-width:0}
+.reveal .final-slide .step mjx-container[display="true"]{font-size:1.1em!important}
+.reveal .stage .fig.fig-s2{margin-top:0}
+.reveal pre,.reveal pre code{max-height:none!important;overflow:visible!important}

@@ -9,7 +9,7 @@ const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 for (const lesson of teachingLessons) {
   const slide = lesson <= 2
-    ? `lessons/lesson${lesson}/lecture/slides/slide.qmd`
+    ? `lessons/lesson${lesson}/lecture/slides/${lesson === 2 ? "slide_v2" : "slide"}.qmd`
     : `lessons/lesson${lesson}/lecture/slide.md`;
   const lab = `lessons/lesson${lesson}/lab/lab_worksheet.${lesson === 2 ? "qmd" : "md"}`;
 
