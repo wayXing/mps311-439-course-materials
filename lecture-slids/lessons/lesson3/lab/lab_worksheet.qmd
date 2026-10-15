@@ -1,0 +1,622 @@
+---
+pagetitle: "Lab 3: Making the Model Stronger"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-copy: true
+    embed-resources: true
+    theme: default
+---
+
+# Lab 3: Making the Model Stronger
+## MPS311/439 Machine Learning
+**Lesson 3 Lab Session | Core duration: 50 minutes**
+
+## What this lab is for
+
+In the lecture, last week's straight line made a large error on one car, and the residuals showed a pattern. Today you walk the same path in code, on the same cars:
+
+1. find what is wrong with the straight line;
+2. make the model stronger with new columns;
+3. see it become too strong, and hold it down with Ridge and Lasso;
+4. choose how strong it should be with cross-validation, and use the test cars only once.
+
+Before each step you will see some evidence and a question. **Write down your own answer first**, then run the code and compare.
+
+Most code is provided. Your job is to fill the blanks `____`, run the cell, and check your result against the **Success check**. At the end there is a short section on how today's lab helps with **Assignment 1**.
+
+## How to work
+
+1. Open a **blank** Colab notebook (**File → New notebook in Drive**), as in Labs 1 and 2.
+2. Copy each code block into a cell, fill in the blanks, and run it. Cells depend on the cells above, so run them from top to bottom.
+3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
+4. Each task has a one-line **Hint** and a folded **Answer**. Try first. Open the Answer only to check your work. If you fall behind, copy the Answer of a task and carry on: every later task still works.
+5. Running every cell and matching the Success checks is a complete lab.
+6. The **Try with AI** boxes are for when you finish early, or after class. They follow the four steps below.
+
+### Using AI
+
+The **Try with AI** boxes use an AI assistant for the Python you do not know yet, while you stay in charge of the machine learning. Every box has the same four steps:
+
+1. **You want:** say what you want in machine-learning words (for example, "the coefficients as a bar chart").
+2. **Tell the AI:** the names of the variables it should use.
+3. **Ask:** the request.
+4. **Check:** compare the AI's result with a number or shape given on this page. If it does not match, the AI or your question is wrong. Find out which.
+
+## Part 0: What is wrong with last week's line? (9 minutes)
+
+**Goal:** find, from evidence, which of the five steps (problem, model, loss, solution, test) is at fault.
+
+### 0.1 Load and split the data
+
+Run the cell without changing it. It loads the same cars as Lab 2 and makes the same split.
+
+```python
+import numpy as np                       # numbers and arrays
+import pandas as pd                      # tables
+import matplotlib.pyplot as plt          # plots
+from sklearn.model_selection import train_test_split, KFold, cross_val_score   # splitting and cross-validation
+from sklearn.linear_model import LinearRegression, Ridge, Lasso                 # the three models
+from sklearn.preprocessing import PolynomialFeatures, StandardScaler            # new columns and standardisation
+from sklearn.metrics import mean_squared_error                                  # the error measure
+
+DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/lesson2/lab/auto_mpg.csv"
+cars = pd.read_csv(DATA_URL)             # load the 392 cars
+
+X = cars.drop(columns="mpg")             # the six measurements (features)
+y = cars["mpg"]                          # what we predict (target)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)   # same split as Lab 2
+print(X_train.shape, X_test.shape)       # how many cars in each part
+```
+
+**Success check:** `(313, 6) (79, 6)`. If the data do not load, use the backup at the end of this worksheet.
+
+### 0.2 Look at the residuals of last week's line
+
+Fit last week's line on horsepower, then plot the residuals (measured minus predicted) against horsepower.
+
+```python
+line = LinearRegression()                               # last week's model: a straight line
+line.fit(X_train[["____"]], y_train)                    # fit it on one column only
+print(line.coef_, line.intercept_)                      # slope and intercept
+
+pred_train = line.predict(X_train[["horsepower"]])      # predictions for the training cars
+residuals = y_train - pred_train                        # measured minus predicted
+
+plt.scatter(X_train["horsepower"], residuals, s=12)     # one dot per car
+plt.axhline(0, color="black")                           # the zero line
+plt.xlabel("Horsepower")
+plt.ylabel("Residual (mpg)")
+plt.show()
+```
+
+**Hint:** the column name, in quotes, as in Lab 2.
+
+**Success check:** slope about `-0.1626` and intercept about `40.61`, the same line as last week.
+
+**Questions:**
+
+1. Look at the cars with low horsepower (below 70) and high horsepower (above 170). Are their residuals mostly **above** zero or **below** zero?
+2. If so, the line guesses too low at both ends. Is the problem in the **model** (a straight line cannot bend) or in the **loss**? Answer one word.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+line.fit(X_train[["horsepower"]], y_train)
+```
+
+1. Mostly above zero at both ends (and below zero in the middle).
+2. The **model**. For a straight line, the normal equation already found the best one; a straight line simply cannot follow a curve.
+:::
+
+## Part 1: Make the model stronger (6 minutes)
+
+**Goal:** make a linear model draw a curve, and see what a polynomial looks like with two inputs.
+
+### 1.1 Add a column
+
+**Question first:** the model multiplies each column by a weight and adds them up. What is the **smallest power** of horsepower you could add as a new column, so that the fitted line can bend? Write your answer, then fill the code.
+
+```python
+X_train_q = X_train[["horsepower"]].copy()                  # a copy of the horsepower column, for the training cars
+X_test_q = X_test[["horsepower"]].copy()                    # the same for the test cars
+X_train_q["hp_power"] = X_train_q["horsepower"] ** ____     # new column: horsepower to some power
+X_test_q["hp_power"] = X_test_q["horsepower"] ** ____       # the same new column for the test cars
+
+model_q = LinearRegression()                                # still a linear model
+model_q.fit(X_train_q, y_train)                             # fit on horsepower and the new column
+
+q_pred = model_q.predict(X_test_q)                          # predict the test cars
+q_mse = mean_squared_error(y_test, q_pred)                  # mean squared error
+print("test RMSE:", q_mse ** 0.5)                           # RMSE, in mpg
+```
+
+**Hint:** the smallest whole number above 1. Use the same number in both blanks.
+
+**Success check:** test RMSE about `4.29`, down from `4.71` for the straight line.
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** to see the new model as a curve on the scatter plot.
+
+**Tell the AI:** the training data are `X_train_q` (columns `horsepower` and `hp_power`, which is horsepower squared) and `y_train`; the fitted model is `model_q`.
+
+**Ask:** *"Plot horsepower against mpg for the training cars, and draw the fitted curve of model_q over it, using 100 horsepower values from 46 to 230. Also print its prediction for a car with 225 hp."*
+
+**Check:** the curve bends, and the prediction for 225 hp is about `14.8` mpg (the car from the lecture; the straight line said 4.0).
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+X_train_q["hp_power"] = X_train_q["horsepower"] ** 2
+X_test_q["hp_power"] = X_test_q["horsepower"] ** 2
+```
+
+The smallest power is 2 (horsepower squared). Building a new column from the ones you have is **feature engineering**. The model is still a weighted sum, so the same `fit` works.
+:::
+
+### 1.2 Powers with two inputs
+
+Run the cell without changing it. `PolynomialFeatures` builds all the powers and products for you.
+
+```python
+poly = PolynomialFeatures(degree=2, include_bias=False)     # all powers and products up to degree 2
+poly.fit(X_train[["horsepower", "weight"]])                 # two inputs: horsepower and weight
+print(poly.get_feature_names_out())                         # the names of the new columns
+```
+
+**Success check:** `['horsepower' 'weight' 'horsepower^2' 'horsepower weight' 'weight^2']`.
+
+**Question:** Which column is the **interaction term** (the product of the two inputs)? Copy its name.
+
+::: {.callout-note collapse="true" title="Answer"}
+`horsepower weight`. With it, the effect of horsepower on mpg can change with weight.
+:::
+
+## Part 2: Put the columns on one scale, then try "more is better" (12 minutes)
+
+**Goal:** standardise the columns, then see whether a higher degree always helps.
+
+### 2.1 Standardise
+
+On the training cars, horsepower and its powers have these ranges:
+
+| Column | Smallest | Largest |
+|---|---:|---:|
+| hp | 46 | 230 |
+| hp² | 2116 | 52900 |
+| hp³ | 97336 | 12167000 |
+
+**Question:** hp³ is tens of thousands of times larger than hp. Can you compare the sizes of their coefficients directly? Answer **yes** or **no**, with one reason about units.
+
+**Standardisation** subtracts each column's mean and divides by its standard deviation (SD). Compute both on the training cars only, then apply the same numbers to the test cars.
+
+```python
+poly3 = PolynomialFeatures(degree=3, include_bias=False)    # columns hp, hp^2, hp^3
+H_train = poly3.fit_transform(X_train[["horsepower"]])      # for the training cars
+H_test = poly3.transform(X_test[["horsepower"]])            # for the test cars
+
+scaler = StandardScaler()                                   # subtract the mean, divide by the SD
+Z_train = scaler.____(H_train)                              # learn mean and SD from the training cars, and apply them
+Z_test = scaler.____(H_test)                                # only apply them to the test cars
+
+column_means = Z_train.mean(axis=0)                         # the mean of each column
+column_sds = Z_train.std(axis=0)                            # the SD of each column
+print(column_means.round(2))                                # should be 0
+print(column_sds.round(2))                                  # should be 1
+```
+
+**Hint:** the first blank both learns and transforms (`fit_transform`); the second only transforms (`transform`).
+
+**Success check:** means `[0. 0. 0.]` (a `-0.` is fine) and SDs `[1. 1. 1.]`.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+Z_train = scaler.fit_transform(H_train)
+Z_test = scaler.transform(H_test)
+```
+
+Ranges question: **no**. A coefficient is "change in mpg per unit of that column", and the units are completely different. The test cars take no part in computing the mean and SD; otherwise they would no longer be cars the model has never seen.
+:::
+
+### 2.2 Is a higher degree always better?
+
+**Predict first:** we fit polynomials of degree 1 to 7 on the **ten cars** from last week's lecture. As the degree rises, will the **training** RMSE go up or down? Write one word, then run the cell without changing it.
+
+```python
+ten_X = X_train[["horsepower"]].iloc[:10]           # the ten cars from last week's lecture
+ten_y = y_train.iloc[:10]
+
+for degree in range(1, 8):                          # degree 1, 2, ..., 7
+    poly_d = PolynomialFeatures(degree=degree, include_bias=False)   # powers of horsepower
+    scaler_d = StandardScaler()                                       # standardise them
+    H10 = poly_d.fit_transform(ten_X)               # columns for the ten cars
+    Z10 = scaler_d.fit_transform(H10)               # standardised, using the ten cars
+    Ht = poly_d.transform(X_test[["horsepower"]])   # columns for the 79 test cars
+    Zt = scaler_d.transform(Ht)                     # standardised with the same numbers
+
+    model_d = LinearRegression()
+    model_d.fit(Z10, ten_y)                         # fit on the ten cars
+
+    pred_10 = model_d.predict(Z10)                  # predictions for the ten cars
+    pred_t = model_d.predict(Zt)                    # predictions for the test cars
+    train_rmse = mean_squared_error(ten_y, pred_10) ** 0.5    # error on the ten cars
+    test_rmse = mean_squared_error(y_test, pred_t) ** 0.5     # error on the test cars
+    sizes = np.abs(model_d.coef_)                   # coefficient sizes, ignoring the sign
+    largest = sizes.max()                           # the largest one
+    print(degree, round(train_rmse, 2), round(test_rmse, 2), round(largest))
+```
+
+**Success check** (each printed line is: degree, training RMSE, test RMSE, largest coefficient). The three largest coefficients may differ slightly in the last digits on your computer.
+
+| Degree | 1 | 2 | 3 | 4 | 5 | 6 | 7 |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Training RMSE | 4.61 | 3.43 | 3.41 | 3.39 | 2.08 | 2.03 | 1.89 |
+| Test RMSE | 4.59 | 4.67 | 4.52 | 5.88 | 276.3 | 68.66 | 7512.49 |
+| Largest coefficient | 5 | 22 | 47 | 340 | about 82 000 | about 253 000 | about 8 700 000 |
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** the training and test RMSE as two lines against the degree, instead of printed numbers.
+
+**Tell the AI:** the loop above prints `degree`, `train_rmse` and `test_rmse` for degrees 1 to 7.
+
+**Ask:** *"Change this loop so that it stores train_rmse and test_rmse in two lists, then plot both against the degree, with a log scale on the y-axis and a legend."*
+
+**Check:** the training line goes down all the way; the test line jumps up after degree 4; the points match the table above.
+:::
+
+**Questions:**
+
+1. Which degree has the **lowest test RMSE**? (one degree)
+2. Fill in: degrees ___ to 7 have a lower training RMSE than degree 3 but a higher test RMSE. This is **overfitting**: better on the cars it learned from, worse on new cars.
+3. The loss only measures how well the model fits. What could we **add to the loss** so that huge coefficients cost something? (a few words)
+
+::: {.callout-note collapse="true" title="Answer"}
+1. Degree 3.
+2. Degrees 4 to 7 (degree 4 only a little; degrees 5 to 7 badly).
+3. A penalty on large coefficients, for example the sum of the squared coefficients.
+:::
+
+## Part 3: Hold the coefficients down (6 minutes)
+
+**Goal:** add a penalty to the loss and see what it does, first with squares (Ridge), then with absolute values (Lasso).
+
+### 3.1 Ridge
+
+The first six lines rebuild the degree 7 columns for the ten cars; run them unchanged. Then fill `alpha` (the λ from the lecture).
+
+```python
+poly7 = PolynomialFeatures(degree=7, include_bias=False)    # degree 7: the model that overfitted
+scaler7 = StandardScaler()                                  # standardise the 7 columns
+H7_ten = poly7.fit_transform(ten_X)                         # degree 7 columns for the ten cars
+Z7_ten = scaler7.fit_transform(H7_ten)                      # standardised
+H7_test = poly7.transform(X_test[["horsepower"]])           # degree 7 columns for the test cars
+Z7_test = scaler7.transform(H7_test)                        # standardised with the same numbers
+
+ridge = Ridge(alpha=____)                                   # Ridge: penalty on squared coefficients
+ridge.fit(Z7_ten, ten_y)                                    # fit on the ten cars
+ridge_pred = ridge.predict(Z7_test)                         # predict the test cars
+ridge_mse = mean_squared_error(y_test, ridge_pred)          # mean squared error on the test cars
+print("test RMSE:", ridge_mse ** 0.5)
+print("coefficients:", ridge.coef_.round(2))
+print("coefficients exactly zero:", np.sum(ridge.coef_ == 0))
+```
+
+**Hint:** use `alpha` equal to 0.01.
+
+**Success check:** test RMSE about `4.36` (it was `7512` without a penalty); coefficients about `[-15.49 0.79 6.55 5.76 2.39 -1.18 -3.96]`; `0` coefficients exactly zero.
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** to see how much smaller the Ridge coefficients are than the coefficients without a penalty.
+
+**Tell the AI:** `Z7_ten` and `ten_y` are the degree 7 columns and targets of the ten cars; `ridge` is the fitted Ridge model.
+
+**Ask:** *"Fit LinearRegression on Z7_ten and ten_y. Then draw a bar chart with the absolute sizes of its 7 coefficients next to the absolute sizes of the 7 coefficients of ridge, using a log scale on the y-axis."*
+
+**Check:** the bars without a penalty reach millions; every Ridge bar is below about 16.
+:::
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+ridge = Ridge(alpha=0.01)
+```
+
+0 coefficients are exactly zero. Ridge makes every coefficient smaller, but it removes none of them.
+:::
+
+### 3.2 Lasso
+
+Lasso uses absolute values instead of squares in the penalty.
+
+```python
+lasso = ____(alpha=0.01, max_iter=1000000)                  # Lasso: penalty on absolute values; max_iter = how many steps it may take
+lasso.fit(Z7_ten, ten_y)                                    # fit on the same ten cars
+print("coefficients:", lasso.coef_.round(2))
+print("coefficients exactly zero:", np.sum(lasso.coef_ == 0))
+```
+
+**Hint:** the name of the model is the name of the method. You may see a `ConvergenceWarning`; with only ten cars that can happen, and it does not change the answer.
+
+**Success check:** `4` coefficients exactly zero.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+lasso = Lasso(alpha=0.01, max_iter=1000000)
+```
+
+4 coefficients are exactly zero. A coefficient of zero removes that column from the model, so Lasso also chooses columns. (Do not compare the two `alpha` values: scikit-learn writes the two losses with different scales.)
+:::
+
+## Part 4: Choose with cross-validation, test once (16 minutes)
+
+**Goal:** choose α without touching the test cars, then read the test cars once.
+
+### 4.1 One validation split wobbles
+
+We may not choose on the test cars. One idea is to keep part of the **training** cars aside as a validation set. We did this twice, with two different random splits, and compared polynomial degrees 1, 2 and 6 on horsepower:
+
+| Validation split | Degree 1 | Degree 2 | Degree 6 |
+|---|---:|---:|---:|
+| split 0 | 4.50 | 3.43 | 3.31 |
+| split 1 | 4.72 | 3.71 | 4.05 |
+
+**Questions:**
+
+1. Which degree is best on split 0? Which on split 1?
+2. Does one validation set give a reliable choice? Answer **yes** or **no**.
+
+::: {.callout-note collapse="true" title="Answer"}
+1. Degree 6 on split 0, degree 2 on split 1.
+2. No. The choice depends on how the cars happened to be split.
+:::
+
+### 4.2 Five folds
+
+**Cross-validation** splits the training cars into 5 folds. In each of 5 rounds, one fold is used for validation and the other four for fitting. Then we average the 5 RMSE values. We use the same folds as Assignment 1.
+
+```python
+kf = KFold(n_splits=5, shuffle=True, random_state=0)       # 5 folds, the same as in Assignment 1
+
+poly2 = PolynomialFeatures(degree=2, include_bias=False)    # horsepower and horsepower squared
+H2_train = poly2.fit_transform(X_train[["horsepower"]])
+
+scores = cross_val_score(LinearRegression(), H2_train, y_train, cv=____, scoring="neg_root_mean_squared_error")   # 5 rounds of fit and validate
+rmse_each_fold = -scores                                    # scikit-learn gives negative numbers: flip the sign
+print("RMSE in each fold:", rmse_each_fold.round(2))
+print("CV RMSE (the average):", rmse_each_fold.mean())
+```
+
+**Hint:** pass the folds you made in the first line.
+
+**Success check:** RMSE in each fold `[3.43 4.31 5.24 4.59 4.28]`, CV RMSE about `4.37`.
+
+**Question:** In how many of the 5 rounds is each training car used for validation? (one number)
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+scores = cross_val_score(LinearRegression(), H2_train, y_train, cv=kf, scoring="neg_root_mean_squared_error")
+```
+
+Exactly one. Every training car is used for validation once, so the result does not depend on one lucky split.
+:::
+
+### 4.3 Choose α with a loop
+
+Now a bigger model: the degree 2 polynomial of all six inputs, 27 columns. Run this block unchanged.
+
+```python
+poly27 = PolynomialFeatures(degree=2, include_bias=False)   # all six inputs, their squares and products
+scaler27 = StandardScaler()
+H27_train = poly27.fit_transform(X_train)                   # 27 columns for the training cars
+H27_test = poly27.transform(X_test)                         # 27 columns for the test cars
+Z27_train = scaler27.fit_transform(H27_train)               # standardised
+Z27_test = scaler27.transform(H27_test)
+print(Z27_train.shape)
+```
+
+**Success check:** `(313, 27)`.
+
+The loop tries 26 values of α and keeps the one with the lowest CV RMSE. Fill the model name.
+
+```python
+alphas = np.logspace(-3, 2, 26)          # 26 values of alpha, from 0.001 to 100
+cv_rmse = []                             # the CV RMSE for each alpha goes here
+
+for alpha in alphas:                                            # try each alpha in turn
+    model = ____(alpha=alpha)                                   # the model we are tuning
+    scores = cross_val_score(model, Z27_train, y_train, cv=kf, scoring="neg_root_mean_squared_error")   # 5 rounds
+    average_rmse = -scores.mean()                               # average RMSE over the 5 folds (sign flipped)
+    cv_rmse.append(average_rmse)                                # keep it in the list
+
+position = np.argmin(cv_rmse)            # where the smallest CV RMSE is in the list
+best_alpha_ridge = alphas[position]      # the alpha with the smallest CV RMSE
+print("best alpha:", best_alpha_ridge)
+print("position:", position, "(the list runs from 0 to 25)")
+print("CV RMSE:", cv_rmse[position])
+```
+
+**Hint:** we are choosing α for Ridge.
+
+**Success check:** best alpha about `0.0398`, position `8`, CV RMSE about `2.88`.
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** to see the CV RMSE as a curve of α, and where the best α sits.
+
+**Tell the AI:** the loop made two lists, `alphas` and `cv_rmse`; the chosen value is `best_alpha_ridge`.
+
+**Ask:** *"Plot cv_rmse against alphas with a log scale on the x-axis, and mark best_alpha_ridge with a red dot."*
+
+**Check:** the curve has its lowest point near α = 0.04, at a CV RMSE of about 2.88, and the red dot sits there.
+:::
+
+**Question:** Is the best α at either end of the list (position 0 or 25)? Answer **yes** or **no**. (If it were, the true best might lie outside the range, and you would widen it. Assignment 1 asks you to check this.)
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+    model = Ridge(alpha=alpha)
+```
+
+No, it is at position 8, inside the range.
+:::
+
+### 4.4 Read the test cars once
+
+Every choice is made. Fit the final model on all training cars and read the test cars **once**.
+
+```python
+final_ridge = Ridge(alpha=____)                  # Ridge with the alpha chosen by cross-validation
+final_ridge.fit(Z27_train, y_train)              # fit on all training cars
+pred_test = final_ridge.predict(Z27_test)        # predict the test cars, once
+mse = mean_squared_error(y_test, pred_test)
+print("test RMSE:", mse ** 0.5)
+```
+
+**Hint:** use the variable that holds the α chosen in 4.3.
+
+**Success check:** test RMSE about `2.64`.
+
+Here is the whole lab side by side (CV RMSE with the folds `kf`; fold SD is how much the RMSE varies from fold to fold):
+
+| Model | CV RMSE | Fold SD | Test RMSE |
+|---|---:|---:|---:|
+| straight line (hp) | 4.98 | 0.42 | 4.71 |
+| hp and hp² | 4.37 | 0.58 | 4.29 |
+| 27 columns, no penalty | 2.91 | 0.23 | 2.72 |
+| 27 columns, Ridge | 2.88 | 0.18 | 2.64 |
+| 27 columns, Lasso | 2.90 | 0.18 | 2.61 |
+
+**Question:** The CV RMSE of the last three rows differ by at most 0.03. The fold SD is about 0.2. Is the difference **bigger** or **smaller** than the fold SD? So, does the penalty clearly help with this much data? Answer **yes** or **no**, with one reason.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+final_ridge = Ridge(alpha=best_alpha_ridge)
+```
+
+Smaller, so **no**: with 313 training cars, the penalty changes the CV RMSE by much less than the fold-to-fold variation. The new columns are what made the big difference (from about 4.4 to about 2.9). The test column only confirms the choice; it was not used to make it.
+:::
+
+# After class: how today's lab helps with Assignment 1
+
+Assignment 1 (California housing, due 6 November) runs the same chain on a different dataset. **From today you can start Sections 1 to 4.**
+
+| What you did today | Where it appears in Assignment 1 |
+|---|---|
+| Part 0: a residual plot, looking for a pattern | Section 1, Figure 2 (predicted value against residual), and "are the points scattered at random, or do they have a shape?" |
+| Part 1: building new columns (a square, an interaction) | Section 2, building fairer features from the totals (the brief's example is rooms per household), and "take a logarithm, multiply two quantities" |
+| Parts 2 and 3: overfitting, huge coefficients, Ridge and Lasso | Section 3, the 9 models of Table 3 (degrees 1 to 3, with linear regression, Ridge and Lasso), and "does the table contain a very large number?" |
+| Part 4: cross-validation to choose α, the test set once | Rule 1 (fit, choose and compare on `train` only), CV RMSE, "the alpha you choose must not sit at either end of your search range", and Section 4 (use `test` once) |
+
+**Three things that are different in the assignment.**
+
+1. The assignment gives you `kf = KFold(n_splits=5, shuffle=True, random_state=0)`. Use that same `kf` for every comparison, as you did in Part 4.
+2. The hint in Section 3 uses `make_pipeline(StandardScaler(), PolynomialFeatures(...), StandardScaler(), Ridge(...))`. The last three steps are today's expansion, standardisation and fit, packed into one object; inside cross-validation each fold then standardises using only its own fitting part. (In 4.3 we standardised once, on all training cars, to keep the code simple; on these data the per-fold version chooses the same α.) The first `StandardScaler` is an extra step: it standardises the raw columns before the expansion, so that squares and products of large counts (population and rooms run to tens of thousands) do not become enormous numbers.
+3. Figures 1 and 2 in Section 1 use **out-of-fold predictions**, `cross_val_predict(model, X, y, cv=kf)`: the prediction for each block comes from a model that has not seen that block.
+
+**Reflection** (after class, one or two sentences each):
+
+1. Where was last week's model not strong enough, and what evidence showed it?
+2. Which new column did you build, and why?
+3. What did the huge coefficients tell you, and how did Ridge and Lasso deal with them?
+4. Why must we not use the test set to choose α?
+
+# Advanced Study
+
+MPS311 students are encouraged to try one. **MPS439 students complete A** and record it in the log at the end. Allow about 30 minutes for each. B and C are extras for everyone. Write your own code; you may ask AI for help, but you are responsible for checking the result.
+
+## A. Condition number and standardisation
+
+**Tasks**
+
+1. On the 27 standardised columns `Z27_train`, for each λ in `np.logspace(-3, 3, 13)`, compute the condition number of `Z.T @ Z + λ I` with `np.linalg.cond`. Plot it against λ on log axes. Explain the shape with the formula from Advanced Study 1 of the Note: (largest eigenvalue + λ) / (smallest eigenvalue + λ).
+2. Do the same with the 27 columns **before** standardisation (`H27_train`). Compare, and explain the difference using what the lecture said about units.
+
+::: {.callout-tip title="Ask AI"}
+Ask: *"Why does adding λ to the diagonal of XᵀX make the problem better conditioned?"* Check its answer against your plot.
+:::
+
+::: {.callout-note collapse="true" title="Hint"}
+`np.eye(27)` is the identity matrix. Plot with `plt.loglog(lams, conds)`.
+:::
+
+**Self-check** (run after your code)
+
+```python
+Z = Z27_train
+print(np.linalg.cond(Z.T @ Z))                        # lambda = 0
+print(np.linalg.cond(Z.T @ Z + 1.0 * np.eye(27)))     # lambda = 1
+```
+
+The two numbers should be about `1260000` and `6260`. Before standardisation they stay above about `1e+13` for every λ, far above the standardised ones.
+
+## B. Write Lasso yourself
+
+**Tasks**
+
+1. Write `soft(z, t)`, which returns `z - t` if `z > t`, `z + t` if `z < -t`, and `0` otherwise.
+2. Fit Lasso by **coordinate descent** on `Z27_train` with `α = 0.05`: centre `y_train`, start from all-zero coefficients, and repeat 1000 times: for each column `j`, compute `rho = Z[:, j] @ (r + Z[:, j] * w[j]) / n`, where `r` is the current residual, and set `w[j] = soft(rho, α) / (Z[:, j] @ Z[:, j] / n)`; update the residual.
+3. Compare your coefficients and the number of non-zero ones with `Lasso(alpha=0.05)`. Then try 200 sweeps instead of 1000: what goes wrong, and why might highly correlated columns make coordinate descent slow?
+
+::: {.callout-tip title="Ask AI"}
+Ask the AI to explain why coordinate descent for Lasso uses soft thresholding. Then check its code against your own on the self-check.
+:::
+
+::: {.callout-note collapse="true" title="Hint"}
+scikit-learn's Lasso minimises (1/(2n)) × (sum of squared residuals) + α × (sum of |w|). With standardised columns, `Z[:, j] @ Z[:, j] / n` is 1.
+:::
+
+**Self-check** (run after your code, with your coefficients in `w`)
+
+```python
+ref = Lasso(alpha=0.05, max_iter=100_000).fit(Z27_train, y_train)
+print(np.abs(w - ref.coef_).max() < 0.05, (w != 0).sum(), (ref.coef_ != 0).sum())
+```
+
+The result should be `True 11 11`.
+
+## C. Coefficient paths, and one more idea
+
+**Tasks**
+
+1. For α on a log grid, fit Ridge and Lasso on `Z27_train` and plot each coefficient against α (two plots). Compare with the Lasso path in the Note.
+2. Repeat the loop of 4.3 for Lasso, with `alphas = np.logspace(-4, 1, 26)` and `Lasso(alpha=alpha, max_iter=100000)` (best α about `0.0025`, CV RMSE about `2.90`; the Note reports a slightly different α because it uses unshuffled folds).
+3. Then choose one: compare polynomial degrees 1 to 6 on horsepower with cross-validation; compare "hour as a number" with sin and cos of the hour on the bike-sharing data from the lecture; or compare `ElasticNet` with Ridge and Lasso on the 27 columns. Write what you found and one limitation.
+
+**Self-check:** in the Ridge plot every curve shrinks smoothly towards zero; in the Lasso plot the curves reach exactly zero one after another.
+
+## Advanced Study log
+
+Copy this into a text cell at the end of your notebook.
+
+> **Investigation chosen (A, B or C):**
+>
+> **What I found:**
+>
+> **How AI helped, and what I had to correct:**
+>
+> **Self-check result (passed or not):**
+
+# Appendix: only if the data did not load
+
+Do not run these cells if the setup in 0.1 worked. First try the independent CDN copy.
+
+```python
+BACKUP_URL = "https://cdn.jsdelivr.net/gh/wayXing/mps311-439-course-materials@main/lecture-slids/lessons/lesson2/lab/auto_mpg.csv"
+cars = pd.read_csv(BACKUP_URL)
+print("Rows and columns:", cars.shape)
+```
+
+If both websites are unavailable, download `auto_mpg.csv`, use Colab's **Files → Upload** button, and then run this cell.
+
+```python
+cars = pd.read_csv("auto_mpg.csv")
+print("Rows and columns:", cars.shape)
+```
+
+<!-- COURSE_FEEDBACK_QR:START -->
+---
+
+## 30-second feedback
+
+Scan the code to share anonymous feedback or post a question for this lab. It opens the correct **Lesson 3 lab** record automatically.
+
+![Feedback QR code for Lesson 3 lab](./feedback-qr.png){fig-align="center" width="180px"}
+<!-- COURSE_FEEDBACK_QR:END -->

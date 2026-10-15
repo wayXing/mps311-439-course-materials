@@ -69,7 +69,7 @@ while k<20:
     if np.ptp(hp[i])<30: continue
     w,b=np.polyfit(hp[i],y[i],1);ax.plot(xl,b+w*xl,color=G,lw=1.6,alpha=0.35,zorder=2);k+=1;slopes.append(w)
 ax.plot(xl,b10+w10*xl,color=G,lw=3.6,zorder=4,label="Our 10 cars");ax.scatter(x10,y10,color=B,s=60,zorder=5)
-ax.plot(xl,b313+w313*xl,color="#172033",lw=2.6,ls="--",zorder=4,label="All 313 training cars")
+ax.plot(xl,b313+w313*xl,color="#172033",lw=2.6,ls="--",zorder=4,label="All 313 cars")
 ax.set_xlim(45,230);ax.set_ylim(5,47);ax.set_xlabel("Horsepower (hp)");ax.set_ylabel("mpg");ax.legend(frameon=False,fontsize=13,loc="upper right")
 out["spaghetti_slopes_range"]=[float(min(slopes)),float(max(slopes))];save(fig,"F13")
 # F14 train vs test over 200 sets

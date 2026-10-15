@@ -2,19 +2,16 @@ import { execFile } from 'node:child_process';
 import { dirname, resolve } from 'node:path';
 import { promisify } from 'node:util';
 import { fileURLToPath } from 'node:url';
-import { teachingLessons } from './course-lessons.mjs';
+import { lessonPaths, teachingLessons } from './course-lessons.mjs';
 
 const execFileAsync = promisify(execFile);
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 for (const lesson of teachingLessons) {
-  const slide = lesson <= 2
-    ? `lessons/lesson${lesson}/lecture/slides/${lesson === 2 ? "slide_v2" : "slide"}.qmd`
-    : `lessons/lesson${lesson}/lecture/slide.md`;
-  const lab = `lessons/lesson${lesson}/lab/lab_worksheet.${lesson === 2 ? "qmd" : "md"}`;
+  const { quarto, slideSource: slide, labSource: lab } = lessonPaths(lesson);
 
   console.log(`Building Lesson ${lesson} slides...`);
-  if (lesson <= 2) {
+  if (quarto) {
     await execFileAsync('quarto', [
       'render', slide, '--to', 'revealjs', '--quiet',
     ], { cwd: projectRoot, maxBuffer: 20 * 1024 * 1024 });

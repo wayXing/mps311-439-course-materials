@@ -395,6 +395,10 @@ One problem remains unsolved here. The comparison of the four models can only be
 
 **Back to the promise at the start.** Faced with a problem of the kind "guess a number from a few measurements", you can now do the following. Write it as data using features and a target. Choose a linear model, judge it by the MSE, and find the parameters with the normal equation or `fit`. Check it with a test set and a baseline. And say where it cannot be trusted. That is everything in this lecture.
 
+**30-second feedback.** When you finish this lesson, scan the code to leave anonymous feedback or a question. Anything that was unclear or too fast is useful to know.
+
+![Feedback QR code for this lesson](./slides/feedback-qr.svg){fig-align="center" width="160px" fig-alt="Feedback QR code"}
+
 *MPS311 students are encouraged to read the studies below; MPS439 students should complete at least one of Studies 1 to 3.*
 
 ---

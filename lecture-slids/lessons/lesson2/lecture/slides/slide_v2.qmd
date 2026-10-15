@@ -203,7 +203,7 @@ Residual = measured minus predicted. Square it, then average.
 
 ::: {.formula .m2}
 $$
-\textcolor{#C84B00}{J(\mathbf w)}=\frac1n\sum_{i=1}^{n}\bigl(\textcolor{#0072B2}{y_i}-\textcolor{#00795A}{\hat y_i}\bigr)^2
+\textcolor{#C84B00}{J(b,w)}=\frac1n\sum_{i=1}^{n}\bigl(\textcolor{#0072B2}{y_i}-\textcolor{#00795A}{\hat y_i}\bigr)^2
 $$
 :::
 
@@ -336,7 +336,7 @@ Twenty sets of ten cars, twenty different best lines. "Best" means best **on the
 :::
 
 ::: {.notes}
-约 1.5 分钟。第 5 步 Test：回答“新车上能信吗”。灰点是 313 辆训练车，每条淡绿线是换一组 10 辆车得到的最佳直线（随机抽样、没有挑选），粗绿线是我们这十辆，虚线是用全部 313 辆车的结果。斜率最陡和最平的差一倍以上。收一句：我们关心的是没见过的车，而现在算出的“最好”只对用过的车成立。
+约 1.5 分钟。第 5 步 Test：回答“新车上能信吗”。灰点是另外 313 辆车（下一页才叫训练车，这页先不用这个词），每条淡绿线是换一组 10 辆车得到的最佳直线（随机抽样、没有挑选），粗绿线是我们这十辆，虚线是用全部 313 辆车的结果。斜率最陡和最平的差一倍以上。收一句：我们关心的是没见过的车，而现在算出的“最好”只对用过的车成立。
 :::
 
 ## [Test:]{.stg} Keep some cars out of the fitting
@@ -370,9 +370,9 @@ Each dot is a line fitted to a different set of ten training cars. The line usua
 
 ## [Test:]{.stg} Do the models beat a simple guess?
 
-::: {.stage}
+::: {.stage .tight}
 ::: {.say}
-Baseline: always guess the training mean, 23.60 mpg. Each model is fitted on the 313 training cars. Test RMSE on the 79 test cars:
+Baseline: always guess the training mean, 23.60 mpg. Test RMSE on the 79 test cars, models fitted on the 313 training cars:
 :::
 
 ::: {.bars}
@@ -383,13 +383,13 @@ Baseline: always guess the training mean, 23.60 mpg. Each model is fitted on the
 <div><div class="lab">Model 4<small>all six features</small></div><div class="bar" style="width:45.1%"></div><div class="v">3.24</div></div>
 :::
 
-::: {.muted .small}
-Read these numbers, but do not use them to pick features again and again: each pick would leak the test cars into the choice.
+::: {.say}
+Model 2 beats Model 1. What does it say about horsepower?
 :::
 :::
 
 ::: {.notes}
-约 2.5 分钟。基线在这里第一次引入：最朴素的猜法，永远猜训练均值。模型 1 就是我们的直线（用全部 313 辆训练车拟合，w = −0.163，b = 40.61）。模型 2 与 3 没有实质差别。最后一句为局限页埋伏笔。收一句：模型 2 比模型 1 好，它对马力说了什么？
+约 2.5 分钟。基线在这里第一次引入：最朴素的猜法，永远猜训练均值。模型 1 就是我们的直线（用全部 313 辆训练车拟合，w = −0.163，b = 40.61）。模型 2 与 3 没有实质差别。口头提醒：读这些数字，但不要拿测试车反复挑特征，每挑一次测试车就漏进选择里一点；这一点在局限页留成未解问题。收一句：模型 2 比模型 1 好，它对马力说了什么？
 :::
 
 ## How to read a coefficient

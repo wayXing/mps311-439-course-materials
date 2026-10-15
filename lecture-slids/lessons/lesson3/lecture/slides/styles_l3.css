@@ -1,0 +1,54 @@
+/* extras for Lesson 3 only; base look comes from styles.css (copied from Lesson 2) */
+.reveal .fig-s2{width:780px}
+.reveal .fig-s3{width:1380px}
+.reveal .fig-f2w{width:960px}
+.reveal .fig-f4a{width:720px}
+.reveal .fig-f4b{width:1300px}
+.reveal .flow.four{grid-template-columns:repeat(4,1fr)}
+.reveal .rows.compact{gap:14px}
+.reveal .rows.compact>div{padding-top:14px;grid-template-columns:150px 1fr}
+.reveal .rows.compact b{font-size:1.2em}
+.reveal .two.f3{grid-template-columns:780px 1fr;gap:44px}
+.reveal .two.f3 .fig{width:100%;max-height:520px;object-fit:contain}
+.reveal table{font-size:.82em;margin:0 auto;border-collapse:collapse}
+.reveal table th,.reveal table td{padding:8px 18px;border-bottom:1px solid var(--rule)}
+.reveal table td:first-child,.reveal table th:first-child{text-align:left}
+/* the two widgets come from the English Note; enlarge them for the projector */
+.reveal #w-i3,.reveal #w-i5{zoom:1.0}
+.reveal #w-i3 svg{width:730px;max-width:730px!important}
+.reveal #w-i5 svg{width:660px;max-width:660px!important}
+.reveal #w-i3 #i3c,.reveal #w-i5 #i5c{width:740px;max-width:740px!important}
+.reveal #w-i5 #i5c{width:660px}
+.reveal #w-i3 .wrow,.reveal #w-i5 .wrow{justify-content:center}
+.reveal .final-slide .takeaway{grid-template-columns:minmax(0,1fr) 380px;gap:50px}
+.reveal .final-slide .takeaway .fig{width:100%;max-height:640px}
+.reveal pre,.reveal pre code{max-height:none!important;overflow:visible!important}
+.reveal pre{font-size:.78em}
+.reveal .rows.tiny{gap:6px}
+.reveal .rows.tiny>div{padding-top:8px;grid-template-columns:150px 1fr}
+.reveal .rows.tiny b{font-size:1.15em}
+.reveal .final-slide .chain p{display:inline;margin-left:14px}
+.reveal .final-slide .chain b{display:inline}
+.reveal .fig-s5{width:860px}
+.reveal .fig-s6{width:1400px}
+.reveal .fig-s7{width:900px}
+.reveal .fig-s8{width:1250px}
+.reveal .fig-s11{width:1250px}
+.reveal .fig-s13{width:1420px}
+.reveal .fig-s21{width:940px}
+.reveal .two.f19{grid-template-columns:820px 1fr;gap:50px}
+.reveal .two.f19 .fig{width:100%}
+.reveal .two.f20{grid-template-columns:720px 1fr;gap:40px}
+.reveal .two.f20 .fig{width:100%}
+.reveal .fig-s5{width:740px}
+.reveal .fig-s7{width:800px}
+.reveal .fig-s21{width:860px}
+.reveal .fig-s10{width:700px}
+.reveal .two.side{grid-template-columns:860px 1fr;gap:50px;align-items:center}
+.reveal .two.side .fig{width:100%}
+.reveal .fig-s6{width:1250px}
+.reveal .fig-s7a{width:1180px}
+.reveal #w-i3 svg,.reveal #w-i3 #i3c{width:640px!important;max-width:640px!important}
+.reveal .two.f20{grid-template-columns:600px 1fr;gap:40px;align-items:center}
+.reveal .two.f19{grid-template-columns:720px 1fr}
+.reveal .two.f20{grid-template-columns:860px 1fr;gap:50px;align-items:center}

@@ -265,64 +265,34 @@
       "slug": "lesson-03",
       "number": "03",
       "label": "Lesson 03",
-      "title": "From lines to curves",
+      "title": "Making the model stronger",
       "shortTitle": "Features & regularisation",
-      "summary": "A straight line cannot express every useful pattern, but greater flexibility also makes it easier to learn noise.",
+      "summary": "When a straight line misses the pattern, build better features; when the model becomes too flexible, hold it down with a penalty, and choose how flexible with cross-validation.",
       "accent": "violet",
       "type": "teaching",
       "topics": [
-        "Polynomial and interaction features",
-        "Ridge and lasso",
+        "Feature engineering and standardisation",
+        "Overfitting, Ridge and Lasso",
         "Cross-validation"
       ],
       "resources": [
         {
           "label": "Interactive slides",
-          "description": "Open the full Slidev presentation.",
+          "description": "Open the full Quarto/RevealJS presentation.",
           "kind": "slides",
           "group": "Lecture",
-          "source": "lesson3/lecture/dist",
-          "target": "materials/lesson3/slides",
-          "href": "materials/lesson3/slides/index.html",
-          "directory": true
-        },
-        {
-          "label": "Slides PDF",
-          "description": "Download or print the lecture slides.",
-          "kind": "pdf",
-          "group": "Lecture",
-          "source": "lesson3/lecture/slide-export.pdf",
-          "target": "materials/lesson3/slides.pdf",
-          "href": "materials/lesson3/slides.pdf"
+          "source": "lesson3/lecture/slides/slide.html",
+          "target": "materials/lesson3/slides/index.html",
+          "href": "materials/lesson3/slides/index.html"
         },
         {
           "label": "Lecture notes",
           "description": "Read the extended explanation online.",
           "kind": "notes",
           "group": "Lecture",
-          "source": "lesson3/lecture/note.html",
+          "source": "lesson3/lecture/note_en.html",
           "target": "materials/lesson3/notes.html",
           "href": "materials/lesson3/notes.html"
-        },
-        {
-          "label": "Notes PDF",
-          "description": "Download the extended lecture notes.",
-          "kind": "pdf",
-          "group": "Lecture",
-          "source": "lesson3/lecture/note.pdf",
-          "target": "materials/lesson3/notes.pdf",
-          "href": "materials/lesson3/notes.pdf"
-        },
-        {
-          "label": "Demo",
-          "description": "Read the worked examples in the browser.",
-          "kind": "notebook",
-          "group": "Lecture",
-          "source": "lesson3/lecture/demo.ipynb",
-          "target": "materials/lesson3/demo",
-          "href": "materials/lesson3/demo/demo.html",
-          "downloadHref": "materials/lesson3/demo/demo.ipynb",
-          "render": "quarto"
         },
         {
           "label": "Lab worksheet",
@@ -345,13 +315,54 @@
           "render": "quarto"
         },
         {
-          "label": "Lab worksheet (PDF)",
-          "description": "Download a printable worksheet.",
-          "kind": "pdf",
-          "group": "Lab",
-          "source": "lesson3/lab/lab_worksheet.pdf",
-          "target": "materials/lesson3/lab.pdf",
-          "href": "materials/lesson3/lab.pdf"
+          "label": "Slides (UoS 2025)",
+          "description": "Open the 2025 lecture retained in the course archive.",
+          "kind": "slides",
+          "group": "Archive",
+          "source": "lesson3/archive/uos-2025/lecture/dist",
+          "target": "materials/lesson3/archive/uos-2025/slides",
+          "href": "materials/lesson3/archive/uos-2025/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Lecture notes (UoS 2025)",
+          "description": "Read the notes accompanying the 2025 lecture.",
+          "kind": "notes",
+          "group": "Archive",
+          "source": "lesson3/archive/uos-2025/lecture/note.html",
+          "target": "materials/lesson3/archive/uos-2025/notes.html",
+          "href": "materials/lesson3/archive/uos-2025/notes.html"
+        },
+        {
+          "label": "Lab worksheet (UoS 2025)",
+          "description": "Open the 2025 practical worksheet.",
+          "kind": "worksheet",
+          "group": "Archive",
+          "source": "lesson3/archive/uos-2025/lab/lab_worksheet.html",
+          "target": "materials/lesson3/archive/uos-2025/lab.html",
+          "href": "materials/lesson3/archive/uos-2025/lab.html"
+        },
+        {
+          "label": "Demo notebook (UoS 2025)",
+          "description": "Read the 2025 worked examples in the browser.",
+          "kind": "notes",
+          "group": "Archive",
+          "source": "lesson3/archive/uos-2025/lecture/demo.ipynb",
+          "target": "materials/lesson3/archive/uos-2025/demo",
+          "href": "materials/lesson3/archive/uos-2025/demo/demo.html",
+          "downloadHref": "materials/lesson3/archive/uos-2025/demo/demo.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab solution (UoS 2025)",
+          "description": "Review the 2025 worked lab notebook in the browser.",
+          "kind": "solution",
+          "group": "Archive",
+          "source": "lesson3/archive/uos-2025/lab/lab_solution.ipynb",
+          "target": "materials/lesson3/archive/uos-2025/solution",
+          "href": "materials/lesson3/archive/uos-2025/solution/lab_solution.html",
+          "downloadHref": "materials/lesson3/archive/uos-2025/solution/lab_solution.ipynb",
+          "render": "quarto"
         }
       ]
     },

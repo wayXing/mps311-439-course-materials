@@ -1,7 +1,7 @@
 import { readFile, stat } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { teachingLessons } from './course-lessons.mjs';
+import { lessonPaths, teachingLessons } from './course-lessons.mjs';
 
 const projectRoot = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const problems = [];
@@ -14,15 +14,7 @@ async function fileStat(relativePath) {
 }
 
 for (const lesson of teachingLessons) {
-  const slideSource = lesson <= 2
-    ? `lessons/lesson${lesson}/lecture/slides/${lesson === 2 ? "slide_v2" : "slide"}.qmd`
-    : `lessons/lesson${lesson}/lecture/slide.md`;
-  const slideBuild = lesson <= 2
-    ? `lessons/lesson${lesson}/lecture/slides/${lesson === 2 ? "slide_v2" : "slide"}.html`
-    : `lessons/lesson${lesson}/lecture/dist/index.html`;
-  const labSource = `lessons/lesson${lesson}/lab/lab_worksheet.${lesson === 2 ? "qmd" : "md"}`;
-  const labBuild = `lessons/lesson${lesson}/lab/lab_worksheet.html`;
-  const solution = `lessons/lesson${lesson}/lab/lab_solution.ipynb`;
+  const { slideSource, slideBuild, labSource, labBuild, solution } = lessonPaths(lesson);
 
   const [slideSourceStat, slideBuildStat, labSourceStat, labBuildStat, solutionStat] = await Promise.all([
     fileStat(slideSource),
