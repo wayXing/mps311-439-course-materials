@@ -206,13 +206,19 @@ steps = [("模型不够强", "残差有规律、误差大", B),
          ("正则化", "Ridge 缩小、Lasso 置零、Elastic Net 兼顾", G),
          ("交叉验证", "选阶数与 λ，不碰测试集", B),
          ("测试集读一次", "报告最终结果和局限", B)]
-BW = 3.9 if EN else 2.6                       # English labels are longer
 fig, ax = plt.subplots(figsize=(10.4 if EN else 7.2, 4.6)); ax.axis("off")
-ax.set_xlim(0, 10 + (BW - 2.6) * 1.6); ax.set_ylim(0, len(steps))
+ax.set_xlim(0, 10); ax.set_ylim(0, len(steps))
+# Size the boxes from the widest rendered label, so long English labels stay inside.
+heads = [ax.text(0, len(steps) - 0.5 - k, s[0], ha="center", va="center", weight="bold", color=s[2], fontsize=13)
+         for k, s in enumerate(steps)]
+fig.canvas.draw()
+to_data = ax.transData.inverted()
+widest = max(np.ptp(to_data.transform(t.get_window_extent())[:, 0]) for t in heads)
+BW = widest + 0.5
 for k, (h, sub, col) in enumerate(steps):
     yy = len(steps) - 1 - k
     ax.add_patch(Rectangle((0.2, yy + 0.12), BW, 0.76, facecolor=col, alpha=0.14, edgecolor=col, lw=1.4))
-    ax.text(0.2 + BW / 2, yy + 0.5, h, ha="center", va="center", weight="bold", color=col, fontsize=13)
+    heads[k].set_x(0.2 + BW / 2)
     ax.text(0.5 + BW, yy + 0.5, sub, va="center", fontsize=12.5, color="#333")
     if k < len(steps) - 1:
         ax.annotate("", xy=(0.2 + BW / 2, yy - 0.12), xytext=(0.2 + BW / 2, yy + 0.12), arrowprops=dict(arrowstyle="->", color="#666", lw=1.2))
