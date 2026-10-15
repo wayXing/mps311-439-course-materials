@@ -7,6 +7,9 @@ author:
 date: "2026-10"
 lang: en
 css: ../../shared/note.css
+format:
+  html:
+    embed-resources: true
 ---
 
 ## 1. Motivation: Where Last Lesson's Model Falls Short
