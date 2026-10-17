@@ -1,0 +1,413 @@
+---
+pagetitle: "Lab 10: Using the Spatial Structure of Images"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-copy: true
+    embed-resources: true
+    css: ../../shared/note.css
+    include-after-body: ../../shared/code_wrap.html
+    theme: default
+---
+
+# Lab 10: Using the Spatial Structure of Images
+## MPS311/439 Machine Learning
+**Lesson 10 Lab Session | Core duration: 50 minutes**
+
+## What this lab is for
+
+In the lecture we saw that the fully connected network of Lesson 9 does not care where the pixels are, and a convolutional network (CNN) does. Today you check this yourself on MNIST:
+
+1. shuffle the pixels and see that the fully connected network does not mind;
+2. build a small CNN, count its weights and train it;
+3. move the digits 2 pixels to the right and test both networks;
+4. look at the CNN's mistakes, as Assignment 2 asks.
+
+Before each step you will see a question. **Write down your own answer first**, then run the code and compare.
+
+Most code is provided. Your job is to fill the blanks `____`, run the cell, and check your result against the **Success check**. Each training cell says roughly how long it runs in Colab. At the end there is a short section on how today's lab helps with **Assignment 2**.
+
+## How to work
+
+1. Open a **blank** Colab notebook (**File → New notebook in Drive**), as in Labs 1 to 9. Keras is already installed in Colab; you do not need a GPU.
+2. Copy each code block into a cell, fill in the blanks, and run it. Cells depend on the cells above, so run them from top to bottom.
+3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
+4. Each task has a one-line **Hint** and a folded **Answer**. Try first. Open the Answer only to check your work. If you fall behind, copy the Answer of a task and carry on: every later task still works.
+5. Running every cell and matching the Success checks is a complete lab. Your last digit or two may differ from the Success check: Colab and the computer that made this page do the arithmetic in a slightly different order. A difference in the third decimal place is fine.
+6. If you run a training cell a second time, run the cell that builds that network first; otherwise `fit` carries on from the weights it has already trained.
+7. The **Try with AI** boxes are for when you finish early, or after class. They follow the four steps below.
+
+### Using AI
+
+The **Try with AI** boxes use an AI assistant for the Python you do not know yet, while you stay in charge of the machine learning. Every box has the same four steps:
+
+1. **You want:** say what you want in machine-learning words (for example, "the 16 first-layer filters as 3 × 3 images").
+2. **Tell the AI:** the names of the variables it should use.
+3. **Ask:** the request.
+4. **Check:** compare the AI's result with a number or shape given on this page. If it does not match, the AI or your question is wrong. Find out which.
+
+## Part 0: Load MNIST in two shapes (6 minutes)
+
+**Goal:** the split of Assignment 2, once as rows of 784 numbers (for the fully connected network) and once as 28 × 28 × 1 images (for the CNN).
+
+**Note:** to save time, the Lab trains for fewer epochs than the lecture (3 epochs for the fully connected network, 2 for the CNN, instead of 5). Your numbers will differ a little from the slides; the Success checks give the Lab's numbers.
+
+### 0.1 Load and split
+
+Run the cell without changing it.
+
+```python
+import numpy as np                                        # numbers and arrays
+import matplotlib.pyplot as plt                           # plots
+from tensorflow import keras                              # neural networks
+
+(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()   # x_test is not used today
+X = x_train.reshape(-1, 28, 28, 1) / 255.0                # 60,000 images of 28 x 28 x 1, between 0 and 1
+y = y_train                                               # the digit, 0 to 9
+X_fit = X[:50000]                                         # the first 50,000 images: fit the models
+y_fit = y[:50000]                                         # and their digits
+X_val = X[50000:]                                         # the last 10,000 images: compare the models
+y_val = y[50000:]                                         # and their digits
+X_fit_flat = X_fit.reshape(-1, 784)                       # the same images as rows of 784 numbers
+X_val_flat = X_val.reshape(-1, 784)
+print(X_fit.shape, X_fit_flat.shape)                      # the two shapes
+```
+
+**Success check:** `(50000, 28, 28, 1) (50000, 784)`.
+
+## Part 1: Shuffle the pixels (8 minutes)
+
+**Goal:** see that the fully connected network does not use which pixel is next to which.
+
+### 1.1 The fully connected network, as in Lab 9
+
+Run the cell without changing it. It trains for 3 epochs: about 20 seconds in Colab.
+
+```python
+keras.utils.set_random_seed(0)                            # fix the random start
+dense = keras.Sequential([
+    keras.layers.Input((784,)),                           # 784 pixels in a row
+    keras.layers.Dense(128, activation="relu"),           # hidden layer 1
+    keras.layers.Dense(128, activation="relu"),           # hidden layer 2
+    keras.layers.Dense(10, activation="softmax"),         # one probability per digit
+])
+dense.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])   # as in Lab 9
+hist = dense.fit(X_fit_flat, y_fit, epochs=3, validation_data=(X_val_flat, y_val), verbose=0)    # 3 epochs
+print(round(hist.history["val_accuracy"][-1], 4))         # validation accuracy after 3 epochs
+```
+
+**Success check:** about `0.974`.
+
+### 1.2 The same network on shuffled pixels
+
+**Question first:** every image will have its 784 pixels moved by **the same** new order. A person can no longer read the digits. What will the network's validation accuracy be?
+
+The first line shuffles the fitting images. Fill the blank in the second line so that the validation images are shuffled **in the same way**, and run. This cell does not train anything; the training result is given below it, to save time in class.
+
+```python
+order = np.random.default_rng(0).permutation(784)         # one fixed new order of the 784 pixels
+X_fit_mixed = X_fit_flat[:, order]                        # every fitting image, pixels in the new order
+X_val_mixed = X_val_flat[:, ____]                         # every validation image, in the same order
+
+plt.figure(figsize=(4, 2))                                # one image before and after
+plt.subplot(1, 2, 1)
+plt.imshow(X_fit_flat[0].reshape(28, 28), cmap="Greys")
+plt.subplot(1, 2, 2)
+plt.imshow(X_fit_mixed[0].reshape(28, 28), cmap="Greys")
+plt.show()
+```
+
+**Hint:** look at the first line. A model trained on one order of pixels must be tested on the same order.
+
+**Success check:** a 5 and a cloud of dots.
+
+**The result.** The network of 1.1, trained in the same way (3 epochs, seed 0) on the shuffled images, reaches a validation accuracy of `0.9731`, against `0.9741` on the real images.
+
+**Question:** in one sentence, why does the network not mind?
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+X_val_mixed = X_val_flat[:, order]                        # every validation image, in the same order
+```
+
+Each pixel has its own weight, and nothing in the network says which pixels are neighbours; moving the columns only moves the weights with them, so it is the same problem.
+:::
+
+::: {.callout-note collapse="true" title="After class: train it yourself (about 20 seconds in Colab)"}
+```python
+keras.utils.set_random_seed(0)                            # the same start as 1.1
+mixed = keras.Sequential([
+    keras.layers.Input((784,)),
+    keras.layers.Dense(128, activation="relu"),
+    keras.layers.Dense(128, activation="relu"),
+    keras.layers.Dense(10, activation="softmax"),
+])                                                        # the network of 1.1
+mixed.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])    # as in 1.1
+hist_mixed = mixed.fit(X_fit_mixed, y_fit, epochs=3, validation_data=(X_val_mixed, y_val), verbose=0)   # 3 epochs
+print(round(hist_mixed.history["val_accuracy"][-1], 4))   # validation accuracy on shuffled pixels: about 0.973
+```
+:::
+
+## Part 2: Build and train a CNN (14 minutes)
+
+**Goal:** the CNN of the lecture: two convolutions, each followed by max pooling, then 10 softmax units.
+
+### 2.1 Build the CNN
+
+**Question first:** the first layer should have 16 filters, each looking at a 3 × 3 patch. What are the two numbers?
+
+Fill the two blanks of the first `Conv2D`: the number of filters, then the size of each filter.
+
+```python
+keras.utils.set_random_seed(0)                            # fix the random start
+cnn = keras.Sequential([
+    keras.layers.Input((28, 28, 1)),                      # height, width, one image
+    keras.layers.Conv2D(____, ____, activation="relu"),   # first convolution
+    keras.layers.MaxPooling2D(2),                         # keep the largest of each 2 x 2
+    keras.layers.Conv2D(32, 3, activation="relu"),        # 32 filters of 3 x 3
+    keras.layers.MaxPooling2D(2),                         # keep the largest of each 2 x 2
+    keras.layers.Flatten(),                               # all the numbers in one row
+    keras.layers.Dense(10, activation="softmax"),         # one probability per digit
+])
+cnn.summary()                                             # the shape and the weights of each layer
+```
+
+**Hint:** `Conv2D(number of filters, size, ...)`; a size of `3` means 3 × 3.
+
+**Success check:** the output shapes are `(None, 26, 26, 16)`, `(None, 13, 13, 16)`, `(None, 11, 11, 32)`, `(None, 5, 5, 32)`, `(None, 800)`, `(None, 10)`, and the total is `12,810` parameters.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+    keras.layers.Conv2D(16, 3, activation="relu"),        # first convolution
+```
+:::
+
+### 2.2 Count the weights by hand
+
+**Question first:** each first-layer filter has 3 × 3 weights plus one constant. How many weights does the first layer have?
+
+Run the cell without changing it.
+
+```python
+conv1 = 16 * (3 * 3 + 1)                                  # 16 filters, each 9 weights and one constant
+conv2 = 32 * (3 * 3 * 16 + 1)                             # 32 filters, each looking at all 16 feature maps
+output = (5 * 5 * 32) * 10 + 10                           # 800 numbers to 10 units, plus 10 constants
+print(conv1, conv2, output, conv1 + conv2 + output)       # the three layers and the total
+print(26 * 26 * 16 * (3 * 3 + 1))                         # the first layer if every position had its own weights
+```
+
+**Success check:** `160 4640 8010 12810`, then `108160`.
+
+**Question:** the fully connected network of 1.1 has 118,282 weights. Which network has more, and by how many times?
+
+::: {.callout-note collapse="true" title="Answer"}
+The fully connected network has about 9 times as many (118,282 against 12,810). Sharing one small filter across all positions is what keeps the CNN small: without sharing, its first layer alone would need 108,160.
+:::
+
+### 2.3 Train for 2 epochs
+
+Run the cell without changing it. A CNN is slower per epoch: these 2 epochs take about one minute in Colab.
+
+```python
+cnn.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])   # as in 1.1
+hist_cnn = cnn.fit(X_fit, y_fit, epochs=2, validation_data=(X_val, y_val), verbose=0)         # 2 epochs
+print(round(hist_cnn.history["val_accuracy"][-1], 4))     # validation accuracy after 2 epochs
+```
+
+**Success check:** about `0.983`.
+
+**Question:** the CNN was trained for 2 epochs and the fully connected network for 3, yet the CNN is already higher (0.983 against 0.974). For a fair comparison, both networks should be trained for the same number of epochs. As it stands, is the comparison unfair to the CNN or to the fully connected network?
+
+::: {.callout-note collapse="true" title="Answer"}
+The number of epochs should be the same. The present comparison is unfair to the CNN, which had fewer epochs. (Assignment 2 also fixes the seed and asks for the training time.)
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** the 16 filters of the first layer, as small images.
+
+**Tell the AI:** `cnn.layers[0].get_weights()[0]` has shape 3 × 3 × 1 × 16: one 3 × 3 filter per column of the last axis.
+
+**Ask:** *"Take cnn.layers[0].get_weights()[0], and show each of its 16 filters as a 3 × 3 image in a 2 × 8 grid, with the colour map 'RdBu_r' centred at 0 and the title 'filter k'."*
+
+**Check:** 16 small red and blue 3 × 3 squares in 2 rows of 8.
+:::
+
+## Part 3: Move the digits (6 minutes)
+
+**Goal:** test both networks on validation images moved 2 pixels to the right.
+
+### 3.1 Two pixels to the right
+
+**Question first:** a person reads a digit just as well after it moves 2 pixels. Which network will lose more accuracy?
+
+Run the cell without changing it.
+
+```python
+X_shift = np.zeros_like(X_val)                            # same shape as X_val, all white
+X_shift[:, :, 2:] = X_val[:, :, :-2]                      # every image moved 2 pixels to the right
+print(round(dense.evaluate(X_shift.reshape(-1, 784), y_val, verbose=0)[1], 4))   # fully connected network of 1.1
+print(round(cnn.evaluate(X_shift, y_val, verbose=0)[1], 4))                      # CNN of 2.3
+```
+
+**Success check:** about `0.850`, then about `0.953`.
+
+**Question:** each network fell from its own accuracy on the unmoved images (0.974 and 0.983). By how many percentage points did each fall? Why does the CNN fall less?
+
+::: {.callout-note collapse="true" title="Answer"}
+The fully connected network fell about 12 points (0.974 to 0.850); the CNN about 3 points (0.983 to 0.953). The CNN uses the same filter at every position, so a moved stroke is still found, only one place further; max pooling then absorbs part of the move. The fully connected network learned "pixel 300 dark", and after the move the stroke is on other pixels.
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** to check that the CNN really uses which pixel is next to which, by training it on the shuffled pixels of 1.2.
+
+**Tell the AI:** `X_fit_mixed` and `X_val_mixed` hold the shuffled images as rows of 784; the CNN of 2.1 wants images of 28 × 28 × 1.
+
+**Ask:** *"Reshape X_fit_mixed and X_val_mixed to (-1, 28, 28, 1), build the CNN of 2.1 again with keras.utils.set_random_seed(0), train it for 2 epochs on the shuffled images, and print the last validation accuracy."*
+
+**Check:** about `0.938`, clearly below the CNN on the real images (0.983). The fully connected network did not mind the shuffle; the CNN does.
+:::
+
+## Part 4: Where does the CNN go wrong? (10 minutes)
+
+**Goal:** the error analysis of Assignment 2, Section 4, here on the validation set.
+
+### 4.1 Confusion matrix and the most common mistakes
+
+**Question first:** which digit do you expect the CNN to mistake most often, and for what? (After only 2 epochs, the most common mistakes can differ from the lecture's 5-epoch network.)
+
+Run the cell without changing it.
+
+```python
+from sklearn.metrics import confusion_matrix              # the 10 x 10 table of Lesson 4
+
+pred = cnn.predict(X_val, verbose=0).argmax(axis=1)       # the most probable digit of each image
+cm = confusion_matrix(y_val, pred)                        # rows: true digit, columns: predicted digit
+print(cm)                                                 # the table
+mistakes = cm.copy()                                      # a copy to keep only the mistakes
+np.fill_diagonal(mistakes, 0)                             # the diagonal is right: set it to 0
+for k in range(5):                                        # the 5 most common mistakes
+    flat = mistakes.argmax()                              # position of the largest number, counted row by row
+    i = flat // 10                                        # its row: the true digit
+    j = flat % 10                                         # its column: the predicted digit
+    print("true", i, "predicted", j, "images", mistakes[i, j])
+    mistakes[i, j] = 0                                    # remove it and look for the next one
+```
+
+**Success check:** a 10 × 10 table whose diagonal adds up to about `9,830`; then five lines. The first is `true 7 predicted 9` with about `12` images, then `true 5 predicted 8` (about `10`).
+
+### 4.2 Ten images it gets wrong
+
+Run the cell without changing it.
+
+```python
+wrong = np.where(pred != y_val)[0]                        # positions of the images it gets wrong
+print(len(wrong))                                         # how many
+fig, axes = plt.subplots(2, 5, figsize=(10, 4.5))         # 2 rows of 5 images
+for k in range(10):                                       # the first 10 mistakes
+    ax = axes[k // 5, k % 5]
+    ax.imshow(X_val[wrong[k], :, :, 0], cmap="Greys")     # the image
+    ax.set_title("true " + str(y_val[wrong[k]]) + ", predicted " + str(pred[wrong[k]]))
+    ax.axis("off")
+plt.show()
+```
+
+**Success check:** about `172`, then 10 images with their titles.
+
+**Question:** in one or two sentences, what do the mistakes have in common?
+
+::: {.callout-note collapse="true" title="Answer"}
+Many are written in an unusual way: a stroke is missing or added, or the digit is slanted or squeezed so that it looks like another one. Some mistakes come from unclear data, not only from the model.
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** the time each network takes to train, as in Table A of Assignment 2.
+
+**Tell the AI:** `dense` and `cnn` are built as in 1.1 and 2.1; use `X_fit_flat`/`X_fit` and the validation sets as above.
+
+**Ask:** *"Build both networks again with keras.utils.set_random_seed(0), train each for 2 epochs, measure the seconds taken by fit with time.time(), and print a small table: network, number of parameters, validation accuracy, seconds."*
+
+**Check:** the CNN has `12810` parameters and the fully connected network `118282`; the CNN is more accurate and takes longer per epoch.
+:::
+
+# After class: how today's lab helps with Assignment 2
+
+Assignment 2 (handwritten digits, MNIST) asks for error analysis in Section 4 and for a CNN in the MPS439 extension task A. **From today you can do both.**
+
+| What you did today | Where it appears in Assignment 2 |
+|---|---|
+| Part 0: images as 28 × 28 × 1 | Extension task A: "input 28 × 28 × 1" |
+| 2.1 and 2.2: `Conv2D`, `MaxPooling2D`, the number of parameters | Extension task A: "at least two `Conv2D` layers"; Table A: "the number of parameters" |
+| The last Try with AI box: seconds taken by `fit` | Table A: "the training time (seconds taken by the call to `fit`)" |
+| Part 3: move the images 2 pixels to the right | Extension task A: "Shift the images 2 pixels to the right. How much does the validation accuracy of each network fall?" |
+| 4.1: the 5 most common mistakes | Section 4, **Table 5**: "the 5 most frequent kinds of mistake (true digit, predicted digit)" |
+| 4.2: 10 misclassified images | Section 4, **Figure 3**: "take 10 misclassified images … write the true label and the predicted label above each one" |
+
+**Three things that are different in the assignment.**
+
+1. In Section 4 of the assignment, Table 5 and Figure 3 use **`test`**, once, with the predictions of your final model. Today we used the validation set, which is fine for learning.
+2. Extension task A asks for **the same number of epochs and the same seed** for both networks (20 epochs, seed 0). Today we used 3 and 2 epochs to save time.
+3. The CNN of the assignment may differ from ours; it needs at least two `Conv2D` layers.
+
+**Reflection** (after class, one or two sentences each):
+
+1. Why does shuffling the pixels not hurt the fully connected network?
+2. What do "local" and "shared" each mean for a convolution, and what does each one buy?
+3. Why does max pooling make the network less sensitive to small moves?
+4. When you compare two networks, what four things would you report?
+
+# Advanced Study
+
+MPS311 students are encouraged to try one. **MPS439 students complete A**, the main task (the exercise of Advanced Study 1 of the Note, here with 2 epochs instead of 5, so the numbers differ from the Note's table), and record it in the log at the end. Allow about 30 minutes. B and C are extras for everyone.
+
+## A. Compare one structural choice
+
+**Tasks**
+
+1. Choose one structural choice: either the number of filters (three versions: 8 and 16, 16 and 32, 32 and 64), or pooling (two versions: the CNN of 2.1 with and without its two `MaxPooling2D` layers).
+2. For each version, train for 2 epochs with `keras.utils.set_random_seed(0)` and record: the number of parameters, the validation accuracy, the seconds taken by `fit`, and the validation accuracy after moving the images 2 pixels to the right (3.1).
+3. Put the results in one table and write three or four sentences: what does the choice buy, and what does it cost? Is the difference in accuracy larger than what a change of seed would give? You do not need to retrain with other seeds: in Lesson 9, changing only the seed moved the validation accuracy by up to 0.26 percentage points.
+
+::: {.callout-tip title="Ask AI"}
+Ask: *"Why does removing the max pooling layers from a small CNN increase the number of parameters of the final Dense layer?"* Check its answer against Section 3 of the Note.
+:::
+
+::: {.callout-note collapse="true" title="Hint"}
+Copy the cell of 2.1 once for each version and change only the numbers in the two `Conv2D` layers (or delete the two `MaxPooling2D` lines). `import time`, then `start = time.time()` before `fit` and `time.time() - start` after it.
+:::
+
+**Self-check:** after 2 epochs, the validation accuracy and the accuracy after a 2-pixel move are about: 8 and 16 filters `0.973` and `0.930` (5,258 parameters); 16 and 32 `0.983` and `0.953` (12,810); 32 and 64 `0.985` and `0.957` (34,826); 16 and 32 without pooling `0.983` and `0.937` (189,130).
+
+## B. Using a network someone else trained
+
+Ask: *"What is transfer learning? How would I use a CNN pre-trained on ImageNet from keras.applications for a new image task, and why does it help when I have few images?"*
+
+**Self-check:** write two sentences on why Assignment 2 does not allow it ("do not use models that someone else has already trained"), and one case where you would use it.
+
+## C. Train on moved images
+
+Make a copy of `X_fit` in which every image is moved 2 pixels to the right (as in 3.1), add it to `X_fit` (and `y_fit` twice), and train the fully connected network of 1.1 for 3 epochs on the larger set. Test it on `X_shift` as in 3.1.
+
+**Self-check:** on `X_shift` the accuracy rises from about `0.850` to about `0.974`; on the unmoved images it stays about `0.973`. Write these down, and say what this tells you about the difference between "learning that shifts do not matter" and "being built so that shifts matter less".
+
+## Advanced Study log
+
+Copy this into a text cell at the end of your notebook.
+
+> **Investigations done (A, B or C):**
+>
+> **What I found:**
+>
+> **How AI helped, and what I had to correct:**
+>
+> **Self-check result (passed or not):**
+
+<!-- COURSE_FEEDBACK_QR:START -->
+---
+
+## 30-second feedback
+
+Scan the code to share anonymous feedback or post a question for this lab. It opens the correct **Lesson 10 lab** record automatically.
+
+![Feedback QR code for Lesson 10 lab](./feedback-qr.svg){fig-align="center" width="180px"}
+<!-- COURSE_FEEDBACK_QR:END -->

@@ -1,0 +1,359 @@
+---
+pagetitle: "Lab 6: A Chain of Yes-or-No Questions"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-copy: true
+    embed-resources: true
+    css: ../../shared/note.css
+    include-after-body: ../../shared/code_wrap.html
+    theme: default
+---
+
+# Lab 6: A Chain of Yes-or-No Questions
+## MPS311/439 Machine Learning
+**Lesson 6 Lab Session | Core duration: 50 minutes**
+
+## What this lab is for
+
+In the lecture a decision tree chose its cuts by Gini, grew until it memorised the training set, and had its depth chosen on a validation set. Today you do the same in code:
+
+1. find the best first cut on the lumps, and check its Gini by hand;
+2. hold out a validation set from the digits and choose the depth of a tree on it;
+3. read the test set once.
+
+Before each step you will see a question. **Write down your own answer first**, then run the code and compare.
+
+Most code is provided. Your job is to fill the blanks `____`, run the cell, and check your result against the **Success check**. At the end there is a short section on how today's lab helps with **Assignment 2**.
+
+## How to work
+
+1. Open a **blank** Colab notebook (**File → New notebook in Drive**), as in Labs 1 to 5.
+2. Copy each code block into a cell, fill in the blanks, and run it. Cells depend on the cells above, so run them from top to bottom.
+3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
+4. Each task has a one-line **Hint** and a folded **Answer**. Try first. Open the Answer only to check your work. If you fall behind, copy the Answer of a task and carry on: every later task still works.
+5. Running every cell and matching the Success checks is a complete lab.
+6. The **Try with AI** boxes are for when you finish early, or after class. They follow the four steps below.
+
+### Using AI
+
+The **Try with AI** boxes use an AI assistant for the Python you do not know yet, while you stay in charge of the machine learning. Every box has the same four steps:
+
+1. **You want:** say what you want in machine-learning words (for example, "the training and validation accuracy against the depth").
+2. **Tell the AI:** the names of the variables it should use.
+3. **Ask:** the request.
+4. **Check:** compare the AI's result with a number or shape given on this page. If it does not match, the AI or your question is wrong. Find out which.
+
+## Part 0: Load the lumps and hold out a validation set (7 minutes)
+
+**Goal:** the same lumps and test set as Labs 4 and 5, and a validation set taken from the training set, as in Lesson 3. Today the Core does not use `X_val`: we split it off only so that `X_fit` holds the same 319 lumps as the lecture. With 426 lumps, cross-validation is the better way to choose (Lesson 6 Note, Section 5).
+
+### 0.1 Load and split
+
+**Question first:** we already have a training set (426 lumps) and a test set (143). Why can we not use the test set to choose the depth of a tree?
+
+Fill the blank so that a quarter of the training lumps becomes the validation set.
+
+```python
+import numpy as np                                        # numbers and arrays
+import matplotlib.pyplot as plt                           # plots
+from sklearn.datasets import load_breast_cancer          # the lumps
+from sklearn.model_selection import train_test_split     # splitting the data
+from sklearn.tree import DecisionTreeClassifier          # the model of today
+
+data = load_breast_cancer()                               # 569 lumps, 30 measurements each
+X = data.data                                             # the 30 measurements (features)
+y = 1 - data.target                                       # sklearn uses 0 = malignant; we want 1 = malignant
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=0, stratify=y)     # the same test set as Labs 4 and 5
+X_fit, X_val, y_fit, y_val = train_test_split(
+    X_train, y_train, test_size=____, random_state=0, stratify=y_train)   # hold out part of the training set
+print(X_fit.shape, X_val.shape, X_test.shape)             # fitting part, validation set, test set
+```
+
+**Hint:** a quarter, written as a decimal.
+
+**Success check:** `(319, 30) (107, 30) (143, 30)`.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+X_fit, X_val, y_fit, y_val = train_test_split(
+    X_train, y_train, test_size=0.25, random_state=0, stratify=y_train)
+```
+
+If we chose the depth by looking at the test set, the test set would no longer be unseen data, and its accuracy would be too optimistic. The test set is read once, at the end.
+:::
+
+## Part 1: The best first cut (13 minutes)
+
+**Goal:** let a tree with one cut find the best first question on two features, then check its Gini by hand.
+
+### 1.1 A tree with one cut
+
+Fill the blank so that the tree asks only one question.
+
+```python
+X_fit_two = X_fit[:, [0, 1]]                              # two features: mean radius (0) and mean texture (1)
+stump = DecisionTreeClassifier(max_depth=____, random_state=0)   # how many questions from root to leaf
+stump.fit(X_fit_two, y_fit)                               # try every cut on both features, keep the best
+print(stump.tree_.feature[0])                             # which feature the root uses (0 = radius)
+print(stump.tree_.threshold[0])                           # where it cuts
+```
+
+**Hint:** one question means depth 1.
+
+**Success check:** `0` and `15.045...`: the root asks "mean radius ≤ 15.05?".
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+stump = DecisionTreeClassifier(max_depth=1, random_state=0)
+```
+:::
+
+### 1.2 Gini by hand
+
+Run this cell without changing it. It counts the lumps on each side of the cut.
+
+```python
+left = y_fit[X_fit[:, 0] <= 15.045]                       # labels on the left of the cut
+right = y_fit[X_fit[:, 0] > 15.045]                       # labels on the right
+print(len(left), left.sum())                              # lumps on the left, and how many are malignant
+print(len(right), right.sum())                            # the same on the right
+```
+
+Now fill the two blanks with the number of **malignant** lumps on each side, read from the printed counts.
+
+```python
+p_left = ____ / len(left)                                 # share of malignant on the left
+p_right = ____ / len(right)                               # share of malignant on the right
+gini_left = 2 * p_left * (1 - p_left)                     # Gini of the left side
+gini_right = 2 * p_right * (1 - p_right)                  # Gini of the right side
+weighted = (len(left) * gini_left + len(right) * gini_right) / len(y_fit)   # the score of this cut
+print(round(gini_left, 3), round(gini_right, 3), round(weighted, 3))   # left, right, weighted
+```
+
+**Hint:** the second number on each printed line.
+
+**Success check:** `228 35`, `91 84`, then `0.26 0.142 0.226`. Before the cut the Gini was 0.468.
+
+**Questions:**
+
+1. The weighted Gini fell from 0.468 to 0.226. What does a smaller weighted Gini say about the two sides?
+2. On this cut, the error rate also falls (from 0.373 to 0.132). In the lecture, on which kind of node did the error rate fail to tell good cuts from bad ones?
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+p_left = 35 / len(left)
+p_right = 84 / len(right)
+```
+
+1. Both sides are purer: each side is closer to holding only one class.
+2. A node where the same class is the majority on both sides of every cut (20 blue among 80 grey). Every cut then has the same error rate, while Gini still falls when a cut makes one side pure.
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** to see a small tree as a diagram.
+
+**Tell the AI:** `X_fit_two` holds the two features (mean radius, mean texture) and `y_fit` the labels (1 = malignant).
+
+**Ask:** *"Fit DecisionTreeClassifier(max_depth=2, random_state=0) on X_fit_two and y_fit, and draw it with sklearn.tree.plot_tree, using feature_names ['radius', 'texture'], class_names ['benign', 'malignant'] and filled=True."*
+
+**Check:** the root asks `radius <= 15.045`, and only one of the four leaves, the bottom right one, is labelled malignant.
+:::
+
+## Part 2: Choose the depth on a validation set (14 minutes)
+
+**Goal:** with handwritten digits from MNIST, hold out a validation set, try 20 depths, and choose the best one, as Assignment 2 asks. We use the course's MNIST subset of 10,000 images (Lab 4). 7500 training images is not a large data set, so cross-validation would also work here (it picks depth 10, with 0.784); today we practise the validation-set method that the assignment needs, with its 50,000 images.
+
+### 2.1 Load and split the digits
+
+Run the cell without changing it. It downloads the MNIST subset (about 1.6 MB). The first split is the one from Labs 4 and 5; the second holds out a validation set.
+
+```python
+import urllib.request                                     # to download a file
+DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/data/mnist10k.npz"
+urllib.request.urlretrieve(DATA_URL, "mnist10k.npz")      # 10,000 MNIST images, about 1.6 MB
+mnist = np.load("mnist10k.npz")                           # the file holds two arrays, X and y
+X_digits = mnist["X"] / 255                               # 784 pixels per image, scaled to 0 to 1
+y_digits = mnist["y"]                                     # the digit, 0 to 9
+X_digits_train, X_digits_test, y_digits_train, y_digits_test = train_test_split(
+    X_digits, y_digits, test_size=0.25, random_state=0, stratify=y_digits)   # the same test set as Labs 4 and 5
+X_digits_fit, X_digits_val, y_digits_fit, y_digits_val = train_test_split(
+    X_digits_train, y_digits_train, test_size=0.25, random_state=0, stratify=y_digits_train)   # hold out a validation set
+print(len(y_digits_fit), len(y_digits_val), len(y_digits_test))   # fitting part, validation set, test set
+```
+
+**Success check:** `5625 1875 2500`.
+
+### 2.2 Try 20 depths
+
+**Question first:** as the depth grows, what do you expect the training accuracy to do? And the validation accuracy?
+
+Fill the blanks so that the second number printed is the accuracy on the **validation set**.
+
+```python
+for depth in range(1, 21):                                # depths 1 to 20
+    tree = DecisionTreeClassifier(max_depth=depth, random_state=0)   # a tree that stops at this depth
+    tree.fit(X_digits_fit, y_digits_fit)                  # fit on the fitting part only
+    train_acc = tree.score(X_digits_fit, y_digits_fit)    # accuracy on the images it was fitted on
+    val_acc = tree.score(____, ____)                      # accuracy on the validation images
+    print(depth, round(train_acc, 3), round(val_acc, 3))  # depth, training, validation
+```
+
+**Hint:** the two variables made by the second split in 2.1 that end in `_val`.
+
+**Success check:** the first and last lines are `1 0.195 0.195` and `20 1.0 0.771`; the line for depth 15 is `15 0.996 0.781`.
+
+**Questions:**
+
+1. Which depth has the highest validation accuracy? (Depths 15 and 16 tie; take the shallower one.) Is it at an end of the range 1 to 20?
+2. From depth 10 on, the training accuracy keeps rising to 1.0, but the validation accuracy stays between 0.77 and 0.78. In one sentence: what are the extra levels of the tree doing?
+3. Suppose you had tried only depths 1 to 8. Which depth would you have chosen, and what should you do next?
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+    val_acc = tree.score(X_digits_val, y_digits_val)
+```
+
+1. Depth 15 (0.781). It is in the middle of 1 to 20, so the range is wide enough. (From depth 10 on, all depths are within about 0.01 of each other.)
+2. They fit the fitting images more and more exactly without getting better on new images: the tree is memorising (overfitting).
+3. Depth 8, the best of those, but it sits at the upper end. Widen the range upwards and choose again.
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** the training and validation accuracy against the depth, as one figure. Assignment 2 asks for the same figure as an optional extra.
+
+**Tell the AI:** the loop in 2.2 fits a tree for each depth from 1 to 20 and computes `train_acc` and `val_acc`.
+
+**Ask:** *"Change the loop so that it stores train_acc and val_acc in two lists, then plot both lists against the depth on one figure, with markers, axis labels and a legend."*
+
+**Check:** the training line reaches 1.0 by depth 20; the validation line rises to about `0.78` by depth 10 and then stays between `0.77` and `0.78`.
+:::
+
+## Part 3: The test set, once (8 minutes)
+
+**Goal:** fit the chosen tree and read the test set once.
+
+### 3.1 Read the test set
+
+```python
+tree = DecisionTreeClassifier(max_depth=____, random_state=0)   # the depth chosen in 2.2
+tree.fit(X_digits_fit, y_digits_fit)                      # the same fitting part
+print(tree.score(X_digits_test, y_digits_test))           # the test set, read once
+```
+
+**Hint:** your answer to question 1 of 2.2.
+
+**Success check:** about `0.776`. It is close to the validation accuracy (0.781): both are images the tree was not fitted on, so a small difference is normal.
+
+**Question:** on the same 2500 test images, logistic regression scored 0.908 (Lesson 4) and shrunk QDA 0.861 (Lesson 5). Give one reason, from the lecture, why a tree may do worse on images of digits. (One reason is enough.)
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+tree = DecisionTreeClassifier(max_depth=15, random_state=0)
+```
+
+Each question in a tree looks at one pixel at a time, so its boundaries are horizontal or vertical. A digit is recognised from many pixels together, which a straight boundary (logistic regression) or an ellipse (QDA) can use at once. (Part of the gap also comes from data: the tree was fitted on 5625 images, the other two on all 7500.)
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** to see which measurements a tree on all 30 features of the lumps relies on.
+
+**Tell the AI:** `X_train` and `y_train` are the 426 training lumps; `data.feature_names` holds the 30 names.
+
+**Ask:** *"Fit DecisionTreeClassifier(max_depth=5, random_state=0) on X_train and y_train, then draw a horizontal bar chart of the five largest feature_importances_, labelled with their names from data.feature_names."*
+
+**Check:** the longest bar is `mean concave points`, at about `0.72`.
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** to see the rectangles of a shallow tree and a deep tree on the two features.
+
+**Tell the AI:** `X_fit_two` holds mean radius and mean texture for the 319 fitting lumps; `y_fit` holds the labels.
+
+**Ask:** *"For max_depth 2 and 10, fit a DecisionTreeClassifier(random_state=0) on X_fit_two, predict on a grid from 6 to 29 for radius and 9 to 40 for texture, and draw the predicted regions with the points on top, in two plots side by side."*
+
+**Check:** the depth-2 plot has a few large boxes; the depth-10 plot has many small boxes around single points.
+:::
+
+# After class: how today's lab helps with Assignment 2
+
+Assignment 2 (handwritten digits, MNIST) asks for a decision tree in Section 2, chosen on a validation set. **From today you can do the decision tree row of Table 2, and the optional figure.**
+
+| What you did today | Where it appears in Assignment 2 |
+|---|---|
+| Part 0 and 2.1: hold out a validation set from the training set | The Data section: `X_train`, `X_val` and `test` (the assignment calls the fitting part `X_train`) |
+| Part 2.2: try several `max_depth` values on the validation set; the best must not sit at an end | Section 2: "Choose both using the validation set only ... The chosen value must not lie at either end of your search range" |
+| The first Try with AI box of Part 2: training and validation accuracy against depth | Section 2, Going further: "Draw a figure of the training accuracy and the validation accuracy of the decision tree against its depth" |
+| Part 3: read the test set once | Section 4: `test` is used once, at the end |
+
+**One thing that is different in the assignment.** The assignment has 50,000 training images and 10,000 validation images, so a single validation set is reliable and cross-validation would be slow. With the 426 lumps of today, cross-validation is the better way to choose (Lesson 6 Note, Section 5).
+
+**Reflection** (after class, one or two sentences each):
+
+1. Why does a tree that keeps cutting reach 100% training accuracy?
+2. Why do we choose the depth on a validation set and not on the test set?
+3. When would you use cross-validation instead of a validation set?
+4. Why are the boundaries of a tree always horizontal or vertical?
+
+# Advanced Study
+
+MPS311 students are encouraged to try one. **MPS439 students complete A**, the main task, and record it in the log at the end. Allow about 30 minutes for A. B and C are extras for everyone.
+
+## A. Find the best cut yourself, one level down
+
+Advanced Study 1 of the Note finds the root cut (radius ≤ 15.045). Here you go one level down, so its numbers will not match yours.
+
+**Tasks**
+
+1. Keep only the fitting lumps on the left of the root cut: `inside = X_fit[:, 0] <= 15.045` (228 lumps, 35 malignant). On their mean radius, take every midpoint between two neighbouring distinct values as a candidate cut. For each, compute the weighted Gini of the two sides (weighted within these 228 lumps), and keep the smallest.
+2. Do the same for mean texture. Which feature gives the better cut? Fit `DecisionTreeClassifier(max_depth=2, random_state=0)` on `X_fit[:, :2]` and `y_fit`, and check that its left node makes the same cut: node 1 is the left child of the root, so look at `tree.tree_.feature[1]` and `tree.tree_.threshold[1]`.
+3. Repeat task 1 with the error rate instead of Gini. Careful: many cuts may tie, and your loop then keeps only the first one. Compare the fewest errors of any cut with the errors of not cutting at all (call all 228 benign). What does it tell you about choosing cuts by the error rate?
+
+::: {.callout-tip title="Ask AI"}
+Ask: *"Why does scikit-learn take midpoints between neighbouring distinct values as candidate cuts, instead of the values themselves?"* Check its answer against Advanced Study 1 of the Note.
+:::
+
+::: {.callout-note collapse="true" title="Hint"}
+`np.unique(x)` gives the distinct values in order; `(values[:-1] + values[1:]) / 2` gives the midpoints. Take the rows with `X_fit[inside, 0]` and `y_fit[inside]`, and divide by 228 (not 319) when you weight the two sides. After the search for radius works, copy it and change the column number to 1 for texture.
+:::
+
+**Self-check:** check the weighted Gini values (the cut 13.41 can also be read off the tree in the Note): in the left node, the best radius cut is about `13.405` with a weighted Gini of about `0.218`; for texture the best is about `18.635` with about `0.235`, so radius wins, and the tree's left node uses feature `0` at `13.405`. With the error rate, no cut does better than 35 wrong out of 228, the same as not cutting at all (all 35 malignant lumps called benign): the error rate sees no gain from any cut, but Gini still finds one.
+
+## B. How stable is a tree?
+
+**Tasks**
+
+1. With `rng = np.random.default_rng(0)`, draw 426 row numbers with replacement, `rng.integers(0, 426, 426)`, and fit `DecisionTreeClassifier(max_depth=3, random_state=0)` on those rows of `X_train` and `y_train`. Record the feature the root uses (`tree.tree_.feature[0]`) and its threshold.
+2. Repeat 10 times (draw new rows each time from the same `rng`). How many different root features do you see?
+
+**Self-check:** 3 different root features in 10 draws: `mean concave points` 6 times, `worst perimeter` 3 times, `worst concave points` once.
+
+## C. Many trees
+
+**Random forest.** `sklearn.ensemble.RandomForestClassifier(n_estimators=100, random_state=0)` grows 100 trees, each on its own sample drawn with replacement, and lets them vote. Fit it on the digits fitting part and score it on the validation set. Compare it with your best single tree from 2.2.
+
+**Self-check:** write the validation accuracy you found and compare it with 0.781.
+
+## Advanced Study log
+
+Copy this into a text cell at the end of your notebook.
+
+> **Investigations done (A, B or C):**
+>
+> **What I found:**
+>
+> **How AI helped, and what I had to correct:**
+>
+> **Self-check result (passed or not):**
+
+<!-- COURSE_FEEDBACK_QR:START -->
+---
+
+## 30-second feedback
+
+Scan the code to share anonymous feedback or post a question for this lab. It opens the correct **Lesson 6 lab** record automatically.
+
+![Feedback QR code for Lesson 6 lab](./feedback-qr.svg){fig-align="center" width="180px"}
+<!-- COURSE_FEEDBACK_QR:END -->

@@ -1,0 +1,402 @@
+---
+pagetitle: "Lab 9: Letting the Model Make Its Own Features"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-copy: true
+    embed-resources: true
+    css: ../../shared/note.css
+    include-after-body: ../../shared/code_wrap.html
+    theme: default
+---
+
+# Lab 9: Letting the Model Make Its Own Features
+## MPS311/439 Machine Learning
+**Lesson 9 Lab Session | Core duration: 50 minutes**
+
+## What this lab is for
+
+In the lecture a few logistic units drew lines around the inner ring, and a network trained them all together. Today you train the network of Assignment 2, Section 4, on MNIST:
+
+1. build the network in Keras and train it for 5 epochs;
+2. remove the activation in the middle and see what is lost;
+3. draw the training and validation curves and find where the network starts to memorise;
+4. read how much the result moves when only the random seed changes.
+
+Before each step you will see a question. **Write down your own answer first**, then run the code and compare.
+
+Most code is provided. Your job is to fill the blanks `____`, run the cell, and check your result against the **Success check**. Training takes time: each training cell says roughly how long it runs in Colab. At the end there is a short section on how today's lab helps with **Assignment 2**.
+
+## How to work
+
+1. Open a **blank** Colab notebook (**File → New notebook in Drive**), as in Labs 1 to 8. Keras is already installed in Colab; you do not need a GPU.
+2. Copy each code block into a cell, fill in the blanks, and run it. Cells depend on the cells above, so run them from top to bottom.
+3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
+4. Each task has a one-line **Hint** and a folded **Answer**. Try first. Open the Answer only to check your work. If you fall behind, copy the Answer of a task and carry on: every later task still works.
+5. Running every cell and matching the Success checks is a complete lab. Your last digit or two may differ from the Success check: Colab and the computer that made this page do the arithmetic in a slightly different order. A difference in the third decimal place is fine.
+6. The **Try with AI** boxes are for when you finish early, or after class. They follow the four steps below.
+
+### Using AI
+
+The **Try with AI** boxes use an AI assistant for the Python you do not know yet, while you stay in charge of the machine learning. Every box has the same four steps:
+
+1. **You want:** say what you want in machine-learning words (for example, "the weights of each first-layer unit as a 28 × 28 image").
+2. **Tell the AI:** the names of the variables it should use.
+3. **Ask:** the request.
+4. **Check:** compare the AI's result with a number or shape given on this page. If it does not match, the AI or your question is wrong. Find out which.
+
+## Part 0: Load MNIST and split it (6 minutes)
+
+**Goal:** the same images and the same split as Assignment 2.
+
+### 0.1 Load and split
+
+Run the cell without changing it. It downloads about 11 MB the first time.
+
+```python
+import numpy as np                                        # numbers and arrays
+import matplotlib.pyplot as plt                           # plots
+from tensorflow import keras                              # neural networks
+
+(x_train, y_train), (x_test, y_test) = keras.datasets.mnist.load_data()   # 60,000 training images, 10,000 test images
+X = x_train.reshape(-1, 784) / 255.0                      # each image becomes 784 pixels between 0 and 1
+y = y_train                                               # the digit, 0 to 9
+X_fit = X[:50000]                                         # the first 50,000 images: fit the models
+y_fit = y[:50000]                                         # and their digits
+X_val = X[50000:]                                         # the last 10,000 images: compare the models
+y_val = y[50000:]                                         # and their digits
+print(X_fit.shape, X_val.shape)                           # images, pixels per image
+print(y_fit[:10])                                         # the first ten labels
+```
+
+**Success check:** `(50000, 784) (10000, 784)`, then `[5 0 4 1 9 2 1 3 1 4]`.
+
+We do not use `x_test` today. As in Assignment 2, the test images are used once, at the very end.
+
+## Part 1: Build and train the network (14 minutes)
+
+**Goal:** the network of Assignment 2, Section 4: 784 pixels in, two hidden layers of 128 units, 10 outputs.
+
+### 1.1 Build the network
+
+**Question first:** the output layer must give a probability for each of the 10 digits. Which function from Lesson 4 does that?
+
+Fill the blanks: the first hidden layer has 128 ReLU units (copy the second layer), and the output layer uses the function from your answer.
+
+```python
+keras.utils.set_random_seed(0)                            # fix the random starting weights and batches
+model = keras.Sequential([
+    keras.layers.Input((784,)),                           # 784 pixels in
+    keras.layers.Dense(____, activation=____),            # hidden layer 1
+    keras.layers.Dense(128, activation="relu"),           # hidden layer 2: 128 ReLU units
+    keras.layers.Dense(10, activation=____),              # output: one probability per digit
+])
+print(model.count_params())                               # how many weights the network has
+```
+
+**Hint:** the activation names are text, in quotation marks, for example `"relu"`.
+
+**Success check:** `118282`.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+    keras.layers.Dense(128, activation="relu"),           # hidden layer 1
+    keras.layers.Dense(10, activation="softmax"),         # output: one probability per digit
+```
+
+softmax, as in Lesson 4 for more than two classes.
+:::
+
+### 1.2 Where do 118,282 weights come from?
+
+**Question first:** each unit of the first hidden layer has one weight for every pixel, plus one constant. How many numbers is that for the whole first layer?
+
+Run the cell without changing it.
+
+```python
+layer1 = 784 * 128 + 128                                  # 128 units, each with 784 weights and one constant
+layer2 = 128 * 128 + 128                                  # 128 units, each with 128 weights and one constant
+output = 128 * 10 + 10                                    # 10 units, each with 128 weights and one constant
+print(layer1, layer2, output, layer1 + layer2 + output)   # the three layers and the total
+print(784 * 10 + 10)                                      # logistic regression on the same pixels (Lesson 4)
+```
+
+**Success check:** `100480 16512 1290 118282`, then `7850`.
+
+**Question:** the network has how many times as many weights as logistic regression? What risk does that bring (Lesson 6)?
+
+::: {.callout-note collapse="true" title="Answer"}
+About 15 times (118,282 against 7,850). With many more weights, the network can memorise the training images, so we must check it on the validation set.
+:::
+
+### 1.3 Train for 5 epochs
+
+**Question first:** in the lecture, one epoch with batches of 32 images was 1563 steps. Roughly how many steps are 5 epochs?
+
+Run the cell without changing it. It takes about half a minute in Colab.
+
+```python
+model.compile(optimizer="adam",                           # gradient descent that sets its own step sizes
+              loss="sparse_categorical_crossentropy",     # cross-entropy; the labels are integers 0 to 9
+              metrics=["accuracy"])                       # also report accuracy
+hist = model.fit(X_fit, y_fit, epochs=5,                  # 5 passes over the 50,000 fitting images
+                 validation_data=(X_val, y_val),          # loss and accuracy on the validation set after every epoch
+                 verbose=0)                               # print nothing while training
+print(np.round(hist.history["val_accuracy"], 4))          # validation accuracy after each epoch
+```
+
+**Success check:** five numbers between about `0.96` and `0.975`; the last is about `0.970`.
+
+If you run this cell again, run 1.1 first: otherwise `fit` carries on from the weights it has already trained, and the numbers will not match.
+
+**Question:** logistic regression on the same split gives a validation accuracy of `0.9277` (Assignment 2, Table 1, asks you to compute it). Out of the 10,000 validation images, how many fewer mistakes does the network make?
+
+::: {.callout-note collapse="true" title="Answer"}
+5 epochs are about 7,800 steps. Logistic regression gets about 723 images wrong; the network about 300. So about 420 fewer mistakes.
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** to see what the units of the first hidden layer look for.
+
+**Tell the AI:** `model.layers[0].get_weights()[0]` is a 784 × 128 array: one column of 784 weights per unit.
+
+**Ask:** *"Take the first 10 columns of model.layers[0].get_weights()[0], reshape each to 28 × 28, and show them in one row with the colour map 'RdBu_r', centred at 0, with the title 'unit k'."*
+
+**Check:** 10 red and blue patterns. None of them looks like a whole digit; most respond to a few areas of the image (compare Section 8 of the Note).
+:::
+
+## Part 2: Remove the activation in the middle (8 minutes)
+
+**Goal:** see what the network loses without a bend in the middle.
+
+### 2.1 No activation
+
+**Question first:** in the lecture, removing the activation on the ring left a straight line at 50.3%. What will it do on MNIST: near 0.97, near logistic regression's 0.9277, or much lower?
+
+Fill both blanks with `"linear"` (no activation: each unit passes on its weighted sum) and run. It takes about half a minute.
+
+```python
+keras.utils.set_random_seed(0)                            # the same starting point as Part 1
+flat = keras.Sequential([
+    keras.layers.Input((784,)),                           # 784 pixels in
+    keras.layers.Dense(128, activation=____),             # hidden layer 1, no bend
+    keras.layers.Dense(128, activation=____),             # hidden layer 2, no bend
+    keras.layers.Dense(10, activation="softmax"),         # output as before
+])
+flat.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])   # as in 1.3
+hist_flat = flat.fit(X_fit, y_fit, epochs=5, validation_data=(X_val, y_val), verbose=0)       # as in 1.3
+print(np.round(hist_flat.history["val_accuracy"], 4))     # validation accuracy after each epoch
+```
+
+**Hint:** the same text in both places, with quotation marks.
+
+**Success check:** five numbers around `0.92`; the last is about `0.920`.
+
+**Question:** this network still has 118,282 weights. Why is it no better than logistic regression?
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+    keras.layers.Dense(128, activation="linear"),         # hidden layer 1, no bend
+    keras.layers.Dense(128, activation="linear"),         # hidden layer 2, no bend
+```
+
+Without a bend, weights times weights times pixels is still one set of weights times the pixels, plus a constant: the same form as logistic regression. The extra weights add nothing new.
+:::
+
+## Part 3: How many epochs? (12 minutes)
+
+**Goal:** the training and validation curves, as in Figure 2 of Assignment 2.
+
+### 3.1 Train for 8 epochs and draw the curves
+
+**Question first:** the training loss falls at every epoch. Will the validation loss do the same?
+
+Run the cell without changing it. It builds the network of Part 1 again from the same seed and trains it for 8 epochs: about one minute in Colab.
+
+```python
+keras.utils.set_random_seed(0)                            # start again from the same point
+model = keras.Sequential([
+    keras.layers.Input((784,)),
+    keras.layers.Dense(128, activation="relu"),
+    keras.layers.Dense(128, activation="relu"),
+    keras.layers.Dense(10, activation="softmax"),
+])                                                        # the network of Part 1
+model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])   # as in 1.3
+hist = model.fit(X_fit, y_fit, epochs=8, validation_data=(X_val, y_val), verbose=0)   # 8 epochs
+h = hist.history                                          # four lists: loss, val_loss, accuracy, val_accuracy
+epochs = np.arange(1, 9)                                  # 1 to 8
+
+fig, axes = plt.subplots(1, 2, figsize=(10, 3.5))         # two plots side by side
+axes[0].plot(epochs, h["loss"], marker="o", label="training")         # left: the losses
+axes[0].plot(epochs, h["val_loss"], marker="o", label="validation")
+axes[0].set_xlabel("epoch")                               # labels and legend of the left plot
+axes[0].set_ylabel("loss")
+axes[0].legend()
+axes[1].plot(epochs, h["accuracy"], marker="o", label="training")     # right: the accuracies
+axes[1].plot(epochs, h["val_accuracy"], marker="o", label="validation")
+axes[1].set_xlabel("epoch")                               # labels and legend of the right plot
+axes[1].set_ylabel("accuracy")
+axes[1].legend()
+plt.show()                                                # draw both plots
+print(np.argmin(h["val_loss"]) + 1, round(min(h["val_loss"]), 3))     # the epoch with the lowest validation loss, and its value
+```
+
+**Success check:** two plots. The lowest validation loss is at epoch `4`, about `0.093`.
+
+**Questions:**
+
+1. After epoch 4, what do the training loss and the validation loss each do?
+2. In one sentence: after epoch 4, is the network learning more about digits, or memorising the training images? What is your evidence? (Look at the validation **loss**; the validation accuracy may still creep up a little.)
+
+::: {.callout-note collapse="true" title="Answer"}
+1. The training loss keeps falling (to about 0.02); the validation loss goes up and down but stays above its value at epoch 4.
+2. Mostly memorising: the training loss keeps falling while the validation loss rises after epoch 4. The validation accuracy may still creep up a little, but the wrong answers become over-confident, which the loss shows. The evidence is the validation curve, not the training curve (Lesson 6).
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** training that stops by itself when the validation loss stops improving.
+
+**Tell the AI:** the model is built and compiled as in 3.1; `X_fit`, `y_fit`, `X_val`, `y_val` as above.
+
+**Ask:** *"Rebuild the model of 3.1 with keras.utils.set_random_seed(0), then train it for at most 20 epochs with keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True). Print the number of epochs it ran and the final validation accuracy."*
+
+**Check:** it stops at epoch 7 (three epochs after the best, epoch 4) and keeps the weights of epoch 4; the validation accuracy is about `0.974`.
+:::
+
+## Part 4: Does the seed matter? (4 minutes)
+
+**Goal:** see how much the result moves when only the random seed changes. To save time in class, this part has no training: read the results below.
+
+**Question first:** the seed fixes the starting weights and the order of the batches. If you change it, will the validation accuracy after 5 epochs still be exactly 0.970?
+
+The network of Part 1 was trained twice more, changing only the seed:
+
+| | seed 0 (Part 1) | seed 1 |
+|---|---:|---:|
+| validation accuracy after 5 epochs | 0.9700 | 0.9760 |
+
+After 20 epochs (Section 7 of the Note), seeds 0, 1 and 2 give 0.9780, 0.9755 and 0.9781. Use the 20-epoch spread (up to 0.26 percentage points) as the size of the seed's luck: after 5 epochs seed 0 happens to dip, so that gap is larger.
+
+**Question:** a classmate's changed network beats yours by 0.1 percentage points. Is that evidence that their network is better? What would you ask them to do?
+
+::: {.callout-note collapse="true" title="Answer"}
+No. Changing only the seed moved the validation accuracy after 5 epochs by 0.6 percentage points (0.970 to 0.976); after 20 epochs the three seeds differ by up to 0.26 points. (The two gaps differ because seed 0 happens to dip at epoch 5; after 20 epochs the curves have settled.) A 0.1-point lead is well inside this. Ask them to train both networks with a few seeds and compare the averages and the spread.
+:::
+
+::: {.callout-note collapse="true" title="After class: run it yourself (about half a minute in Colab)"}
+```python
+keras.utils.set_random_seed(1)                            # a different seed; nothing else changes
+other = keras.Sequential([
+    keras.layers.Input((784,)),
+    keras.layers.Dense(128, activation="relu"),
+    keras.layers.Dense(128, activation="relu"),
+    keras.layers.Dense(10, activation="softmax"),
+])                                                        # the network of Part 1
+other.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])   # as in 1.3
+hist_other = other.fit(X_fit, y_fit, epochs=5, validation_data=(X_val, y_val), verbose=0)       # 5 epochs, as in 1.3
+print(round(hist_other.history["val_accuracy"][-1], 4))   # validation accuracy after 5 epochs: about 0.976
+```
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** which digits the network confuses, as a 10 × 10 confusion matrix on the validation set (Lesson 4).
+
+**Tell the AI:** `model` is the network trained in 3.1; `X_val` and `y_val` are the validation images and labels.
+
+**Ask:** *"Compute model.predict(X_val), take the argmax of each row as the predicted digit, and print sklearn.metrics.confusion_matrix(y_val, predicted). Then print the three largest numbers off the diagonal with their true and predicted digits."*
+
+**Check:** the diagonal adds up to about `9,740` of the 10,000 images (the validation accuracy of 3.1 after 8 epochs). Each off-diagonal number is small (a few tens at most).
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** the network of the lecture on the ring: 3 hidden sigmoid units, and a picture of where it says "inner ring".
+
+**Tell the AI:** the ring of Lesson 4: `rng = np.random.default_rng(0)`, `angle = rng.uniform(0, 2 * np.pi, 300)`, `radius = np.r_[rng.normal(1.0, 0.25, 150), rng.normal(2.4, 0.3, 150)]`; the points are `radius * cos(angle)`, `radius * sin(angle)`; the first 150 are class 1.
+
+**Ask:** *"Build these 300 points, then train keras.Sequential([Input((2,)), Dense(3, activation='sigmoid'), Dense(1, activation='sigmoid')]) with Adam(0.05), loss 'binary_crossentropy', 300 epochs, batch_size=300, after keras.utils.set_random_seed(0). Shade the region where the predicted probability is above 0.5 on a grid from -3.6 to 3.6, and draw the points on top."*
+
+**Check:** the training accuracy is about `0.97`, and the shaded region is a triangle around the inner ring, as in Section 3 of the Note with 3 units.
+:::
+
+# After class: how today's lab helps with Assignment 2
+
+Assignment 2 (handwritten digits, MNIST) asks for this network in Section 4. **From today you can do the training and Figure 2.**
+
+| What you did today | Where it appears in Assignment 2 |
+|---|---|
+| Part 0: load MNIST, first 50,000 to fit, last 10,000 to validate | Data: "A fixed split, used throughout". The assignment calls the arrays `X_train`, `y_train` (our `X_fit`, `y_fit`) and `X_val`, `y_val`. Its Option 1 loads the same Keras file, joins the training and test images, then splits them; the first 50,000 and the next 10,000 are the same images as today |
+| Part 1: `Sequential`, `Dense(128, "relu")` twice, `Dense(10, "softmax")`, `compile`, `fit(validation_data=...)` | Section 4: "two hidden layers of 128 ReLU units each … the Adam optimiser and the loss `sparse_categorical_crossentropy` … pass the validation set as `validation_data`" |
+| Part 3: the two plots of loss and accuracy against the epoch | Section 4, **Figure 2**: "on the left, the training loss and the validation loss … on the right, the training accuracy and the validation accuracy" |
+| Part 4: `set_random_seed`, and how much one seed moves the result | Randomness: "write `keras.utils.set_random_seed(0)` before you build the model"; Going further: "Train again with three different random seeds" |
+| The second Try with AI box after Part 4: the confusion matrix | Section 4: Table 5, "the 5 most frequent kinds of mistake" (in the assignment, on `test`, once) |
+
+**Two things that are different in the assignment.**
+
+1. The assignment trains for **20 epochs**, not 8. It takes about two to three minutes in Colab.
+2. In the assignment, the final model is checked on `test` **once**, after you have chosen it on the validation set. Today we never touched `x_test`.
+
+**Reflection** (after class, one or two sentences each):
+
+1. Why must there be an activation between the layers?
+2. What does one epoch mean, and how many steps is it with batches of 32 on 50,000 images?
+3. Why do we decide the number of epochs from the validation curve and not from the training curve?
+4. How large a difference between two networks would you trust, and why?
+
+# Advanced Study
+
+MPS311 students are encouraged to try one. **MPS439 students complete A**, the main task, and record it in the log at the end. Allow about 30 minutes. B and C are extras for everyone.
+
+## A. A one-hidden-layer network in numpy, with ReLU
+
+Advanced Study 2 of the Note trains this network with sigmoid hidden units. Here you use ReLU, so its numbers will not match yours.
+
+**Tasks**
+
+1. Build the ring of Lesson 4 (the code is in the last Try with AI box, or in Section 9 of the Note) as `X_ring` (300 × 2) and `y_ring`.
+2. Using only numpy, train a network with 4 **ReLU** hidden units and one logistic output by gradient descent: 5000 steps, step size 0.5, all 300 points in every step. Start from a new `rng = np.random.default_rng(0)` (make it again after building the ring): first `W1 = rng.normal(0, 1, (2, 4))`, then `w2 = rng.normal(0, 1, 4)`; both constants start at 0. Write the gradients yourself with the four steps of Advanced Study 1 of the Note; only step 3 changes, because the slope of ReLU is 1 where its weighted sum is positive and 0 elsewhere.
+3. Print the loss at the start and at the end, and the training accuracy. Compare with Keras (Section 9 of the Note: 0.997 with 4 units).
+
+::: {.callout-tip title="Ask AI"}
+Ask: *"Why does the gradient of the cross-entropy with respect to the output score of a logistic unit equal p − y?"* Check its argument against Lesson 4, Advanced Study 1.
+:::
+
+::: {.callout-note collapse="true" title="Hint"}
+For sigmoid units the four steps in numpy are `g = (p - y_ring) / 300`; `gw2 = H.T @ g`; `gH = np.outer(g, w2) * H * (1 - H)`; `gW1 = X_ring.T @ gH`. For ReLU, keep the weighted sums `Zh = X_ring @ W1 + b1`, use `H = np.maximum(0, Zh)`, and replace `H * (1 - H)` by `(Zh > 0)`. Each step updates with the step size, for example `W1 = W1 - 0.5 * gW1` (the same for `b1`, `w2`, `b2`). The loss is the mean cross-entropy, `-np.mean(y_ring * np.log(p) + (1 - y_ring) * np.log(1 - p))`; compute it before the first step and after the last. The constants take the sums `g.sum()` and `gH.sum(axis=0)`.
+:::
+
+**Self-check:** the loss falls from about `0.651` to about `0.019`; the accuracy is `0.997`.
+
+## B. Check one gradient by hand
+
+After A, pick one weight, for example `W1[0, 0]`. Compute the loss with `1e-5` added to it and with `1e-5` taken away, and divide the difference by `2e-5`. Compare with `gW1[0, 0]` computed again at the final weights (the last `gW1` inside your loop used the weights before the last update). (Advanced Study 2 of the Note adds `1e-5` only once; stepping both ways, a central difference, is more accurate, and here it is needed to agree to three figures.)
+
+**Self-check:** the two numbers agree in their first three significant figures (about `0.0000575`). Then explain in one sentence why this check is too slow to train the network of Part 1 with (Section 5 of the Note).
+
+## C. Dropout
+
+Rebuild the network of 3.1 with `keras.layers.Dropout(0.2)` after each hidden layer, train for 8 epochs, and draw the same two plots.
+
+**Self-check:** the lowest validation loss is now at epoch `7` (about `0.078`), and after 8 epochs the validation loss is only about `0.016` above the training loss, against about `0.091` in 3.1.
+
+## Advanced Study log
+
+Copy this into a text cell at the end of your notebook.
+
+> **Investigations done (A, B or C):**
+>
+> **What I found:**
+>
+> **How AI helped, and what I had to correct:**
+>
+> **Self-check result (passed or not):**
+
+<!-- COURSE_FEEDBACK_QR:START -->
+---
+
+## 30-second feedback
+
+Scan the code to share anonymous feedback or post a question for this lab. It opens the correct **Lesson 9 lab** record automatically.
+
+![Feedback QR code for Lesson 9 lab](./feedback-qr.svg){fig-align="center" width="180px"}
+<!-- COURSE_FEEDBACK_QR:END -->

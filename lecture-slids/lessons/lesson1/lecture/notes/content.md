@@ -107,7 +107,7 @@ Useful evidence normally requires unseen data, a sensible baseline, and an evalu
 
 Every model relies on assumptions and has a limited domain of use. Data can change, important information can be missing, and a method that works for one group or period may fail for another.
 
-Identifying a limitation is not an admission that learning has failed. In this course, limitations are what create the need for the next method.
+Identifying a limitation is not an admission that learning has failed. In this course, every method ends with the question of where it fails, and that question is left open for you to think about.
 
 <!-- Figure task: Present the recurring modelling process as one connected sequence: real problem, data representation, criterion for a good answer, solution, evidence, and limitations. The figure should communicate a reusable way of thinking, not a rigid checklist. -->
 
@@ -121,7 +121,7 @@ We can now apply the complete framework to the opening stock-market prediction.
 
 **What counts as a good answer?** If the real interest is tomorrow's new movement, producing a value close to the current price is not enough. The success criterion must reflect whether the model adds information that is useful for the decision.
 
-**How will we find an answer?** The current model uses recent closing prices to find a rule for producing the next prediction. Later lessons will examine more carefully what forms such rules can take and how data are used to improve them.
+**How will we find an answer?** The current model uses recent closing prices to find a rule for producing the next prediction.
 
 **What evidence is needed?** We need to compare the model on days it has not seen with sensible simple rules, such as using yesterday's price or always predicting the more common direction. Any advantage must also be relevant to the original decision.
 
@@ -196,7 +196,7 @@ The course therefore does not move through methods arbitrarily. Each new topic a
 
 Each topic will follow a recognisable pattern.
 
-We will begin with a problem or with the failure of a method we already understand. We will formalise the new task, define what a good answer means, examine how the method finds an answer, and decide what evidence supports using it. We will then identify an important limitation that motivates the next development.
+We will begin with a problem or with the failure of a method we already understand. We will formalise the new task, define what a good answer means, examine how the method finds an answer, and decide what evidence supports using it. We will finish by asking where the method fails.
 
 Different course materials support different parts of this work:
 
@@ -246,7 +246,7 @@ In addition to the shared core, you will go further in two directions.
 
 **Depth** means examining objectives and solution methods more closely, implementing or modifying important components, and testing assumptions, sensitivity, and robustness.
 
-**Breadth** means exploring more advanced questions, modern tools, and research or professional practices when they genuinely deepen the topic. For example, later neural-network topics may use a framework such as PyTorch to move beyond high-level model calls.
+**Breadth** means exploring more advanced questions, modern tools, and research or professional practices when they genuinely deepen the topic.
 
 The aim is not to collect additional software names. It is to become able to investigate a model more deeply and design stronger evidence.
 
@@ -268,7 +268,7 @@ For example, the original request—“predict tomorrow's stock price and plot i
 
 The point is not yet to select a more complicated model or a technical measure. It is to turn a plausible AI-generated request into an investigation whose question, information, comparison, evidence, and conclusion can be clearly explained and tested.
 
-Broader directions that later topics may revisit include uncertainty, changing data distributions, information leakage, reproducibility, and model responsibility.
+Broader directions you can think about on your own include uncertainty, changing data distributions, information leakage, reproducibility, and model responsibility.
 
 ## 10. Takeaways
 

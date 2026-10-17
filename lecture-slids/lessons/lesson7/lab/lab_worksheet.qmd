@@ -1,0 +1,380 @@
+---
+pagetitle: "Lab 7: Fewer Numbers for the Same Data"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-copy: true
+    embed-resources: true
+    css: ../../shared/note.css
+    include-after-body: ../../shared/code_wrap.html
+    theme: default
+---
+
+# Lab 7: Fewer Numbers for the Same Data
+## MPS311/439 Machine Learning
+**Lesson 7 Lab Session | Core duration: 50 minutes**
+
+## What this lab is for
+
+In the lecture we replaced the 784 pixels of each digit by a few principal components. Today you do it in code:
+
+1. learn the components from the fitting images only, and read how much variance each one keeps;
+2. rebuild one image from k components;
+3. choose k on the validation set for QDA, and read the test set once.
+
+Before each step you will see a question. **Write down your own answer first**, then run the code and compare.
+
+Most code is provided. Your job is to fill the blanks `____`, run the cell, and check your result against the **Success check**. At the end there is a short section on how today's lab helps with **Assignment 2**.
+
+## How to work
+
+1. Open a **blank** Colab notebook (**File → New notebook in Drive**), as in Labs 1 to 6.
+2. Copy each code block into a cell, fill in the blanks, and run it. Cells depend on the cells above, so run them from top to bottom.
+3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
+4. Each task has a one-line **Hint** and a folded **Answer**. Try first. Open the Answer only to check your work. If you fall behind, copy the Answer of a task and carry on: every later task still works.
+5. Running every cell and matching the Success checks is a complete lab.
+6. The **Try with AI** boxes are for when you finish early, or after class. They follow the four steps below.
+
+### Using AI
+
+The **Try with AI** boxes use an AI assistant for the Python you do not know yet, while you stay in charge of the machine learning. Every box has the same four steps:
+
+1. **You want:** say what you want in machine-learning words (for example, "the cumulative share of variance against k").
+2. **Tell the AI:** the names of the variables it should use.
+3. **Ask:** the request.
+4. **Check:** compare the AI's result with a number or shape given on this page. If it does not match, the AI or your question is wrong. Find out which.
+
+## Part 0: Load the digits (6 minutes)
+
+**Goal:** the same three parts as Lab 6: fitting images, validation images, test images.
+
+### 0.1 Load and split
+
+Run the cell without changing it.
+
+```python
+import numpy as np                                        # numbers and arrays
+import matplotlib.pyplot as plt                           # plots
+import urllib.request                                     # to download a file
+from sklearn.model_selection import train_test_split     # splitting the data
+from sklearn.decomposition import PCA                     # the method of today
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis   # QDA from Lesson 5
+
+DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/data/mnist10k.npz"
+urllib.request.urlretrieve(DATA_URL, "mnist10k.npz")      # 10,000 MNIST images, about 1.6 MB
+mnist = np.load("mnist10k.npz")                           # the file holds two arrays, X and y
+X_digits = mnist["X"] / 255                               # 784 pixels per image (28 x 28), scaled to 0 to 1
+y_digits = mnist["y"]                                     # the digit, 0 to 9
+X_digits_train, X_digits_test, y_digits_train, y_digits_test = train_test_split(
+    X_digits, y_digits, test_size=0.25, random_state=0, stratify=y_digits)   # the test set of Labs 4 to 6
+X_digits_fit, X_digits_val, y_digits_fit, y_digits_val = train_test_split(
+    X_digits_train, y_digits_train, test_size=0.25, random_state=0, stratify=y_digits_train)   # the validation set of Lab 6
+print(X_digits_fit.shape, X_digits_val.shape, X_digits_test.shape)   # fitting, validation, test
+```
+
+**Success check:** `(5625, 784) (1875, 784) (2500, 784)`.
+
+## Part 1: Learn the components (12 minutes)
+
+**Goal:** learn the directions from the fitting images, and read how much variance each one keeps.
+
+### 1.1 Fit PCA
+
+**Question first:** PCA learns its directions from data. From which of the three parts should it learn them?
+
+Fill the blank with the method that **learns** the directions.
+
+```python
+pca = PCA()                                               # keep all 784 components for now
+pca.____(X_digits_fit)                                    # learn the directions
+ratios = pca.explained_variance_ratio_                    # share of the total variance kept by each component
+print(ratios[:5].round(4))                                # the first five shares
+```
+
+**Hint:** the same method name you use to train any model in scikit-learn.
+
+**Success check:** `[0.0955 0.072  0.0619 0.0532 0.0493]`.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+pca.fit(X_digits_fit)
+```
+
+From the fitting images only. If PCA also learned from the validation or test images, those images would no longer be unseen, and their accuracy would not be a fair estimate.
+:::
+
+### 1.2 The cumulative share
+
+Run the cell without changing it.
+
+```python
+cum = np.cumsum(ratios)                                   # cum[0] is k = 1, cum[9] is k = 10, and so on
+print(round(cum[9], 3))                                   # share kept by the first 10 components
+print(round(cum[49], 3))                                  # first 50
+print(round(cum[99], 3))                                  # first 100
+```
+
+**Success check:** `0.489`, `0.827` and `0.917`.
+
+**Questions:**
+
+1. Which of 10, 50 or 100 components is the smallest that keeps at least 90% of the variance?
+2. In the lecture, keeping the 10 most variable **pixels** kept 3.7% of the variance. The first 10 components keep how much? In one sentence, why the difference?
+
+::: {.callout-note collapse="true" title="Answer"}
+1. 100 (0.917); 50 keeps only 0.827. Exactly 90% needs 86.
+2. 48.9%. Each component combines all 784 pixels, while 10 pixels repeat each other's information and throw the other 774 pixels away.
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** the cumulative share of variance against the number of components.
+
+**Tell the AI:** `cum` holds the cumulative share for k = 1 to 784 (`cum[0]` is k = 1).
+
+**Ask:** *"Plot cum against k from 1 to 200, with a dotted horizontal line at 0.9, axis labels 'number of components k' and 'cumulative explained variance'."*
+
+**Check:** the curve passes about `0.49` at k = 10 and `0.83` at k = 50, and crosses 0.9 at k = 86.
+:::
+
+## Part 2: Rebuild one image (10 minutes)
+
+**Goal:** see what k components keep of one validation image, and what they lose.
+
+### 2.1 Rebuild from k components
+
+**Question first:** with 2 components, do you expect to recognise the digit? With 10?
+
+Fill the blank with the number of components, first `2`, run, then `10`, run again.
+
+```python
+pca_k = PCA(n_components=____, random_state=0)            # keep k components; random_state=0 gives the same result every run
+pca_k.fit(X_digits_fit)                                   # fitting images only
+one_image = X_digits_val[5:6]                             # one validation image (a 6); [5:6] keeps it a table with one row
+z = pca_k.transform(one_image)                            # its k numbers
+back = pca_k.inverse_transform(z)                         # mean image plus each component times its score
+error = one_image - back                                  # what the k numbers could not keep
+print(z.shape, round((error ** 2).sum(), 1))              # 1 image, k numbers; reconstruction error of this image
+fig, axes = plt.subplots(1, 3, figsize=(7.5, 2.5))        # three small pictures side by side
+axes[0].imshow(one_image.reshape(28, 28), cmap="Greys")   # the original
+axes[0].set_title("original")
+axes[1].imshow(back.reshape(28, 28), cmap="Greys")        # rebuilt from k numbers
+axes[1].set_title("rebuilt")
+axes[2].imshow(error.reshape(28, 28), cmap="RdBu_r", vmin=-1, vmax=1)   # red: rebuilt too light, blue: too dark
+axes[2].set_title("original - rebuilt")
+plt.show()
+```
+
+**Hint:** write the number itself, for example `2`.
+
+**Success check:** with `2`, it prints `(1, 2) 57.7` and the rebuilt image is a blur; with `10`, it prints `(1, 10) 25.2`, you can read a 6, and the error image is much paler.
+
+**Question:** the original image has 784 numbers. With k = 10, how many numbers do you store for this image? What else do you need to keep to rebuild it?
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+pca_k = PCA(n_components=10, random_state=0)            # keep k components; random_state=0 gives the same result every run
+```
+
+10 numbers. To rebuild it you also need the mean image and the 10 components, but those are stored once and shared by all images.
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** to see what the first components look like as images.
+
+**Tell the AI:** `pca.components_` has 784 rows (one per component) of 784 numbers, one per pixel of a 28 × 28 image.
+
+**Ask:** *"Show the first 6 rows of pca.components_ as 28 × 28 images in one row, with a red-blue colour map centred at zero, and the explained variance ratio of each as its title."*
+
+**Check:** 6 images with titles about `0.0955`, `0.072`, `0.062`, `0.053`, `0.049`, `0.044`; the first looks like a red 0 with a blue centre.
+:::
+
+## Part 3: Choose k for QDA, then the test set (14 minutes)
+
+**Goal:** let the validation accuracy of QDA decide how many components to keep.
+
+### 3.1 Try six values of k
+
+**Question first:** in Lesson 5, QDA on all 784 pixels without shrinking scored poorly. Will QDA on 10 components do better or worse?
+
+Fill the blank so that the validation images are turned into k numbers with the **same** directions.
+
+```python
+for k in [10, 20, 30, 40, 50, 100]:                       # candidate numbers of components
+    pca_k = PCA(n_components=k, random_state=0)           # keep k components
+    pca_k.fit(X_digits_fit)                               # learn them from the fitting images only
+    Z_fit = pca_k.transform(X_digits_fit)                 # k numbers per fitting image
+    Z_val = pca_k.transform(____)                         # k numbers per validation image
+    qda = QuadraticDiscriminantAnalysis()                 # one spread per class
+    qda.fit(Z_fit, y_digits_fit)                          # train on the reduced fitting images
+    print(k, round(qda.score(Z_val, y_digits_val), 3))    # validation accuracy
+```
+
+**Hint:** the validation images from Part 0.
+
+**Success check:**
+
+```
+10 0.885
+20 0.942
+30 0.952
+40 0.957
+50 0.956
+100 0.946
+```
+
+**Questions:**
+
+1. Which k is best? Is it at an end of the range you tried?
+2. On all 784 pixels without shrinking, QDA scores 0.725 on the same validation set. In one sentence: which directions does PCA throw away, and why does that help QDA?
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+    Z_val = pca_k.transform(X_digits_val)
+```
+
+1. k = 40 (0.957). It is in the middle of 10 to 100 (30 and 50 are within 0.005).
+2. PCA throws away the directions in which almost nothing varies; those are the directions that made each class's 784-pixel spread flat, so without them QDA can estimate the spreads (Lesson 5).
+:::
+
+### 3.2 The test set, once
+
+```python
+pca_k = PCA(n_components=____, random_state=0)            # the k chosen in 3.1
+pca_k.fit(X_digits_fit)                                   # fitting images only
+Z_fit = pca_k.transform(X_digits_fit)                     # k numbers per fitting image
+Z_test = pca_k.transform(X_digits_test)                   # the test images, with the same directions
+qda = QuadraticDiscriminantAnalysis()                     # one spread per class
+qda.fit(Z_fit, y_digits_fit)                              # train on the reduced fitting images
+print(round(qda.score(Z_test, y_digits_test), 3))         # the test set, read once
+```
+
+**Hint:** your answer to question 1 of 3.1.
+
+**Success check:** `0.962`.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+pca_k = PCA(n_components=40, random_state=0)            # the k chosen in 3.1
+```
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** the fitting images drawn on the first two components, coloured by digit.
+
+**Tell the AI:** `pca` (from 1.1) is fitted on `X_digits_fit`; `y_digits_fit` holds the digits.
+
+**Ask:** *"Use pca.transform(X_digits_fit) and plot its first two columns as a scatter plot, coloured by y_digits_fit with the tab10 colour map, and write each digit at the average position of its points."*
+
+**Check:** 0 sits far right and 1 far left; 4, 7 and 9 sit at the top; 2, 3, 5, 6 and 8 crowd in the middle (as on the lecture slide).
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** the 30 measurements of the breast lumps (Labs 4 and 5) drawn on two components.
+
+Run this cell first, without changing it.
+
+```python
+from sklearn.datasets import load_breast_cancer           # the 569 lumps
+from sklearn.preprocessing import StandardScaler          # rescales columns
+data = load_breast_cancer()                               # 569 lumps, 30 measurements
+y = 1 - data.target                                       # 1 = malignant
+X_train, X_test, y_train, y_test = train_test_split(
+    data.data, y, test_size=0.25, random_state=0, stratify=y)   # the split of Labs 4 and 5
+scaler = StandardScaler()                                 # the measurements have very different scales
+X_train_s = scaler.fit_transform(X_train)                 # learn and scale on the training lumps
+pca_lumps = PCA(n_components=2)                           # two components
+Z_lumps = pca_lumps.fit_transform(X_train_s)              # learn and project the training lumps
+print(pca_lumps.explained_variance_ratio_.round(3))      # share kept by each component
+```
+
+**Tell the AI:** `Z_lumps` has two columns; `y_train` holds the labels (1 = malignant).
+
+**Ask:** *"Plot the two columns of Z_lumps as a scatter plot, with malignant lumps as blue dots and benign lumps as grey circles, and a legend."*
+
+**Check:** the printed shares are `[0.452 0.177]`; benign lumps sit mostly on the left, malignant ones spread to the right.
+:::
+
+# After class: how today's lab helps with Assignment 2
+
+Assignment 2 (handwritten digits, MNIST) asks for PCA in Section 3. **From today you can do Section 3 and its optional figures.**
+
+| What you did today | Where it appears in Assignment 2 |
+|---|---|
+| 1.1: fit PCA on the fitting part only; 3.1: only `transform` the validation set | Section 3: "Fit PCA on the training set only, then use it to transform the training and validation sets" (the assignment calls the fitting part `X_train`) |
+| 1.2: `explained_variance_ratio_` and the cumulative share | Section 3, Table 3: "the cumulative fraction of variance that this k keeps" |
+| 3.1: compare a method on several values of k | Section 3, Table 3: k = 10, 50 and 100 for four methods (the same 784-pixel images; today you tried k from 10 to 100 for QDA) |
+| The second Try with AI box: components as images | Section 3, Going further: "Turn the first few principal components back into 28 × 28 images" |
+| The third Try with AI box: the scatter plot | Section 3, Going further: "Plot the training set on the plane of the first two components (k = 2), coloured by digit" |
+
+**One thing that is different in the assignment.** Today you chose k for QDA. In the assignment, Table 3 reports all four methods at each k, using the parameter values chosen in Section 2.
+
+**Reflection** (after class, one or two sentences each):
+
+1. Why does a combination of pixels keep more variance than the same number of pixels?
+2. Why are the widest-spread direction and the smallest-error direction the same?
+3. Why must PCA be fitted on the fitting part only?
+4. Why can fewer numbers give QDA a higher accuracy?
+
+# Advanced Study
+
+MPS311 students are encouraged to try one. **MPS439 students complete A**, the main task, and record it in the log at the end. Allow about 30 minutes for A. B and C are extras for everyone.
+
+## A. The components are eigenvectors, for one digit
+
+Advanced Study 1 of the Note works on all the fitting images. Here you use only the images of digit 0, so its numbers will not match yours.
+
+**Tasks**
+
+1. Advanced Study 1 of the Note shows that the first component solves $S\mathbf u = \lambda\mathbf u$ with the largest $\lambda$. Go one step further: among unit vectors $\mathbf u$ perpendicular to the first component $\mathbf u_1$, show that the variance $\mathbf u^\top S\mathbf u$ is largest when $\mathbf u$ is the eigenvector with the second-largest eigenvalue. Write the derivation in a text cell. (Use two Lagrange multipliers, one for $\|\mathbf u\| = 1$ and one for $\mathbf u^\top\mathbf u_1 = 0$. Key step: multiply the condition on the left by $\mathbf u_1^\top$ and use $S\mathbf u_1 = \lambda_1\mathbf u_1$ to show that the second multiplier is 0; you should end with $S\mathbf u = \lambda\mathbf u$ again.)
+2. Take the fitting images of digit 0, `zeros = X_digits_fit[y_digits_fit == 0]` (557 images). Compute `S = np.cov(zeros.T)` and its eigenvalues and eigenvectors with `np.linalg.eigh`. Sort them from the largest eigenvalue down.
+3. Fit `PCA(random_state=0)` on `zeros`. Compare the first eigenvector with its `components_[0]`, and the share of the first eigenvalue with its `explained_variance_ratio_[0]`. Draw the first eigenvector as a 28 × 28 image: what change among the 0s does it describe? (A picture with red and blue swapped is the same direction with the opposite sign.)
+4. Count the eigenvalues below `1e-10`. Which result of Lesson 5 do they explain?
+
+::: {.callout-tip title="Ask AI"}
+Ask: *"Why can an eigenvector from np.linalg.eigh differ from sklearn's PCA component by a minus sign, and why does it not matter?"* Check its answer against Advanced Study 1 of the Note.
+:::
+
+::: {.callout-note collapse="true" title="Hint"}
+`np.linalg.eigh` returns the eigenvalues in increasing order and the eigenvectors as **columns**. `order = np.argsort(values)[::-1]` gives the order from the largest down.
+:::
+
+**Self-check:** the share of the first eigenvalue is `0.1869` (the second `0.1276`); the first eigenvector equals `components_[0]` or its negative, with a largest difference below `1e-6`; `322` eigenvalues are below `1e-10`. (Lab 5 used all 750 training images of digit 0 and found rank 471; here there are only 557 fitting images, so the number differs.)
+
+## B. PCA from scratch with SVD
+
+**Tasks**
+
+1. Centre the fitting images with their mean, and compute `np.linalg.svd(Xc, full_matrices=False)`.
+2. Compute the variance along each component as `s ** 2 / (len(Xc) - 1)` and compare the first with `pca.explained_variance_[0]`.
+3. Rebuild the validation images from k = 10 components with your own code (subtract the **fitting** mean, project, add the mean back), and compute the average reconstruction error: for each image, the sum of the 784 squared pixel errors; then the average over the 1875 validation images.
+
+**Self-check:** the first variance is `5.0389`; the average reconstruction error for k = 10 is `27.05`.
+
+## C. Does standardising matter?
+
+First run the lumps cell in the last Try with AI box of Part 3 (it makes `X_train` and `X_train_s`). Then fit `PCA(n_components=2)` on the breast lumps **without** standardising (`X_train` instead of `X_train_s`). Which feature has the largest weight in the first component (`components_[0]`), and what share of the variance does that component keep? Explain why, from the scales of the features.
+
+**Self-check:** write the feature name and the share you found, and compare them with the standardised version (0.452).
+
+## Advanced Study log
+
+Copy this into a text cell at the end of your notebook.
+
+> **Investigations done (A, B or C):**
+>
+> **What I found:**
+>
+> **How AI helped, and what I had to correct:**
+>
+> **Self-check result (passed or not):**
+
+<!-- COURSE_FEEDBACK_QR:START -->
+---
+
+## 30-second feedback
+
+Scan the code to share anonymous feedback or post a question for this lab. It opens the correct **Lesson 7 lab** record automatically.
+
+![Feedback QR code for Lesson 7 lab](./feedback-qr.svg){fig-align="center" width="180px"}
+<!-- COURSE_FEEDBACK_QR:END -->

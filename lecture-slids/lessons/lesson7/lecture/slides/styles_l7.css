@@ -1,0 +1,40 @@
+/* extras for Lesson 7 only; base look comes from styles.css (copied from Lesson 2 via Lessons 4 to 6) */
+.reveal .flow.four{grid-template-columns:repeat(4,1fr)}
+.reveal .two.side{grid-template-columns:840px 1fr;gap:50px;align-items:center}
+.reveal .two.side .fig{width:100%}
+.reveal table{font-size:1.0em;margin:0 auto;border-collapse:collapse}
+.reveal table th,.reveal table td{padding:8px 22px;border-bottom:1px solid var(--rule)}
+.reveal table td:first-child,.reveal table th:first-child{text-align:left}
+.reveal pre,.reveal pre code{max-height:none!important;overflow:visible!important}
+.reveal pre{font-size:.74em}
+.reveal .rows.tiny{gap:6px}
+.reveal .rows.tiny>div{padding-top:8px;grid-template-columns:170px 1fr}
+.reveal .rows.tiny b{font-size:1.15em}
+.reveal .final-slide .takeaway{grid-template-columns:minmax(0,1fr) 380px;gap:50px}
+.reveal .final-slide .chain p{display:inline;margin-left:14px}
+.reveal .final-slide .chain b{display:inline}
+.reveal .formula.m3 mjx-container[display="true"]{font-size:1.0em!important}
+.reveal .tile{border:2px solid var(--rule);border-radius:14px;padding:30px 36px;background:var(--panel);font-size:1.3em;line-height:1.4}
+.reveal .tile span.math{display:inline;text-transform:none;font-size:1em;letter-spacing:0;color:inherit;font-weight:inherit}
+.reveal .wbox .cap{display:none}
+.reveal .wbox{zoom:1.18}
+.reveal #w-i1 #i1s{width:470px;max-width:470px!important}
+.reveal #w-i1 #i1b{width:300px;max-width:300px!important}
+.reveal #w-i1 .wrow,.reveal #w-i2 .wrow{justify-content:center}
+.reveal #w-i2 svg{width:230px!important}
+.reveal .fig-s1{width:1150px}
+.reveal .fig-s2{width:1250px}
+.reveal .fig-f4{width:1450px}
+.reveal .fig-f1{width:1300px}
+.reveal .fig-s1{width:1250px}
+.reveal .fig-s2{width:1400px}
+.reveal .formula.big mjx-container[display="true"]{font-size:2.2em!important}
+.reveal table.big,.reveal .bigtab table{font-size:1.35em}
+.reveal .two.side{grid-template-columns:900px 1fr}
+.reveal .fig-f4{width:1500px}
+.reveal #w-i3 #i3s{width:480px;max-width:480px!important}
+.reveal #w-i4 svg{width:200px!important}
+.reveal #w-i2 .wrow{flex-wrap:nowrap}
+.reveal .stage small{font-size:.75em;color:var(--muted);display:block;text-align:center}
+.reveal .fig-s1{width:1000px}
+.reveal .fig-s4{width:640px!important}
