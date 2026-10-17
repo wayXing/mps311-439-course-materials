@@ -1,0 +1,40 @@
+/* extras for Lesson 4 only; base look comes from styles.css (copied from Lesson 2) */
+.reveal .fig-f1{width:1100px}
+.reveal .fig-f2{width:1400px}
+.reveal .fig-f6{width:1250px}
+.reveal .fig-f7{height:560px;width:auto;max-width:none}
+.reveal .fig-f8{width:1150px}
+.reveal .flow.four{grid-template-columns:repeat(4,1fr)}
+.reveal .two.side{grid-template-columns:840px 1fr;gap:50px;align-items:center}
+.reveal .two.side .fig{width:100%}
+.reveal table{font-size:.82em;margin:0 auto;border-collapse:collapse}
+.reveal table th,.reveal table td{padding:8px 18px;border-bottom:1px solid var(--rule)}
+.reveal table td:first-child,.reveal table th:first-child{text-align:left}
+.reveal pre,.reveal pre code{max-height:none!important;overflow:visible!important}
+.reveal pre{font-size:.72em}
+.reveal .rows.tiny{gap:6px}
+.reveal .rows.tiny>div{padding-top:8px;grid-template-columns:150px 1fr}
+.reveal .rows.tiny b{font-size:1.15em}
+.reveal .final-slide .takeaway{grid-template-columns:minmax(0,1fr) 380px;gap:50px}
+.reveal .final-slide .chain p{display:inline;margin-left:14px}
+.reveal .final-slide .chain b{display:inline}
+/* the two widgets come from the English Note; enlarge them for the projector */
+.reveal #w-i2 svg{width:560px;max-width:560px!important;margin:0 auto}
+.reveal #w-i2 .wrow,.reveal .wbox{font-size:.66em}
+/* second pass after the deck review */
+.reveal .two.wide{grid-template-columns:980px 1fr;gap:40px;align-items:center}
+.reveal .two.wide .fig{width:100%}
+.reveal table{font-size:1.05em}
+.reveal pre{font-size:.8em}
+.reveal .formula.m3 mjx-container[display="true"]{font-size:1.0em!important}
+/* third pass: the new widgets */
+.reveal #w-i1 svg{width:700px;max-width:700px!important;margin:0 auto}
+.reveal #w-i6 #i6s{width:820px;max-width:820px!important;margin:0 auto}
+.reveal #w-i3 #i3g{width:380px;max-width:380px!important}
+.reveal #w-i3 #i3d{width:660px;max-width:660px!important}
+.reveal #w-i1 .wrow,.reveal #w-i3 .wrow,.reveal #w-i6 .wrow{justify-content:center}
+.reveal #w-i1 .cap,.reveal #w-i3 .cap,.reveal #w-i6 .cap{display:none}
+.reveal #w-i3 #i3txt{font-size:1.12em}
+.reveal .fig-s16{width:900px}
+.reveal #w-i3 #i3txt{display:none}
+.reveal .tile{border:2px solid var(--rule);border-radius:14px;padding:30px 36px;background:var(--panel);font-size:1.3em;line-height:1.4}

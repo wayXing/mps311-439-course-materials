@@ -20,7 +20,7 @@ const lessonIgnoredNames = new Set([
   '01_narrative.md', '02_teaching_script.md', '03_slide_spec.md', 'redesign_storyboard.md',
   'design_goal.md', 'lab_plan.md', 'narrative.md', 'note_plan.md', 'note_draft.md', 'note_draft_zh.md',
   'slide_plan.md', 'figure_spec.md', 'note_visual_plan.md',
-  'LESSON2_LECTURE_HANDOFF.md', 'feedback_log.md', 'slide_table_zh_v2.md', 'lecture_script_zh_v2.md', 'slide_table_zh.md', 'teaching_script_zh.md', 'lecture_script_zh.md', 'lecture_script_zh_detailed.md', 'lecture_script_zh_rehearsal.md',
+  'LESSON2_LECTURE_HANDOFF.md', 'feedback_log.md', 'COURSE_FEEDBACK_LOG.md', 'LESSONS_5_10_DECISIONS.md', 'student_review.md', 'video', '.claude', '.env', 'slide_table_zh_v2.md', 'lecture_script_zh_v2.md', 'slide_table_zh.md', 'teaching_script_zh.md', 'lecture_script_zh.md', 'lecture_script_zh_detailed.md', 'lecture_script_zh_rehearsal.md',
   'note.html', 'note.pdf',
   'note.png', 'note_files', 'slide-export.pdf', 'lab_worksheet.html',
   'lab_worksheet.pdf', 'lab_solution.html', 'slide.html',
@@ -38,7 +38,8 @@ function shouldCopyCourseSite(source) {
 
 function shouldCopySlides(source) {
   const parts = relativeParts(sourceSlides, source);
-  if (parts.includes('admin') || parts.some((part) => lessonIgnoredNames.has(part))) return false;
+  if (parts.includes('admin') || parts.some((part) => lessonIgnoredNames.has(part) || part.startsWith('STUDENT_REVIEW'))) return false;
+  if (parts.includes('lab') && parts[parts.length - 1] === 'mnist10k.npz') return false;  // a copy downloaded when the solution runs; the public file is data/mnist10k.npz
   return !parts.some((part) => part.endsWith('.html') || part.endsWith('.pdf') || part.endsWith('.webloc'));
 }
 

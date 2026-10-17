@@ -1,0 +1,431 @@
+---
+pagetitle: "Lab 4: From a Number to a Decision"
+format:
+  html:
+    toc: true
+    toc-depth: 2
+    code-copy: true
+    embed-resources: true
+    css: ../../shared/note.css
+    include-after-body: ../../shared/code_wrap.html
+    theme: default
+---
+
+# Lab 4: From a Number to a Decision
+## MPS311/439 Machine Learning
+**Lesson 4 Lab Session | Core duration: 50 minutes**
+
+## What this lab is for
+
+In the lecture we asked whether a lump is malignant or benign. Today you walk the same path in code, on the same 569 lumps:
+
+1. find out what "good" means here, by comparing with the simplest guess;
+2. fit logistic regression and read its probabilities;
+3. count the two kinds of mistake with a confusion matrix;
+4. choose a threshold by the cost of each mistake, and use the test set only once.
+
+Before each step you will see a question. **Write down your own answer first**, then run the code and compare.
+
+Most code is provided. Your job is to fill the blanks `____`, run the cell, and check your result against the **Success check**. At the end there is a short section on how today's lab helps with **Assignment 2**.
+
+## How to work
+
+1. Open a **blank** Colab notebook (**File → New notebook in Drive**), as in Labs 1 to 3.
+2. Copy each code block into a cell, fill in the blanks, and run it. Cells depend on the cells above, so run them from top to bottom.
+3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
+4. Each task has a one-line **Hint** and a folded **Answer**. Try first. Open the Answer only to check your work. If you fall behind, copy the Answer of a task and carry on: every later task still works.
+5. Running every cell and matching the Success checks is a complete lab.
+6. The **Try with AI** boxes are for when you finish early, or after class. They follow the four steps below.
+
+### Using AI
+
+The **Try with AI** boxes use an AI assistant for the Python you do not know yet, while you stay in charge of the machine learning. Every box has the same four steps:
+
+1. **You want:** say what you want in machine-learning words (for example, "the probabilities as two histograms, one per class").
+2. **Tell the AI:** the names of the variables it should use.
+3. **Ask:** the request.
+4. **Check:** compare the AI's result with a number or shape given on this page. If it does not match, the AI or your question is wrong. Find out which.
+
+## Part 0: What is the simplest guess worth? (10 minutes)
+
+**Goal:** load the data, and find the accuracy that any classifier has to beat.
+
+### 0.1 Load and split the data
+
+Run the cell without changing it. The data come with scikit-learn, so nothing is downloaded.
+
+```python
+import numpy as np                                        # numbers and arrays
+import matplotlib.pyplot as plt                           # plots
+from sklearn.datasets import load_breast_cancer           # the 569 lumps
+from sklearn.model_selection import train_test_split, KFold, cross_val_predict   # splitting and cross-validation
+from sklearn.preprocessing import StandardScaler          # rescales columns
+from sklearn.linear_model import LogisticRegression       # the model of today
+from sklearn.metrics import confusion_matrix, recall_score, precision_score      # counting mistakes
+
+data = load_breast_cancer()                               # 569 lumps, 30 measurements each
+X = data.data                                             # the 30 measurements (features)
+y = 1 - data.target                                       # sklearn uses 0 = malignant; we want 1 = malignant
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=0, stratify=y)     # 3:1 split, same share of malignant in both parts
+print(X_train.shape, X_test.shape)                        # how many lumps in each part
+print(y_train.sum(), y_test.sum())                        # how many malignant in each part
+```
+
+**Success check:** `(426, 30) (143, 30)` and `159 53`.
+
+### 0.2 The majority baseline
+
+**Question first:** 159 of the 426 training lumps are malignant. If a "model" always guesses the more common class, what accuracy will it get? Write a guess, then fill the code.
+
+```python
+share_benign = (y_train == ____).mean()                   # fraction of training lumps in that class
+print("always guess benign:", share_benign)               # its accuracy
+```
+
+**Hint:** benign is labelled 0.
+
+**Success check:** `always guess benign: 0.6267...`
+
+**Questions:**
+
+1. A model has accuracy 0.86 on these lumps. Is that "86% good"? Compare it with the baseline in one sentence.
+2. In a disease that 1 person in 100 has, what accuracy does "always guess healthy" get? Give a number.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+share_benign = (y_train == 0).mean()
+```
+
+1. Always guessing benign already gives 0.63, so 0.86 is better, but by much less than "86%" suggests.
+2. 0.99. A high accuracy alone says nothing when one class is rare.
+:::
+
+## Part 1: Fit logistic regression (12 minutes)
+
+**Goal:** fit the model on the 30 measurements and read its output as probabilities.
+
+### 1.1 Fit on the raw measurements
+
+Run the cell without changing it. It fits the model on the raw measurements.
+
+```python
+raw_model = LogisticRegression()                          # default settings: at most 100 steps
+raw_model.fit(X_train, y_train)                           # fit on the raw measurements
+print(X_train[:, 0].min(), X_train[:, 0].max())           # range of mean radius
+print(X_train[:, 3].min(), X_train[:, 3].max())           # range of mean area
+```
+
+**Success check:** a yellow **ConvergenceWarning** appears, and the two ranges are about `7 to 28` and `144 to 2501`.
+
+**Question:** the warning says the solver stopped before reaching the bottom. Using Lesson 3, what would you do to the columns first? One word.
+
+Write your answer, then fill the two blanks below.
+
+```python
+scaler = StandardScaler()                                 # mean and standard deviation per column
+X_train_s = scaler.____(X_train)                          # learn them from the training lumps, and scale
+X_test_s = scaler.____(X_test)                            # scale the test lumps the same way
+print(X_train_s.mean(axis=0)[:3].round(2), X_train_s.std(axis=0)[:3].round(2))   # first three columns
+```
+
+**Hint:** as in Lab 3: one method learns and scales, the other only scales.
+
+**Success check:** `[0. 0. 0.] [1. 1. 1.]` (the first number may print as `-0.`).
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+X_train_s = scaler.fit_transform(X_train)
+X_test_s = scaler.transform(X_test)
+```
+
+The answer to the question is **standardise**. Mean area runs to 2501 while smoothness stays below 0.2, so the solver needs many small steps along some directions; after standardising, every column has mean 0 and standard deviation 1.
+:::
+
+### 1.2 Probabilities, not classes
+
+**Question first:** the model gives two numbers for each lump. What do you expect them to add up to?
+
+```python
+model = LogisticRegression()                              # sigmoid model, trained with cross-entropy
+model.fit(X_train_s, y_train)                             # fit on the standardised training lumps
+prob_both = model.____(X_train_s[:5])                     # two probabilities for the first five training lumps
+print(prob_both.round(3))                                 # column 0: benign, column 1: malignant
+print(y_train[:5])                                        # the true labels of these five lumps
+```
+
+**Hint:** the method name ends in `_proba`.
+
+**Success check:** five rows of two numbers, each row adding up to 1; the labels are `[0 0 1 1 1]`. The first row is about `[0.944 0.056]`; the fourth is about `[0.253 0.747]`, a malignant lump the model is less sure about.
+
+**Questions:**
+
+1. Which column is the probability of malignant?
+2. `model.predict` turns these into 0 or 1. Which threshold does it use?
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+prob_both = model.predict_proba(X_train_s[:5])
+```
+
+1. Column 1 (classes are listed in the order 0, 1).
+2. 0.5: a lump is called malignant when its probability is at least 0.5.
+:::
+
+## Part 2: Count the two kinds of mistake (12 minutes)
+
+**Goal:** use cross-validation inside the training set to see which mistakes the model makes, without touching the test set.
+
+### 2.1 Cross-validated probabilities and the confusion matrix
+
+Run the cell without changing it. As in Lesson 3, the training lumps are split into 5 folds; each lump gets a probability from a model that did not see it.
+
+```python
+kf = KFold(5, shuffle=True, random_state=0)               # 5 folds; shuffle first
+prob_both = cross_val_predict(LogisticRegression(), X_train_s, y_train,
+                              cv=kf, method="predict_proba")   # one probability pair per training lump
+prob = prob_both[:, 1]                                    # column 1: probability of malignant
+pred = (prob >= 0.5).astype(int)                          # threshold 0.5: 1 = malignant, 0 = benign
+print(confusion_matrix(y_train, pred, labels=[1, 0]))     # rows: actual malignant, actual benign
+```
+
+**Success check:**
+
+```
+[[152   7]
+ [  2 265]]
+```
+
+Read it like the lecture: first row, actually malignant (152 caught, **7 missed**); second row, actually benign (**2 false alarms**, 265 cleared).
+
+### 2.2 Recall by hand
+
+**Recall** is the share of malignant lumps that the model finds: caught divided by (caught plus missed). **Precision** is the share of lumps called malignant that really are malignant: caught divided by (caught plus false alarms). Fill the number of missed lumps from 2.1, then compare with scikit-learn.
+
+```python
+recall_by_hand = 152 / (152 + ____)                       # caught / (caught + missed)
+print(round(recall_by_hand, 3))                           # your recall
+print(round(recall_score(y_train, pred), 3))              # scikit-learn's recall
+print(round(precision_score(y_train, pred), 3))           # precision: share of "malignant" calls that are right
+```
+
+**Hint:** the top-right number of the matrix.
+
+**Success check:** `0.956`, `0.956` and `0.987`.
+
+**Question:** the accuracy here is (152 + 265) / 426 = 0.979 (the two correct cells of your matrix over all 426 lumps), far above the baseline of 0.627. Still, 7 cancers are missed. In one sentence: why can accuracy hide this?
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+recall_by_hand = 152 / (152 + 7)
+```
+
+Accuracy counts a missed cancer and a false alarm as the same kind of error, and malignant lumps are only 37% of the data, so a few missed cancers change accuracy very little.
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** to see how the cross-validated probabilities are spread for the two classes.
+
+**Tell the AI:** `prob` holds one probability of malignant per training lump; `y_train` holds the true labels (1 = malignant, 0 = benign).
+
+**Ask:** *"Draw two histograms of prob on the same axes, one for the lumps with y_train equal to 1 and one for y_train equal to 0, with 20 bins between 0 and 1 and a legend."*
+
+**Check:** the two histograms contain `159` and `267` lumps; most malignant lumps sit near 1, most benign near 0.
+:::
+
+## Part 3: Choose a threshold, then read the test set once (8 minutes)
+
+**Goal:** see how the threshold trades missed cancers against false alarms, choose one for a clinic, and report it on the test set.
+
+### 3.1 Try three thresholds
+
+Run the cell after filling the two thresholds **0.3** and **0.1**. The loop is given in full.
+
+```python
+for t in [0.5, ____, ____]:                               # three thresholds to compare
+    pred_t = (prob >= t).astype(int)                      # call malignant when probability >= t
+    cm = confusion_matrix(y_train, pred_t, labels=[1, 0]) # the 2 x 2 table
+    missed = cm[0, 1]                                     # actually malignant, called benign
+    false_alarms = cm[1, 0]                               # actually benign, called malignant
+    print("threshold", t, "missed", missed, "false alarms", false_alarms)
+```
+
+**Hint:** write the two numbers given above, in that order.
+
+**Success check:**
+
+```
+threshold 0.5 missed 7 false alarms 2
+threshold 0.3 missed 6 false alarms 9
+threshold 0.1 missed 3 false alarms 27
+```
+
+**Question:** a missed cancer is the worst outcome for the clinic. Which threshold do you choose? Compare the number of missed cancers at 0.5 and at your threshold.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+for t in [0.5, 0.3, 0.1]:
+```
+
+0.1: missed cancers drop from 7 to 3. The price is 27 false alarms instead of 2, which means more follow-up checks for patients who do not have cancer.
+:::
+
+### 3.2 The test set, once
+
+The threshold was chosen inside the training set. Now, and only now, fit on all training lumps and read the test set once. Fill in your chosen threshold.
+
+```python
+model = LogisticRegression()                              # the same model
+model.fit(X_train_s, y_train)                             # train on all 426 training lumps
+prob_test = model.predict_proba(X_test_s)[:, 1]           # probability of malignant for each test lump
+pred_test = (prob_test >= ____).astype(int)               # your chosen threshold
+print(confusion_matrix(y_test, pred_test, labels=[1, 0])) # the test set, read once
+```
+
+**Hint:** the threshold you chose in 3.1.
+
+**Success check (threshold 0.1):**
+
+```
+[[53  0]
+ [11 79]]
+```
+
+All 53 malignant test lumps are found; 11 of the 90 benign lumps are false alarms. If you chose 0.3, you get `[[51 2] [6 84]]`: 2 missed, 6 false alarms.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+pred_test = (prob_test >= 0.1).astype(int)
+```
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** to see the whole trade-off, not only three thresholds.
+
+**Tell the AI:** `prob` holds the cross-validated probability of malignant for each training lump; `y_train` holds the labels (1 = malignant).
+
+**Ask:** *"For thresholds from 0.05 to 0.95 in steps of 0.05, count the missed malignant lumps (y_train is 1 but prob is below the threshold) and the false alarms (y_train is 0 but prob is at least the threshold). Plot both counts against the threshold on one figure."*
+
+**Check:** at threshold 0.5 the two counts are `7` and `2`; missed cancers go down and false alarms go up as the threshold falls.
+:::
+
+::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+**You want:** to see what a multi-class logistic regression looks at, as in Assignment 2.
+
+Run this cell first, without changing it. It downloads the course's MNIST subset (10,000 handwritten digits of 28 × 28 pixels, about 1.6 MB; Labs 5 to 8 use it too) and fits logistic regression. It takes about half a minute.
+
+```python
+import urllib.request                                     # to download a file
+DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/data/mnist10k.npz"
+urllib.request.urlretrieve(DATA_URL, "mnist10k.npz")      # 10,000 MNIST images, about 1.6 MB
+mnist = np.load("mnist10k.npz")                           # the file holds two arrays, X and y
+X_digits = mnist["X"] / 255                               # 784 pixels per image (28 x 28), scaled to 0 to 1
+y_digits = mnist["y"]                                     # the digit, 0 to 9
+X_digits_train, X_digits_test, y_digits_train, y_digits_test = train_test_split(
+    X_digits, y_digits, test_size=0.25, random_state=0, stratify=y_digits)   # 7500 to train, 2500 to test
+digit_model = LogisticRegression(max_iter=1000, C=0.1)    # more steps; C = 0.1 regularises (Lesson 3), chosen by cross-validation
+digit_model.fit(X_digits_train, y_digits_train)           # softmax and cross-entropy happen inside
+print(digit_model.score(X_digits_test, y_digits_test))    # accuracy on the test images
+```
+
+**Tell the AI:** `digit_model.coef_` has 10 rows (one per digit) of 784 weights, one per pixel of a 28 × 28 image.
+
+**Ask:** *"Show the 784 weights of each of the 10 rows of digit_model.coef_ as a 28 × 28 image, in a grid of 2 rows and 5 columns, with a red-blue colour map centred at zero (positive red, negative blue) and the digit as each title."*
+
+**Check:** the printed accuracy is about `0.908`, and there are 10 small images; the one for digit 0 has a blue centre and a red ring around it.
+:::
+
+# After class: how today's lab helps with Assignment 2
+
+Assignment 2 (handwritten digits, MNIST) starts with the same steps on a 10-class problem. **From today you can do Section 1.**
+
+| What you did today | Where it appears in Assignment 2 |
+|---|---|
+| Part 0: the majority baseline | Section 1, the first baseline: "always predicts the digit that is most common in the training set" (about 0.11) |
+| Part 1: standardise, then `LogisticRegression`; the `ConvergenceWarning` | Section 1, the second baseline, and the reminder to divide the pixels by 255 and raise `max_iter` |
+| Part 2: the confusion matrix | Section 1, "Which digit does logistic regression most often mistake for which other digit?" (a 10 × 10 matrix: rows are the actual digit, columns the predicted one) |
+| The digits Try with AI box: weights as an image | Section 1, "arrange the coefficients of one class as a 28 × 28 image: what is it looking at?" |
+| Part 0, question 2: accuracy when classes differ in size | Section 1, "Do the 10 digits have the same number of samples? What does this mean for accuracy?" |
+
+**Two things that are different in the assignment.**
+
+1. The assignment uses a separate **validation set** instead of cross-validation, because 60,000 images make cross-validation slow. The rule is the same: choose on validation, read the test set once at the end.
+2. The assignment uses accuracy throughout; it does not ask you to choose a threshold. With 10 classes, the prediction is the digit with the highest probability.
+
+**Reflection** (after class, one or two sentences each):
+
+1. Why is a linear regression line a poor model when the answer is 0 or 1?
+2. Why does cross-entropy punish a confident mistake more than squared error does?
+3. What did the confusion matrix show that accuracy did not?
+4. Why must the threshold be chosen without the test set?
+
+# Advanced Study
+
+MPS311 students are encouraged to try one. **MPS439 students complete A** and record it in the log at the end. Allow about 30 minutes for each. B and C are extras for everyone. Write your own code; you may ask AI for help, but you are responsible for checking the result.
+
+## A. Gradient descent by hand
+
+**Tasks**
+
+1. Follow Advanced Study 1 of the Note to derive the gradient of the cross-entropy, $\frac{1}{n}X^\top(\mathbf p - \mathbf y)$, and write the derivation in a text cell.
+2. On `X_train_s` and `y_train`, write gradient descent that matches `LogisticRegression(C=0.5)`: start from all-zero weights and intercept, learning rate 0.5, 5000 steps. Advanced Study 2 of the Note matches the default `C = 1` by adding $\frac{1}{n}\mathbf w$ to the weight gradient. Work out what this term becomes when `C = 0.5`, and use it (not on the intercept).
+3. Record the training cross-entropy every 100 steps and plot it. Then try learning rates 0.05 and 5 and compare the curves.
+
+::: {.callout-tip title="Ask AI"}
+Ask: *"Why does the derivative of the cross-entropy with respect to z come out as p minus y?"* Check its steps against Advanced Study 1 of the Note.
+:::
+
+::: {.callout-note collapse="true" title="Hint"}
+`p = 1 / (1 + np.exp(-(X_train_s @ w + b)))` gives all probabilities at once. For `C = 1` the weight gradient is `X_train_s.T @ (p - y_train) / n + w / n`; scikit-learn's penalty term is $\frac{1}{2C}\|\mathbf w\|^2$ next to the sum of the losses, so a smaller `C` makes the extra term larger. When you compute the cross-entropy, use `p = np.clip(p, 1e-12, 1 - 1e-12)` first, so that `np.log` never sees exactly 0 or 1.
+:::
+
+**Self-check** (run after your code, with your weights in `w`)
+
+```python
+ref = LogisticRegression(C=0.5).fit(X_train_s, y_train)  # the same penalty as yours
+print(np.abs(w - ref.coef_[0]).max() < 0.02)              # True if your weights match
+print(round(np.abs(ref.coef_).max(), 3))                  # the largest weight with C = 0.5
+```
+
+The result should be `True` (the largest difference is about `0.007`), and the largest weight is about `0.958`. It is smaller than about `1.24` for `C = 1`: a stronger penalty, smaller weights.
+
+## B. Remove the penalty
+
+**Tasks**
+
+1. Fit `LogisticRegression(C=1e6, max_iter=10000)` on `X_train_s` (a larger `C` means a weaker penalty, so a huge `C` means almost no penalty). Print the largest absolute weight and the training accuracy.
+2. Compare with the default model. Explain, using the cross-entropy, why the weights grow so large when the training lumps can be separated perfectly. Which idea from Lesson 3 does this remind you of?
+3. Use `cross_val_predict` with the same `kf` to compare the missed cancers and false alarms of the two models at threshold 0.5.
+
+**Self-check:** the largest weight is about `264` and the training accuracy is `1.0`, against about `1.24` for the default model.
+
+## C. Two more ideas
+
+Choose one.
+
+1. **Class weights.** Fit `LogisticRegression(class_weight="balanced")` and compare its cross-validated missed cancers and false alarms at threshold 0.5 with those of the default model at a lower threshold. In what way are the two the same, and in what way different?
+2. **Calibration.** Group the cross-validated probabilities `prob` into ten bins (0 to 0.1, 0.1 to 0.2, and so on). For each bin, compute the fraction of lumps that are really malignant. Plot it against the mean probability of the bin. Are the probabilities honest? Look up `sklearn.calibration.calibration_curve`.
+
+**Self-check:** for class weights, write the counts you found; for calibration, the points should lie near the diagonal in the bins that contain many lumps.
+
+## Advanced Study log
+
+Copy this into a text cell at the end of your notebook.
+
+> **Investigation chosen (A, B or C):**
+>
+> **What I found:**
+>
+> **How AI helped, and what I had to correct:**
+>
+> **Self-check result (passed or not):**
+
+<!-- COURSE_FEEDBACK_QR:START -->
+---
+
+## 30-second feedback
+
+Scan the code to share anonymous feedback or post a question for this lab. It opens the correct **Lesson 4 lab** record automatically.
+
+![Feedback QR code for Lesson 4 lab](./feedback-qr.svg){fig-align="center" width="180px"}
+<!-- COURSE_FEEDBACK_QR:END -->

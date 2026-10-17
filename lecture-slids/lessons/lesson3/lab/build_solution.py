@@ -154,6 +154,11 @@ table = [
 ]
 assert table == [((4.98, 0.42), 4.71), ((4.37, 0.58), 4.29), ((2.91, 0.23), 2.72),
                  ((2.88, 0.18), 2.64), ((2.9, 0.18), 2.61)], table
+# 警告信息里带有本机的安装路径；公开的 Solution 不留本机路径
+for cell in nb.cells:
+    for out in cell.get("outputs", []):
+        if out.get("output_type") == "stream":
+            out["text"] = re.sub(r"/\S*/site-packages/", "", out["text"])
 nbformat.write(nb, ROOT / "lab_solution.ipynb")
 print(f"Validated {fi} blank blocks, all Core answers, {len(EXPECT)} check values and {images} figures; "
       f"wrote {len(nb.cells)} cells.")

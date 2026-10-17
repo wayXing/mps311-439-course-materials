@@ -2,12 +2,15 @@ export const teachingLessons = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
 // A lesson listed here is being redesigned: until its new deck and worksheet replace them,
 // the site keeps serving the UoS 2025 version from the lesson's archive.
-const servedFromArchive = {};
+const servedFromArchive = {
+  5: 'lessons/lesson5/archive/uos-2025', 6: 'lessons/lesson6/archive/uos-2025', 7: 'lessons/lesson7/archive/uos-2025',
+  8: 'lessons/lesson8/archive/uos-2025', 9: 'lessons/lesson9/archive/uos-2025', 10: 'lessons/lesson10/archive/uos-2025',
+};  // released one lesson at a time, a week before class: see reviews/PENDING_RELEASES.md
 
-// Lessons 1 to 3 use Quarto decks in lecture/slides/; Lessons 4 to 10 still use Slidev (lecture/slide.md).
-const quartoDecks = { 1: 'slide', 2: 'slide_v2', 3: 'slide' };
+// Lessons whose served deck is a Quarto deck in lecture/slides/ (the 2025 archives of Lessons 5–10 are Slidev).
+const quartoDecks = { 1: 'slide', 2: 'slide_v2', 3: 'slide', 4: 'slide' };
 // Lessons whose lab worksheet is a Quarto .qmd file (the others are .md).
-const qmdWorksheets = new Set([2, 3]);
+const qmdWorksheets = new Set([2, 3, 4]);
 
 // Source and build paths of the slide deck and lab worksheet that the site currently serves.
 export function lessonPaths(lesson) {

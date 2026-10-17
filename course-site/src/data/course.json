@@ -370,64 +370,34 @@
       "slug": "lesson-04",
       "number": "04",
       "label": "Lesson 04",
-      "title": "Linear classification",
+      "title": "From a number to a decision",
       "shortTitle": "Logistic regression",
-      "summary": "Many real decisions require a class or probability, so the output and objective used for regression are no longer enough.",
+      "summary": "When the answer is a class, output a probability, train it with cross-entropy, check it against a baseline and a confusion matrix, and choose a threshold by what each mistake costs.",
       "accent": "gold",
       "type": "teaching",
       "topics": [
-        "Sigmoid and probability",
-        "Decision boundaries",
-        "Classification metrics"
+        "Sigmoid and cross-entropy",
+        "Baselines and confusion matrices",
+        "Thresholds and error costs"
       ],
       "resources": [
         {
           "label": "Interactive slides",
-          "description": "Open the full Slidev presentation.",
+          "description": "Open the full Quarto/RevealJS presentation.",
           "kind": "slides",
           "group": "Lecture",
-          "source": "lesson4/lecture/dist",
-          "target": "materials/lesson4/slides",
-          "href": "materials/lesson4/slides/index.html",
-          "directory": true
-        },
-        {
-          "label": "Slides PDF",
-          "description": "Download or print the lecture slides.",
-          "kind": "pdf",
-          "group": "Lecture",
-          "source": "lesson4/lecture/slide-export.pdf",
-          "target": "materials/lesson4/slides.pdf",
-          "href": "materials/lesson4/slides.pdf"
+          "source": "lesson4/lecture/slides/slide.html",
+          "target": "materials/lesson4/slides/index.html",
+          "href": "materials/lesson4/slides/index.html"
         },
         {
           "label": "Lecture notes",
           "description": "Read the extended explanation online.",
           "kind": "notes",
           "group": "Lecture",
-          "source": "lesson4/lecture/note.html",
+          "source": "lesson4/lecture/note_en.html",
           "target": "materials/lesson4/notes.html",
           "href": "materials/lesson4/notes.html"
-        },
-        {
-          "label": "Notes PDF",
-          "description": "Download the extended lecture notes.",
-          "kind": "pdf",
-          "group": "Lecture",
-          "source": "lesson4/lecture/note.pdf",
-          "target": "materials/lesson4/notes.pdf",
-          "href": "materials/lesson4/notes.pdf"
-        },
-        {
-          "label": "Demo",
-          "description": "Read the worked examples in the browser.",
-          "kind": "notebook",
-          "group": "Lecture",
-          "source": "lesson4/lecture/demo.ipynb",
-          "target": "materials/lesson4/demo",
-          "href": "materials/lesson4/demo/demo.html",
-          "downloadHref": "materials/lesson4/demo/demo.ipynb",
-          "render": "quarto"
         },
         {
           "label": "Lab worksheet",
@@ -450,13 +420,54 @@
           "render": "quarto"
         },
         {
-          "label": "Lab worksheet (PDF)",
-          "description": "Download a printable worksheet.",
-          "kind": "pdf",
-          "group": "Lab",
-          "source": "lesson4/lab/lab_worksheet.pdf",
-          "target": "materials/lesson4/lab.pdf",
-          "href": "materials/lesson4/lab.pdf"
+          "label": "Slides (UoS 2025)",
+          "description": "Open the 2025 lecture retained in the course archive.",
+          "kind": "slides",
+          "group": "Archive",
+          "source": "lesson4/archive/uos-2025/lecture/dist",
+          "target": "materials/lesson4/archive/uos-2025/slides",
+          "href": "materials/lesson4/archive/uos-2025/slides/index.html",
+          "directory": true
+        },
+        {
+          "label": "Lecture notes (UoS 2025)",
+          "description": "Read the notes accompanying the 2025 lecture.",
+          "kind": "notes",
+          "group": "Archive",
+          "source": "lesson4/archive/uos-2025/lecture/note.html",
+          "target": "materials/lesson4/archive/uos-2025/notes.html",
+          "href": "materials/lesson4/archive/uos-2025/notes.html"
+        },
+        {
+          "label": "Lab worksheet (UoS 2025)",
+          "description": "Open the 2025 practical worksheet.",
+          "kind": "worksheet",
+          "group": "Archive",
+          "source": "lesson4/archive/uos-2025/lab/lab_worksheet.html",
+          "target": "materials/lesson4/archive/uos-2025/lab.html",
+          "href": "materials/lesson4/archive/uos-2025/lab.html"
+        },
+        {
+          "label": "Demo notebook (UoS 2025)",
+          "description": "Read the 2025 worked examples in the browser.",
+          "kind": "notes",
+          "group": "Archive",
+          "source": "lesson4/archive/uos-2025/lecture/demo.ipynb",
+          "target": "materials/lesson4/archive/uos-2025/demo",
+          "href": "materials/lesson4/archive/uos-2025/demo/demo.html",
+          "downloadHref": "materials/lesson4/archive/uos-2025/demo/demo.ipynb",
+          "render": "quarto"
+        },
+        {
+          "label": "Lab solution (UoS 2025)",
+          "description": "Review the 2025 worked lab notebook in the browser.",
+          "kind": "solution",
+          "group": "Archive",
+          "source": "lesson4/archive/uos-2025/lab/lab_solution.ipynb",
+          "target": "materials/lesson4/archive/uos-2025/solution",
+          "href": "materials/lesson4/archive/uos-2025/solution/lab_solution.html",
+          "downloadHref": "materials/lesson4/archive/uos-2025/solution/lab_solution.ipynb",
+          "render": "quarto"
         }
       ]
     },
@@ -466,7 +477,7 @@
       "label": "Lesson 05",
       "title": "Finding the best projection",
       "shortTitle": "Linear discriminant analysis",
-      "summary": "Classification can also start from assumptions about how each class generates its data, giving a different route to a decision boundary.",
+      "summary": "A generative view of classification and the geometry of finding informative projections.",
       "accent": "sage",
       "type": "teaching",
       "topics": [
@@ -480,7 +491,7 @@
           "description": "Open the full Slidev presentation.",
           "kind": "slides",
           "group": "Lecture",
-          "source": "lesson5/lecture/dist",
+          "source": "lesson5/archive/uos-2025/lecture/dist",
           "target": "materials/lesson5/slides",
           "href": "materials/lesson5/slides/index.html",
           "directory": true
@@ -490,7 +501,7 @@
           "description": "Download or print the lecture slides.",
           "kind": "pdf",
           "group": "Lecture",
-          "source": "lesson5/lecture/slide-export.pdf",
+          "source": "lesson5/archive/uos-2025/lecture/slide-export.pdf",
           "target": "materials/lesson5/slides.pdf",
           "href": "materials/lesson5/slides.pdf"
         },
@@ -499,7 +510,7 @@
           "description": "Read the extended explanation online.",
           "kind": "notes",
           "group": "Lecture",
-          "source": "lesson5/lecture/note.html",
+          "source": "lesson5/archive/uos-2025/lecture/note.html",
           "target": "materials/lesson5/notes.html",
           "href": "materials/lesson5/notes.html"
         },
@@ -508,16 +519,16 @@
           "description": "Download the extended lecture notes.",
           "kind": "pdf",
           "group": "Lecture",
-          "source": "lesson5/lecture/note.pdf",
+          "source": "lesson5/archive/uos-2025/lecture/note.pdf",
           "target": "materials/lesson5/notes.pdf",
           "href": "materials/lesson5/notes.pdf"
         },
         {
           "label": "Demo",
           "description": "Read the worked examples in the browser.",
-          "kind": "notebook",
+          "kind": "notes",
           "group": "Lecture",
-          "source": "lesson5/lecture/demo.ipynb",
+          "source": "lesson5/archive/uos-2025/lecture/demo.ipynb",
           "target": "materials/lesson5/demo",
           "href": "materials/lesson5/demo/demo.html",
           "downloadHref": "materials/lesson5/demo/demo.ipynb",
@@ -528,7 +539,7 @@
           "description": "Open the guided practical worksheet.",
           "kind": "worksheet",
           "group": "Lab",
-          "source": "lesson5/lab/lab_worksheet.html",
+          "source": "lesson5/archive/uos-2025/lab/lab_worksheet.html",
           "target": "materials/lesson5/lab.html",
           "href": "materials/lesson5/lab.html"
         },
@@ -537,7 +548,7 @@
           "description": "Review the fully worked notebook in the browser.",
           "kind": "solution",
           "group": "Lab",
-          "source": "lesson5/lab/lab_solution.ipynb",
+          "source": "lesson5/archive/uos-2025/lab/lab_solution.ipynb",
           "target": "materials/lesson5/solution",
           "href": "materials/lesson5/solution/lab_solution.html",
           "downloadHref": "materials/lesson5/solution/lab_solution.ipynb",
@@ -548,7 +559,7 @@
           "description": "Download a printable worksheet.",
           "kind": "pdf",
           "group": "Lab",
-          "source": "lesson5/lab/lab_worksheet.pdf",
+          "source": "lesson5/archive/uos-2025/lab/lab_worksheet.pdf",
           "target": "materials/lesson5/lab.pdf",
           "href": "materials/lesson5/lab.pdf"
         }
@@ -560,7 +571,7 @@
       "label": "Lesson 06",
       "title": "Learning through decisions",
       "shortTitle": "Decision trees",
-      "summary": "Linear boundaries struggle with conditional and irregular regions; trees build decisions from a sequence of simple questions.",
+      "summary": "From simple questions to hierarchical models, including the strengths and fragility of trees.",
       "accent": "coral",
       "type": "teaching",
       "topics": [
@@ -574,7 +585,7 @@
           "description": "Open the full Slidev presentation.",
           "kind": "slides",
           "group": "Lecture",
-          "source": "lesson6/lecture/dist",
+          "source": "lesson6/archive/uos-2025/lecture/dist",
           "target": "materials/lesson6/slides",
           "href": "materials/lesson6/slides/index.html",
           "directory": true
@@ -584,7 +595,7 @@
           "description": "Download or print the lecture slides.",
           "kind": "pdf",
           "group": "Lecture",
-          "source": "lesson6/lecture/slide-export.pdf",
+          "source": "lesson6/archive/uos-2025/lecture/slide-export.pdf",
           "target": "materials/lesson6/slides.pdf",
           "href": "materials/lesson6/slides.pdf"
         },
@@ -593,7 +604,7 @@
           "description": "Read the extended explanation online.",
           "kind": "notes",
           "group": "Lecture",
-          "source": "lesson6/lecture/note.html",
+          "source": "lesson6/archive/uos-2025/lecture/note.html",
           "target": "materials/lesson6/notes.html",
           "href": "materials/lesson6/notes.html"
         },
@@ -602,16 +613,16 @@
           "description": "Download the extended lecture notes.",
           "kind": "pdf",
           "group": "Lecture",
-          "source": "lesson6/lecture/note.pdf",
+          "source": "lesson6/archive/uos-2025/lecture/note.pdf",
           "target": "materials/lesson6/notes.pdf",
           "href": "materials/lesson6/notes.pdf"
         },
         {
           "label": "Demo",
           "description": "Read the worked examples in the browser.",
-          "kind": "notebook",
+          "kind": "notes",
           "group": "Lecture",
-          "source": "lesson6/lecture/demo.ipynb",
+          "source": "lesson6/archive/uos-2025/lecture/demo.ipynb",
           "target": "materials/lesson6/demo",
           "href": "materials/lesson6/demo/demo.html",
           "downloadHref": "materials/lesson6/demo/demo.ipynb",
@@ -622,7 +633,7 @@
           "description": "Open the guided practical worksheet.",
           "kind": "worksheet",
           "group": "Lab",
-          "source": "lesson6/lab/lab_worksheet.html",
+          "source": "lesson6/archive/uos-2025/lab/lab_worksheet.html",
           "target": "materials/lesson6/lab.html",
           "href": "materials/lesson6/lab.html"
         },
@@ -631,7 +642,7 @@
           "description": "Review the fully worked notebook in the browser.",
           "kind": "solution",
           "group": "Lab",
-          "source": "lesson6/lab/lab_solution.ipynb",
+          "source": "lesson6/archive/uos-2025/lab/lab_solution.ipynb",
           "target": "materials/lesson6/solution",
           "href": "materials/lesson6/solution/lab_solution.html",
           "downloadHref": "materials/lesson6/solution/lab_solution.ipynb",
@@ -642,7 +653,7 @@
           "description": "Download a printable worksheet.",
           "kind": "pdf",
           "group": "Lab",
-          "source": "lesson6/lab/lab_worksheet.pdf",
+          "source": "lesson6/archive/uos-2025/lab/lab_worksheet.pdf",
           "target": "materials/lesson6/lab.pdf",
           "href": "materials/lesson6/lab.pdf"
         }
@@ -654,7 +665,7 @@
       "label": "Lesson 07",
       "title": "Finding structure in dimensions",
       "shortTitle": "Principal component analysis",
-      "summary": "When no target label is available, we need a new objective for finding a useful low-dimensional representation.",
+      "summary": "Discovering low-dimensional structure and learning what information a projection preserves.",
       "accent": "blue",
       "type": "teaching",
       "topics": [
@@ -668,7 +679,7 @@
           "description": "Open the full Slidev presentation.",
           "kind": "slides",
           "group": "Lecture",
-          "source": "lesson7/lecture/dist",
+          "source": "lesson7/archive/uos-2025/lecture/dist",
           "target": "materials/lesson7/slides",
           "href": "materials/lesson7/slides/index.html",
           "directory": true
@@ -678,7 +689,7 @@
           "description": "Download or print the lecture slides.",
           "kind": "pdf",
           "group": "Lecture",
-          "source": "lesson7/lecture/slide-export.pdf",
+          "source": "lesson7/archive/uos-2025/lecture/slide-export.pdf",
           "target": "materials/lesson7/slides.pdf",
           "href": "materials/lesson7/slides.pdf"
         },
@@ -687,7 +698,7 @@
           "description": "Read the extended explanation online.",
           "kind": "notes",
           "group": "Lecture",
-          "source": "lesson7/lecture/note.html",
+          "source": "lesson7/archive/uos-2025/lecture/note.html",
           "target": "materials/lesson7/notes.html",
           "href": "materials/lesson7/notes.html"
         },
@@ -696,16 +707,16 @@
           "description": "Download the extended lecture notes.",
           "kind": "pdf",
           "group": "Lecture",
-          "source": "lesson7/lecture/note.pdf",
+          "source": "lesson7/archive/uos-2025/lecture/note.pdf",
           "target": "materials/lesson7/notes.pdf",
           "href": "materials/lesson7/notes.pdf"
         },
         {
           "label": "Demo",
           "description": "Read the worked examples in the browser.",
-          "kind": "notebook",
+          "kind": "notes",
           "group": "Lecture",
-          "source": "lesson7/lecture/demo.ipynb",
+          "source": "lesson7/archive/uos-2025/lecture/demo.ipynb",
           "target": "materials/lesson7/demo",
           "href": "materials/lesson7/demo/demo.html",
           "downloadHref": "materials/lesson7/demo/demo.ipynb",
@@ -716,7 +727,7 @@
           "description": "Open the guided practical worksheet.",
           "kind": "worksheet",
           "group": "Lab",
-          "source": "lesson7/lab/lab_worksheet.html",
+          "source": "lesson7/archive/uos-2025/lab/lab_worksheet.html",
           "target": "materials/lesson7/lab.html",
           "href": "materials/lesson7/lab.html"
         },
@@ -725,7 +736,7 @@
           "description": "Review the fully worked notebook in the browser.",
           "kind": "solution",
           "group": "Lab",
-          "source": "lesson7/lab/lab_solution.ipynb",
+          "source": "lesson7/archive/uos-2025/lab/lab_solution.ipynb",
           "target": "materials/lesson7/solution",
           "href": "materials/lesson7/solution/lab_solution.html",
           "downloadHref": "materials/lesson7/solution/lab_solution.ipynb",
@@ -736,7 +747,7 @@
           "description": "Download a printable worksheet.",
           "kind": "pdf",
           "group": "Lab",
-          "source": "lesson7/lab/lab_worksheet.pdf",
+          "source": "lesson7/archive/uos-2025/lab/lab_worksheet.pdf",
           "target": "materials/lesson7/lab.pdf",
           "href": "materials/lesson7/lab.pdf"
         }
@@ -748,7 +759,7 @@
       "label": "Lesson 08",
       "title": "Discovering groups",
       "shortTitle": "Clustering",
-      "summary": "A projection reveals directions of variation, but finding groups requires a different objective and different evidence.",
+      "summary": "K-means and hierarchical clustering as two different ways of revealing groups in unlabeled data.",
       "accent": "violet",
       "type": "teaching",
       "topics": [
@@ -762,7 +773,7 @@
           "description": "Open the full Slidev presentation.",
           "kind": "slides",
           "group": "Lecture",
-          "source": "lesson8/lecture/dist",
+          "source": "lesson8/archive/uos-2025/lecture/dist",
           "target": "materials/lesson8/slides",
           "href": "materials/lesson8/slides/index.html",
           "directory": true
@@ -772,7 +783,7 @@
           "description": "Download or print the lecture slides.",
           "kind": "pdf",
           "group": "Lecture",
-          "source": "lesson8/lecture/slide-export.pdf",
+          "source": "lesson8/archive/uos-2025/lecture/slide-export.pdf",
           "target": "materials/lesson8/slides.pdf",
           "href": "materials/lesson8/slides.pdf"
         },
@@ -781,7 +792,7 @@
           "description": "Read the extended explanation online.",
           "kind": "notes",
           "group": "Lecture",
-          "source": "lesson8/lecture/note.html",
+          "source": "lesson8/archive/uos-2025/lecture/note.html",
           "target": "materials/lesson8/notes.html",
           "href": "materials/lesson8/notes.html"
         },
@@ -790,16 +801,16 @@
           "description": "Download the extended lecture notes.",
           "kind": "pdf",
           "group": "Lecture",
-          "source": "lesson8/lecture/note.pdf",
+          "source": "lesson8/archive/uos-2025/lecture/note.pdf",
           "target": "materials/lesson8/notes.pdf",
           "href": "materials/lesson8/notes.pdf"
         },
         {
           "label": "Demo",
           "description": "Read the worked examples in the browser.",
-          "kind": "notebook",
+          "kind": "notes",
           "group": "Lecture",
-          "source": "lesson8/lecture/demo.ipynb",
+          "source": "lesson8/archive/uos-2025/lecture/demo.ipynb",
           "target": "materials/lesson8/demo",
           "href": "materials/lesson8/demo/demo.html",
           "downloadHref": "materials/lesson8/demo/demo.ipynb",
@@ -810,7 +821,7 @@
           "description": "Open the guided practical worksheet.",
           "kind": "worksheet",
           "group": "Lab",
-          "source": "lesson8/lab/lab_worksheet.html",
+          "source": "lesson8/archive/uos-2025/lab/lab_worksheet.html",
           "target": "materials/lesson8/lab.html",
           "href": "materials/lesson8/lab.html"
         },
@@ -819,7 +830,7 @@
           "description": "Review the fully worked notebook in the browser.",
           "kind": "solution",
           "group": "Lab",
-          "source": "lesson8/lab/lab_solution.ipynb",
+          "source": "lesson8/archive/uos-2025/lab/lab_solution.ipynb",
           "target": "materials/lesson8/solution",
           "href": "materials/lesson8/solution/lab_solution.html",
           "downloadHref": "materials/lesson8/solution/lab_solution.ipynb",
@@ -830,7 +841,7 @@
           "description": "Download a printable worksheet.",
           "kind": "pdf",
           "group": "Lab",
-          "source": "lesson8/lab/lab_worksheet.pdf",
+          "source": "lesson8/archive/uos-2025/lab/lab_worksheet.pdf",
           "target": "materials/lesson8/lab.pdf",
           "href": "materials/lesson8/lab.pdf"
         }
@@ -842,7 +853,7 @@
       "label": "Lesson 09",
       "title": "Learning representations",
       "shortTitle": "Neural networks",
-      "summary": "Hand-designed features limit what a model can express; neural networks learn useful representations together with the prediction rule.",
+      "summary": "From logistic regression to layered networks that learn useful internal representations.",
       "accent": "coral",
       "type": "teaching",
       "topics": [
@@ -856,7 +867,7 @@
           "description": "Open the full Slidev presentation.",
           "kind": "slides",
           "group": "Lecture",
-          "source": "lesson9/lecture/dist",
+          "source": "lesson9/archive/uos-2025/lecture/dist",
           "target": "materials/lesson9/slides",
           "href": "materials/lesson9/slides/index.html",
           "directory": true
@@ -866,7 +877,7 @@
           "description": "Download or print the lecture slides.",
           "kind": "pdf",
           "group": "Lecture",
-          "source": "lesson9/lecture/slide-export.pdf",
+          "source": "lesson9/archive/uos-2025/lecture/slide-export.pdf",
           "target": "materials/lesson9/slides.pdf",
           "href": "materials/lesson9/slides.pdf"
         },
@@ -875,7 +886,7 @@
           "description": "Read the extended explanation online.",
           "kind": "notes",
           "group": "Lecture",
-          "source": "lesson9/lecture/note.html",
+          "source": "lesson9/archive/uos-2025/lecture/note.html",
           "target": "materials/lesson9/notes.html",
           "href": "materials/lesson9/notes.html"
         },
@@ -884,16 +895,16 @@
           "description": "Download the extended lecture notes.",
           "kind": "pdf",
           "group": "Lecture",
-          "source": "lesson9/lecture/note.pdf",
+          "source": "lesson9/archive/uos-2025/lecture/note.pdf",
           "target": "materials/lesson9/notes.pdf",
           "href": "materials/lesson9/notes.pdf"
         },
         {
           "label": "Demo",
           "description": "Read the worked examples in the browser.",
-          "kind": "notebook",
+          "kind": "notes",
           "group": "Lecture",
-          "source": "lesson9/lecture/demo.ipynb",
+          "source": "lesson9/archive/uos-2025/lecture/demo.ipynb",
           "target": "materials/lesson9/demo",
           "href": "materials/lesson9/demo/demo.html",
           "downloadHref": "materials/lesson9/demo/demo.ipynb",
@@ -904,7 +915,7 @@
           "description": "Open the guided practical worksheet.",
           "kind": "worksheet",
           "group": "Lab",
-          "source": "lesson9/lab/lab_worksheet.html",
+          "source": "lesson9/archive/uos-2025/lab/lab_worksheet.html",
           "target": "materials/lesson9/lab.html",
           "href": "materials/lesson9/lab.html"
         },
@@ -913,7 +924,7 @@
           "description": "Review the fully worked notebook in the browser.",
           "kind": "solution",
           "group": "Lab",
-          "source": "lesson9/lab/lab_solution.ipynb",
+          "source": "lesson9/archive/uos-2025/lab/lab_solution.ipynb",
           "target": "materials/lesson9/solution",
           "href": "materials/lesson9/solution/lab_solution.html",
           "downloadHref": "materials/lesson9/solution/lab_solution.ipynb",
@@ -924,7 +935,7 @@
           "description": "Download a printable worksheet.",
           "kind": "pdf",
           "group": "Lab",
-          "source": "lesson9/lab/lab_worksheet.pdf",
+          "source": "lesson9/archive/uos-2025/lab/lab_worksheet.pdf",
           "target": "materials/lesson9/lab.pdf",
           "href": "materials/lesson9/lab.pdf"
         }
@@ -936,7 +947,7 @@
       "label": "Lesson 10",
       "title": "Learning from images",
       "shortTitle": "Convolutional neural networks",
-      "summary": "Ordinary neural networks ignore the spatial structure of images; convolution builds that structure into the model.",
+      "summary": "How convolution, feature hierarchies, and pooling make neural networks effective with images.",
       "accent": "blue",
       "type": "teaching",
       "topics": [
@@ -950,7 +961,7 @@
           "description": "Open the full Slidev presentation.",
           "kind": "slides",
           "group": "Lecture",
-          "source": "lesson10/lecture/dist",
+          "source": "lesson10/archive/uos-2025/lecture/dist",
           "target": "materials/lesson10/slides",
           "href": "materials/lesson10/slides/index.html",
           "directory": true
@@ -960,7 +971,7 @@
           "description": "Download or print the lecture slides.",
           "kind": "pdf",
           "group": "Lecture",
-          "source": "lesson10/lecture/slide-export.pdf",
+          "source": "lesson10/archive/uos-2025/lecture/slide-export.pdf",
           "target": "materials/lesson10/slides.pdf",
           "href": "materials/lesson10/slides.pdf"
         },
@@ -969,7 +980,7 @@
           "description": "Read the extended explanation online.",
           "kind": "notes",
           "group": "Lecture",
-          "source": "lesson10/lecture/note.html",
+          "source": "lesson10/archive/uos-2025/lecture/note.html",
           "target": "materials/lesson10/notes.html",
           "href": "materials/lesson10/notes.html"
         },
@@ -978,16 +989,16 @@
           "description": "Download the extended lecture notes.",
           "kind": "pdf",
           "group": "Lecture",
-          "source": "lesson10/lecture/note.pdf",
+          "source": "lesson10/archive/uos-2025/lecture/note.pdf",
           "target": "materials/lesson10/notes.pdf",
           "href": "materials/lesson10/notes.pdf"
         },
         {
           "label": "Demo",
           "description": "Read the worked examples in the browser.",
-          "kind": "notebook",
+          "kind": "notes",
           "group": "Lecture",
-          "source": "lesson10/lecture/demo.ipynb",
+          "source": "lesson10/archive/uos-2025/lecture/demo.ipynb",
           "target": "materials/lesson10/demo",
           "href": "materials/lesson10/demo/demo.html",
           "downloadHref": "materials/lesson10/demo/demo.ipynb",
@@ -998,7 +1009,7 @@
           "description": "Open the guided practical worksheet.",
           "kind": "worksheet",
           "group": "Lab",
-          "source": "lesson10/lab/lab_worksheet.html",
+          "source": "lesson10/archive/uos-2025/lab/lab_worksheet.html",
           "target": "materials/lesson10/lab.html",
           "href": "materials/lesson10/lab.html"
         },
@@ -1007,7 +1018,7 @@
           "description": "Review the fully worked notebook in the browser.",
           "kind": "solution",
           "group": "Lab",
-          "source": "lesson10/lab/lab_solution.ipynb",
+          "source": "lesson10/archive/uos-2025/lab/lab_solution.ipynb",
           "target": "materials/lesson10/solution",
           "href": "materials/lesson10/solution/lab_solution.html",
           "downloadHref": "materials/lesson10/solution/lab_solution.ipynb",
@@ -1018,7 +1029,7 @@
           "description": "Download a printable worksheet.",
           "kind": "pdf",
           "group": "Lab",
-          "source": "lesson10/lab/lab_worksheet.pdf",
+          "source": "lesson10/archive/uos-2025/lab/lab_worksheet.pdf",
           "target": "materials/lesson10/lab.pdf",
           "href": "materials/lesson10/lab.pdf"
         }
