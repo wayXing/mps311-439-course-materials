@@ -29,11 +29,6 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
       <p id="live-intro">Keep this page open during the class. Everything here is anonymous.</p>
     </header>
 
-    <article class="live-card" id="offline-card" hidden>
-      <h2 class="live-card-title" id="last-title">Last class</h2>
-      <div id="last-body"><p class="live-muted">No class is live right now. During a lecture or lab, votes and the attendance code appear here.</p></div>
-    </article>
-
     <div id="live-content" hidden>
       <article class="live-card live-code" id="code-card" hidden>
         <h2 class="live-card-title">Attendance code</h2>
@@ -52,6 +47,9 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
       <form id="checkin-form" class="live-form" hidden>
         <p class="live-muted"><b>Anonymous:</b> the lecturer cannot see who you are. Send it any time, as often as you like; each one is kept with its time.</p>
         <p class="live-muted" id="feedback-for"></p>
+        <label class="live-select" id="class-field" hidden>Which class?
+          <select id="class-select"></select>
+        </label>
         <fieldset class="live-choice" id="module-field">
           <legend>Your module (asked once)</legend>
           <label><input type="radio" name="module" value="MPS311" />MPS311</label>
@@ -110,6 +108,10 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
       <ol class="live-board" id="question-list"></ol>
       <button type="button" class="live-link-button" id="question-more" hidden>Show older questions</button>
     </article>
+    <details class="live-card live-last" id="offline-card" hidden>
+      <summary class="live-card-title" id="last-title">Last class results</summary>
+      <div id="last-body"></div>
+    </details>
   </section>
 
   <script>
@@ -150,6 +152,7 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
     let session = null;
     // Defined first: the class display below uses them.
     let lastShown = '';
+    let lastHasResults = false;
     let lastFetched = 0;
     const checkinForm = document.querySelector('#checkin-form');
     const openButton = document.querySelector('#checkin-open');
@@ -170,7 +173,7 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
       const wasLive = Boolean(session);
       session = next;
       if (wasLive && !session) lastShown = '';
-      document.querySelector('#offline-card').hidden = Boolean(session);
+      document.querySelector('#offline-card').hidden = Boolean(session) || !lastHasResults;
       document.querySelector('#live-content').hidden = !session;
       const codeCard = document.querySelector('#code-card');
       codeCard.hidden = !session?.attendanceCode;
@@ -178,7 +181,7 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
       if (!session) {
         document.querySelector('#live-eyebrow').textContent = 'Between classes';
         document.querySelector('#live-title').textContent = page.dataset.code;
-        document.querySelector('#live-intro').textContent = 'No class is live. See how the last class went, and ask questions at any time.';
+        document.querySelector('#live-intro').textContent = 'No class is live. Give feedback on any class, and ask questions at any time.';
       } else {
         document.querySelector('#live-intro').textContent = 'Keep this page open during the class. Everything here is anonymous.';
       }
@@ -191,21 +194,22 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
     };
 
     // ------------------------------------------------------------ feedback
-    // Feedback is for the live class, or else for the class that ended last.
+    // Feedback is for the live class; between classes, for any class of the year that has ended,
+    // chosen from a menu (newest first, the last class by default).
     let feedbackClass = null;
-    const setFeedbackClass = (entry, isLive) => {
+    const setFeedbackClass = (entry, isLive, chosen = false) => {
       const key = entry ? `${entry.contextKey}|${isLive}` : '';
       const card = document.querySelector('#checkin-card');
       card.hidden = !entry;
+      document.querySelector('#class-field').hidden = isLive || !entry;
       if (!entry || key === (feedbackClass?.key ?? '')) return;
       // While a student is filling in feedback for one class, a new class does not take it over.
-      if (feedbackClass && !checkinForm.hidden && feedbackClass.contextKey !== entry.contextKey
+      if (!chosen && feedbackClass && !checkinForm.hidden && feedbackClass.contextKey !== entry.contextKey
         && checkinForm.querySelector('input[name="difficulty"]:checked, input[name="pace"]:checked')) return;
+      if (!isLive) classSelect.value = entry.contextKey;
       feedbackClass = { key, contextKey: entry.contextKey };
       const lesson = lessons[entry.lessonSlug] ?? { label: entry.lessonSlug, sections: [] };
-      document.querySelector('#feedback-for').textContent = isLive
-        ? `About ${lesson.label} ${entry.kind}, so far.`
-        : `About ${lesson.label} ${entry.kind}, which has ended.`;
+      document.querySelector('#feedback-for').textContent = isLive ? `About ${lesson.label} ${entry.kind}, so far.` : '';
       const sections = entry.kind === 'lab' ? labSections : lesson.sections;
       const lostField = document.querySelector('#lost-field');
       lostField.querySelectorAll('label').forEach((label) => label.remove());
@@ -219,6 +223,32 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
         lostField.append(label);
       });
     };
+
+    const classSelect = document.querySelector('#class-select');
+    let pastClasses = [];
+    const classLabel = (entry) => {
+      const lesson = lessons[entry.lessonSlug] ?? { label: entry.lessonSlug };
+      const day = new Date(entry.openedAt).toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
+      return `${lesson.label} · ${entry.kind === 'lab' ? 'Lab' : 'Lecture'} · ${day}`;
+    };
+    const fillClassMenu = (classes) => {
+      if (JSON.stringify(classes) !== JSON.stringify(pastClasses)) {
+        pastClasses = classes;
+        classSelect.replaceChildren(...classes.map((entry) => {
+          const option = document.createElement('option');
+          option.value = entry.contextKey;
+          option.textContent = classLabel(entry);
+          return option;
+        }));
+      }
+      // Keep the student's choice while it is still listed; otherwise the newest class.
+      const current = classes.find((entry) => entry.contextKey === feedbackClass?.contextKey);
+      setFeedbackClass(current ?? classes[0] ?? null, false);
+    };
+    classSelect.addEventListener('change', () => {
+      const entry = pastClasses.find((item) => item.contextKey === classSelect.value);
+      if (entry) setFeedbackClass(entry, false, true);
+    });
 
     // "Only feedback": the lecturer can switch every phone to the feedback form alone.
     const applyMode = () => {
@@ -415,17 +445,18 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
         });
         if (!response.ok) return;
         const last = await response.json();
-        if (!session) setFeedbackClass(last, false);
+        if (!session) fillClassMenu(last?.classes ?? []);
         const signature = JSON.stringify(last);
         if (signature === lastShown) return;
         lastShown = signature;
         const body = document.querySelector('#last-body');
-        body.replaceChildren(note('No class is live right now. During a lecture or lab, votes and the attendance code appear here.'));
-        if (!last) return;
         body.replaceChildren();
+        lastHasResults = Boolean(last && (last.polls.length || last.checkins?.count));
+        document.querySelector('#offline-card').hidden = Boolean(session) || !lastHasResults;
+        if (!lastHasResults) return;
         const lesson = lessons[last.lessonSlug] ?? { label: last.lessonSlug, title: '' };
         const day = new Date(last.openedAt).toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
-        document.querySelector('#last-title').textContent = `Last class · ${lesson.label} ${last.kind} · ${day}`;
+        document.querySelector('#last-title').textContent = `Last class results · ${lesson.label} ${last.kind} · ${day}`;
         last.polls.forEach((poll) => {
           const prompt = document.createElement('p');
           prompt.className = 'live-prompt live-prompt-small';
