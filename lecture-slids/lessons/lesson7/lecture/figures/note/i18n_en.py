@@ -69,7 +69,7 @@ PAIRS = [
     ("平均图", "Mean image"),
     ("主成分", "Principal components"),
     ("规矩", "The rule"),
-    ("选 k", "Choose k"),
+    ("选几个", "Choose how many"),
     (" 个\n", "\n"),
     ("第 ", "Component "),
     ("数字 ", "Digit "),

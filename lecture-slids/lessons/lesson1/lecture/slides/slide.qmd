@@ -47,7 +47,15 @@ Given a new real-world question and an unfamiliar dataset, you should be able to
 <b>MPS311</b> applies and explains the process. <b>MPS439</b> also investigates its assumptions, implementation, and limits.
 :::
 
+::: {.scan}
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Scan now</b>
+votes, questions, feedback
+:::
+
 ::: {.notes}
+先请大家扫右下角（或右屏）的二维码，页面整节课开着。后面的投票会自动出现在手机上，整节课不用关。
+
 **讲：** 这门课训练的不是算法清单，而是面对新问题时能够定义任务、比较方案、检查证据并限制结论。
 
 **问：** AI 已能写代码和画图，为什么还要学习机器学习？
@@ -79,11 +87,19 @@ If the predicted line almost matches reality, would you trust it with your own m
 
 ![](../figures/fig_ai_prediction.png){fig-alt="Actual S&P 500 closing level and an AI-generated prediction across 2020 to 2024" .hero-chart}
 
-::: {.question-line}
-Has the model solved the problem?
+::: {.ask .vote .compact}
+<small>Vote on your phone</small>
+The AI's stock prediction almost matches reality. Trust it with your money?
+
+::: {.opts}
+<span><b>A</b>Yes</span>
+<span><b>B</b>No</span>
+:::
 :::
 
 ::: {.notes}
+**投票（约 +0.5 分钟）：** 右屏 The prediction looks remarkable → Open，30 秒，再 Reveal。这是让每人先表态的判断，没有标准答案，不评对错；请选 Yes 和选 No 的各一人说一句理由，记住比例，最后一页回到这个问题。
+
 **讲：** 五年里，预测线几乎一直贴着真实市场。
 
 **问：** 只根据这张图，它已经解决问题了吗？
@@ -186,11 +202,20 @@ A system predicts that everyone is healthy.
 <span>accuracy</span>
 :::
 
-::: {.big-question}
-Would you call this an excellent system?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+10 in 10,000 are ill. It calls everyone healthy. Patients found?
+
+::: {.opts}
+<span><b>A</b>0</span>
+<span><b>B</b>5</span>
+<span><b>C</b>10</span>
+:::
 :::
 
 ::: {.notes}
+**投票（约 +0.5 分钟）：** 右屏 Is 99.9% a good result? → Open，30 秒，先不显示结果，再 Reveal。答案是 A：0 位，下一页拆开数字（0 / 10）。揭晓后再问：那 99.9% 算好系统吗？
+
 **讲：** 不解释答案，只说明疾病很少见，系统把所有人都说成健康。
 
 **问：** 99.9% 是不是很好？如果这是医院要使用的系统，你会接受吗？
@@ -229,7 +254,20 @@ A score is useful only when it reflects the purpose and the failure that matters
 <div><span>Fair comparison</span><b>Predict tomorrow's demand for shared bikes</b><p>What simple rule should a complicated model beat?</p></div>
 :::
 
+::: {.ask .vote}
+<small>Vote on your phone · first card</small>
+Predicting a pass before the exam, using the final-exam mark. What's wrong?
+
+::: {.opts}
+<span><b>A</b>Nothing, it predicts well</span>
+<span><b>B</b>The mark isn't known yet</span>
+<span><b>C</b>Exam marks are too noisy</span>
+:::
+:::
+
 ::: {.notes}
+**投票（约 +1 分钟）：** 右屏 Two quick judgements → Open，30 秒，先不显示结果。分歧大时让邻座讨论一分钟再 Vote again（本讲只在这一题这样做），再 Reveal。答案是 B：预测时期末成绩还不存在。选 A 的人最值得请来说一句——它确实“预测得很好”，问题是用不了。第二张卡片口头问。
+
 **问：** 第一个方案为什么无法真正使用？第二个复杂模型至少应该超过什么？
 
 **讲：** 期末成绩在预测时还不存在；单车模型应至少与昨天、上周同一天或近期平均值比较。
@@ -330,9 +368,9 @@ Machine learning gives us a way to move from a real problem to a conclusion the 
 
 Scan this code to share anonymous feedback or post a question for this lecture.
 
-![](../feedback-qr.svg){fig-alt="Feedback QR code for Lesson 1 lecture" width="360"}
+![](live-qr.svg){fig-alt="QR code for today's live page" width="360"}
 
-<p class="feedback-meta">MPS311/439 · 2026–27 · Lesson 01 lecture</p>
+<p class="feedback-meta"><b>Feedback</b> · MPS311/439 · 2026–27 · Lesson 01 lecture</p>
 
 ::: {.notes}
 留出时间，让学生当场提交反馈或问题。

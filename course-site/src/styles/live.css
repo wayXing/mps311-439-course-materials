@@ -1,0 +1,797 @@
+/* Live classroom page (students' phones) and the teacher's screen. */
+
+.live-page {
+  display: grid;
+  gap: 18px;
+  max-width: 680px;
+  /* room at the bottom so the Lost and Like buttons never cover the last answer */
+  padding: 28px 16px 120px;
+}
+
+.live-heading h1 {
+  margin: 6px 0 8px;
+  font-family: var(--font-display);
+  font-size: clamp(30px, 7vw, 44px);
+  font-weight: 500;
+  letter-spacing: -0.04em;
+  line-height: 1.05;
+}
+
+.live-heading p,
+.live-muted {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.live-card {
+  padding: 20px;
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.live-card-title {
+  margin: 0 0 10px;
+  font-size: 13px;
+  font-weight: 760;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+#poll-card {
+  border: 2px solid color-mix(in srgb, var(--blue) 45%, var(--line));
+}
+
+.live-prompt {
+  margin: 0 0 14px;
+  font-size: 19px;
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.live-options {
+  display: grid;
+  gap: 10px;
+}
+
+.live-option {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  min-height: 56px;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 17px;
+  text-align: left;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.live-option.is-chosen {
+  background: color-mix(in srgb, var(--blue) 14%, var(--surface-solid));
+  border-color: var(--blue);
+}
+
+.live-letter {
+  display: inline-grid;
+  flex: none;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  font-weight: 760;
+  color: var(--surface-solid);
+  background: var(--ink);
+  border-radius: 50%;
+}
+
+.live-results {
+  display: grid;
+  gap: 12px;
+}
+
+.live-result-label {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 5px;
+  font-size: 16px;
+}
+
+.live-result-label b {
+  margin-left: auto;
+}
+
+.live-result.is-chosen .live-result-label {
+  font-weight: 700;
+}
+
+.live-bar {
+  height: 14px;
+  overflow: hidden;
+  background: var(--paper-deep);
+  border-radius: var(--radius-pill);
+}
+
+.live-bar span {
+  display: block;
+  height: 100%;
+  background: var(--blue);
+  border-radius: var(--radius-pill);
+  transition: width 0.4s ease;
+}
+
+.live-form {
+  display: grid;
+  gap: 12px;
+}
+
+.live-form textarea,
+.live-form select {
+  width: 100%;
+  padding: 10px 12px;
+  font: inherit;
+  font-size: 16px;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.live-choice {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.live-choice legend,
+.live-label {
+  margin-bottom: 4px;
+  font-size: 15px;
+  font-weight: 650;
+}
+
+.live-choice label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 52px;
+  padding: 0 14px;
+  font-size: 17px;
+  cursor: pointer;
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.live-choice label:has(input:checked) {
+  background: color-mix(in srgb, var(--blue) 12%, var(--surface-solid));
+  border-color: var(--blue);
+}
+
+.live-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+}
+
+.live-button {
+  justify-self: start;
+  min-height: 46px;
+  padding: 0 22px;
+  font: inherit;
+  font-size: 16px;
+  font-weight: 650;
+  color: var(--surface-solid);
+  background: var(--ink);
+  border: 0;
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.live-link,
+.live-link-button {
+  padding: 0;
+  font: inherit;
+  font-size: 15px;
+  color: var(--blue);
+  background: none;
+  border: 0;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.live-status {
+  min-height: 1.4em;
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+}
+
+.live-honeypot {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.live-choice input {
+  width: 20px;
+  height: 20px;
+  margin: 0;
+}
+
+.live-answers {
+  display: grid;
+  gap: 8px;
+  margin: 14px 0 0;
+  padding: 0;
+  list-style: none;
+}
+
+.live-answers li {
+  padding: 10px 14px;
+  font-size: 16px;
+  line-height: 1.4;
+  background: var(--paper);
+  border-radius: var(--radius-sm);
+}
+
+.live-more summary {
+  font-size: 15px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.live-more textarea {
+  margin-top: 8px;
+}
+
+#live-content {
+  display: grid;
+  gap: 18px;
+}
+
+/* ------------------------------------------------------------ teacher's screen */
+
+.screen-body {
+  min-height: 100vh;
+  margin: 0;
+  font-family: var(--font-sans);
+  color: var(--ink);
+  background: var(--paper);
+}
+
+.screen-login {
+  display: grid;
+  gap: 12px;
+  max-width: 360px;
+  margin: 18vh auto;
+  padding: 24px;
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.screen-login input {
+  padding: 10px 12px;
+  font: inherit;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.screen {
+  display: grid;
+  gap: 28px;
+  grid-template-columns: minmax(280px, 0.8fr) minmax(0, 1.4fr);
+  min-height: 100vh;
+  padding: 3vh 3vw;
+  box-sizing: border-box;
+}
+
+.screen-qr {
+  display: grid;
+  align-content: start;
+  gap: 14px;
+  text-align: center;
+}
+
+.screen-qr img {
+  width: 100%;
+  max-width: 46vh;
+  margin: 0 auto;
+  padding: 14px;
+  background: #fff;
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+}
+
+.screen-qr .screen-url {
+  font-size: clamp(18px, 2.2vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.screen-qr p {
+  margin: 0;
+  font-size: clamp(15px, 1.5vw, 20px);
+  color: var(--ink-soft);
+}
+
+.screen-main {
+  display: grid;
+  align-content: start;
+  gap: 22px;
+}
+
+.screen-poll {
+  padding: 26px 30px;
+  background: var(--surface-solid);
+  border: 2px solid color-mix(in srgb, var(--blue) 45%, var(--line));
+  border-radius: var(--radius-md);
+}
+
+.screen-poll .live-prompt {
+  font-size: clamp(22px, 2.4vw, 34px);
+}
+
+.screen-poll .live-result-label {
+  font-size: clamp(18px, 1.8vw, 26px);
+}
+
+.screen-poll .live-bar {
+  height: 22px;
+}
+
+.screen-poll .live-bar.is-previous span {
+  background: var(--blue-soft);
+}
+
+.screen-count {
+  margin: 14px 0 0;
+  font-size: clamp(18px, 1.8vw, 26px);
+  color: var(--ink-soft);
+}
+
+.screen-questions {
+  padding: 18px 24px;
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-md);
+}
+
+.screen-questions h2 {
+  margin: 0 0 10px;
+  font-size: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-soft);
+}
+
+.screen-questions ol {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding-left: 22px;
+  font-size: clamp(16px, 1.5vw, 22px);
+  line-height: 1.35;
+}
+
+.screen-controls {
+  display: grid;
+  gap: 8px;
+  padding: 14px 18px;
+  font-size: 13px;
+  background: var(--paper-deep);
+  border-radius: var(--radius-sm);
+}
+
+.screen-controls .control-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.screen-controls .control-row strong {
+  min-width: 90px;
+}
+
+.screen-controls button,
+.screen-controls select {
+  padding: 5px 10px;
+  font: inherit;
+  font-size: 13px;
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.screen-controls button.is-current {
+  color: var(--surface-solid);
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
+@media (max-width: 760px) {
+  .screen {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* The layout rules above set display, which would otherwise override the hidden attribute. */
+.live-page [hidden],
+.screen-body [hidden] {
+  display: none !important;
+}
+
+.screen-answers {
+  display: grid;
+  gap: 10px;
+  max-height: 46vh;
+  margin: 0;
+  padding: 0;
+  overflow: auto;
+  list-style: none;
+}
+
+.screen-answers li {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 16px;
+  font-size: clamp(17px, 1.6vw, 24px);
+  line-height: 1.35;
+  background: var(--paper);
+  border-radius: var(--radius-sm);
+}
+
+.screen-answers li span {
+  flex: 1;
+}
+
+.screen-answers li.is-hidden {
+  opacity: 0.35;
+  text-decoration: line-through;
+}
+
+.screen-answers button {
+  padding: 2px 8px;
+  font-size: 12px;
+  background: transparent;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.screen-mute {
+  margin-left: auto;
+  color: var(--ink-soft);
+}
+
+/* live results inside the vote buttons */
+.live-option.has-share {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--blue) 18%, var(--paper)) var(--share), var(--paper) var(--share));
+}
+
+.live-option.is-chosen.has-share {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--blue) 30%, var(--surface-solid)) var(--share), color-mix(in srgb, var(--blue) 10%, var(--surface-solid)) var(--share));
+}
+
+.live-option-share {
+  margin-left: auto;
+  font-size: 16px;
+}
+
+.live-open {
+  width: 100%;
+}
+
+/* attendance code */
+.live-code {
+  text-align: center;
+  border: 2px solid color-mix(in srgb, var(--sage) 60%, var(--line));
+}
+
+.live-code-value {
+  margin: 0;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: clamp(40px, 13vw, 56px);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+
+.live-prompt-small {
+  margin: 14px 0 8px;
+  font-size: 16px;
+}
+
+/* the question board */
+.live-board {
+  display: grid;
+  gap: 10px;
+  margin: 16px 0 6px;
+  padding: 0;
+  list-style: none;
+}
+
+.live-board li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 12px;
+  background: var(--paper);
+  border-radius: var(--radius-sm);
+}
+
+.live-board li.is-answered {
+  opacity: 0.7;
+}
+
+.live-board-text {
+  flex: 1;
+  min-width: 0;
+}
+
+.live-board-text > p {
+  margin: 0 0 4px;
+  font-size: 16px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+}
+
+.live-board summary {
+  font-size: 14px;
+  color: var(--ink-soft);
+  cursor: pointer;
+}
+
+.live-upvote {
+  flex: none;
+  min-width: 52px;
+  min-height: 40px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 650;
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  cursor: pointer;
+}
+
+.live-upvote.is-chosen {
+  color: var(--surface-solid);
+  background: var(--blue);
+  border-color: var(--blue);
+}
+
+.live-reply {
+  margin: 6px 0;
+  padding-left: 10px;
+  font-size: 15px;
+  border-left: 3px solid var(--line);
+  overflow-wrap: anywhere;
+}
+
+.live-reply-form {
+  display: flex;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.live-reply-form input {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  font: inherit;
+  font-size: 15px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-sm);
+}
+
+.live-reply-form button {
+  padding: 0 14px;
+  font: inherit;
+  font-size: 15px;
+  color: var(--surface-solid);
+  background: var(--ink);
+  border: 0;
+  border-radius: var(--radius-pill);
+}
+
+.screen-code {
+  display: inline-flex;
+  gap: 6px;
+}
+
+/* typed in front of the class; a password field, so the projector never shows it */
+.screen-code input {
+  width: 130px;
+  padding: 5px 10px;
+  font: inherit;
+  font-size: 13px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+}
+
+/* "only feedback": cards set aside while the lecturer collects feedback */
+.live-page .is-set-aside {
+  display: none !important;
+}
+
+.live-open.is-secondary {
+  color: var(--ink);
+  background: var(--paper-deep);
+}
+
+/* the like button and its small float on the phone */
+.live-react {
+  position: fixed;
+  right: max(18px, env(safe-area-inset-right));
+  bottom: max(22px, env(safe-area-inset-bottom));
+  z-index: 20;
+  display: flex;
+  gap: 10px;
+}
+
+.live-react[hidden] {
+  display: none;
+}
+
+.live-lost {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 58px;
+  padding: 0 20px 0 16px;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--ink);
+  background: var(--gold-soft);
+  border: 0;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+}
+
+.live-lost span {
+  font-size: 26px;
+}
+
+.live-lost:disabled {
+  opacity: 0.45;
+}
+
+.live-toast {
+  position: fixed;
+  right: 18px;
+  bottom: 92px;
+  z-index: 22;
+  max-width: 260px;
+  margin: 0;
+  padding: 10px 14px;
+  font-size: 14px;
+  color: #fff;
+  background: var(--ink);
+  border-radius: var(--radius-sm);
+}
+
+.live-like {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  height: 58px;
+  padding: 0 22px 0 18px;
+  font: inherit;
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+  background: var(--blue);
+  border: 0;
+  border-radius: var(--radius-pill);
+  box-shadow: var(--shadow-soft);
+  cursor: pointer;
+}
+
+.live-like span {
+  font-size: 26px;
+}
+
+.live-like:active {
+  transform: scale(0.92);
+}
+
+.live-like-float {
+  position: fixed;
+  bottom: 86px;
+  z-index: 21;
+  font-size: 26px;
+  pointer-events: none;
+  animation: live-float 1.6s ease-out forwards;
+}
+
+@keyframes live-float {
+  from { opacity: 1; transform: translateY(0) scale(1); }
+  to { opacity: 0; transform: translateY(-180px) scale(1.3); }
+}
+
+/* the lecturer's screen: likes float up the right edge */
+.screen-likes {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  width: 220px;
+  height: 100vh;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.screen-like {
+  position: absolute;
+  bottom: -40px;
+  font-size: 40px;
+  animation: screen-float 3.2s ease-out forwards;
+}
+
+@keyframes screen-float {
+  0% { opacity: 0; transform: translate(0, 0) scale(0.6); }
+  10% { opacity: 1; }
+  100% { opacity: 0; transform: translate(var(--drift), -75vh) scale(1.2); }
+}
+
+.screen-lost {
+  margin: 0;
+  white-space: pre;
+  padding: 10px 18px;
+  font-size: clamp(18px, 1.7vw, 24px);
+  font-weight: 700;
+  background: var(--paper-deep);
+  border-radius: var(--radius-sm);
+}
+
+.screen-poll .live-results.is-compact {
+  gap: 6px;
+}
+
+.screen-poll .live-results.is-compact .live-result-label {
+  margin-bottom: 2px;
+  font-size: clamp(15px, 1.3vw, 19px);
+}
+
+.screen-poll .live-results.is-compact .live-bar {
+  height: 12px;
+}
+
+/* the correct option after the reveal */
+.live-result.is-correct .live-letter {
+  background: var(--sage);
+}
+
+.live-result.is-correct .live-result-label {
+  font-weight: 700;
+  color: color-mix(in srgb, var(--sage) 55%, var(--ink));
+}
+
+.live-result.is-correct .live-bar span {
+  background: var(--sage);
+}

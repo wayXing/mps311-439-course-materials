@@ -1,0 +1,492 @@
+---
+// The lecturer's right-hand screen: start the class, show the course QR code, the current
+// vote or one-sentence answers, and the newest questions (with a soft chime for each new one).
+// The strip at the bottom opens, reveals and closes the polls listed in src/data/live.json.
+import '../../styles/global.css';
+import '../../styles/live.css';
+import { course } from '../../data/course';
+import { academicYearKey, labSections, liveLessons, publishableKey, supabaseUrl } from '../../data/live';
+
+const lessons = liveLessons.map(({ slug, label, polls, sections }) => ({ slug, label, polls, sections }));
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex" />
+    <title>Live screen · {course.code}</title>
+  </head>
+  <body class="screen-body">
+    <form class="screen-login" id="login" hidden>
+      <strong>Lecturer sign-in</strong>
+      <label for="password">Admin password</label>
+      <input id="password" type="password" autocomplete="current-password" required />
+      <button type="submit" class="live-button">Sign in</button>
+      <p class="live-status" id="login-status"></p>
+    </form>
+
+    <main
+      class="screen"
+      id="screen"
+      hidden
+      data-year={academicYearKey}
+      data-supabase={supabaseUrl}
+      data-key={publishableKey}
+      data-lessons={JSON.stringify(lessons)}
+      data-lab-sections={JSON.stringify(labSections)}
+    >
+      <section class="screen-qr">
+        <img src="/live-qr/course.svg" alt="QR code for the live classroom page" />
+        <div class="screen-url">ml.wxing.me/live</div>
+        <p id="live-line">Scan once: votes, answers, questions and the check-in.</p>
+      </section>
+
+      <section class="screen-main">
+        <p class="screen-lost" id="lost-signal" hidden></p>
+        <div class="screen-poll" id="poll" aria-live="polite"></div>
+        <div class="screen-questions">
+          <h2>Newest questions</h2>
+          <ol id="questions"><li class="live-muted">None yet.</li></ol>
+        </div>
+        <div class="screen-controls">
+          <div class="control-row" id="class-row">
+            <select id="lesson-select"></select>
+            <select id="kind-select">
+              <option value="lecture">Lecture</option>
+              <option value="lab">Lab</option>
+            </select>
+            <button type="button" id="start-class">Start class</button>
+            <button type="button" id="end-class">End class</button>
+            <button type="button" id="feedback-mode">Ask for feedback</button>
+            <span id="class-status"></span>
+            <form id="code-form" class="screen-code">
+              <input id="code-input" type="password" maxlength="8" autocomplete="off" placeholder="attendance code" aria-label="Attendance code" />
+              <button type="submit">Show on phones</button>
+              <button type="button" id="code-clear">Clear</button>
+            </form>
+            <label class="screen-mute" title="Browsers play sound only after one click on this page."><input type="checkbox" id="mute" /> mute chime (click the page once to enable sound)</label>
+            <label class="screen-mute"><input type="checkbox" id="hide-likes" /> hide likes</label>
+          </div>
+          <div id="controls"></div>
+        </div>
+      </section>
+    </main>
+    <div class="screen-likes" id="likes" aria-hidden="true"></div>
+
+    <script>
+      const screen = document.querySelector('#screen');
+      const login = document.querySelector('#login');
+      const yearKey = screen.dataset.year;
+      const supabaseUrl = screen.dataset.supabase;
+      const publishableKey = screen.dataset.key;
+      const lessons = JSON.parse(screen.dataset.lessons);
+      const labSections = JSON.parse(screen.dataset.labSections);
+      const submissionUrl = `${supabaseUrl}/functions/v1/course-feedback`;
+      const tokenStorageKey = 'mps-course-feedback-admin-token-v1';
+      const lessonSelect = document.querySelector('#lesson-select');
+      const kindSelect = document.querySelector('#kind-select');
+
+      // End of class: "what was least clear today?", answered by tapping a part of the lesson.
+      const leastClearPoll = () => {
+        const sections = (kindSelect.value === 'lab' ? labSections : lesson().sections).slice(0, 7);
+        return {
+          key: 'least-clear',
+          kind: 'choice',
+          slide: 'End of class: least clear today?',
+          prompt: 'What was least clear today? Tap the part.',
+          options: [...sections, 'Everything was clear'],
+        };
+      };
+
+      // Two lecturer-made polls for questions asked on the spot.
+      const quickPolls = [
+        { key: 'quick-vote', kind: 'choice', slide: 'Quick vote', prompt: 'Answer the question on the screen.', options: ['A', 'B', 'C', 'D'] },
+        { key: 'quick-text', kind: 'text', slide: 'Quick one sentence', prompt: 'Answer the question on the screen in one sentence.' },
+      ];
+
+      lessons.forEach((lesson) => {
+        const option = document.createElement('option');
+        option.value = lesson.slug;
+        option.textContent = lesson.label;
+        lessonSelect.append(option);
+      });
+      const requested = new URLSearchParams(location.search).get('lesson');
+      if (lessons.some((lesson) => lesson.slug === requested)) lessonSelect.value = requested;
+
+      let live = { session: null, polls: [], checkinCount: 0 };
+      const lesson = () => lessons.find((entry) => entry.slug === lessonSelect.value);
+      const contextKey = () => `${yearKey}-${lessonSelect.value}-${kindSelect.value}`;
+      const getToken = () => { try { return sessionStorage.getItem(tokenStorageKey); } catch { return null; } };
+
+      const admin = async (action, payload = {}) => {
+        const response = await fetch(submissionUrl, {
+          method: 'POST',
+          headers: { apikey: publishableKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action, admin_token: getToken(), context_key: contextKey(), ...payload }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (response.status === 401) { showLogin(); throw new Error('signed out'); }
+        if (!response.ok) throw new Error(result.error ?? 'Request failed');
+        return result;
+      };
+
+      // ------------------------------------------------------------ chime
+      let audio = null;
+      const chime = () => {
+        if (document.querySelector('#mute').checked) return;
+        try {
+          audio = audio ?? new AudioContext();
+          [880, 1320].forEach((frequency, index) => {
+            const start = audio.currentTime + index * 0.16;
+            const tone = audio.createOscillator();
+            const gain = audio.createGain();
+            tone.type = 'sine';
+            tone.frequency.value = frequency;
+            gain.gain.setValueAtTime(0.0001, start);
+            gain.gain.exponentialRampToValueAtTime(0.06, start + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, start + 0.5);
+            tone.connect(gain).connect(audio.destination);
+            tone.start(start);
+            tone.stop(start + 0.55);
+          });
+        } catch {}
+      };
+      // Browsers allow sound only after a click on the page; any click unlocks it.
+      document.addEventListener('click', () => { try { audio = audio ?? new AudioContext(); audio.resume(); } catch {} });
+
+      // ------------------------------------------------------------ drawing
+      const current = () => live.polls
+        .filter((poll) => poll.status !== 'closed')
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt))[0];
+
+      const drawPoll = () => {
+        const box = document.querySelector('#poll');
+        const poll = current();
+        box.replaceChildren();
+        const prompt = document.createElement('p');
+        prompt.className = 'live-prompt';
+        const count = document.createElement('p');
+        count.className = 'screen-count';
+        if (!poll) {
+          prompt.textContent = live.session ? 'Questions welcome at any time.' : 'No class started.';
+          count.textContent = live.session ? 'Nothing open to answer.' : 'Choose the lesson below and press Start class.';
+          box.append(prompt, count);
+          return;
+        }
+        prompt.textContent = poll.prompt;
+        box.append(prompt);
+        const showResults = poll.status === 'revealed' || poll.showLive;
+
+        if (poll.kind === 'text') {
+          const list = document.createElement('ul');
+          list.className = 'screen-answers';
+          (poll.texts ?? []).forEach((entry) => {
+            const item = document.createElement('li');
+            if (!entry.isVisible) item.className = 'is-hidden';
+            const text = document.createElement('span');
+            // The screen is projected: a hidden answer shows no text at all.
+            text.textContent = entry.isVisible ? entry.body : '(hidden)';
+            const hide = document.createElement('button');
+            hide.type = 'button';
+            hide.textContent = entry.isVisible ? 'hide' : 'show';
+            hide.addEventListener('click', async () => {
+              try { live = (await admin('admin_set_poll_text_visibility', { text_id: entry.id, is_visible: !entry.isVisible })).live; drawAll(); } catch {}
+            });
+            item.append(text, hide);
+            list.append(item);
+          });
+          if (showResults) box.append(list);
+          count.textContent = `${poll.total} ${poll.total === 1 ? 'answer' : 'answers'}${poll.status === 'open' ? '' : ' · closed'}`;
+          box.append(count);
+          return;
+        }
+
+        const total = poll.total;
+        const previousTotal = poll.previousCounts ? poll.previousCounts.reduce((sum, value) => sum + value, 0) : 0;
+        const results = document.createElement('div');
+        // Many options (or a second vote) get thinner bars so the questions stay on screen.
+        results.className = `live-results${poll.options.length > 5 || poll.isRevote ? ' is-compact' : ''}`;
+        poll.options.forEach((option, index) => {
+          const row = document.createElement('div');
+          row.className = 'live-result';
+          const label = document.createElement('div');
+          label.className = 'live-result-label';
+          const badge = document.createElement('span');
+          badge.className = 'live-letter';
+          badge.textContent = String.fromCharCode(65 + index);
+          const text = document.createElement('span');
+          text.textContent = option;
+          const value = document.createElement('b');
+          label.append(badge, text, value);
+          row.append(label);
+          // The screen is projected: the correct option is marked only once the results are revealed.
+          if (poll.status === 'revealed' && Number.isInteger(poll.answer) && poll.answer === index) {
+            row.classList.add('is-correct');
+            badge.textContent = '✓';
+          }
+          if (showResults) {
+            const share = total ? Math.round((100 * poll.counts[index]) / total) : 0;
+            value.textContent = `${share}%`;
+            if (poll.isRevote && poll.previousCounts && poll.status === 'revealed') {
+              const before = previousTotal ? Math.round((100 * poll.previousCounts[index]) / previousTotal) : 0;
+              const ghost = document.createElement('div');
+              ghost.className = 'live-bar is-previous';
+              const ghostFill = document.createElement('span');
+              ghostFill.style.width = `${before}%`;
+              ghost.append(ghostFill);
+              row.append(ghost);
+            }
+            const bar = document.createElement('div');
+            bar.className = 'live-bar';
+            const fill = document.createElement('span');
+            fill.style.width = `${share}%`;
+            bar.append(fill);
+            row.append(bar);
+          }
+          results.append(row);
+        });
+        box.append(results);
+        const round = poll.isRevote ? 'Second vote · ' : '';
+        const state = poll.status === 'open'
+          ? (showResults ? 'live' : 'results hidden until you reveal')
+          : `closed${poll.status === 'revealed' && Number.isInteger(poll.answer) ? ` · answer: ${String.fromCharCode(65 + poll.answer)}` : ''}`;
+        count.textContent = `${round}${total} ${total === 1 ? 'vote' : 'votes'} · ${state}${poll.isRevote && poll.status === 'revealed' ? ' · pale bars: first vote' : ''}`;
+        box.append(count);
+      };
+
+      const drawClass = () => {
+        const status = document.querySelector('#class-status');
+        const line = document.querySelector('#live-line');
+        if (live.session) {
+          const until = new Date(live.session.closesAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+          const label = lessons.find((entry) => entry.slug === live.session.lessonSlug)?.label ?? live.session.lessonSlug;
+          status.textContent = `Live: ${label} ${live.session.kind} until ${until} · check-ins: ${live.checkinCount} · attendance code ${live.session.attendanceCode ? 'on phones' : 'not set'}`;
+          line.textContent = `${label} ${live.session.kind} is live. Scan once: votes, answers, questions and the check-in.`;
+        } else {
+          status.textContent = 'No class live';
+          line.textContent = 'Scan once: votes, answers, questions and the check-in.';
+        }
+      };
+
+      const drawControls = () => {
+        const box = document.querySelector('#controls');
+        box.replaceChildren();
+        const isLiveHere = live.session?.contextKey === contextKey();
+        const leastClearCandidate = leastClearPoll();
+        const leastClear = leastClearCandidate.options.length >= 2 ? [leastClearCandidate] : [];
+        [...lesson().polls, ...leastClear, ...quickPolls].forEach((poll) => {
+          const state = live.polls.find((entry) => entry.pollKey === poll.key);
+          const row = document.createElement('div');
+          row.className = 'control-row';
+          const name = document.createElement('strong');
+          name.textContent = poll.kind === 'text' && !poll.slide.includes('sentence') ? `${poll.slide} (one sentence)` : poll.slide;
+          row.append(name);
+          const openPayload = (newRound) => ({
+            poll_key: poll.key,
+            kind: poll.kind ?? 'choice',
+            prompt: poll.prompt,
+            options: poll.kind === 'text' ? [] : poll.options,
+            show_live: poll.showLive !== false,
+            new_round: newRound,
+            answer: Number.isInteger(poll.answer) ? poll.answer : null,
+          });
+          const actions = [
+            ['Open', () => admin('admin_open_poll', openPayload(false)), state?.status === 'open' && !state.isRevote, true],
+            ['Reveal', () => admin('admin_set_poll_status', { poll_key: poll.key, status: 'revealed' }), state?.status === 'revealed', Boolean(state)],
+            ['Vote again', () => admin('admin_open_poll', openPayload(true)), state?.status === 'open' && state.isRevote, Boolean(state) && poll.kind !== 'text'],
+            ['Close', () => admin('admin_set_poll_status', { poll_key: poll.key, status: 'closed' }), false, Boolean(state)],
+          ];
+          actions.forEach(([label, run, isCurrent, enabled]) => {
+            if (label === 'Vote again' && poll.kind === 'text') return;
+            const button = document.createElement('button');
+            button.type = 'button';
+            button.textContent = label;
+            if (isCurrent) button.className = 'is-current';
+            button.disabled = !enabled || !isLiveHere;
+            button.addEventListener('click', async () => {
+              requestSerial += 1;
+              try {
+                live = (await run()).live;
+                drawAll();
+              } catch (error) {
+                document.querySelector('#class-status').textContent = `Could not do that: ${error.message}`;
+              }
+            });
+            row.append(button);
+          });
+          box.append(row);
+        });
+        if (!isLiveHere) {
+          const hint = document.createElement('p');
+          hint.className = 'live-muted';
+          hint.textContent = 'Start this class to use its polls.';
+          box.append(hint);
+        }
+      };
+
+      // Likes from phones float up the right edge: one per new like, at most 25 per refresh.
+      let likesSeen = null;
+      let likesContext = '';
+      const floatLikes = () => {
+        const count = live.reactionCount ?? 0;
+        const context = live.session?.contextKey ?? '';
+        if (likesSeen === null || context !== likesContext) { likesSeen = count; likesContext = context; return; }
+        const fresh = Math.min(Math.max(count - likesSeen, 0), 25);
+        likesSeen = count;
+        if (document.querySelector('#hide-likes').checked) return;
+        const layer = document.querySelector('#likes');
+        for (let index = 0; index < fresh; index += 1) {
+          setTimeout(() => {
+            const like = document.createElement('span');
+            like.className = 'screen-like';
+            like.textContent = '👍';
+            like.style.left = `${20 + Math.random() * 140}px`;
+            like.style.setProperty('--drift', `${Math.round(Math.random() * 60 - 30)}px`);
+            layer.append(like);
+            setTimeout(() => like.remove(), 3300);
+          }, index * (2400 / Math.max(fresh, 1)));
+        }
+      };
+
+      const drawFeedbackMode = () => {
+        const button = document.querySelector('#feedback-mode');
+        const on = Boolean(live.session?.feedbackMode);
+        button.textContent = on ? 'Back to class' : 'Ask for feedback';
+        button.className = on ? 'is-current' : '';
+        button.disabled = !live.session;
+        const line = document.querySelector('#live-line');
+        if (on) line.textContent = 'Feedback time: open the page on your phone and send your feedback. It is anonymous.';
+      };
+
+      // Got it and Lost in the last two minutes, side by side, so a few Lost taps never stand alone.
+      const drawLost = () => {
+        const signal = document.querySelector('#lost-signal');
+        const lost = live.session ? (live.lostRecent ?? 0) : 0;
+        const gotIt = live.session ? (live.likeRecent ?? 0) : 0;
+        signal.hidden = !live.session || lost + gotIt === 0;
+        signal.textContent = `Last 2 minutes:  👍 Got it ${gotIt}   ·   🤔 Lost ${lost}`;
+      };
+
+      const drawAll = () => { drawClass(); drawPoll(); drawControls(); drawFeedbackMode(); floatLikes(); drawLost(); };
+
+      // Newest questions; a soft chime when one arrives.
+      let newestSeen = null;
+      const drawQuestions = async () => {
+        const query = new URLSearchParams({
+          select: 'id,question,vote_count',
+          context_key: `eq.${yearKey}-classroom`,
+          is_visible: 'eq.true',
+          is_answered: 'eq.false',
+          order: 'id.desc',
+          limit: '4',
+        });
+        try {
+          const response = await fetch(`${supabaseUrl}/rest/v1/course_questions?${query}`, { headers: { apikey: publishableKey } });
+          const rows = await response.json();
+          if (!Array.isArray(rows)) return;
+          const newest = rows.length ? rows[0].id : 0;
+          if (newestSeen !== null && newest > newestSeen) chime();
+          newestSeen = Math.max(newestSeen ?? 0, newest);
+          const list = document.querySelector('#questions');
+          list.replaceChildren();
+          if (!rows.length) { list.innerHTML = '<li class="live-muted">None yet.</li>'; return; }
+          rows.forEach((row) => {
+            const item = document.createElement('li');
+            item.textContent = row.vote_count ? `${row.question}  (+${row.vote_count})` : row.question;
+            list.append(item);
+          });
+        } catch {}
+      };
+
+      // While a class is live the screen always shows that class; the lesson choosers are locked.
+      // Replies to older requests are dropped, so a slow poll cannot undo a button just pressed.
+      let requestSerial = 0;
+      const refresh = async () => {
+        const serial = ++requestSerial;
+        try {
+          const asked = contextKey();
+          let next = (await admin('admin_live_overview')).live;
+          if (next.session && next.session.contextKey !== asked) {
+            lessonSelect.value = next.session.lessonSlug;
+            kindSelect.value = next.session.kind;
+            next = (await admin('admin_live_overview')).live;
+          }
+          if (serial !== requestSerial) return;
+          live = next;
+          lessonSelect.disabled = Boolean(live.session);
+          kindSelect.disabled = Boolean(live.session);
+          drawAll();
+        } catch {}
+        drawQuestions();
+      };
+
+      lessonSelect.addEventListener('change', refresh);
+      kindSelect.addEventListener('change', refresh);
+      document.querySelector('#start-class').addEventListener('click', async () => {
+        try {
+          requestSerial += 1;
+          live = (await admin('admin_start_live', { lesson_slug: lessonSelect.value, kind: kindSelect.value, minutes: 180 })).live;
+          lessonSelect.disabled = kindSelect.disabled = Boolean(live.session);
+          drawAll();
+        } catch {}
+      });
+      document.querySelector('#end-class').addEventListener('click', async () => {
+        requestSerial += 1;
+        try {
+          live = (await admin('admin_stop_live')).live;
+          lessonSelect.disabled = kindSelect.disabled = false;
+          drawAll();
+        } catch {}
+      });
+
+      document.querySelector('#feedback-mode').addEventListener('click', async () => {
+        requestSerial += 1;
+        try { live = (await admin('admin_set_feedback_mode', { on: !live.session?.feedbackMode })).live; drawAll(); } catch {}
+      });
+
+      // The attendance code goes to students' phones only; the screen never shows it.
+      const codeInput = document.querySelector('#code-input');
+      document.querySelector('#code-form').addEventListener('submit', async (event) => {
+        event.preventDefault();
+        requestSerial += 1;
+        try {
+          live = (await admin('admin_set_attendance_code', { code: codeInput.value })).live;
+          codeInput.value = '';
+          codeInput.placeholder = 'code sent to phones';
+          drawAll();
+        } catch (error) {
+          codeInput.placeholder = error.message;
+          codeInput.value = '';
+        }
+      });
+      document.querySelector('#code-clear').addEventListener('click', async () => {
+        requestSerial += 1;
+        try { live = (await admin('admin_set_attendance_code', { code: '' })).live; codeInput.placeholder = 'attendance code'; drawAll(); } catch {}
+      });
+
+      // ------------------------------------------------------------ sign-in
+      const showLogin = () => { screen.hidden = true; login.hidden = false; };
+      const showScreen = () => { login.hidden = true; screen.hidden = false; refresh(); };
+
+      login.addEventListener('submit', async (event) => {
+        event.preventDefault();
+        const status = document.querySelector('#login-status');
+        status.textContent = 'Checking…';
+        const response = await fetch(submissionUrl, {
+          method: 'POST',
+          headers: { apikey: publishableKey, 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'admin_login', password: document.querySelector('#password').value }),
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok || !result.token) { status.textContent = result.error ?? 'Could not sign in.'; return; }
+        try { sessionStorage.setItem(tokenStorageKey, result.token); } catch {}
+        showScreen();
+      });
+
+      if (getToken()) showScreen(); else showLogin();
+      setInterval(() => { if (!screen.hidden) refresh(); }, 2500);
+    </script>
+  </body>
+</html>

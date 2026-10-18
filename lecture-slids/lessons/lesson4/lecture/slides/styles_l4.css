@@ -38,3 +38,14 @@
 .reveal .fig-s16{width:900px}
 .reveal #w-i3 #i3txt{display:none}
 .reveal .tile{border:2px solid var(--rule);border-radius:14px;padding:30px 36px;background:var(--panel);font-size:1.3em;line-height:1.4}
+/* live classroom: the QR on the opening slide and the vote boxes */
+.reveal .scan{position:absolute;right:40px;bottom:30px;width:200px;text-align:center;font-size:.6em;color:var(--muted);line-height:1.25}
+.reveal .scan img{width:180px;height:180px;display:block;margin:0 auto 6px}
+.reveal .scan b{display:block;font-size:1.3em;color:var(--ink)}
+.reveal .ask.vote .opts{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:16px;font-size:.85em}
+.reveal .ask.vote .opts span{display:inline-flex;align-items:center;gap:12px}
+.reveal .ask.vote .opts b{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--slate);color:#fff;font-size:.8em}
+.reveal .two.side .ask.vote .opts{flex-direction:column;gap:10px}
+.reveal .vote-strip{margin-top:14px;padding:10px 22px;font-size:.8em;border-left:8px solid var(--slate);background:var(--panel);border-radius:0 12px 12px 0}
+.reveal .vote-strip small{font-size:.6em;letter-spacing:.1em;text-transform:uppercase;color:var(--slate);font-weight:700;margin-right:14px}
+.reveal .vote-strip b{display:inline-grid;place-items:center;width:38px;height:38px;border-radius:50%;background:var(--slate);color:#fff;font-size:.75em;margin:0 6px 0 18px}

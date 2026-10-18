@@ -1,0 +1,471 @@
+{
+  "_comment": "Live classroom (/live/ and /live/screen/). One QR code for the whole course; the lecturer starts a class on the screen. For each lesson: 'sections' (at most 7) are the choices for 'where did you first get lost?' in a lecture check-in; 'polls' are opened from the screen at the matching slide. A poll is a choice (2-8 options) or, with \"kind\": \"text\", a one-sentence answer. Results show live unless \"showLive\": false. \"answer\" (0-based) marks the correct option, shown when the lecturer reveals; omit it for a decision with no single right answer.",
+  "lessons": {
+    "lesson-01": {
+      "sections": [
+        "What this course will teach you to do",
+        "An AI stock prediction that looks perfect",
+        "Comparing it with just using yesterday's price",
+        "Six questions to ask before trusting a model",
+        "A 99.9% score that finds no patients",
+        "Two quick judgements: exam marks and bike demand",
+        "How the course and each week will run, and working with AI"
+      ],
+      "polls": [
+        {
+          "key": "trust-stock",
+          "slide": "The prediction looks remarkable",
+          "prompt": "The AI's stock prediction almost matches reality. Trust it with your money?",
+          "options": [
+            "Yes",
+            "No"
+          ],
+          "showLive": true
+        },
+        {
+          "key": "patients-found",
+          "slide": "Is 99.9% a good result?",
+          "prompt": "10 in 10,000 are ill. It calls everyone healthy. Patients found?",
+          "options": [
+            "0",
+            "5",
+            "10"
+          ],
+          "showLive": false,
+          "answer": 0
+        },
+        {
+          "key": "exam-mark-input",
+          "slide": "Two quick judgements",
+          "prompt": "Predicting a pass before the exam, using the final-exam mark. What's wrong?",
+          "options": [
+            "Nothing, it predicts well",
+            "The mark isn't known yet",
+            "Exam marks are too noisy"
+          ],
+          "showLive": false,
+          "answer": 1
+        }
+      ]
+    },
+    "lesson-02": {
+      "sections": [
+        "Guessing a new car's mpg from ten cars",
+        "Writing the guess as a line, then with many features",
+        "Scoring a line by how far the points are from it",
+        "Finding the line with the lowest score",
+        "Checking the line on cars it never saw",
+        "Reading what a coefficient tells you"
+      ],
+      "polls": [
+        {
+          "key": "how-to-guess",
+          "slide": "A new car arrives",
+          "prompt": "A new car has 140 hp. How would you guess its mpg?",
+          "options": [
+            "average all ten cars",
+            "average the cars nearest 140 hp",
+            "draw a line through the dots"
+          ],
+          "showLive": true
+        },
+        {
+          "key": "error-on-other-cars",
+          "slide": "Test: Is the best line best for other cars?",
+          "prompt": "A line fitted to ten cars. On other cars, its error is usually … than on its own ten cars.",
+          "options": [
+            "smaller",
+            "about the same",
+            "larger"
+          ],
+          "showLive": false,
+          "answer": 2
+        },
+        {
+          "key": "hp-coefficient",
+          "slide": "Test: Do the models beat a simple guess?",
+          "prompt": "Add weight to Model 1. Its hp coefficient, -0.163, becomes…",
+          "options": [
+            "more negative",
+            "about the same",
+            "closer to zero"
+          ],
+          "showLive": false,
+          "answer": 2
+        }
+      ]
+    },
+    "lesson-03": {
+      "sections": [
+        "Why the straight line fails on a powerful car",
+        "Building new columns so the line can bend",
+        "Putting the columns on one scale",
+        "When a more flexible model fits the noise",
+        "Penalising large coefficients (Ridge and Lasso)",
+        "Choosing how flexible, without touching the test set"
+      ],
+      "polls": [
+        {
+          "key": "which-step",
+          "slide": "Problem: Bad luck, or a pattern?",
+          "prompt": "The line's errors follow a pattern. Which step is at fault?",
+          "options": [
+            "the loss (squared error)",
+            "the solving (normal equation)",
+            "the model (a straight line)"
+          ],
+          "showLive": false,
+          "answer": 2
+        },
+        {
+          "key": "how-many-powers",
+          "slide": "Model: No idea which column? Use powers of x",
+          "prompt": "How many powers of hp should we add?",
+          "options": [
+            "just a few (2 or 3)",
+            "as many as we can"
+          ],
+          "showLive": false,
+          "answer": 0
+        },
+        {
+          "key": "zero-penalty",
+          "slide": "Loss: Ridge shrinks, but keeps every coefficient",
+          "prompt": "Which penalty could make some coefficients exactly zero?",
+          "options": [
+            "none: penalties only shrink",
+            "sum of |w| instead of w²",
+            "sum of w⁴ instead of w²"
+          ],
+          "showLive": false,
+          "answer": 1
+        }
+      ]
+    },
+    "lesson-04": {
+      "sections": [
+        "Turning the line into a probability",
+        "The boundary between the two classes",
+        "Scoring confident mistakes",
+        "Finding the weights step by step",
+        "Judging accuracy and the kinds of mistakes",
+        "Choosing where to cut",
+        "More than two classes: handwritten digits"
+      ],
+      "polls": [
+        {
+          "key": "loss",
+          "slide": "Loss: Is squared error harsh enough?",
+          "prompt": "Malignant lump, p = 0.01. Its penalty should be…",
+          "options": [
+            "About the same as at p = 0.1",
+            "Much bigger"
+          ],
+          "answer": 1
+        },
+        {
+          "key": "accuracy",
+          "slide": "Test: Accuracy 0.864. Is that good?",
+          "prompt": "A rule that always guesses “benign”. Its accuracy?",
+          "options": [
+            "0.50",
+            "0.63",
+            "0.86"
+          ],
+          "showLive": false,
+          "answer": 1
+        },
+        {
+          "key": "threshold",
+          "slide": "Decide: Three thresholds, side by side",
+          "prompt": "1 missed cancer = 10 false alarms. Which threshold?",
+          "options": [
+            "0.5",
+            "0.3",
+            "0.1"
+          ],
+          "answer": 2
+        }
+      ]
+    },
+    "lesson-05": {
+      "sections": [
+        "Why a straight line fails on the opening data",
+        "Describing one class with a bell curve",
+        "Turning curve heights into a probability using each class's share",
+        "Two features: the bell becomes a tilted ellipse",
+        "Shared spread or one spread per class (straight vs curved boundary)",
+        "Testing on real data: when the flexible method loses",
+        "Pulling each spread towards a circle, and choosing how much"
+      ],
+      "polls": [
+        {
+          "key": "share-matters",
+          "slide": "Compare: Benign is 4.6 times higher here. So 4.6 times more likely?",
+          "prompt": "Benign: 63% of lumps, curve 4.6 times higher at radius 12.8. Benign is…",
+          "options": [
+            "exactly 4.6 times as likely",
+            "more than 4.6 times",
+            "less than 4.6 times"
+          ],
+          "showLive": false,
+          "answer": 1
+        },
+        {
+          "key": "shared-spread-boundary",
+          "slide": "Two candidates: How do we estimate each spread?",
+          "prompt": "Both classes share one spread. The boundary is…",
+          "options": [
+            "a straight line",
+            "a curve around one class",
+            "depends on the data"
+          ],
+          "showLive": false,
+          "answer": 0
+        },
+        {
+          "key": "shrink-target",
+          "slide": "Shrink: Regularise: pull each spread towards which shape?",
+          "prompt": "Pixels that are 0 in every digit: pull each spread towards…",
+          "options": [
+            "the shared spread",
+            "its diagonal only",
+            "a circle"
+          ],
+          "showLive": false,
+          "answer": 2
+        }
+      ]
+    },
+    "lesson-06": {
+      "sections": [
+        "Writing a sorting rule by hand on the ring",
+        "Scoring how mixed each side of a cut is",
+        "Cutting again and reading the tree",
+        "Deeper trees memorising the training points",
+        "Choosing the depth with a validation set",
+        "Comparing the tree with earlier models, and the code"
+      ],
+      "polls": [
+        {
+          "key": "error-vs-gini",
+          "slide": "One cut: A good cut leaves both sides pure. How do we score \"mixed\"?",
+          "prompt": "Error rate and Gini: will they always rank the cuts the same?",
+          "options": [
+            "yes, same ranking",
+            "no, they can differ"
+          ],
+          "showLive": false,
+          "answer": 1
+        },
+        {
+          "key": "choose-depth-how",
+          "slide": "Choose: How do we choose max_depth?",
+          "prompt": "50,000 images: choose max_depth using…",
+          "options": [
+            "5-fold cross-validation",
+            "one validation split",
+            "the test set"
+          ],
+          "showLive": false,
+          "answer": 1
+        }
+      ]
+    },
+    "lesson-07": {
+      "sections": [
+        "Why 784 numbers per image are too many",
+        "Keeping only the pixels that vary most",
+        "Mixing all pixels into one new number (a line through the cloud)",
+        "Adding more lines that do not repeat the first: PCA",
+        "Choosing how many numbers to keep",
+        "Which data to learn the directions from, and drawing the data on two numbers"
+      ],
+      "polls": [
+        {
+          "key": "spread-vs-error",
+          "slide": "Combine pixels: A weighted sum is a projection",
+          "prompt": "Widest spread along the line, or smallest distance to it: same line?",
+          "options": [
+            "the same line",
+            "different lines",
+            "it depends"
+          ],
+          "showLive": false,
+          "answer": 0
+        },
+        {
+          "key": "second-line",
+          "slide": "Combine pixels: A second number: what should it do?",
+          "prompt": "Which line should give the second number?",
+          "options": [
+            "the next-widest line",
+            "the x2 axis",
+            "the line uncorrelated with the first"
+          ],
+          "showLive": false,
+          "answer": 2
+        },
+        {
+          "key": "fit-on-which",
+          "slide": "The rule: Learn the directions from which data?",
+          "prompt": "pca.fit should learn the directions from…",
+          "options": [
+            "the fitting images only",
+            "fitting + validation images",
+            "all images, test included"
+          ],
+          "showLive": false,
+          "answer": 0
+        }
+      ]
+    },
+    "lesson-08": {
+      "sections": [
+        "Seeing groups in points without labels",
+        "Scoring a grouping by distance to centres",
+        "Assign, move, repeat (K-means)",
+        "Where centres fail: rings and strips",
+        "Merging the nearest points from below",
+        "Checking the groups on handwritten digits",
+        "When there are too many points"
+      ],
+      "polls": [
+        {
+          "key": "score-grouping",
+          "slide": "One centre per group: How do we score a grouping?",
+          "prompt": "One number: small when points hug their centres. Use the…",
+          "options": [
+            "farthest point from its centre",
+            "sum of distances",
+            "sum of squared distances"
+          ],
+          "showLive": false,
+          "answer": 2
+        },
+        {
+          "key": "rings-near",
+          "slide": "Merge from below: How near are two groups?",
+          "prompt": "Two rings: which way of measuring \"near\" will follow them?",
+          "options": [
+            "nearest two points (single)",
+            "Ward (via group centres)"
+          ],
+          "showLive": false,
+          "answer": 0
+        },
+        {
+          "key": "scale-50000",
+          "slide": "Scale: Every pair of points",
+          "prompt": "50,000 images: every pair needs 10 GB. You would…",
+          "options": [
+            "find a bigger machine",
+            "cluster a random 5000",
+            "use K-means on all"
+          ],
+          "showLive": true
+        }
+      ]
+    },
+    "lesson-09": {
+      "sections": [
+        "Why one straight line fails on the ring",
+        "Combining several small lines into new features",
+        "Why each middle unit needs a bend",
+        "Passing the error back to train every weight",
+        "Training in small batches",
+        "The MNIST network: reading the validation curves and the seed"
+      ],
+      "polls": [
+        {
+          "key": "no-bend",
+          "slide": "A bend in the middle: Drop the middle sigmoid?",
+          "prompt": "Ring data, 4 hidden units, no sigmoid in the middle. Accuracy?",
+          "options": [
+            "about 0.997",
+            "about 0.82",
+            "about 0.50"
+          ],
+          "showLive": false,
+          "answer": 2
+        },
+        {
+          "key": "batch-size",
+          "slide": "Training: How many images per step?",
+          "prompt": "Same computing, 5 passes over the data. Which ends better?",
+          "options": [
+            "all 50,000 per step",
+            "32 per step",
+            "about the same"
+          ],
+          "showLive": false,
+          "answer": 1
+        },
+        {
+          "key": "seed-luck",
+          "slide": "MNIST: Change only the seed",
+          "prompt": "512 units: 0.9803. Ours: 0.9780. Better?",
+          "options": [
+            "yes, it scores higher",
+            "can't tell yet"
+          ],
+          "showLive": false,
+          "answer": 1
+        }
+      ]
+    },
+    "lesson-10": {
+      "sections": [
+        "Shuffling and moving the digits",
+        "Looking at a small patch, the same filter everywhere",
+        "Keeping one number per block",
+        "Testing the new network against the old one",
+        "Reading its mistakes"
+      ],
+      "polls": [
+        {
+          "key": "shuffle-dense",
+          "slide": "Opening: Shuffle every image's pixels, the same way",
+          "prompt": "All images shuffled the same way; Lesson 9 network (0.970) retrained. Accuracy?",
+          "options": [
+            "about 0.1",
+            "about 0.5",
+            "about 0.97"
+          ],
+          "showLive": false,
+          "answer": 2
+        },
+        {
+          "key": "pooling",
+          "slide": "One number per block: The feature map still moves",
+          "prompt": "Digits moved 2 pixels. Which keeps accuracy highest?",
+          "options": [
+            "keep every position",
+            "mean of each 2 × 2",
+            "largest of each 2 × 2"
+          ],
+          "showLive": false,
+          "answer": 2
+        },
+        {
+          "key": "shuffle-cnn",
+          "slide": "The new network, tested: Does it really use neighbours?",
+          "prompt": "Same shuffle, CNN (0.987) retrained. Its accuracy?",
+          "options": [
+            "still about 0.987",
+            "clearly lower",
+            "about 0.1"
+          ],
+          "showLive": false,
+          "answer": 1
+        }
+      ]
+    }
+  },
+  "labSections": [
+    "Getting the code to run",
+    "Understanding what a task asks",
+    "Reading the results",
+    "Answering the questions"
+  ]
+}

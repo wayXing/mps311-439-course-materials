@@ -31,3 +31,14 @@
 .reveal #w-I2r .wrow{justify-content:center}
 .reveal #w-I2r #I2rs{width:500px;max-width:500px!important}
 .reveal .fig-s1{height:400px;width:auto}
+
+/* live classroom: the QR on the opening slide and the vote boxes */
+.reveal .scan{position:absolute;right:40px;bottom:30px;width:200px;text-align:center;font-size:.6em;color:var(--muted);line-height:1.25}
+.reveal .scan img{width:180px;height:180px;display:block;margin:0 auto 6px}
+.reveal .scan b{display:block;font-size:1.3em;color:var(--ink)}
+.reveal .ask.vote .opts{display:flex;flex-wrap:wrap;gap:12px 28px;margin-top:16px;font-size:.85em}
+.reveal .ask.vote .opts span{display:inline-flex;align-items:center;gap:12px}
+.reveal .ask.vote .opts b{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--slate);color:#fff;font-size:.8em}
+.reveal .two.side .ask.vote .opts{flex-direction:column;gap:10px}
+.reveal .stage:has(>.scan)>.ask{margin-right:250px}
+.reveal .fig-f1{height:460px}

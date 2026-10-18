@@ -1,12 +1,18 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { course } from '../data/course';
+import { liveLessons, publishableKey, supabaseUrl as projectUrl } from '../data/live';
 import '../styles/admin.css';
 
-const projectUrl = 'https://whxpzfruhtshrwiksezg.supabase.co';
-const publishableKey = 'sb_publishable_GEKCtohy16BxHMc8_fji6w_TbcrlbPd';
 const submissionUrl = `${projectUrl}/functions/v1/course-feedback`;
 const academicYearKey = course.academicYear.replace(/[^0-9]+/g, '-').replace(/^-|-$/g, '');
+// Lesson titles and poll wording, written into each class report so it still reads years later.
+const reportCourse = `${course.code} ${course.title}`;
+const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
+  label: lesson.label,
+  title: lesson.title,
+  polls: Object.fromEntries(lesson.polls.map((poll) => [poll.key, poll.slide])),
+}]));
 ---
 
 <SiteLayout title={`Feedback admin · ${course.code}`} description={`Private feedback administration for ${course.code}.`}>
@@ -86,6 +92,29 @@ const academicYearKey = course.academicYear.replace(/[^0-9]+/g, '-').replace(/^-
         </div>
 
         <div class="admin-record-section">
+          <div class="admin-section-label"><h3>Class reports</h3><span id="admin-reports-count">—</span></div>
+          <p class="admin-status">One report per class: the votes (every round), all feedback, Got it / Lost per 5 minutes and the questions posted during the class. Save them in <code>reviews/class-data/&lt;year&gt;/</code> for the lesson's retro.</p>
+          <div class="admin-empty" id="admin-reports-empty">No classes yet.</div>
+          <div class="admin-table-wrap" id="admin-reports-wrap" hidden>
+            <table>
+              <thead><tr><th>Class</th><th>First started</th><th>Download</th></tr></thead>
+              <tbody id="admin-reports-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="admin-record-section">
+          <div class="admin-section-label"><h3>Like and Lost during class</h3><span id="admin-likes-count">—</span></div>
+          <div class="admin-empty" id="admin-likes-empty">No likes yet.</div>
+          <div class="admin-table-wrap" id="admin-likes-wrap" hidden>
+            <table>
+              <thead><tr><th>Class</th><th>Total</th><th>Per 5 minutes from the start</th></tr></thead>
+              <tbody id="admin-likes-body"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="admin-record-section">
           <div class="admin-section-label"><h3>Classroom posts</h3><span id="admin-question-count">—</span></div>
           <div class="admin-empty" id="admin-questions-empty">Loading questions…</div>
           <div class="admin-table-wrap" id="admin-questions-wrap" hidden>
@@ -109,7 +138,7 @@ const academicYearKey = course.academicYear.replace(/[^0-9]+/g, '-').replace(/^-
     </div>
   </section>
 
-  <script is:inline define:vars={{ submissionUrl, publishableKey, academicYearKey }}>
+  <script is:inline define:vars={{ submissionUrl, publishableKey, academicYearKey, projectUrl, reportLessons, reportCourse }}>
     const tokenStorageKey = 'mps-course-feedback-admin-token-v1';
     const loginPanel = document.querySelector('#admin-login');
     const dashboard = document.querySelector('#admin-dashboard');
@@ -191,13 +220,42 @@ const academicYearKey = course.academicYear.replace(/[^0-9]+/g, '-').replace(/^-
         const row = document.createElement('tr');
         row.append(
           createCell(sessionLabel(record.contextKey)),
-          createCell(`D ${record.difficulty} · P ${record.pace} · C ${record.contentAmount}`, 'ratings-cell'),
+          // Check-ins from the live page use five points (3 = about right); older records use 1–10 sliders.
+          createCell(record.isCheckin
+            ? [
+              `${record.inClass ? 'In class' : 'After class'} · student ${record.student} · ${record.module ?? 'module not given'}`,
+              `Difficulty ${record.difficulty}/5 · Pace ${record.pace}/5 (3 = about right)`,
+              `Lost at: ${record.lostAt || 'not answered'}`,
+              `Programming: ${({ new: 'hardly at all', some: 'a little', confident: 'comfortable' })[record.background] ?? 'not given'}`,
+              record.changes ? `Changed ${record.changes} time${record.changes === 1 ? '' : 's'}; latest shown` : '',
+            ].filter(Boolean).join('\n')
+            : `D ${record.difficulty} · P ${record.pace} · C ${record.contentAmount}`, 'ratings-cell'),
           createCell(record.comment || '—', 'message-cell'),
           createCell(formatDate(record.createdAt)),
         );
         feedbackBody.append(row);
       });
       if (records.length === 0) feedbackEmpty.textContent = 'No feedback for this selection.';
+    };
+
+    // Questions all go to one board; the class a question belongs to is the live class at the time it was posted.
+    let liveSessions = [];
+    const loadLiveSessions = async () => {
+      try {
+        const query = new URLSearchParams({ select: 'context_key,lesson_slug,kind,opened_at,closes_at,closed_at', order: 'opened_at.desc', limit: '500' });
+        const response = await fetch(`${projectUrl}/rest/v1/course_live_sessions?${query}`, { headers: { apikey: publishableKey } });
+        const rows = await response.json();
+        liveSessions = Array.isArray(rows) ? rows : [];
+      } catch { liveSessions = []; }
+    };
+    const classAt = (time, fallbackKey) => {
+      // Only the year's single classroom board needs the time; older boards name their class.
+      if (!/-classroom$/.test(fallbackKey ?? '')) return sessionLabel(fallbackKey);
+      const moment = new Date(time).getTime();
+      const match = liveSessions.find((entry) => new Date(entry.opened_at).getTime() <= moment
+        && moment <= new Date(entry.closed_at ?? entry.closes_at).getTime());
+      if (match) return `${match.lesson_slug.replace('lesson-', 'Lesson ')} ${match.kind}`;
+      return liveSessions.length ? 'Between classes' : sessionLabel(fallbackKey);
     };
 
     const renderQuestions = (records) => {
@@ -208,7 +266,7 @@ const academicYearKey = course.academicYear.replace(/[^0-9]+/g, '-').replace(/^-
       records.forEach((record) => {
         const row = document.createElement('tr');
         row.append(
-          createCell(sessionLabel(record.contextKey)),
+          createCell(classAt(record.createdAt, record.contextKey)),
           createCell(record.displayName || 'Anonymous'),
           createCell(record.question || '—', 'message-cell'),
           createCell(`${record.isVisible ? 'Visible' : 'Hidden'} · ${record.isAnswered ? 'Discussed' : 'Open'} · ↑ ${record.voteCount || 0}`),
@@ -250,7 +308,7 @@ const academicYearKey = course.academicYear.replace(/[^0-9]+/g, '-').replace(/^-
       records.forEach((record) => {
         const row = document.createElement('tr');
         row.append(
-          createCell(sessionLabel(record.contextKey)),
+          createCell(classAt(record.createdAt, record.contextKey)),
           createCell(record.displayName || 'Anonymous'),
           createCell(record.reply || '—', 'message-cell'),
           createCell(record.isVisible ? 'Visible' : 'Hidden'),
@@ -350,11 +408,156 @@ const academicYearKey = course.academicYear.replace(/[^0-9]+/g, '-').replace(/^-
       if ([...yearFilter.options].some((option) => option.value === previousValue)) yearFilter.value = previousValue;
     };
 
+    // Likes per class: when in the class students pressed the like button.
+    const renderLikes = (records) => {
+      const body = document.querySelector('#admin-likes-body');
+      body.replaceChildren();
+      document.querySelector('#admin-likes-count').textContent = `${records.length} class${records.length === 1 ? '' : 'es'}`;
+      document.querySelector('#admin-likes-empty').hidden = records.length > 0;
+      document.querySelector('#admin-likes-wrap').hidden = records.length === 0;
+      records.forEach((record) => {
+        const row = document.createElement('tr');
+        const steps = (record.perFiveMinutes ?? []).map((step) => `${step.minute}–${step.minute + 5} min: 👍 ${step.likes} · 🤔 ${step.lost}`).join('\n');
+        row.append(
+          createCell(`${sessionLabel(record.contextKey)} · ${formatDate(record.openedAt)}`),
+          createCell(`👍 ${record.likes} · 🤔 ${record.lost}`),
+          createCell(steps || '—', 'ratings-cell'),
+        );
+        body.append(row);
+      });
+    };
+
+    // ------------------------------------------------------------ class reports
+    const download = (name, text, type) => {
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(new Blob([text], { type }));
+      link.download = name;
+      link.click();
+      setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+    };
+    const share = (count, total) => (total ? `${count} (${Math.round((100 * count) / total)}%)` : '0');
+    const fivePoints = ['1 much too easy/slow', '2 a bit easy/slow', '3 about right', '4 a bit hard/fast', '5 much too hard/fast'];
+
+    const reportMarkdown = (report) => {
+      const [, year, slug, kind] = report.contextKey.match(/^(\d{4}-\d{2})-(.+)-(lecture|lab)$/) ?? [null, '', report.contextKey, ''];
+      const lesson = reportLessons[slug] ?? { label: slug, title: '', polls: {} };
+      const lines = [];
+      const when = (value) => new Date(value).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' });
+      lines.push(`# Class report: ${year.replace('-', '/')} · ${lesson.label} ${kind}${lesson.title ? `: ${lesson.title}` : ''}`, '');
+      lines.push(`- Course: ${reportCourse}`);
+      lines.push(`- Class key: \`${report.contextKey}\` (year, lesson, lecture or lab)`);
+      lines.push(`- Sessions: ${report.sessions.map((entry) => `${when(entry.openedAt)} to ${new Date(entry.endedAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`).join('; ') || 'none'}`);
+      lines.push(`- Report made: ${when(report.generatedAt)}`, '');
+
+      lines.push('## Votes', '');
+      if (!report.polls.length) lines.push('No votes.', '');
+      report.polls.forEach((poll) => {
+        lines.push(`### ${lesson.polls[poll.pollKey] ?? poll.pollKey}`, '', `“${poll.prompt}”`, '');
+        if (poll.kind === 'choice') {
+          const header = ['Option', ...poll.rounds.map((round) => `Round ${round.round}${round.round === poll.revealedRound ? ' (shown)' : ''}`)];
+          lines.push(`| ${header.join(' | ')} |`, `|${header.map(() => '---').join('|')}|`);
+          poll.options.forEach((option, index) => {
+            lines.push(`| ${String.fromCharCode(65 + index)}. ${option} | ${poll.rounds.map((round) => share(round.counts[index], round.counts.reduce((sum, value) => sum + value, 0))).join(' | ')} |`);
+          });
+          lines.push(`| Votes | ${poll.rounds.map((round) => round.counts.reduce((sum, value) => sum + value, 0)).join(' | ')} |`, '');
+        } else {
+          (poll.answers ?? []).forEach((answer) => lines.push(`- ${answer.hidden ? '(hidden) ' : ''}${answer.body}`));
+          lines.push('');
+        }
+      });
+
+      const feedback = report.feedback;
+      const students = new Set(feedback.map((row) => row.student));
+      lines.push('## Feedback', '', `${feedback.length} submissions from ${students.size} students (latest per student counted below).`, '');
+      // In class and after class; each also split by module (MPS311 and MPS439 share the room).
+      const groups = [];
+      ['In class', 'After class'].forEach((label) => {
+        const latest = new Map();
+        feedback.filter((row) => row.inClass === (label === 'In class')).forEach((row) => latest.set(row.student, row));
+        const all = [...latest.values()];
+        groups.push([label, all]);
+        ['MPS311', 'MPS439'].forEach((module) => {
+          const part = all.filter((row) => row.module === module);
+          if (part.length && part.length < all.length) groups.push([`${label}, ${module}`, part]);
+        });
+      });
+      groups.forEach(([label, rows]) => {
+        if (!rows.length) return;
+        lines.push(`### ${label} (${rows.length} students)`, '');
+        lines.push('| Point | Difficulty | Pace |', '|---|---|---|');
+        fivePoints.forEach((name, index) => {
+          lines.push(`| ${name} | ${share(rows.filter((row) => row.difficulty === index + 1).length, rows.length)} | ${share(rows.filter((row) => row.pace === index + 1).length, rows.length)} |`);
+        });
+        const lost = {};
+        rows.forEach((row) => { const key = row.lostAt || 'not answered'; lost[key] = (lost[key] ?? 0) + 1; });
+        lines.push('', 'First got lost at:', ...Object.entries(lost).sort((a, b) => b[1] - a[1]).map(([key, count]) => `- ${key}: ${count}`), '');
+        const comments = rows.filter((row) => row.comment);
+        if (comments.length) lines.push('Comments:', ...comments.map((row) => `- ${row.student}: ${row.comment}`), '');
+      });
+
+      lines.push('## Got it / Lost per 5 minutes', '');
+      if (!report.reactions.length) lines.push('None.', '');
+      else {
+        lines.push('| Session start | Minutes | 👍 Got it | 🤔 Lost |', '|---|---|---|---|');
+        report.reactions.forEach((step) => lines.push(`| ${when(step.sessionOpenedAt)} | ${step.minute}–${step.minute + 5} | ${step.gotIt} | ${step.lost} |`));
+        lines.push('');
+      }
+
+      lines.push('## Questions posted during the class', '');
+      if (!report.questions.length) lines.push('None.', '');
+      report.questions.forEach((question) => {
+        lines.push(`- ${question.hidden ? '(hidden) ' : ''}${question.question} (▲ ${question.votes}${question.replies ? `, ${question.replies} replies` : ''}${question.discussed ? ', discussed' : ''})`);
+      });
+      lines.push('');
+      return lines.join('\n');
+    };
+
+    const renderReports = () => {
+      const firstStart = new Map();
+      liveSessions.forEach((entry) => {
+        const key = entry.context_key;
+        const start = entry.opened_at;
+        if (!firstStart.has(key) || start < firstStart.get(key)) firstStart.set(key, start);
+      });
+      const contexts = [...firstStart.entries()].sort((a, b) => (a[1] < b[1] ? 1 : -1));
+      const body = document.querySelector('#admin-reports-body');
+      body.replaceChildren();
+      document.querySelector('#admin-reports-count').textContent = `${contexts.length} class${contexts.length === 1 ? '' : 'es'}`;
+      document.querySelector('#admin-reports-empty').hidden = contexts.length > 0;
+      document.querySelector('#admin-reports-wrap').hidden = contexts.length === 0;
+      contexts.forEach(([contextKey, start]) => {
+        const row = document.createElement('tr');
+        const actions = document.createElement('td');
+        [['Report (.md)', 'md'], ['Data (.json)', 'json']].forEach(([label, format]) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = 'admin-toggle';
+          button.textContent = label;
+          button.addEventListener('click', async () => {
+            try {
+              const result = await requestAdmin('admin_class_report', { context_key: contextKey });
+              if (format === 'md') download(`${contextKey}.md`, reportMarkdown(result.report), 'text/markdown');
+              else download(`${contextKey}.json`, JSON.stringify(result.report, null, 2), 'application/json');
+            } catch (error) {
+              dashboardStatus.textContent = error instanceof Error ? error.message : 'Could not make the report.';
+            }
+          });
+          actions.append(button);
+        });
+        row.append(createCell(sessionLabel(contextKey)), createCell(formatDate(start)), actions);
+        body.append(row);
+      });
+    };
+
     const renderOverview = (overview, message = '') => {
       const years = Array.isArray(overview?.years) ? overview.years : [];
       renderYears(years);
       renderBoards(Array.isArray(overview?.boards) ? overview.boards : [], years);
-      renderFeedback(Array.isArray(overview?.feedback) ? overview.feedback : []);
+      const checkins = Array.isArray(overview?.checkins) ? overview.checkins.map((record) => ({ ...record, isCheckin: true })) : [];
+      const sliders = Array.isArray(overview?.feedback) ? overview.feedback : [];
+      renderFeedback([...checkins, ...sliders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      renderLikes(Array.isArray(overview?.reactions) ? overview.reactions : []);
+      renderReports();
       renderQuestions(Array.isArray(overview?.questions) ? overview.questions : []);
       renderReplies(Array.isArray(overview?.replies) ? overview.replies : []);
       dashboardStatus.textContent = message;
@@ -362,7 +565,10 @@ const academicYearKey = course.academicYear.replace(/[^0-9]+/g, '-').replace(/^-
 
     const loadOverview = async (message = '') => {
       dashboardStatus.textContent = 'Loading records…';
-      const result = await requestAdmin('admin_overview', { year_key: yearFilter.value || null });
+      const [result] = await Promise.all([
+        requestAdmin('admin_overview', { year_key: yearFilter.value || null }),
+        loadLiveSessions(),
+      ]);
       renderOverview(result.overview, message);
     };
 

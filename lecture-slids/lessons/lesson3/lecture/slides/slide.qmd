@@ -45,30 +45,46 @@ title-slide-attributes:
 <small>Guess first</small>
 The most powerful test car has 225 hp. What will the line predict? How close will it be?
 :::
+
+::: {.scan}
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Scan now</b>
+votes, questions, feedback
+:::
 :::
 
 ::: {.notes}
-约 2 分钟。上一讲的马力直线（w = −0.1626，b = 40.61），313 辆训练车。这辆车按规则选出：测试集里马力最大的那辆（1973 年，4951 磅），在看预测之前定下。请学生说出猜测，不评价，下一页揭示。
+约 2 分钟。先请大家扫右下角（或右屏）的二维码，页面整节课开着。上一讲的马力直线（w = −0.1626，b = 40.61），313 辆训练车。这辆车按规则选出：测试集里马力最大的那辆（1973 年，4951 磅），在看预测之前定下。请学生说出猜测，不评价，下一页揭示。
 :::
 
-## [Problem:]{.stg} Bad luck, or a broken model?
+## [Problem:]{.stg} Bad luck, or a pattern?
 
 ::: {.stage}
 ![](../figures/slides/S3.svg){.fig .fig-s3 fig-alt="Left: the line predicts 4.0 mpg for a car that measured 12.0. Right: mean residuals in five horsepower groups, positive at both ends and negative in the middle"}
 
-::: {.ask}
-<small>Look at the right panel</small>
-The errors follow a pattern. Which of the five steps is at fault?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+The line's errors follow a pattern. Which step is at fault?
+
+::: {.opts}
+<span><b>A</b>the loss (squared error)</span>
+<span><b>B</b>the solving (normal equation)</span>
+<span><b>C</b>the model (a straight line)</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 2.5 分钟。揭示：直线预测 4.0，实测 12.0，差 8 mpg，约为测试 RMSE 4.71 的 1.7 倍。一辆车错可能是运气，所以看右图：训练车按马力分五组，平均残差 +3.4、−0.7、−2.2、−1.6、+0.8，两头正、中间负，是规律不是噪声。停下来问：毛病在问题、模型、损失、求解、检验中的哪一步？答案在下一页开头。
+约 3.5 分钟。投票（右屏 Bad luck, or a pattern? → Open，30 秒，先不显示结果）；分歧大时让邻座讨论一分钟再 Vote again（本讲只在这一题这样做），再 Reveal；请选 A 或 B 的同学说理由。揭示：直线预测 4.0，实测 12.0，差 8 mpg，约为测试 RMSE 4.71 的 1.7 倍。一辆车错可能是运气，所以看右图：训练车按马力分五组，平均残差 +3.4、−0.7、−2.2、−1.6、+0.8，两头正、中间负，是规律不是噪声。停下来问：毛病在问题、模型、损失、求解、检验中的哪一步？答案在下一页开头。
 :::
 
 ## What you will be able to do
 
 ::: {.stage .tight}
+::: {.muted .center}
+Not the loss, not the solving: the model (a straight line) is too simple.
+:::
+
 ::: {.say .xl}
 When a model is not strong enough, you will **see where the problem is** and know how to fix it, without fooling yourself.
 :::
@@ -177,19 +193,24 @@ For each one: what new column would you add, and why?
 
 ::: {}
 ::: {.say}
-**Polynomial features** ($x, x^2, x^3, \dots$) are one special case of feature engineering: a general recipe when the problem gives no better idea.
+**Polynomial features** (powers of&nbsp;x) are one special case of feature engineering: a general recipe when the problem gives no better idea.
 :::
 
-::: {.ask}
-<small>Quick question</small>
-How many powers should we add?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+How many powers of hp should we add?
+
+::: {.opts}
+<span><b>A</b>just a few (2 or 3)</span>
+<span><b>B</b>as many as we can</span>
+:::
 :::
 :::
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。前三个例子都来自对问题的理解；没有这样的理解时，多项式是通用办法。强调：多项式是特征工程的一个特例，不等于特征工程。快问：加几次方？多数人会说“越多越好”，记下来，第 12 页检验它。
+约 2 分钟。投票（右屏 No idea which column? Use powers of x → Open，30 秒，再 Reveal），不评对错，请选 B 的同学说一句理由，结果留到第 12 页检验。前三个例子都来自对问题的理解；没有这样的理解时，多项式是通用办法。强调：多项式是特征工程的一个特例，不等于特征工程。投票：加几次方？多数人会选“越多越好”，记下比例，第 12 页检验它。
 :::
 
 ## [Model:]{.stg} Powers with several inputs
@@ -240,6 +261,10 @@ $$
 ## [Test:]{.stg} Is a more flexible model always better?
 
 ::: {.stage .top}
+::: {.muted .center}
+Your vote: a few powers, or as many as we can? Watch the test error.
+:::
+
 {{< include ../figures/note_en/I3.html >}}
 
 ::: {.muted .center}
@@ -323,14 +348,20 @@ $$
 At every $\lambda$ on the slider, all **7** coefficients stay non-zero. Look at the boxed penalty.
 :::
 
-::: {.ask}
-<small>Your turn</small>
-Could a different penalty make the coefficients we do not need exactly zero?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Which penalty could make some coefficients exactly zero?
+
+::: {.opts}
+<span><b>A</b>none: penalties only shrink</span>
+<span><b>B</b>sum of |w| instead of w²</span>
+<span><b>C</b>sum of w⁴ instead of w²</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。指刚才的系数柱：λ 再大，七根柱子都还在，只是变矮。请学生盯着方框里的惩罚项：它是平方。问：能不能换一种惩罚，让不需要的系数直接变成 0？期待有人说“绝对值”。
+约 2 分钟。投票（右屏 Ridge shrinks, but keeps every coefficient → Open，30 秒，先不显示结果，再 Reveal）；请选 C 的同学说理由（w⁴ 对小系数罚得更轻，更不会压到零），下一页给答案 B。指刚才的系数柱：λ 再大，七根柱子都还在，只是变矮。请学生盯着方框里的惩罚项：它是平方。问：能不能换一种惩罚，让不需要的系数直接变成 0？期待有人说“绝对值”。
 :::
 
 ## [Loss:]{.stg} Lasso: absolute values instead of squares
@@ -521,8 +552,8 @@ You will build this step by step in Lab 3.
 :::
 
 ::: {.qr}
-![](feedback-qr.svg){fig-alt="Feedback QR code for Lesson 3"}
-<b>30-second feedback</b>
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Feedback</b>
 <p>After class: Lab 3</p>
 :::
 :::

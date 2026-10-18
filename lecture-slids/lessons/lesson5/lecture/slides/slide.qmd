@@ -40,10 +40,16 @@ title-slide-attributes:
 
 ::: {.stage .top}
 {{< include ../figures/note_en/I1.html >}}
+
+::: {.scan}
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Scan now</b>
+votes, questions, feedback
+:::
 :::
 
 ::: {.notes}
-约 3.5 分钟，让学生自己试出“不行”。二维手造数据：蓝点类 1（120 个），灰圈类 0（240 个）。请一位学生指挥拖两个滑块：方向和位置，绿色一侧判为类 1，橙圈是判错的点。拖几次后问：最好能到多少？再点按钮：logistic regression 的直线 0.722，而永远猜类 0 就有 0.667。只比瞎猜好一点。
+约 3.5 分钟。先请大家扫右下角（或右屏）的二维码，页面整节课开着。让学生自己试出“不行”。二维手造数据：蓝点类 1（120 个），灰圈类 0（240 个）。请一位学生指挥拖两个滑块：方向和位置，绿色一侧判为类 1，橙圈是判错的点。拖几次后问：最好能到多少？再点按钮：logistic regression 的直线 0.722，而永远猜类 0 就有 0.667。只比瞎猜好一点。
 :::
 
 ## [Problem:]{.stg} The line ignores what each class looks like
@@ -143,14 +149,20 @@ Mean $\mu$ and SD $\sigma$ fix it: the **normal distribution**.
 ::: {.stage}
 ![](../figures/slides/F1.svg){.fig .fig-f1s fig-alt="The two bell curves; at radius 12.8 the benign curve is 0.211 high and the malignant curve 0.046"}
 
-::: {.ask}
-<small>Your turn</small>
-Imagine only 1 lump in 1000 were malignant. Would the heights still be the whole story?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Benign: 63% of lumps, curve 4.6× higher at 12.8. Benign is…
+
+::: {.opts}
+<span><b>A</b>exactly 4.6 times as likely</span>
+<span><b>B</b>more than 4.6 times</span>
+<span><b>C</b>less than 4.6 times</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。期待：不是，还要看每一类本来有多少。高度只说“如果它是恶性，长成这样有多常见”。
+约 2.5 分钟。投票（右屏 Compare: Benign is 4.6 times higher → Open，30 秒，先不显示结果）。分歧大时让邻座讨论一分钟再 Vote again（本讲只在这一题这样做），再 Reveal。请选 A 的说理由，再请选 B 的说：还要看每一类本来有多少，良性占 0.627，所以比 4.6 倍更多（下一页：0.132 对 0.017，约 7.8 倍）。高度只说“如果它是恶性，长成这样有多常见”。追问：如果 1000 个肿块里只有 1 个恶性，高度还是全部吗？
 :::
 
 ## [Compare:]{.stg} Multiply by the share: Bayes' rule
@@ -235,14 +247,20 @@ Diagonal: each feature's variance. Off-diagonal: the **covariance**, do $x_1$ an
 ::: {.stage}
 ![](../figures/slides/S6.svg){.fig .fig-s6 fig-alt="Left: both classes drawn with one shared ellipse shape at their two centres. Right: each class drawn with its own ellipse, small for class 1 and large for class 0"}
 
-::: {.ask}
-<small>Predict</small>
-What shape will the boundary be in each case?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Both classes share one spread. The boundary is…
+
+::: {.opts}
+<span><b>A</b>a straight line</span>
+<span><b>B</b>a curve around one class</span>
+<span><b>C</b>depends on the data</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1 分钟。中心用平均值没什么可选，散布有两个候选：左边共用一个 Σ（要估的数少），右边每类自己的 Σ（更灵活，要估的协方差多一倍）。让学生先预测边界形状，下一页切换验证。
+约 1.5 分钟。投票（右屏 Two candidates: How do we estimate each spread? → Open，30 秒，先不显示结果，再 Reveal）。请选 B 或 C 的同学说理由，下一页按按钮揭晓（答案 A）；再口头问右边各有一个 Σ 时呢。中心用平均值没什么可选，散布有两个候选：左边共用一个 Σ（要估的数少），右边每类自己的 Σ（更灵活，要估的协方差多一倍）。让学生先预测边界形状，下一页切换验证。
 :::
 
 ## [Two candidates:]{.stg} Shared spread or one per class?
@@ -306,16 +324,22 @@ Cross-validated: QDA **0.710**; logistic regression 0.901 (Lesson 4, C = 0.1). I
 ## [Shrink:]{.stg} Regularise: pull each spread towards which shape?
 
 ::: {.stage}
-![](../figures/slides/S5q.svg){.fig .fig-s5 fig-alt="Three sketches over two pixels, each showing a class's own spread as a flat dashed line, titled with the three candidates: towards the shared spread, keep only the diagonal, towards a circle"}
+![](../figures/slides/S5q.svg){.fig .fig-s5 .fig-s5q fig-alt="Three sketches over two pixels, each showing a class's own spread as a flat dashed line, titled with the three candidates: towards the shared spread, keep only the diagonal, towards a circle"}
 
-::: {.ask}
-<small>Your turn</small>
-Some pixels are 0 in every image of a class (for 121 pixels, in every image of every digit). Which candidate gives those flat directions thickness back, for every class?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Pixels that are 0 in every digit: pull each spread towards…
+
+::: {.opts}
+<span><b>A</b>the shared spread</span>
+<span><b>B</b>its diagonal only</span>
+<span><b>C</b>a circle</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1 分钟。先让学生判断。提示：MNIST 子集里有 121 个像素在所有训练图像里都是 0；一类里有 245 到 361 个像素恒为 0。
+约 2 分钟。投票（右屏 Shrink: Regularise → Open，30 秒，先不显示结果，再 Reveal）。请选 A 和 B 的各说一句理由，下一页揭晓（答案 C）。先让学生判断。提示：MNIST 子集里有 121 个像素在所有训练图像里都是 0；一类里有 245 到 361 个像素恒为 0。
 :::
 
 ## [Shrink:]{.stg} Only the circle has thickness everywhere
@@ -426,8 +450,8 @@ Three methods, three **assumptions** about what each class looks like.
 :::
 
 ::: {.qr}
-![](feedback-qr.svg){fig-alt="Feedback QR code for Lesson 5"}
-<b>30-second feedback</b>
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Feedback</b>
 <p>After class: Lab 5</p>
 :::
 :::

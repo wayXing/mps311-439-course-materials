@@ -45,10 +45,16 @@ title-slide-attributes:
 <small>Guess first</small>
 Benign or malignant? How sure are you?
 :::
+
+::: {.scan}
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Scan now</b>
+votes, questions, check-in
+:::
 :::
 
 ::: {.notes}
-约 1.5 分钟。数据：569 个乳腺肿块，细针穿刺后在显微镜图像上测细胞核，30 个测量值；病理结论 212 恶性、357 良性。只看一个：细胞核平均半径。分层划分 3:1（两部分恶性比例相同，约 37%），这张图是 426 个训练肿块。让学生猜，并说出有多确定。要点：12.8 处良性多，但也有恶性，没有一刀切的答案。不揭示病理结论，留到结尾。
+约 1.5 分钟。先请大家扫右下角（或右屏）的二维码，页面整节课开着，后面投票会自动出现在手机上。数据：569 个乳腺肿块，细针穿刺后在显微镜图像上测细胞核，30 个测量值；病理结论 212 恶性、357 良性。只看一个：细胞核平均半径。分层划分 3:1（两部分恶性比例相同，约 37%），这张图是 426 个训练肿块。让学生猜，并说出有多确定。要点：12.8 处良性多，但也有恶性，没有一刀切的答案。不揭示病理结论，留到结尾。
 :::
 
 ## [Problem:]{.stg} The answer is a class, not a number
@@ -186,15 +192,20 @@ The edge is a line; with $d$ features, a flat plane: the **decision boundary**.
 ::: {.two .side}
 ![](../figures/slides/S4.svg){.fig fig-alt="Squared error (1 − p) squared against p for a malignant lump; at p = 0.1 it is 0.81, at p = 0.01 it is 0.98, never above 1"}
 
-::: {.ask}
-<small>Your turn</small>
-A confident mistake ($p=0.01$) costs about the same as $p=0.1$. What should the curve do?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Malignant lump, $p = 0.01$. Its penalty should be…
+
+::: {.opts}
+<span><b>A</b>about the same as at p&nbsp;=&nbsp;0.1</span>
+<span><b>B</b>much bigger</span>
+:::
 :::
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。实际是恶性，模型给 p。平方误差最多罚 1：p = 0.01（很自信地错了）0.98，p = 0.1 0.81，差不多。问：曲线应该怎样？期待：p 越接近 0 罚得越重，趋于无穷；有人会想到对数。
+约 2 分钟。实际是恶性，模型给 p。平方误差最多罚 1：p = 0.01（很自信地错了）0.98，p = 0.1 0.81，差不多。投票（右屏 Loss → Open，30 秒，再 Reveal）。现在的曲线给的是 A：0.98 和 0.81 差不多。选 B 的请说一句理由：很自信地错了，应该罚得更重，p 越接近 0 罚得越重，趋于无穷；有人会想到对数。
 :::
 
 ## [Loss:]{.stg} Cross-entropy: a confident mistake costs a lot
@@ -267,18 +278,20 @@ Steep: big step. Near the bottom: small steps. $\eta$ = **learning rate**.
 Radius only, threshold 0.5, cross-validated: **0.864**
 :::
 
-::: {.say .center}
-<small>**Test** here means checking the model with cross-validation on the training set. The test set itself is read once, at the end.</small>
-:::
+::: {.ask .vote}
+<small>Vote on your phone</small>
+A rule that always guesses “benign”. Its accuracy?
 
-::: {.ask}
-<small>Your turn</small>
-Good compared with what?
+::: {.opts}
+<span><b>A</b>0.50</span>
+<span><b>B</b>0.63</span>
+<span><b>C</b>0.86</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1 分钟。测试集留到最后，所以检验用 Lesson 3 的交叉验证：5 折，每个样本得到“它没参与训练时”的预测（cross_val_predict，分份前先打乱）。期待有人说“和瞎猜比”。
+约 2 分钟。测试集留到最后，所以检验用 Lesson 3 的交叉验证：5 折，每个样本得到“它没参与训练时”的预测（cross_val_predict，分份前先打乱）。口头一句：这里的“检验”指在训练集上做交叉验证，测试集留到最后只读一次。问：0.864 好吗？和什么比？引到“什么都不看、永远猜良性”这条规则。投票（右屏 Test → Open，30 秒，先不显示结果）。分歧大时让邻座讨论一分钟再 Vote again（本讲只在这一题这样做），再 Reveal。选 A 的人以为瞎猜就是一半一半，可两类不是一半一半：426 个训练肿块里 267 个良性，267/426 = 0.627，答案是 B。下一页给出这条基线。
 :::
 
 ## [Test:]{.stg} Always guess benign: 0.627
@@ -334,7 +347,7 @@ Missed cancers: **36 → 7**. The 30 measurements are standardised first: their 
 :::
 
 ::: {.notes}
-约 2 分钟。30 个测量值尺度相差大（半径 7 到 28，面积 143 到 2501），直接拟合会出 ConvergenceWarning，先按 Lesson 3 标准化。口头一句：sklearn 用 C 控制默认惩罚，C 越小惩罚越强，大致相当于 λ 的倒数，本讲一直用默认 C = 1。准确率 0.979，召回率 0.956，精确率 0.987。
+约 2 分钟。30 个测量值尺度相差大（半径 7 到 28，面积 143 到 2501），直接拟合会出 ConvergenceWarning，先按 Lesson 3 标准化。口头一句：sklearn 用 C 控制默认惩罚，C 越小惩罚越强，大致相当于 λ 的倒数，本讲一直用默认 C = 1。准确率 0.979，召回率 0.956，精确率 0.987。讲完这一页（课程约三分之二处），请大家花一分钟填手机页面底部的 check-in，再进入阈值部分。加了三次投票和 check-in 后全讲约 49 分钟，超出 45 分钟约 4 分钟，需要教师决定删哪里。
 :::
 
 ## [Decide:]{.stg} Where would you put the threshold? <small>(30 features)</small>
@@ -350,20 +363,26 @@ Missed cancers: **36 → 7**. The 30 measurements are standardised first: their 
 ## [Decide:]{.stg} Three thresholds, side by side
 
 ::: {.stage .bigtab}
-| threshold | missed cancers | false alarms | recall | precision |
-|---:|---:|---:|---:|---:|
-| 0.5 | 7 | 2 | 0.956 | 0.987 |
-| 0.3 | 6 | 9 | 0.962 | 0.944 |
-| 0.1 | **3** | 27 | **0.981** | 0.852 |
+| threshold | missed cancers | false alarms |
+|---:|---:|---:|
+| 0.5 | 7 | 2 |
+| 0.3 | 6 | 9 |
+| 0.1 | 3 | 27 |
 
-::: {.ask}
-<small>Your turn</small>
-A hospital says a missed cancer is far worse than a false alarm. Which threshold, and what does it cost?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+1 missed cancer = 10 false alarms. Which threshold?
+
+::: {.opts}
+<span><b>A</b>0.5</span>
+<span><b>B</b>0.3</span>
+<span><b>C</b>0.1</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。426 个训练肿块，概率来自 5 折交叉验证。阈值降低：漏诊减少，误报增加。医院把漏诊看得更重：选 0.1，漏诊从 7 降到 3，代价是误报从 2 升到 27。阈值是在训练集内选的，测试集还没碰。
+约 2.5 分钟。投票（右屏 Decide → Open，30 秒，再 Reveal）。代价按“漏诊 × 10 + 误报”算：0.5 是 72，0.3 是 69，0.1 是 57，选 0.1。揭晓后追问：如果一次漏诊只等于 5 次误报呢？（37、39、42，反而选 0.5。）阈值取决于两种错误的代价之比，没有离开场景的唯一答案。426 个训练肿块，概率来自 5 折交叉验证。阈值降低：漏诊减少，误报增加。选 0.1：漏诊从 7 降到 3，代价是误报从 2 升到 27。阈值是在训练集内选的，测试集还没碰。
 :::
 
 ## [Decide:]{.stg} The cost of each mistake decides
@@ -497,8 +516,8 @@ print(confusion_matrix(y_test, pred_test, labels=[1, 0]))
 :::
 
 ::: {.qr}
-![](feedback-qr.svg){fig-alt="Feedback QR code for Lesson 4"}
-<b>30-second feedback</b>
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Check-in</b>
 <p>After class: Lab 4</p>
 :::
 :::

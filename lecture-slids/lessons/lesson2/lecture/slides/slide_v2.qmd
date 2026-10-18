@@ -41,14 +41,26 @@ title-slide-attributes:
 ::: {.stage}
 ![](../figures/slides_v2/S2.svg){.fig .fig-s2 fig-alt="Ten cars as dots: horsepower against mpg, and a dashed vertical line for a new car with 140 hp"}
 
-::: {.ask}
-<small>Look at the ten cars</small>
-A new car has 140 hp. What mpg would you guess? How did you decide?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+A new car has 140 hp. How would you guess its mpg?
+
+::: {.opts}
+<span><b>A</b>average all ten cars</span>
+<span><b>B</b>average the cars nearest 140&nbsp;hp</span>
+<span><b>C</b>draw a line through the dots</span>
+:::
+:::
+
+::: {.scan}
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Scan now</b>
+votes, questions, feedback
 :::
 :::
 
 ::: {.notes}
-约 3 分钟。先不讲任何术语。请学生看这十辆车的点，在心里或纸上写一个数，请两位同学说出猜测和理由，不评价。多半会说“画一条线”或“看附近的点”，记下这句话，后面的拖线和打分都回到它。这辆新车是 79 辆测试车之一（规则：在看结果之前定下，是用全部训练车拟合的马力直线下误差最接近测试 RMSE 的那辆），实测 13.0 mpg，先不揭晓，结尾回来。mpg 是美制加仑，英制数值约高 20%。
+先请大家扫右下角（或右屏）的二维码，页面整节课开着。在右屏打开 “A new car arrives” 这一行的投票，30 秒，然后 Reveal（没有对错，结果可边投边看）；选 A、B、C 的各请一位说理由。约 3.5 分钟。先不讲任何术语。请学生看这十辆车的点，先在心里写一个数再投票，听理由时不评价。三个选项分别是后面的基线、近邻和今天的直线，记下学生的说法，后面的拖线和打分都回到它。这辆新车是 79 辆测试车之一（规则：在看结果之前定下，是用全部训练车拟合的马力直线下误差最接近测试 RMSE 的那辆），实测 13.0 mpg，先不揭晓，结尾回来。mpg 是美制加仑，英制数值约高 20%。
 :::
 
 ## What you will be able to do
@@ -331,12 +343,23 @@ $$
 ![](../figures/slides_v2/F13.svg){.fig .fig-f13 fig-alt="Twenty fitted lines from twenty different sets of ten cars, our line, and the line from all 313 training cars"}
 
 ::: {.say .center}
-Twenty sets of ten cars, twenty different best lines. "Best" means best **on the cars used to compute it**.
+Twenty sets of ten cars, twenty different best lines.
+:::
+
+::: {.ask .vote}
+<small>Vote on your phone</small>
+A line fitted to ten cars. On other cars, its error is usually … than on its own ten cars.
+
+::: {.opts}
+<span><b>A</b>smaller</span>
+<span><b>B</b>about the same</span>
+<span><b>C</b>larger</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。第 5 步 Test：回答“新车上能信吗”。灰点是另外 313 辆车（下一页才叫训练车，这页先不用这个词），每条淡绿线是换一组 10 辆车得到的最佳直线（随机抽样、没有挑选），粗绿线是我们这十辆，虚线是用全部 313 辆车的结果。斜率最陡和最平的差一倍以上。收一句：我们关心的是没见过的车，而现在算出的“最好”只对用过的车成立。
+在右屏打开 “Test: Is the best line best for other cars?” 这一行的投票，30 秒，然后 Reveal；请选 A 或 B 的同学说理由。分歧大时让邻座讨论一分钟再 Vote again（本讲只在这一题这样做）。答案在下一页右图揭晓：揭晓时指出红星（我们这十辆车，4.61 对 4.59）是例外，“usually”指约 83% 的直线在测试车上更差。约 2.5 分钟。第 5 步 Test：回答“新车上能信吗”。灰点是另外 313 辆车（下一页才叫训练车，这页先不用这个词），每条淡绿线是换一组 10 辆车得到的最佳直线（随机抽样、没有挑选），粗绿线是我们这十辆，虚线是用全部 313 辆车的结果。斜率最陡和最平的差一倍以上。收一句：“最好”只是在用来算它的车上最好；我们关心的是没见过的车，而现在算出的“最好”只对用过的车成立。
 :::
 
 ## [Test:]{.stg} Keep some cars out of the fitting
@@ -383,13 +406,20 @@ Baseline: always guess the training mean, 23.60 mpg. Test RMSE on the 79 test ca
 <div><div class="lab">Model 4<small>all six features</small></div><div class="bar" style="width:45.1%"></div><div class="v">3.24</div></div>
 :::
 
-::: {.say}
-Model 2 beats Model 1. What does it say about horsepower?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Add weight to Model 1. Its hp coefficient, −0.163, becomes…
+
+::: {.opts}
+<span><b>A</b>more negative</span>
+<span><b>B</b>about the same</span>
+<span><b>C</b>closer to zero</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 2.5 分钟。基线在这里第一次引入：最朴素的猜法，永远猜训练均值。模型 1 就是我们的直线（用全部 313 辆训练车拟合，w = −0.163，b = 40.61）。模型 2 与 3 没有实质差别。口头提醒：读这些数字，但不要拿测试车反复挑特征，每挑一次测试车就漏进选择里一点；这一点在局限页留成未解问题。收一句：模型 2 比模型 1 好，它对马力说了什么？
+在右屏打开 “Test: Do the models beat a simple guess?” 这一行的投票，30 秒，然后 Reveal；请选 A 的同学说理由，答案在下一页勾选重量时揭晓。约 3.5 分钟。基线在这里第一次引入：最朴素的猜法，永远猜训练均值。模型 1 就是我们的直线（用全部 313 辆训练车拟合，w = −0.163，b = 40.61）。模型 2 与 3 没有实质差别。口头提醒：读这些数字，但不要拿测试车反复挑特征，每挑一次测试车就漏进选择里一点；这一点在局限页留成未解问题。收一句：模型 2 比模型 1 好，它对马力说了什么？翻页看答案。
 :::
 
 ## How to read a coefficient
@@ -407,7 +437,7 @@ Weight and horsepower are strongly correlated (0.86), so they **share the credit
 :::
 
 ::: {.notes}
-约 3.5 分钟。讲者先问：模型 1 的马力系数是 −0.163，加入重量后会变大、变小还是不变？举手数一下，不设点击揭示。然后依次勾选重量、气缸数与排量、加速度与年份；hp 系数 −0.163 → −0.052 → −0.044 → −0.002。年份的原因：较晚的车马力偏低又更省油。时间紧时这页改为口头讲结论，省掉互动。
+约 3 分钟。先回到上一页的投票：勾选重量，看马力系数，对照投票结果。然后依次勾选重量、气缸数与排量、加速度与年份；hp 系数 −0.163 → −0.052 → −0.044 → −0.002。年份的原因：较晚的车马力偏低又更省油。时间紧时这页改为口头讲结论，省掉互动。
 :::
 
 ## The same five steps in code
@@ -519,8 +549,8 @@ $$
 :::
 
 ::: {.qr}
-![](feedback-qr.svg){fig-alt="Feedback QR code for Lesson 2"}
-<b>30-second feedback</b>
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Feedback</b>
 <p>After class: Lab 2</p>
 :::
 :::

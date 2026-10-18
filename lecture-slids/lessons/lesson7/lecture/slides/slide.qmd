@@ -45,10 +45,16 @@ title-slide-attributes:
 <small>Your turn</small>
 How would you draw 5625 of these on one page? And QDA on all 784 numbers scores only **0.725** (validation, Lessons 5–6): why?
 :::
+
+::: {.scan}
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Scan now</b>
+votes, questions, feedback
+:::
 :::
 
 ::: {.notes}
-约 1.5 分钟。MNIST 子集一张图 28×28 = 784 个数。画不出来：两个特征才能画在平面上。QDA：Lesson 6 的拟合／验证划分上，不收缩只有 0.725，因为 784×784 的散布估不出来（每类约 560 张图）。今天不预测任何东西，只看像素，不看标签。
+约 1.5 分钟。先请大家扫右下角（或右屏）的二维码，页面整节课开着。MNIST 子集一张图 28×28 = 784 个数。画不出来：两个特征才能画在平面上。QDA：Lesson 6 的拟合／验证划分上，不收缩只有 0.725，因为 784×784 的散布估不出来（每类约 560 张图）。今天不预测任何东西，只看像素，不看标签。
 :::
 
 ## [Problem:]{.stg} What we want
@@ -78,7 +84,7 @@ How could we measure "information" in a column of numbers? Hint: a pixel that is
 ::: {.flow .four}
 <div><span>1</span>Pick pixels?</div>
 <div><span>2</span>Combine pixels</div>
-<div><span>3</span>Choose k</div>
+<div><span>3</span>Choose how many</div>
 <div><span>4</span>The rule, and a picture</div>
 :::
 :::
@@ -119,16 +125,22 @@ $$
 $x_1, x_2$: means subtracted. $\mathbf u=(u_1,u_2)$: a direction.
 :::
 
-::: {.ask}
-<small>Your turn</small>
-Keeping $x_1$ alone is one direction. Which would you choose instead, and by what measure?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Widest spread along the line, or smallest distance to it: same line?
+
+::: {.opts}
+<span><b>A</b>the same line</span>
+<span><b>B</b>different lines</span>
+<span><b>C</b>it depends</span>
+:::
 :::
 :::
 :::
 :::
 
 ::: {.notes}
-约 2 分钟。先在两个特征上想清楚。像素的组合 = 每个像素一个权重，乘起来加。二维时就是把点投影到一条线上，z 是点在线上的位置。只留 x₁（候选一的二维版）= 投影到横轴，保住 68%。两个合理的标准：投影后散得开；丢掉的少（点到线的距离平方，还原误差）。
+约 3 分钟。先问：只留 x₁ 之外，你会选哪个方向、用什么标准？等学生说出两个标准（散得开、丢得少）再投票（右屏 Combine pixels: A weighted sum is a projection → Open，30 秒，先不显示结果）。分歧大时让邻座讨论一分钟再 Vote again（本讲只在这一题这样做），再 Reveal；请选 B 的人说理由。答案 A，下一页转线看到两者都在约 31°，再下一页用勾股定理说明为什么。先在两个特征上想清楚。像素的组合 = 每个像素一个权重，乘起来加。二维时就是把点投影到一条线上，z 是点在线上的位置。只留 x₁（候选一的二维版）= 投影到横轴，保住 68%。两个合理的标准：投影后散得开；丢掉的少（点到线的距离平方，还原误差）。
 :::
 
 ## [Combine pixels:]{.stg} Turn the line: spread against error
@@ -164,14 +176,20 @@ Pythagoras, point by point: spread + error is fixed. So the widest-spread direct
 The first direction keeps 89%. We want a second number.
 :::
 
-::: {.ask}
-<small>Your turn</small>
-What should the second number do that the first does not? How could we check it?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Which line should give the second number?
+
+::: {.opts}
+<span><b>A</b>the next-widest line</span>
+<span><b>B</b>the x2 axis</span>
+<span><b>C</b>the line uncorrelated with the first</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。期待：不要重复第一个；检查办法：两个数的相关系数，接近 ±1 就是在重复。下一页转第二条线。
+约 2 分钟。投票（右屏 Combine pixels: A second number → Open，30 秒，再 Reveal）；请选 A 的人说理由，再问选 C 的人：怎么检查“不重复”？答案在下一页揭晓（C）。期待：不要重复第一个；检查办法：两个数的相关系数，接近 ±1 就是在重复。下一页转第二条线。
 :::
 
 ## [Combine pixels:]{.stg} Turn a second line: does it repeat the first?
@@ -198,7 +216,7 @@ Each **principal component** is 784 pixel weights. The share it keeps: the **exp
 约 2.5 分钟。点名 principal components、PCA。每个方向与前面的都垂直，在剩下的方向里找散得最开的；784 个像素最多 784 个。第 3 节“保住 89%”就是解释方差比例（那是两个特征的点云；这里第一个主成分只有 9.6%）；前 k 个加起来是累计比例。PC1 像一个红圈、中间蓝：得分大像 0，得分小像 1。还原：平均图 + 每个主成分乘以这张图的得分，只加前 k 个。只用 5625 张拟合图学。
 :::
 
-## [Choose k:]{.stg} How many until you can read the digit?
+## [Choose how many:]{.stg} When can you read the digit?
 
 ::: {.stage .top}
 {{< include ../figures/note_en/I2.html >}}
@@ -208,7 +226,7 @@ Each **principal component** is 784 pixel weights. The share it keeps: the **exp
 约 4 分钟。拖 k：1、2、5、10、20、50。请学生说从几个开始认得出是 6。右边的误差图：红 = 还原得太白，蓝 = 还原得太黑；k 越大，误差图越淡，这张图的重建误差（784 个差的平方和）从 k = 10 的 25.2 降到 k = 50 的 11.0。换几张图试。对照：10 个像素保住 3.7%，10 个主成分保住 48.9%。
 :::
 
-## [Choose k:]{.stg} The cumulative share gives a starting point
+## [Choose how many:]{.stg} The cumulative share gives a starting point
 
 ::: {.stage}
 ::: {.two .side}
@@ -224,7 +242,7 @@ Each **principal component** is 784 pixel weights. The share it keeps: the **exp
 约 1.5 分钟。95% 要 150 个。留 86 个还是 150 个，累计比例回答不了；要看降维之后拿来做什么。
 :::
 
-## [Choose k:]{.stg} Let the classifier decide, on the validation set
+## [Choose how many:]{.stg} Let the classifier decide, on the validation set
 
 ::: {.stage}
 ::: {.two .side}
@@ -252,14 +270,20 @@ QDA scores 0.725 with all 784 numbers but **0.885** with only 10 components, and
 `pca.fit(...)` learns the directions **from data**.
 :::
 
-::: {.ask}
-<small>Your turn</small>
-What goes wrong if we fit PCA on the fitting images **and** the validation images together?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+`pca.fit` should learn the directions from…
+
+::: {.opts}
+<span><b>A</b>the fitting images only</span>
+<span><b>B</b>fitting + validation images</span>
+<span><b>C</b>all images, test included</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。期待：方向“见过”验证集，验证准确率不再是没见过的数据上的准确率。
+约 2 分钟。投票（右屏 The rule: Learn the directions from which data? → Open，30 秒，先不显示结果，再 Reveal）；请选 B 或 C 的人说理由，再问：如果在拟合加验证上 fit，会出什么问题？答案 A，下一页给出代码。期待：方向“见过”验证集，验证准确率不再是没见过的数据上的准确率。
 :::
 
 ## [The rule:]{.stg} Fit on the fitting part, only transform the rest
@@ -364,13 +388,13 @@ Fewer numbers, little lost: combine, don't pick.
 <div><span class="n">pick?</span><div><b>Pixels repeat each other</b><p>10 pixels keep 3.7%</p></div></div>
 <div><span class="n">combine</span><div><b>Project onto a direction</b><p>widest spread = smallest error</p></div></div>
 <div><span class="n">PCA</span><div><b>Principal components</b><p>perpendicular, one after another</p></div></div>
-<div><span class="n">choose k</span><div><b>Cumulative share, then validation</b><p>the chosen k must not be at either end of the range</p></div></div>
+<div><span class="n">how many</span><div><b>Cumulative share, then validation</b><p>the chosen k must not be at either end of the range</p></div></div>
 <div><span class="n">rule</span><div><b>Fit on the fitting part</b><p>only transform validation and test</p></div></div>
 :::
 
 ::: {.qr}
-![](feedback-qr.svg){fig-alt="Feedback QR code for Lesson 7"}
-<b>30-second feedback</b>
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Feedback</b>
 <p>After class: Lab 7</p>
 :::
 :::

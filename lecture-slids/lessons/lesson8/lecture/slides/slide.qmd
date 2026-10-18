@@ -47,10 +47,16 @@ title-slide-attributes:
 How many groups do you see? If you circled them with a pen, what would you be using?
 :::
 :::
+
+::: {.scan}
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Scan now</b>
+votes, questions, feedback
+:::
 :::
 
 ::: {.notes}
-约 1.5 分钟。期待：三群；凭“挤在一起、和别的点之间隔着空白”。Lesson 7 第一次不看标签，这一讲继续不看标签，换一个问题：有没有自然的几群。
+约 1.5 分钟。先请大家扫右下角（或右屏）的二维码，页面整节课开着。期待：三群；凭“挤在一起、和别的点之间隔着空白”。Lesson 7 第一次不看标签，这一讲继续不看标签，换一个问题：有没有自然的几群。
 :::
 
 ## [Problem:]{.stg} What we want
@@ -95,15 +101,21 @@ Before any method: what makes a set of points "one group"?
 ::: {.two .side}
 ![](../figures/slides/S2.svg){.fig .fig-s2 fig-alt="The 180 points split into three coloured groups, each point joined by a thin line to the cross at its group's centre"}
 
-::: {.ask}
-<small>Your turn</small>
-We want one number: small when points hug their centres, large when they do not. Which would you use?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+One number: small when points hug their centres. Use the…
+
+::: {.opts}
+<span><b>A</b>farthest point from its centre</span>
+<span><b>B</b>sum of distances</span>
+<span><b>C</b>sum of squared distances</span>
+:::
 :::
 :::
 :::
 
 ::: {.notes}
-约 2 分钟。先用第一个说法：每群一个中心，点属于最近的中心。候选：每群最远的点；距离之和；距离平方之和。最远的点只看一个点，一个离群点就能拉大；后两个看所有点。选平方和：和 Lesson 2 的平方误差一样，到平均位置的平方和最小，中心就有现成的算法。
+约 2.5 分钟。投票（右屏“How do we score a grouping?”一行 → Open，30 秒，再 Reveal）。揭晓后请选 A 的同学说理由，再问选 B 的人平方和多给了什么。先用第一个说法：每群一个中心，点属于最近的中心。候选：每群最远的点；距离之和；距离平方之和。最远的点只看一个点，一个离群点就能拉大；后两个看所有点。选平方和：和 Lesson 2 的平方误差一样，到平均位置的平方和最小，中心就有现成的算法。
 :::
 
 ## [One centre per group:]{.stg} Score a grouping
@@ -116,7 +128,7 @@ $$
 :::
 
 ::: {.say .center}
-Each point belongs to its nearest centre. Smaller is better.
+Each point belongs to its nearest centre. Smaller is better.<br><small>Why squared: the best centre is then simply the mean of its points.</small>
 :::
 :::
 
@@ -231,14 +243,19 @@ Merging from below: **hierarchical clustering**. Its record is a **dendrogram**:
 ::: {.stage}
 ![](../figures/slides/S3.svg){.fig .fig-s3 fig-alt="Two groups of points shown twice: on the left a green line joins their two nearest points; on the right the two group centres and the green centre of the merged group"}
 
-::: {.ask}
-<small>Predict</small>
-**Nearest points (single)** or **Ward**: which one will follow the rings?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Two rings: which way of measuring "near" will follow them?
+
+::: {.opts}
+<span><b>A</b>nearest two points (single)</span>
+<span><b>B</b>Ward (via group centres)</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。Ward 和 K-means 同一个标准，追求紧凑的一团。让学生先预测，下一页验证。
+约 2.5 分钟。投票（右屏“How near are two groups?”一行 → Open，30 秒，先不显示结果）。分歧大时让邻座讨论一分钟再 Vote again（本讲只在这一题这样做），再 Reveal；请选 B 的同学说为什么。Ward 和 K-means 同一个标准，追求紧凑的一团。让学生先预测，下一页验证。
 :::
 
 ## [Merge from below:]{.stg} Nearest points follow the shape
@@ -302,19 +319,24 @@ Nearest points (single) won on the rings; on MNIST it puts **5616** of 5625 imag
 | points | pairs | memory |
 |---:|---:|---:|
 | 5625 (today) | 15.8 million | 0.13 GB |
-| 5000 | 12.5 million | 0.1 GB |
 | 50,000 (Assignment 2) | 1.25 billion | 10 GB |
 
 <small>Each distance takes 8 bytes: 15.8 million × 8 bytes ≈ 0.13 GB.</small>
 
-::: {.ask}
-<small>Your turn</small>
-Hierarchical clustering needs the distance of every pair. What would you do with 50,000 images?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+50,000 images: every pair needs 10 GB. You would…
+
+::: {.opts}
+<span><b>A</b>find a bigger machine</span>
+<span><b>B</b>cluster a random 5000</span>
+<span><b>C</b>use K-means on all</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 2 分钟。n(n−1)/2 对，每个 8 字节；点数翻 10 倍，内存翻 100 倍。期待：随机抽一部分（subsample）。MNIST 子集只用 500 张做 Ward，多数投票 59.2%，和全部 5625 张的 59.7% 差不多；作业 2 提示 5000 张。K-means 只算点到 k 个中心的距离，可以用全部数据。
+约 2.5 分钟。投票（右屏“Every pair of points”一行 → Open，30 秒，再 Reveal）。这是真实的取舍，B、C 都说得通；请选 A 和选 C 的各说一句。揭晓后口头给证据：Ward 只用随机 500 张，多数投票 59.2%，全部 5625 张是 59.7%，几乎一样；K-means 只算点到 k 个中心的距离，可以用全部数据。n(n−1)/2 对，每个 8 字节；点数翻 10 倍，内存翻 100 倍。随机抽一部分叫 subsample；作业 2 提示 5000 张。
 :::
 
 ## Today in code
@@ -372,8 +394,8 @@ What counts as "one group" decides which method works.
 :::
 
 ::: {.qr}
-![](feedback-qr.svg){fig-alt="Feedback QR code for Lesson 8"}
-<b>30-second feedback</b>
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Feedback</b>
 <p>After class: Lab 8</p>
 :::
 :::

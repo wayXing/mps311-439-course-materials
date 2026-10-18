@@ -1,0 +1,669 @@
+---
+// The page behind the course's one QR code. It shows the class the lecturer has started:
+// the current vote or one-sentence question, the classroom question board, and the check-in.
+import SiteLayout from '../../layouts/SiteLayout.astro';
+import { course } from '../../data/course';
+import { academicYearKey, labSections, liveLessons, publishableKey, supabaseUrl } from '../../data/live';
+import '../../styles/live.css';
+
+const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
+  label: lesson.label,
+  title: lesson.title,
+  sections: lesson.sections,
+}]));
+---
+
+<SiteLayout title={`In class · ${course.code}`} description={`Votes, questions and a check-in during ${course.code} classes.`}>
+  <section
+    class="live-page shell"
+    data-board={`${academicYearKey}-classroom`}
+    data-supabase={supabaseUrl}
+    data-key={publishableKey}
+    data-lessons={JSON.stringify(lessons)}
+    data-lab-sections={JSON.stringify(labSections)}
+    data-code={course.code}
+  >
+    <header class="live-heading">
+      <span class="eyebrow" id="live-eyebrow">In class</span>
+      <h1 id="live-title">{course.code}</h1>
+      <p id="live-intro">Keep this page open during the class. Everything here is anonymous.</p>
+    </header>
+
+    <article class="live-card" id="offline-card" hidden>
+      <h2 class="live-card-title" id="last-title">Last class</h2>
+      <div id="last-body"><p class="live-muted">No class is live right now. During a lecture or lab, votes and the attendance code appear here.</p></div>
+    </article>
+
+    <div id="live-content" hidden>
+      <article class="live-card live-code" id="code-card" hidden>
+        <h2 class="live-card-title">Attendance code</h2>
+        <p class="live-code-value" id="code-value"></p>
+      </article>
+
+      <article class="live-card" id="poll-card" aria-live="polite">
+        <h2 class="live-card-title">Answer</h2>
+        <div id="poll-body"></div>
+      </article>
+
+    </div>
+
+    <article class="live-card" id="checkin-card" hidden>
+      <button type="button" class="live-button live-open" id="checkin-open" aria-expanded="false">Give feedback</button>
+      <form id="checkin-form" class="live-form" hidden>
+        <p class="live-muted"><b>Anonymous:</b> the lecturer cannot see who you are. Send it any time, as often as you like; each one is kept with its time.</p>
+        <p class="live-muted" id="feedback-for"></p>
+        <fieldset class="live-choice" id="module-field">
+          <legend>Your module (asked once)</legend>
+          <label><input type="radio" name="module" value="MPS311" />MPS311</label>
+          <label><input type="radio" name="module" value="MPS439" />MPS439</label>
+        </fieldset>
+        <fieldset class="live-choice" id="background-field">
+          <legend>Before this course, how much had you programmed?</legend>
+          <label><input type="radio" name="background" value="new" />Hardly at all</label>
+          <label><input type="radio" name="background" value="some" />A little</label>
+          <label><input type="radio" name="background" value="confident" />Comfortable</label>
+        </fieldset>
+        <fieldset class="live-choice">
+          <legend>Difficulty</legend>
+          <label><input type="radio" name="difficulty" value="1" required />Much too easy</label>
+          <label><input type="radio" name="difficulty" value="2" />A bit easy</label>
+          <label><input type="radio" name="difficulty" value="3" />About right</label>
+          <label><input type="radio" name="difficulty" value="4" />A bit hard</label>
+          <label><input type="radio" name="difficulty" value="5" />Much too hard</label>
+        </fieldset>
+        <fieldset class="live-choice">
+          <legend>Pace</legend>
+          <label><input type="radio" name="pace" value="1" required />Much too slow</label>
+          <label><input type="radio" name="pace" value="2" />A bit slow</label>
+          <label><input type="radio" name="pace" value="3" />About right</label>
+          <label><input type="radio" name="pace" value="4" />A bit fast</label>
+          <label><input type="radio" name="pace" value="5" />Much too fast</label>
+        </fieldset>
+        <fieldset class="live-choice" id="lost-field">
+          <legend>Where did you first get lost?</legend>
+        </fieldset>
+        <details class="live-more">
+          <summary>Add a comment (optional)</summary>
+          <textarea name="comment" rows="2" maxlength="2000"></textarea>
+        </details>
+        <input name="website" class="live-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <button type="submit" class="live-button">Send feedback</button>
+        <p class="live-status" id="checkin-status" aria-live="polite"></p>
+      </form>
+    </article>
+
+    <div class="live-react" id="like-button" hidden>
+      <button type="button" class="live-lost" id="lost-button"><span aria-hidden="true">🤔</span> Lost</button>
+      <button type="button" class="live-like" id="like-tap"><span aria-hidden="true">👍</span> Got it</button>
+    </div>
+    <p class="live-toast" id="react-toast" hidden></p>
+
+    <article class="live-card" id="board-card">
+      <h2 class="live-card-title">Questions</h2>
+      <form id="question-form" class="live-form">
+        <label for="question-text" class="visually-hidden">Your question</label>
+        <textarea id="question-text" name="question" rows="2" maxlength="1000" required placeholder="Ask anything about the course. Anonymous."></textarea>
+        <input name="website" class="live-honeypot" tabindex="-1" autocomplete="off" aria-hidden="true" />
+        <button type="submit" class="live-button">Post question</button>
+        <p class="live-status" id="question-status" aria-live="polite"></p>
+      </form>
+      <ol class="live-board" id="question-list"></ol>
+      <button type="button" class="live-link-button" id="question-more" hidden>Show older questions</button>
+    </article>
+  </section>
+
+  <script>
+    const page = document.querySelector('.live-page');
+    const boardKey = page.dataset.board;
+    const supabaseUrl = page.dataset.supabase;
+    const publishableKey = page.dataset.key;
+    const lessons = JSON.parse(page.dataset.lessons);
+    const labSections = JSON.parse(page.dataset.labSections);
+    const submissionUrl = `${supabaseUrl}/functions/v1/course-feedback`;
+    const deviceStorageKey = 'mps-course-feedback-device-v1';
+    const backgroundStorageKey = 'mps-course-background-v1';
+
+    const store = {
+      get(key) { try { return localStorage.getItem(key); } catch { return null; } },
+      set(key, value) { try { localStorage.setItem(key, value); } catch {} },
+    };
+    const deviceId = (() => {
+      const current = store.get(deviceStorageKey);
+      if (current && /^[a-zA-Z0-9-]{20,100}$/.test(current)) return current;
+      const created = crypto.randomUUID();
+      store.set(deviceStorageKey, created);
+      return created;
+    })();
+
+    const send = async (body) => {
+      const response = await fetch(submissionUrl, {
+        method: 'POST',
+        headers: { apikey: publishableKey, 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ...body, device_id: deviceId }),
+      });
+      let result = {};
+      try { result = await response.json(); } catch {}
+      if (!response.ok) throw new Error(typeof result.error === 'string' ? result.error : 'Could not send. Please try again.');
+      return result;
+    };
+
+    let session = null;
+    // Defined first: the class display below uses them.
+    let lastShown = '';
+    let lastFetched = 0;
+    const checkinForm = document.querySelector('#checkin-form');
+    const openButton = document.querySelector('#checkin-open');
+    function openFeedback(open) {
+      checkinForm.hidden = !open;
+      openButton.textContent = open ? 'Close' : 'Give feedback';
+      openButton.setAttribute('aria-expanded', String(open));
+      openButton.classList.toggle('is-secondary', open);
+    }
+    const difficultyWords = ['Much too easy', 'A bit easy', 'About right', 'A bit hard', 'Much too hard'];
+    const paceWords = ['Much too slow', 'A bit slow', 'About right', 'A bit fast', 'Much too fast'];
+
+    // ------------------------------------------------------------ the class
+    const showSession = (next) => {
+      // Rebuild the class-specific parts only when the class itself changes, not when the code is set.
+      const classOf = (value) => value ? `${value.contextKey}|${value.lessonSlug}|${value.kind}` : '';
+      const changed = classOf(next) !== classOf(session);
+      const wasLive = Boolean(session);
+      session = next;
+      if (wasLive && !session) lastShown = '';
+      document.querySelector('#offline-card').hidden = Boolean(session);
+      document.querySelector('#live-content').hidden = !session;
+      const codeCard = document.querySelector('#code-card');
+      codeCard.hidden = !session?.attendanceCode;
+      document.querySelector('#code-value').textContent = session?.attendanceCode ?? '';
+      if (!session) {
+        document.querySelector('#live-eyebrow').textContent = 'Between classes';
+        document.querySelector('#live-title').textContent = page.dataset.code;
+        document.querySelector('#live-intro').textContent = 'No class is live. See how the last class went, and ask questions at any time.';
+      } else {
+        document.querySelector('#live-intro').textContent = 'Keep this page open during the class. Everything here is anonymous.';
+      }
+      applyMode();
+      if (session) setFeedbackClass(session, true);
+      if (!session || !changed) return;
+      const lesson = lessons[session.lessonSlug] ?? { label: session.lessonSlug, title: '', sections: [] };
+      document.querySelector('#live-eyebrow').textContent = `${lesson.label} · ${session.kind === 'lab' ? 'lab' : 'lecture'} · live`;
+      document.querySelector('#live-title').textContent = lesson.title;
+    };
+
+    // ------------------------------------------------------------ feedback
+    // Feedback is for the live class, or else for the class that ended last.
+    let feedbackClass = null;
+    const setFeedbackClass = (entry, isLive) => {
+      const key = entry ? `${entry.contextKey}|${isLive}` : '';
+      const card = document.querySelector('#checkin-card');
+      card.hidden = !entry;
+      if (!entry || key === (feedbackClass?.key ?? '')) return;
+      // While a student is filling in feedback for one class, a new class does not take it over.
+      if (feedbackClass && !checkinForm.hidden && feedbackClass.contextKey !== entry.contextKey
+        && checkinForm.querySelector('input[name="difficulty"]:checked, input[name="pace"]:checked')) return;
+      feedbackClass = { key, contextKey: entry.contextKey };
+      const lesson = lessons[entry.lessonSlug] ?? { label: entry.lessonSlug, sections: [] };
+      document.querySelector('#feedback-for').textContent = isLive
+        ? `About ${lesson.label} ${entry.kind}, so far.`
+        : `About ${lesson.label} ${entry.kind}, which has ended.`;
+      const sections = entry.kind === 'lab' ? labSections : lesson.sections;
+      const lostField = document.querySelector('#lost-field');
+      lostField.querySelectorAll('label').forEach((label) => label.remove());
+      [...sections, 'I followed everything'].forEach((section, index) => {
+        const label = document.createElement('label');
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'lostAt';
+        input.value = index === sections.length ? 'followed everything' : section;
+        label.append(input, document.createTextNode(section));
+        lostField.append(label);
+      });
+    };
+
+    // "Only feedback": the lecturer can switch every phone to the feedback form alone.
+    const applyMode = () => {
+      const only = Boolean(session?.feedbackMode);
+      ['#code-card', '#poll-card', '#board-card'].forEach((selector) => {
+        document.querySelector(selector).classList.toggle('is-set-aside', only);
+      });
+      document.querySelector('#like-button').hidden = !session || only;
+      if (only && !page.dataset.feedbackOnly) {
+        openFeedback(true);
+        document.querySelector('#checkin-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+      page.dataset.feedbackOnly = only ? 'yes' : '';
+    };
+
+    // ------------------------------------------------------------ the poll
+    const pollBody = document.querySelector('#poll-body');
+    let lastPoll = '';
+
+    const storageKey = (poll) => `mps-live:${session.contextKey}:${poll.pollKey}:${poll.round}`;
+    const letter = (index) => String.fromCharCode(65 + index);
+
+    const bars = (poll, mine) => {
+      const total = poll.counts.reduce((sum, count) => sum + count, 0);
+      const box = document.createElement('div');
+      box.className = 'live-results';
+      poll.options.forEach((option, index) => {
+        const share = total ? Math.round((100 * poll.counts[index]) / total) : 0;
+        const row = document.createElement('div');
+        // After the reveal the correct option (if the question has one) is marked with a tick.
+        const correct = Number.isInteger(poll.answer) && poll.answer === index;
+        row.className = `live-result${String(index) === mine ? ' is-chosen' : ''}${correct ? ' is-correct' : ''}`;
+        const label = document.createElement('div');
+        label.className = 'live-result-label';
+        const badge = document.createElement('span');
+        badge.className = 'live-letter';
+        badge.textContent = correct ? '✓' : letter(index);
+        const text = document.createElement('span');
+        text.textContent = option;
+        const value = document.createElement('b');
+        value.textContent = `${share}%`;
+        label.append(badge, text, value);
+        const bar = document.createElement('div');
+        bar.className = 'live-bar';
+        const fill = document.createElement('span');
+        fill.style.width = `${share}%`;
+        bar.append(fill);
+        row.append(label, bar);
+        box.append(row);
+      });
+      return box;
+    };
+
+    const answersList = (texts) => {
+      const list = document.createElement('ul');
+      list.className = 'live-answers';
+      texts.slice(0, 20).forEach((entry) => {
+        const item = document.createElement('li');
+        item.textContent = entry.body;
+        list.append(item);
+      });
+      return list;
+    };
+
+    const note = (text) => {
+      const line = document.createElement('p');
+      line.className = 'live-status';
+      line.textContent = text;
+      return line;
+    };
+
+    const renderPoll = (poll) => {
+      const signature = JSON.stringify(poll);
+      if (signature === lastPoll) return;
+      // Do not redraw while the student is typing a one-sentence answer.
+      const previous = lastPoll ? JSON.parse(lastPoll) : null;
+      const samePoll = previous && poll && previous.pollKey === poll.pollKey && previous.round === poll.round;
+      if (samePoll && poll.status === 'open' && pollBody.contains(document.activeElement) && document.activeElement.tagName === 'TEXTAREA') return;
+      const isNew = Boolean(poll) && !samePoll;
+      lastPoll = signature;
+      pollBody.replaceChildren();
+      // A new question: bring it into view and buzz once, in case the student is further down.
+      if (isNew && poll.status === 'open') {
+        document.querySelector('#poll-card').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        try { navigator.vibrate?.(80); } catch {}
+      }
+
+      if (!poll) {
+        pollBody.append(note('Nothing to answer right now. When the lecturer asks, it appears here by itself.'));
+        return;
+      }
+
+      const prompt = document.createElement('p');
+      prompt.className = 'live-prompt';
+      prompt.textContent = poll.prompt;
+      pollBody.append(prompt);
+      const mine = store.get(storageKey(poll));
+
+      if (poll.kind === 'text') {
+        if (poll.status === 'open') {
+          const form = document.createElement('form');
+          form.className = 'live-form';
+          const input = document.createElement('textarea');
+          input.rows = 3;
+          input.maxLength = 200;
+          input.required = true;
+          input.placeholder = 'One sentence';
+          input.value = mine ?? '';
+          const button = document.createElement('button');
+          button.type = 'submit';
+          button.className = 'live-button';
+          button.textContent = mine ? 'Update answer' : 'Send answer';
+          const status = note(mine ? 'Sent. You can still change it.' : 'Anonymous. Answers appear on the screen; the lecturer can hide any.');
+          form.append(input, button, status);
+          form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            status.textContent = 'Sending…';
+            try {
+              await send({ action: 'poll_text', context_key: session.contextKey, poll_key: poll.pollKey, body: input.value });
+              store.set(storageKey(poll), input.value.trim());
+              input.blur();
+              lastPoll = '';
+              renderPoll(poll);
+            } catch (error) {
+              status.textContent = error.message;
+            }
+          });
+          pollBody.append(form);
+        } else {
+          pollBody.append(note('Answers closed.'));
+        }
+        if (poll.texts) pollBody.append(answersList(poll.texts));
+        return;
+      }
+
+      if (poll.status === 'open') {
+        const list = document.createElement('div');
+        list.className = 'live-options';
+        const status = note(mine === null
+          ? (poll.isRevote ? 'Second vote: after talking to your neighbour, vote again.' : 'Tap your answer. Nobody sees who chose what.')
+          : 'Saved. You can change it until voting closes.');
+        poll.options.forEach((option, index) => {
+          const button = document.createElement('button');
+          button.type = 'button';
+          button.className = `live-option${String(index) === mine ? ' is-chosen' : ''}`;
+          const badge = document.createElement('span');
+          badge.className = 'live-letter';
+          badge.textContent = letter(index);
+          button.append(badge, document.createTextNode(option));
+          if (poll.counts) {
+            // Live results sit inside the buttons, so they are not mistaken for a second set of options.
+            const share = poll.total ? Math.round((100 * poll.counts[index]) / poll.total) : 0;
+            const value = document.createElement('b');
+            value.className = 'live-option-share';
+            value.textContent = `${share}%`;
+            button.append(value);
+            button.style.setProperty('--share', `${share}%`);
+            button.classList.add('has-share');
+          }
+          button.addEventListener('click', async () => {
+            list.querySelectorAll('button').forEach((other) => { other.disabled = true; });
+            try {
+              await send({ action: 'poll_vote', context_key: session.contextKey, poll_key: poll.pollKey, option_index: index });
+              store.set(storageKey(poll), String(index));
+              lastPoll = '';
+              renderPoll(poll);
+            } catch (error) {
+              status.textContent = error.message;
+              list.querySelectorAll('button').forEach((other) => { other.disabled = false; });
+            }
+          });
+          list.append(button);
+        });
+        pollBody.append(list, status);
+        return;
+      }
+
+      const answerLine = Number.isInteger(poll.answer)
+        ? ` · answer: ${letter(poll.answer)}${mine === null ? '' : String(poll.answer) === mine ? ' (you got it)' : ''}`
+        : '';
+      pollBody.append(bars(poll, mine), note(`Voting closed · ${poll.total} ${poll.total === 1 ? 'vote' : 'votes'}${answerLine}${mine === null ? '' : ' · your choice is in bold'}`));
+    };
+
+    // Between classes: what the last class voted (only votes the lecturer revealed) and how it felt.
+    const showLastClass = async () => {
+      // Fetch the last class once after a class ends, then once a minute.
+      if (lastShown && Date.now() - lastFetched < 60000) return;
+      lastFetched = Date.now();
+      try {
+        const response = await fetch(`${supabaseUrl}/rest/v1/rpc/get_course_last_class`, {
+          method: 'POST',
+          headers: { apikey: publishableKey, 'Content-Type': 'application/json' },
+          body: '{}',
+        });
+        if (!response.ok) return;
+        const last = await response.json();
+        if (!session) setFeedbackClass(last, false);
+        const signature = JSON.stringify(last);
+        if (signature === lastShown) return;
+        lastShown = signature;
+        const body = document.querySelector('#last-body');
+        body.replaceChildren(note('No class is live right now. During a lecture or lab, votes and the attendance code appear here.'));
+        if (!last) return;
+        body.replaceChildren();
+        const lesson = lessons[last.lessonSlug] ?? { label: last.lessonSlug, title: '' };
+        const day = new Date(last.openedAt).toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
+        document.querySelector('#last-title').textContent = `Last class · ${lesson.label} ${last.kind} · ${day}`;
+        last.polls.forEach((poll) => {
+          const prompt = document.createElement('p');
+          prompt.className = 'live-prompt live-prompt-small';
+          prompt.textContent = poll.prompt;
+          body.append(prompt, bars({ ...poll, total: poll.counts.reduce((sum, count) => sum + count, 0) }, null));
+        });
+        if (last.checkins?.count) {
+          const heading = document.createElement('p');
+          heading.className = 'live-prompt live-prompt-small';
+          heading.textContent = `How the class felt (${last.checkins.count} check-ins)`;
+          body.append(heading, spread('Difficulty', last.checkins.difficulty, difficultyWords), spread('Pace', last.checkins.pace, paceWords));
+        }
+      } catch {}
+    };
+
+    // One five-point answer as a single line: the most common answer and its share.
+    const spread = (label, counts, words) => {
+      const total = counts.reduce((sum, count) => sum + count, 0);
+      const top = counts.indexOf(Math.max(...counts));
+      const right = total ? Math.round((100 * counts[2]) / total) : 0;
+      return note(`${label}: most said “${words[top]}”; ${right}% said about right.`);
+    };
+
+    const refresh = async () => {
+      try {
+        const response = await fetch(`${supabaseUrl}/rest/v1/rpc/get_course_live_state`, {
+          method: 'POST',
+          headers: { apikey: publishableKey, 'Content-Type': 'application/json' },
+          body: '{}',
+        });
+        if (!response.ok) return;
+        const state = await response.json();
+        showSession(state.session);
+        if (state.session) renderPoll(state.poll); else showLastClass();
+      } catch {}
+    };
+
+    refresh();
+    setInterval(() => { if (document.visibilityState === 'visible') refresh(); }, 3000);
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') refresh(); });
+
+    // ------------------------------------------------------------ likes
+    // A like floats up on the lecturer's screen; a small one floats here too.
+    const likeButton = document.querySelector('#like-tap');
+    let lastLike = 0;
+    likeButton.addEventListener('click', () => {
+      if (!session || Date.now() - lastLike < 1000) return;
+      lastLike = Date.now();
+      const bubble = document.createElement('span');
+      bubble.className = 'live-like-float';
+      bubble.textContent = '👍';
+      bubble.style.right = `${24 + Math.random() * 30}px`;
+      document.body.append(bubble);
+      setTimeout(() => bubble.remove(), 1600);
+      send({ action: 'reaction', context_key: session.contextKey, kind: 'like' }).catch(() => {});
+    });
+
+    // Lost: "I did not follow that." The lecturer sees how many tapped it in the last two minutes.
+    const lostButton = document.querySelector('#lost-button');
+    const toast = document.querySelector('#react-toast');
+    lostButton.addEventListener('click', async () => {
+      if (!session || lostButton.disabled) return;
+      lostButton.disabled = true;
+      try {
+        await send({ action: 'reaction', context_key: session.contextKey, kind: 'lost' });
+        toast.textContent = 'Sent. The lecturer sees how many times Lost was tapped, not who.';
+      } catch (error) {
+        toast.textContent = error.message;
+      }
+      toast.hidden = false;
+      setTimeout(() => { toast.hidden = true; }, 3500);
+      // One tap counts once a minute (the server enforces the same).
+      setTimeout(() => { lostButton.disabled = false; }, 60000);
+    });
+
+    // ------------------------------------------------------------ questions
+    // One board for the whole year; the admin page tells which class a question came from by its time.
+    const questionForm = document.querySelector('#question-form');
+    const questionStatus = document.querySelector('#question-status');
+    const questionList = document.querySelector('#question-list');
+    const questionMore = document.querySelector('#question-more');
+    const voteStorageKey = 'mps-course-question-votes-v1';
+    let questionLimit = 10;
+    let boardShown = '';
+    const votedIds = () => { try { return new Set(JSON.parse(localStorage.getItem(voteStorageKey) || '[]')); } catch { return new Set(); } };
+    const saveVoted = (ids) => { try { localStorage.setItem(voteStorageKey, JSON.stringify([...ids])); } catch {} };
+
+    const loadBoard = async (force = false) => {
+      try {
+        const query = new URLSearchParams({
+          select: 'id,question,created_at,vote_count,is_answered',
+          context_key: `eq.${boardKey}`,
+          is_visible: 'eq.true',
+          order: 'last_activity_at.desc',
+          limit: String(questionLimit + 1),
+        });
+        const response = await fetch(`${supabaseUrl}/rest/v1/course_questions?${query}`, { headers: { apikey: publishableKey } });
+        const rows = await response.json();
+        if (!Array.isArray(rows)) return;
+        const ids = rows.map((row) => row.id).join(',');
+        let replies = [];
+        if (ids) {
+          const replyQuery = new URLSearchParams({ select: 'id,question_id,reply', question_id: `in.(${ids})`, is_visible: 'eq.true', order: 'created_at.asc' });
+          const replyResponse = await fetch(`${supabaseUrl}/rest/v1/course_question_replies?${replyQuery}`, { headers: { apikey: publishableKey } });
+          replies = replyResponse.ok ? await replyResponse.json() : [];
+        }
+        const signature = JSON.stringify([rows, replies]);
+        if (!force && signature === boardShown) return;
+        if (!force && questionList.contains(document.activeElement)) return;
+        boardShown = signature;
+        // Keep open reply threads open across the refresh.
+        const openThreads = new Set([...questionList.querySelectorAll('details[open]')].map((element) => element.dataset.id));
+        questionMore.hidden = rows.length <= questionLimit;
+        questionList.replaceChildren();
+        const voted = votedIds();
+        rows.slice(0, questionLimit).forEach((row) => {
+          const item = document.createElement('li');
+          item.className = row.is_answered ? 'is-answered' : '';
+          const vote = document.createElement('button');
+          vote.type = 'button';
+          vote.className = `live-upvote${voted.has(row.id) ? ' is-chosen' : ''}`;
+          vote.textContent = `▲ ${row.vote_count}`;
+          vote.setAttribute('aria-label', 'Me too');
+          vote.addEventListener('click', async () => {
+            try {
+              const result = await send({ action: 'vote', context_key: boardKey, question_id: row.id });
+              const next = votedIds();
+              const outcome = Array.isArray(result.vote) ? result.vote[0] : result.vote;
+              if (outcome?.voted) next.add(row.id); else next.delete(row.id);
+              saveVoted(next);
+              loadBoard(true);
+            } catch {}
+          });
+          const text = document.createElement('div');
+          text.className = 'live-board-text';
+          const question = document.createElement('p');
+          question.textContent = row.question;
+          text.append(question);
+          const own = replies.filter((reply) => reply.question_id === row.id);
+          const details = document.createElement('details');
+          details.dataset.id = String(row.id);
+          details.open = openThreads.has(String(row.id));
+          const summary = document.createElement('summary');
+          summary.textContent = own.length ? `${own.length} ${own.length === 1 ? 'reply' : 'replies'}` : 'Reply';
+          details.append(summary);
+          own.forEach((reply) => {
+            const line = document.createElement('p');
+            line.className = 'live-reply';
+            line.textContent = reply.reply;
+            details.append(line);
+          });
+          const form = document.createElement('form');
+          form.className = 'live-reply-form';
+          const input = document.createElement('input');
+          input.maxLength = 1000;
+          input.required = true;
+          input.placeholder = 'Add a reply';
+          input.setAttribute('aria-label', 'Reply');
+          const button = document.createElement('button');
+          button.type = 'submit';
+          button.textContent = 'Send';
+          form.append(input, button);
+          form.addEventListener('submit', async (event) => {
+            event.preventDefault();
+            try {
+              await send({ action: 'reply', context_key: boardKey, question_id: row.id, display_name: '', reply: input.value });
+              input.value = '';
+              input.blur();
+              loadBoard(true);
+            } catch {}
+          });
+          details.append(form);
+          text.append(details);
+          item.append(vote, text);
+          questionList.append(item);
+        });
+      } catch {}
+    };
+
+    questionMore.addEventListener('click', () => { questionLimit += 20; loadBoard(true); });
+    loadBoard();
+    setInterval(() => { if (document.visibilityState === 'visible') loadBoard(); }, 8000);
+
+    questionForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const data = new FormData(questionForm);
+      questionStatus.textContent = 'Posting…';
+      try {
+        await send({ action: 'question', context_key: boardKey, display_name: '', question: String(data.get('question') ?? ''), website: String(data.get('website') ?? '') });
+        questionForm.reset();
+        questionStatus.textContent = 'Posted.';
+        loadBoard(true);
+      } catch (error) {
+        questionStatus.textContent = error.message;
+      }
+    });
+
+    // ------------------------------------------------------------ check-in
+    const checkinStatus = document.querySelector('#checkin-status');
+    // Module and programming background are asked once per browser, then sent with every feedback.
+    const moduleStorageKey = 'mps-course-module-v1';
+    const savedBackground = store.get(backgroundStorageKey);
+    const savedModule = store.get(moduleStorageKey);
+    if (['new', 'some', 'confident'].includes(savedBackground)) {
+      document.querySelector('#background-field').hidden = true;
+    }
+    if (['MPS311', 'MPS439'].includes(savedModule)) {
+      document.querySelector('#module-field').hidden = true;
+    }
+
+    openButton.addEventListener('click', () => openFeedback(checkinForm.hidden));
+
+    checkinForm.addEventListener('submit', async (event) => {
+      event.preventDefault();
+      const data = new FormData(checkinForm);
+      const background = data.get('background') ?? savedBackground;
+      const module = data.get('module') ?? savedModule;
+      if (!feedbackClass) { checkinStatus.textContent = 'There is no class to give feedback on yet.'; return; }
+      checkinStatus.textContent = 'Sending…';
+      try {
+        await send({
+          action: 'checkin',
+          context_key: feedbackClass.contextKey,
+          difficulty: Number(data.get('difficulty')),
+          pace: Number(data.get('pace')),
+          lost_at: String(data.get('lostAt') ?? ''),
+          background: background ? String(background) : null,
+          module: module ? String(module) : null,
+          comment: String(data.get('comment') ?? ''),
+          website: String(data.get('website') ?? ''),
+        });
+        if (background) store.set(backgroundStorageKey, String(background));
+        if (module) store.set(moduleStorageKey, String(module));
+        const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        checkinStatus.textContent = `Sent at ${time}. Thank you. You can send again any time.`;
+      } catch (error) {
+        checkinStatus.textContent = error.message;
+      }
+    });
+  </script>
+</SiteLayout>

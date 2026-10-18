@@ -1370,3 +1370,18 @@
   max-width: 1200px;
   text-align: center;
 }
+
+/* live classroom: the QR on the opening slide and the vote boxes */
+.reveal .scan{position:absolute;right:40px;bottom:30px;width:200px;text-align:center;font-size:.6em;color:var(--muted);line-height:1.25}
+.reveal .scan img{width:180px;height:180px;display:block;margin:0 auto 6px}
+.reveal .scan b{display:block;font-size:1.3em;color:var(--ink)}
+.reveal .ask.vote{background:var(--orange-soft);border-left:8px solid var(--orange);border-radius:12px;font-size:.98em;font-weight:700;line-height:1.3;margin:1em auto 0;max-width:1260px;padding:.6em 1em .7em}
+.reveal .ask.vote small{display:block;font-size:.5em;letter-spacing:.1em;text-transform:uppercase;color:var(--orange);margin-bottom:8px;font-weight:800}
+.reveal .ask.vote .opts{display:flex;flex-wrap:wrap;gap:12px 48px;margin-top:16px;font-size:.85em}
+.reveal .ask.vote .opts span{display:inline-flex;align-items:center;gap:12px;font-weight:600;margin-right:40px}
+.reveal .ask.vote .opts b{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--slate,#475569);color:#fff;font-size:.8em}
+.reveal .two.side .ask.vote .opts{flex-direction:column;gap:10px}
+.reveal .promise-slide .level-note{max-width:1180px}
+.reveal .ask.vote.compact{margin-top:.4em;padding:.35em 1em .45em}
+.reveal .ask.vote.compact .opts{margin-top:8px}
+.reveal section:has(.ask.vote.compact) img.hero-chart{width:min(100%,860px)!important}

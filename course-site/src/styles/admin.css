@@ -364,7 +364,7 @@
 }
 
 .ratings-cell {
-  white-space: nowrap;
+  white-space: pre;
 }
 
 .sr-only {

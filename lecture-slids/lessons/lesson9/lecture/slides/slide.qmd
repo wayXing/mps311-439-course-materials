@@ -45,10 +45,16 @@ title-slide-attributes:
 <small>Your turn</small>
 The 99% needed a feature that **we** thought of. Who thinks of the feature that says "this is a 3" in 784 pixels?
 :::
+
+::: {.scan}
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Scan now</b>
+votes, questions, feedback
+:::
 :::
 
 ::: {.notes}
-约 2 分钟。回到 Lesson 4 结尾：logistic regression 只有一条直线，50%；先想到“到中心的距离”这个特征，99%。Lesson 3 结尾也说过特征要靠人想到。MNIST 每张图 784 个像素，没人能写出这样的特征。期待：让模型自己造特征。
+约 2 分钟。先请大家扫右下角（或右屏）的二维码，页面整节课开着。回到 Lesson 4 结尾：logistic regression 只有一条直线，50%；先想到“到中心的距离”这个特征，99%。Lesson 3 结尾也说过特征要靠人想到。MNIST 每张图 784 个像素，没人能写出这样的特征。期待：让模型自己造特征。
 :::
 
 ## [Problem:]{.stg} What we want
@@ -129,21 +135,27 @@ Trained together: a **neural network**. The middle layer is the **hidden layer**
 约 3 分钟。点名 neural network；中间那层看不见，叫 hidden layer；每个小 logistic regression 叫一个 unit。依次点 1 到 4：0.69、0.82、0.97、0.997。4 个单元围成四边形。没人告诉它“距离”。
 :::
 
-## [A bend in the middle:]{.stg} Can we drop the sigmoid in the middle?
+## [A bend in the middle:]{.stg} Drop the middle sigmoid?
 
 ::: {.stage}
 ::: {.say .xl .center}
 Each hidden unit puts its weighted sum through a sigmoid. The output already has one.
 :::
 
-::: {.ask}
-<small>Predict</small>
-Pass the weighted sums on directly, without the sigmoid. With 4 units, what accuracy?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Ring data, 4 hidden units, no sigmoid in the middle. Accuracy?
+
+::: {.opts}
+<span><b>A</b>about&nbsp;0.997</span>
+<span><b>B</b>about&nbsp;0.82</span>
+<span><b>C</b>about&nbsp;0.50</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1 分钟。让学生先写下预测（0.997？还是更低？），下一页验证。
+约 1.5 分钟。在右屏打开 “Drop the middle sigmoid?” 这一行的投票，30 秒，然后 Reveal；请选 A 的同学说理由。让学生先写下预测（0.997？还是更低？），下一页验证。
 :::
 
 ## [A bend in the middle:]{.stg} Without it: 0.503, however many units
@@ -267,14 +279,20 @@ Rough but cheap: 5 passes = 7,815 steps.
 :::
 :::
 
-::: {.ask}
-<small>Predict</small>
-Same amount of computing. Which ends up better after 5 passes?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Same computing, 5 passes over the data. Which ends better?
+
+::: {.opts}
+<span><b>A</b>all&nbsp;50,000 per step</span>
+<span><b>B</b>32 per step</span>
+<span><b>C</b>about the same</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。Lesson 4 每步用全部数据。请学生先写下预测。
+约 2 分钟。在右屏打开 “How many images per step?” 这一行的投票，30 秒，然后 Reveal；请选 A 的同学说为什么“精确”更好。Lesson 4 每步用全部数据。请学生先写下预测。
 :::
 
 ## [Training:]{.stg} Small batches win
@@ -377,14 +395,19 @@ The gap keeps growing: the training images are being memorised (Lesson 6). Accur
 |---|---:|---:|---:|
 | validation accuracy (20 epochs) | 0.9780 | 0.9755 | 0.9781 |
 
-::: {.ask}
-<small>Your turn</small>
-A classmate uses 512 units per layer and gets **0.9803**. Is their network better?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+512 units: 0.9803. Ours: 0.9780. Better?
+
+::: {.opts}
+<span><b>A</b>yes, it scores higher</span>
+<span><b>B</b>can't tell yet</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 2 分钟。权重的起点和每批用哪 32 张都是随机的，同一段代码每次结果不同；keras.utils.set_random_seed(0) 固定下来，结果可复现。只换种子就差 0.26 个百分点。请学生判断 512 单元的结果，下一页给答案。
+约 3 分钟。在右屏打开 “Change only the seed” 这一行的投票，30 秒，然后 Reveal；请选 A 和 B 的各一位说理由；答案是 B：差距在种子的随机范围之内。分歧大时让邻座讨论一分钟再 Vote again（本讲只在这一题这样做）。权重的起点和每批用哪 32 张都是随机的，同一段代码每次结果不同；keras.utils.set_random_seed(0) 固定下来，结果可复现。只换种子就差 0.26 个百分点。请学生判断 512 单元的结果，下一页给答案。
 :::
 
 ## [MNIST:]{.stg} Not yet
@@ -400,7 +423,7 @@ The lead is inside the seed's luck. Train both with a few seeds and compare the 
 :::
 
 ::: {.notes}
-约 1.5 分钟。512 单元约 67 万权重，验证损失第 3 轮就最低了，更容易记训练集。只在验证集上比较，测试集最后用一次。
+约 1.5 分钟。答案是“还说不准”：0.9803 已经是验证集分数，领先的 0.23 个百分点落在只换种子的波动（0.26）之内，要用几个种子比平均。顺带：512 单元约 67 万权重，验证损失第 3 轮就最低，但这不是判断它更好或更差的依据。只在验证集上比较，测试集最后用一次。
 :::
 
 
@@ -471,8 +494,8 @@ The price: many weights, results that move with the seed, and memorising after a
 :::
 
 ::: {.qr}
-![](feedback-qr.svg){fig-alt="Feedback QR code for Lesson 9"}
-<b>30-second feedback</b>
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Feedback</b>
 <p>After class: Lab 9</p>
 :::
 :::

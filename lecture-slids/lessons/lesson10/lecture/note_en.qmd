@@ -89,7 +89,7 @@ How can we make the result less sensitive to a small move? The candidates:
 
 ![The third candidate: keep only the largest number in each 2 × 2 patch. The height and width of the feature map are halved.](figures/note_en/F3.svg){fig-alt="On the left, a 4 by 4 table of numbers divided by green frames into four 2 by 2 blocks. On the right, a 2 by 2 table where each cell is the largest number of the matching block: 3, 2, 2, 5"}
 
-The last two methods both halve the height and width of the feature map, so the next layer needs fewer weights. Taking the largest number has one more advantage. If the largest number in a patch moves by one step and stays in the same patch, the number we keep does not change at all. With the average, a move changes the average. The third method is called **max pooling**.
+The last two methods both halve the height and width of the feature map, so the next layer needs fewer weights. Taking the largest number has one more advantage. When the whole feature map moves by one step with the image, the largest number of each patch, as long as it stays inside its patch, is kept unchanged. With the average, numbers move into and out of the patch, so the average changes. The third method is called **max pooling**.
 
 Let us compare them (using the network we build in Section 4: two convolution layers, each followed by one such reduction, and then 10 softmax units; each of the three methods is trained for 5 epochs):
 
@@ -121,7 +121,7 @@ There are 12,810 weights in total, less than one ninth of the fully connected ne
 | Number of parameters | 118,282 | 12,810 |
 | Validation accuracy (5 epochs) | 0.970 | 0.987 |
 | Images wrong on the validation set | 300 | 130 |
-| Time to train 5 epochs (this machine, differs by a few seconds per run) | about 11 seconds | about 29 seconds |
+| Time to train 5 epochs (this machine, differs by a few seconds per run) | 11.8 seconds | 29.5 seconds |
 
 The CNN is more accurate, makes less than half as many mistakes, and has far fewer weights. The cost is that each epoch is slower: the convolution must be computed at every position.
 
@@ -259,7 +259,7 @@ If you read only one page, read this one.
 | After shuffling the pixels, the fully connected network is still accurate | It does not use neighbours: we need a model that looks locally | 0.9700 against 0.9738 |
 | A separate set of weights for each position is too many, and what is learned cannot be used everywhere | Use the same detector everywhere: convolution | 108,160 against 160 weights |
 | The feature map still moves when the image moves | Max pooling | Move of 2 pixels: max 0.962, average 0.949, keep all 0.941 |
-| We want to know where it is better than the fully connected network | Compare weights, validation accuracy, time and the move | 12,810 against 118,282; 0.987 against 0.970; about 29 against 11 seconds |
+| We want to know where it is better than the fully connected network | Compare weights, validation accuracy, time and the move | 12,810 against 118,282; 0.987 against 0.970; 29.5 against 11.8 seconds |
 | We want to know whether it really used the spatial structure | Shuffle the pixels and train again | CNN falls to 0.945, the fully connected network does not change |
 | We know only the accuracy | Confusion matrix, most common mistakes, wrongly classified images | 5 read as 8, and 6, are the most common |
 
@@ -276,7 +276,7 @@ We cannot conclude this. The accuracy differs by only 0.04 percentage points. Th
 **Where this method cannot be trusted.**
 
 1. **It absorbs only small moves.** With a move of 4 pixels, the CNN is down to 0.663. Rotation and scaling are worse. They need more layers, or moved images in the training set (Advanced Study 3).
-2. **Each epoch is slower.** The weights are fewer, but the convolution must be calculated at every position: about 29 seconds against 11 seconds on this machine. With bigger images and more layers, the gap grows.
+2. **Each epoch is slower.** The weights are fewer, but the convolution must be calculated at every position: 29.5 seconds against 11.8 seconds on this machine. With bigger images and more layers, the gap grows.
 3. **There are many choices of structure.** The number of filters, the size, the number of layers, and whether to use pooling must each be compared on the validation set, and each comparison is affected by the seed.
 4. **It assumes that "pixels next to each other are related".** This is true for images. For tabular data with no order (for example the 30 features of breast lumps in Lesson 4), the assumption does not hold, and a CNN has no advantage.
 5. **Some of the wrong images are unclear in themselves.** Even a very good model will not be right every time. After the accuracy is high enough, the remaining mistakes must be looked at one image at a time.

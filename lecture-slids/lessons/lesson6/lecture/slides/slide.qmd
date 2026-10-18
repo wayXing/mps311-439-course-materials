@@ -47,10 +47,16 @@ title-slide-attributes:
 Forget models for a moment. Write a rule by hand that sorts these points.
 :::
 :::
+
+::: {.scan}
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Scan now</b>
+votes, questions, feedback
+:::
 :::
 
 ::: {.notes}
-约 1.5 分钟。Lesson 4 第 9 节的环形数据：logistic 只能画直线，0.50 和瞎猜一样；Lesson 5 的 QDA 要假设每一类是椭圆小山。让学生口头说规则：期待“中间那块是蓝的”“x₁、x₂ 都不太大就是蓝的”。
+约 1.5 分钟。先请大家扫右下角（或右屏）的二维码，页面整节课开着。Lesson 4 第 9 节的环形数据：logistic 只能画直线，0.50 和瞎猜一样；Lesson 5 的 QDA 要假设每一类是椭圆小山。让学生口头说规则：期待“中间那块是蓝的”“x₁、x₂ 都不太大就是蓝的”。
 :::
 
 ## Write the rule yourself: four cuts make a box
@@ -116,14 +122,19 @@ Draw two points from one side. Chance they differ: $2p(1-p)$
 :::
 :::
 
-::: {.ask}
-<small>Predict</small>
-Both are 0 when a side is pure. Will they always pick the same cut?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Error rate and Gini: will they always rank the cuts the same?
+
+::: {.opts}
+<span><b>A</b>yes, same ranking</span>
+<span><b>B</b>no, they can differ</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 2 分钟。p 是一边里类 1 的比例。先让学生想“怎样衡量混”，常见答案就是错分率；第二个候选：抽两个点类别不同的概率。一刀的得分：两边按点数加权平均，越小越好。下一页让学生自己试。
+约 3 分钟。投票（右屏 One cut: How do we score "mixed" → Open，30 秒，先不显示结果）；分歧大时让邻座讨论一分钟再 Vote again（本讲只在这一题这样做），再 Reveal；请选 A 的同学说理由（两者在纯的时候都是 0），答案留给下一页拖动揭晓：错分率对每一刀都是 0.200，排不出先后，Gini 能排出来。p 是一边里类 1 的比例。先让学生想“怎样衡量混”，常见答案就是错分率；第二个候选：抽两个点类别不同的概率。一刀的得分：两边按点数加权平均，越小越好。下一页让学生自己试。
 :::
 
 ## [One cut:]{.stg} Drag the cut: which score notices?
@@ -205,14 +216,20 @@ Training climbs, accuracy on the validation lumps (Lesson 3) falls: **overfittin
 Assignment 2: **50,000** images, **20** depths to try.
 :::
 
-::: {.ask}
-<small>Your turn</small>
-With 5-fold cross-validation, how many trees must we fit? Is there a cheaper way that still avoids the test set?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+50,000 images: choose `max_depth` using…
+
+::: {.opts}
+<span><b>A</b>5-fold cross-validation</span>
+<span><b>B</b>one validation split</span>
+<span><b>C</b>the test set</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。期待：100 棵，每棵 4 万张图；第 4 节的神经网络一次就要几分钟。更便宜的办法：Lesson 3 的验证集，我们其实已经在用了，那 107 个肿块。
+约 2 分钟。投票（右屏 Choose: How do we choose max_depth → Open，30 秒，先不显示结果，再 Reveal）；先问选 C 的同学：用测试集选，测试分数还算数吗？再问选 A 的同学：5 折试 20 个深度要拟合几棵树？答案在下一页揭晓：一次验证集划分。期待：100 棵，每棵 4 万张图；第 4 节的神经网络一次就要几分钟。更便宜的办法：Lesson 3 的验证集，我们其实已经在用了，那 107 个肿块。
 :::
 
 ## [Choose:]{.stg} Back to Lesson 3: cross-validation or one validation split
@@ -221,7 +238,7 @@ With 5-fold cross-validation, how many trees must we fit? Is there a cheaper way
 ![](../figures/slides/S3.svg){.fig .fig-s3 fig-alt="Left: five rows of five blocks, a different block held out in each row: cross-validation fits 5 times per depth. Right: one bar split into a fitting part, a validation block and a separate test block: the validation set fits once per depth"}
 
 ::: {.say .center}
-The **validation set** of Lesson 3: split once, fit once per depth. Cheaper, but it depends on which points land in it.
+5-fold CV: 5 fits × 20 depths **= 100 fits**. The **validation set** (Lesson 3): 1 fit per depth, 20 fits. Cheaper, but it depends on which points land in it.
 :::
 :::
 
@@ -328,8 +345,8 @@ A depth-4 tree finds the box by itself: **0.98**, 9 leaves.
 :::
 
 ::: {.qr}
-![](feedback-qr.svg){fig-alt="Feedback QR code for Lesson 6"}
-<b>30-second feedback</b>
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Feedback</b>
 <p>After class: Lab 6</p>
 :::
 :::

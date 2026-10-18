@@ -115,7 +115,7 @@ if (listing.status !== 0) throw new Error('Could not validate the Sites archive.
 for (const required of [
   'dist/server/index.js',
   'dist/client/index.html',
-  'dist/client/feedback/index.html',
+  'dist/client/live/index.html',
   'dist/.openai/hosting.json',
 ]) {
   if (!listing.stdout.split('\n').includes(required)) {

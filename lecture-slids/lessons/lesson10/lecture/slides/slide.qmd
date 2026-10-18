@@ -41,14 +41,26 @@ title-slide-attributes:
 ::: {.stage}
 ![](../figures/slides/S1.svg){.fig .fig-s1 fig-alt="Left: a handwritten 7. Right: the same image after its 784 pixels are moved into a fixed new order, a cloud of dots"}
 
-::: {.ask}
-<small>Predict</small>
-Train the Lesson 9 network (0.970) again on shuffled images. Its validation accuracy?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+All images shuffled the same way; Lesson 9 network (0.970) retrained. Accuracy?
+
+::: {.opts}
+<span><b>A</b>about 0.1</span>
+<span><b>B</b>about 0.5</span>
+<span><b>C</b>about 0.97</span>
+:::
+:::
+
+::: {.scan}
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Scan now</b>
+votes, questions, feedback
 :::
 :::
 
 ::: {.notes}
-约 2.5 分钟。开场：Lesson 9 的全连接网络把图排成一行，先看它漏掉了什么。所有图都按同一种顺序打乱。人认不出。请学生写下预测（掉到 0.1？0.5？），下一页揭晓。
+约 3 分钟。先请大家扫右下角（或右屏）的二维码，页面整节课开着。投票（右屏 Shuffle every image's pixels → Open，30 秒，先不显示结果，再 Reveal），揭晓后请选 A 的同学说理由，下一页给答案（C）。开场：Lesson 9 的全连接网络把图排成一行，先看它漏掉了什么。所有图都按同一种顺序打乱。人认不出。请学生写下预测（掉到 0.1？0.5？），下一页揭晓。
 :::
 
 ## The network does not mind
@@ -208,14 +220,20 @@ One number per block: the largest of the 4.
 :::
 :::
 
-::: {.ask}
-<small>Your turn</small>
-Which of the three cares least about a small move?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Digits moved 2 pixels. Which keeps accuracy highest?
+
+::: {.opts}
+<span><b>A</b>keep every position</span>
+<span><b>B</b>mean of each 2&nbsp;×&nbsp;2</span>
+<span><b>C</b>largest of each 2&nbsp;×&nbsp;2</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。期待：取最大的那个。最大的数挪一格，只要还在同一块里，留下的数完全不变；平均值会变。
+约 2.5 分钟。投票（右屏 The feature map still moves → Open，30 秒，先不显示结果）。分歧大时让邻座讨论一分钟再 Vote again（本讲只在这一题这样做），再 Reveal；请选 B 的同学说为什么平均值也稳。期待：取最大的那个。下一页的表：数字移 2 个像素后，验证准确率依次是 0.941（全部保留）、0.949（取平均）、0.962（取最大），取最大的掉得最少。直觉：笔画稍微一挪，一块里最大的那个数常常还落在同一块里，留下的数不变；平均值会因为有数移进、移出这一块而变；全部保留时下一层读到的位置整体都挪了。挪得多了（比如 4 个像素）池化也吸收不了。
 :::
 
 ## [One number per block:]{.stg} Keep the largest
@@ -271,7 +289,7 @@ Against the Lesson 9 network (118,282 weights, 0.970): more or less accurate? Fa
 | weights | 118,282 | **12,810** |
 | validation accuracy (5 epochs) | 0.970 | **0.987** |
 | wrong validation images | 300 | **130** |
-| seconds for 5 epochs (laptop) | **about 11** | about 29 |
+| seconds for 5 epochs (laptop) | **11.8** | 29.5 |
 
 ::: {.say .center}
 The price: a convolution is computed at every position.
@@ -303,14 +321,20 @@ Moved 2 pixels: CNN **0.962**, fully connected 0.870. Moved 4: 0.663 and 0.390.
 Shuffle the pixels the same way as before, and train the CNN from scratch.
 :::
 
-::: {.ask}
-<small>Predict</small>
-The fully connected network did not mind (0.970 → 0.974). And the CNN (0.987)?
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Same shuffle, CNN (0.987) retrained. Its accuracy?
+
+::: {.opts}
+<span><b>A</b>still about 0.987</span>
+<span><b>B</b>clearly lower</span>
+<span><b>C</b>about 0.1</span>
+:::
 :::
 :::
 
 ::: {.notes}
-约 1 分钟。请学生先预测。
+约 1.5 分钟。投票（右屏 Does it really use neighbours? → Open，30 秒，先不显示结果，再 Reveal），请选 A 的同学说理由：全连接网络不在乎，CNN 为什么会在乎？请学生先预测。
 :::
 
 ## [The new network, tested:]{.stg} Shuffling hurts the CNN
@@ -429,8 +453,8 @@ The price: slower epochs, many structural choices, and it still fails at 4 pixel
 :::
 
 ::: {.qr}
-![](feedback-qr.svg){fig-alt="Feedback QR code for Lesson 10"}
-<b>30-second feedback</b>
+![](live-qr.svg){fig-alt="QR code for today's live page"}
+<b>Feedback</b>
 <p>After class: Lab 10</p>
 :::
 :::
