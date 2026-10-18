@@ -528,6 +528,20 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
       contexts.forEach(([contextKey, start]) => {
         const row = document.createElement('tr');
         const actions = document.createElement('td');
+        // Rehearsals and tests: wipe this class's data so it never mixes with the real class.
+        const reset = document.createElement('button');
+        reset.type = 'button';
+        reset.className = 'admin-remove';
+        reset.textContent = 'Delete test data';
+        reset.addEventListener('click', async () => {
+          if (!window.confirm(`Delete all votes, feedback and Got it / Lost for ${sessionLabel(contextKey)}? This cannot be undone. Classroom questions are kept.`)) return;
+          try {
+            await requestAdmin('admin_reset_class', { context_key: contextKey });
+            await loadOverview('Test data deleted.');
+          } catch (error) {
+            dashboardStatus.textContent = error instanceof Error ? error.message : 'Could not delete the data.';
+          }
+        });
         [['Report (.md)', 'md'], ['Data (.json)', 'json']].forEach(([label, format]) => {
           const button = document.createElement('button');
           button.type = 'button';
@@ -544,6 +558,7 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
           });
           actions.append(button);
         });
+        actions.append(reset);
         row.append(createCell(sessionLabel(contextKey)), createCell(formatDate(start)), actions);
         body.append(row);
       });
