@@ -9,6 +9,7 @@
     "branch": "main",
     "notebookRoot": "lecture-slids/lessons"
   },
+  "videoPlaylist": "PLPBMDPoIfNKo",
   "lessons": [
     {
       "slug": "foundation",
@@ -61,6 +62,10 @@
       ],
       "revisionNote": "What changed after your feedback: the stock-market opening and course journey remain, while repeated explanations have been combined and new examples now let you apply the modelling questions to other situations.",
       "note": "The lab builds on Python Preparation. Complete the preparation guide first if loading data, pandas methods, or error messages are still unfamiliar.",
+      "video": {
+        "youtubeId": "lFLJm5OhSE4",
+        "minutes": 8
+      },
       "resources": [
         {
           "label": "Interactive slides",
@@ -183,6 +188,10 @@
         "Simple linear regression",
         "Training and test evidence"
       ],
+      "video": {
+        "youtubeId": "E59Jcr8LusY",
+        "minutes": 17
+      },
       "resources": [
         {
           "label": "Interactive slides",
@@ -275,6 +284,10 @@
         "Overfitting, Ridge and Lasso",
         "Cross-validation"
       ],
+      "video": {
+        "youtubeId": "4Utjd3Vydz8",
+        "minutes": 9
+      },
       "resources": [
         {
           "label": "Interactive slides",
@@ -380,6 +393,10 @@
         "Baselines and confusion matrices",
         "Thresholds and error costs"
       ],
+      "video": {
+        "youtubeId": "Aa2QR5fcoQY",
+        "minutes": 12
+      },
       "resources": [
         {
           "label": "Interactive slides",
@@ -485,6 +502,10 @@
         "LDA and QDA",
         "Shrinkage with reg_param"
       ],
+      "video": {
+        "youtubeId": "4fiOe-oJOJA",
+        "minutes": 16
+      },
       "resources": [
         {
           "label": "Interactive slides",
@@ -590,6 +611,10 @@
         "Growing and stopping a tree",
         "Validation sets"
       ],
+      "video": {
+        "youtubeId": "57b09IwdBXc",
+        "minutes": 11
+      },
       "resources": [
         {
           "label": "Interactive slides",
@@ -695,6 +720,10 @@
         "Principal components and explained variance",
         "Choosing k without peeking"
       ],
+      "video": {
+        "youtubeId": "_t0xPW0ZB6w",
+        "minutes": 9
+      },
       "resources": [
         {
           "label": "Interactive slides",
@@ -800,6 +829,10 @@
         "Where K-means fails, and hierarchical clustering",
         "Count tables and majority vote"
       ],
+      "video": {
+        "youtubeId": "6eifSsv6IfU",
+        "minutes": 12
+      },
       "resources": [
         {
           "label": "Interactive slides",
@@ -907,6 +940,10 @@
         "Keras on MNIST",
         "Training and validation curves"
       ],
+      "video": {
+        "youtubeId": "Ip_tAfJIGwI",
+        "minutes": 10
+      },
       "resources": [
         {
           "label": "Interactive slides",
@@ -1014,6 +1051,10 @@
         "Comparing a CNN with a fully connected network",
         "Error analysis"
       ],
+      "video": {
+        "youtubeId": "fnwmWLSlXEs",
+        "minutes": 9
+      },
       "resources": [
         {
           "label": "Interactive slides",

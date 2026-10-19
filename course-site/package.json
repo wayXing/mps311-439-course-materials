@@ -10,6 +10,7 @@
     "sync:public": "node scripts/sync-public-course.mjs",
     "sync:timetable": "node scripts/sync-timetable.mjs",
     "sync": "npm run sync:course && npm run sync:timetable",
+    "pdf": "node scripts/build-pdfs.mjs",
     "feedback:qr": "node scripts/generate-feedback-qrs.mjs",
     "predev": "npm run sync",
     "dev": "astro dev",

@@ -31,6 +31,7 @@ export interface CourseLesson {
   topics: string[];
   note?: string;
   revisionNote?: string;
+  video?: { youtubeId: string; minutes: number };
   resources: CourseResource[];
 }
 
@@ -40,6 +41,7 @@ export interface CourseData {
   academicYear: string;
   instructor: string;
   description: string;
+  videoPlaylist?: string;
   colab?: {
     repository: string;
     branch?: string;

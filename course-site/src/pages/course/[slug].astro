@@ -85,6 +85,29 @@ const resourceLabels: Record<string, string> = {
       <p>Everything for this lesson, collected in one place.</p>
     </div>
 
+    {lesson.video && (
+      <section class="resource-group" aria-labelledby="group-video">
+        <div class="resource-group-heading">
+          <h3 id="group-video">Video</h3>
+          <span>About {lesson.video.minutes} min</span>
+        </div>
+        <div class="lesson-video">
+          <iframe
+            src={`https://www.youtube-nocookie.com/embed/${lesson.video.youtubeId}?rel=0${course.videoPlaylist ? `&list=${course.videoPlaylist}` : ''}`}
+            title={`${lesson.label} video: ${lesson.title}`}
+            loading="lazy"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+            referrerpolicy="strict-origin-when-cross-origin"
+            allowfullscreen
+          ></iframe>
+        </div>
+        <p class="lesson-video-caption">
+          Missed the class, or want to see it again? The whole lesson in about {lesson.video.minutes} minutes, with subtitles and chapters.
+          {course.videoPlaylist && <a href={`https://www.youtube.com/playlist?list=${course.videoPlaylist}`} target="_blank" rel="noopener">All lesson videos on YouTube ↗</a>}
+        </p>
+      </section>
+    )}
+
     {groups.length > 0 ? groups.map((group) => (
       <section class="resource-group" aria-labelledby={`group-${group.toLowerCase()}`}>
         <div class="resource-group-heading">

@@ -998,6 +998,35 @@ dd {
   display: block;
 }
 
+.lesson-video {
+  aspect-ratio: 16 / 9;
+  margin-top: 18px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  background: var(--paper-deep);
+}
+
+.lesson-video iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.lesson-video-caption {
+  margin: 10px 0 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.lesson-video-caption a {
+  margin-left: 6px;
+  color: var(--ink);
+  font-weight: 650;
+  white-space: nowrap;
+}
+
 .resource-card {
   display: flex;
   min-height: 76px;
