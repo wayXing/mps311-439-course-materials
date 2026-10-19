@@ -1,6 +1,7 @@
 ---
 import {
   BookOpenText,
+  CirclePlay,
   Code,
   Database,
   FileDown,
@@ -13,7 +14,7 @@ import {
 import type { ResourceKind } from '../data/course';
 
 interface Props {
-  kind: ResourceKind | 'all';
+  kind: ResourceKind | 'all' | 'video';
   size?: number;
 }
 
@@ -29,6 +30,7 @@ const icons = {
   guide: BookOpenText,
   data: Database,
   all: FolderOpen,
+  video: CirclePlay,
 };
 const Icon = icons[kind] ?? FileText;
 ---

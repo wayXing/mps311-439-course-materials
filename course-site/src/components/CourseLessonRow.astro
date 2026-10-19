@@ -53,6 +53,14 @@ const resourceLabel = (kind: ResourceKind) => ({
         ><ResourceIcon kind={item.kind} size={13} />{resourceLabel(item.kind)}</a>
       ))
       : <span class="resource-empty">—</span>}
+    {lesson.video && (
+      <a
+        class="resource-link resource-video"
+        href={`https://www.youtube.com/watch?v=${lesson.video.youtubeId}${course.videoPlaylist ? `&list=${course.videoPlaylist}` : ''}`}
+        target="_blank"
+        rel="noopener"
+      ><ResourceIcon kind="video" size={13} />Video</a>
+    )}
   </div>
 
   <div class="course-row-resources">

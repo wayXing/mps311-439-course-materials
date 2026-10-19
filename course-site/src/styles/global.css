@@ -595,6 +595,11 @@ dd {
   --resource-soft: var(--resource-data-soft);
 }
 
+.resource-video {
+  --resource-color: var(--resource-video);
+  --resource-soft: var(--resource-video-soft);
+}
+
 .course-row-resources .resource-link {
   color: var(--resource-color);
   background: var(--resource-soft);
