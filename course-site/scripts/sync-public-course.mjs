@@ -13,6 +13,7 @@ const sourceSlides = resolve(workspaceRoot, 'lecture-slids');
 const courseSiteIgnored = new Set([
   '.git', '.astro', '.openai', '.sites-artifacts', '.sites-stage', '.vercel', 'AGENTS.md', 'CLAUDE.md',
   'dist', 'node_modules', 'public/materials', 'public/assignments', 'supabase',
+  'scripts/build-pdfs.mjs', 'scripts/slides-handout.py',   // private tooling (local paths)
 ]);
 const lessonIgnoredNames = new Set([
   '.DS_Store', '.quarto', '.venv', '_site', 'shared', 'AGENTS.md', 'SLIDE_DESIGN_SYSTEM.md', 'NOTE_VISUAL_SYSTEM.md',
@@ -24,6 +25,8 @@ const lessonIgnoredNames = new Set([
   'note.html', 'note.pdf',
   'note.png', 'note_files', 'slide-export.pdf', 'lab_worksheet.html',
   'lab_worksheet.pdf', 'lab_solution.html', 'slide.html',
+  // production tooling and generated output, never public
+  'PDF', 'youtube', 'video-engine', 'mock', 'popsci',
 ]);
 
 function relativeParts(root, source) {
@@ -39,6 +42,7 @@ function shouldCopyCourseSite(source) {
 function shouldCopySlides(source) {
   const parts = relativeParts(sourceSlides, source);
   if (parts.includes('admin') || parts.some((part) => lessonIgnoredNames.has(part) || part.startsWith('STUDENT_REVIEW'))) return false;
+  if (parts.some((part) => /^(VIDEO|YOUTUBE)_.*\.md$/.test(part))) return false;  // video and YouTube production notes
   if (parts.includes('lab') && parts[parts.length - 1] === 'mnist10k.npz') return false;  // a copy downloaded when the solution runs; the public file is data/mnist10k.npz
   return !parts.some((part) => part.endsWith('.html') || part.endsWith('.pdf') || part.endsWith('.webloc'));
 }
