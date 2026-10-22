@@ -4,6 +4,13 @@ dist/
 .sites-stage/
 .sites-artifacts/
 
+# Keep local credentials and assistant configuration out of deployment uploads.
+.env
+.env.*
+AGENTS.md
+CLAUDE.md
+.openai/
+
 # PDF handouts are intentionally hidden from the public course site.  Keeping
 # them out of this Vercel deployment keeps the upload below the Hobby limit;
 # the original course files remain in the local materials directory.
