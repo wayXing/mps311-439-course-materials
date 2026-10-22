@@ -26,8 +26,8 @@ const resources = withBase(`assignments/${number === 1 ? 'assignment-one' : 'ass
         <h2>Can you beat wxing?</h2>
         <p>Turn your Assignment 1 model into a Kaggle submission: get an R² score, see other participants’ scores and find out where your approach stands. This is a voluntary extension with <strong>no effect on your marks</strong>. Any model is welcome, and AI tools are encouraged.</p>
         <div class="competition-data-note">
-          <p><strong>First visit? Join through the invitation below.</strong> This is a private course competition. Sign in to Kaggle, follow the invitation and complete the joining steps before opening the leaderboard or announcement. Kaggle shows “We can’t find that page” if your account has not joined yet.</p>
-          <a class="button button-primary" href={assignmentOneCompetition.joinUrl}>Join on Kaggle (optional) <span aria-hidden="true">↗</span></a>
+          <p><strong>The competition is public.</strong> Browse the leaderboard and teacher announcement without signing in. Sign in to Kaggle when you want to join and submit your predictions.</p>
+          <a class="button button-primary" href={assignmentOneCompetition.joinUrl}>Compete now (optional) <span aria-hidden="true">↗</span></a>
         </div>
         <ol>
           <li>Join with your Kaggle account and choose a nickname.</li>
@@ -37,7 +37,7 @@ const resources = withBase(`assignments/${number === 1 ? 'assignment-one' : 'ass
         <p class="competition-data-note"><strong>Use the Kaggle competition files for this challenge.</strong> The assignment’s original <code>full.csv</code> contains the evaluation source records and must not be used for competition training. If you used it, refit on the permitted competition training data.</p>
         <p>I have added teacher reference scores, including my <strong>wxing</strong> result. I used a strong model from my current research projects with no fine-tuning or hyperparameter search. The method is a mystery for now—come and challenge me!</p>
         <p>Keep experimenting after the assignment deadline, including with methods you learn later. Kaggle allows 100 submissions per UTC day. You can leave a short message in Discussion.</p>
-        <p><strong>Already joined with this Kaggle account?</strong> You can open the leaderboard and teacher announcement directly below.</p>
+        <p>See the current scores and read the teacher challenge:</p>
         <div class="competition-actions">
           <a href={assignmentOneCompetition.leaderboardUrl}>View leaderboard <span aria-hidden="true">↗</span></a>
           <a href={assignmentOneCompetition.challengeUrl}>Read wxing’s challenge <span aria-hidden="true">↗</span></a>
