@@ -2,6 +2,7 @@
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { course } from '../data/course';
 import { assignmentOne, assignmentTwo } from '../data/assignment';
+import { assignmentOneCompetition } from '../data/competition';
 interface Props { number: 1 | 2; }
 const { number } = Astro.props;
 const assignment = number === 1 ? assignmentOne : assignmentTwo;
@@ -16,6 +17,29 @@ const resources = withBase(`assignments/${number === 1 ? 'assignment-one' : 'ass
       <h1>Assignment {number}</h1>
       <p>{number === 1 ? 'California Housing Prices' : 'Handwritten Digit Recognition'}</p>
     </header>
+    {number === 1 && <details class="competition-callout">
+      <summary>
+        <span><strong>Competition available <span class="optional">(optional)</span></strong><small>Assignment 1 · Try your model on the class leaderboard</small></span>
+        <span class="competition-toggle" aria-hidden="true">+</span>
+      </summary>
+      <div class="competition-details">
+        <h2>Can you beat wxing?</h2>
+        <p>Turn your Assignment 1 model into a Kaggle submission: get an R² score, see other participants’ scores and find out where your approach stands. This is a voluntary extension with <strong>no effect on your marks</strong>. Any model is welcome, and AI tools are encouraged.</p>
+        <ol>
+          <li>Join with your Kaggle account and choose a nickname.</li>
+          <li>Download the competition files. Fit your model on <code>train.csv</code> (500 rows) or <code>challenge_train.csv</code> (17,640 rows), then predict the new 1,000-row <code>challenge_test.csv</code>.</li>
+          <li>Put your predictions in <code>sample_submission.csv</code> and upload it. Your score appears on the leaderboard; no extra report or code upload is required.</li>
+        </ol>
+        <p class="competition-data-note"><strong>Use the Kaggle competition files for this challenge.</strong> The assignment’s original <code>full.csv</code> contains the evaluation source records and must not be used for competition training. If you used it, refit on the permitted competition training data.</p>
+        <p>I have added teacher reference scores, including my <strong>wxing</strong> result. I used a strong model from my current research projects with no fine-tuning or hyperparameter search. The method is a mystery for now—come and challenge me!</p>
+        <p>Keep experimenting after the assignment deadline, including with methods you learn later. Kaggle allows 100 submissions per UTC day. You can leave a short message in Discussion.</p>
+        <div class="competition-actions">
+          <a class="button button-primary" href={assignmentOneCompetition.joinUrl}>Compete now (optional) <span aria-hidden="true">↗</span></a>
+          <a href={assignmentOneCompetition.leaderboardUrl}>View leaderboard <span aria-hidden="true">↗</span></a>
+          <a href={assignmentOneCompetition.challengeUrl}>Read wxing’s challenge <span aria-hidden="true">↗</span></a>
+        </div>
+      </div>
+    </details>}
     <section class="deadline-banner" aria-labelledby="deadline-heading">
       <div class="deadline-copy">
         <h2 id="deadline-heading">Submission deadline</h2>
@@ -89,6 +113,23 @@ const resources = withBase(`assignments/${number === 1 ? 'assignment-one' : 'ass
   .assignment-heading { margin-bottom: 28px; }
   .assignment-heading h1 { margin: 12px 0 8px; font-family: var(--font-display); font-size: clamp(42px, 6vw, 62px); font-weight: 500; letter-spacing: -0.04em; line-height: 1.1; }
   .assignment-heading p { margin: 0; color: var(--ink-soft); font-size: 21px; }
+  .competition-callout { margin: 0 0 24px; border: 1px solid #88bcb1; border-left: 5px solid #13745e; border-radius: 12px; background: #eef8f4; }
+  .competition-callout summary { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 22px 24px; cursor: pointer; list-style: none; color: #155b4b; }
+  .competition-callout summary::-webkit-details-marker { display: none; }
+  .competition-callout summary strong { display: block; font-size: 21px; line-height: 1.4; }
+  .competition-callout summary small { display: block; margin-top: 5px; font-size: 13px; }
+  .competition-callout summary:hover { background: #e2f2eb; }
+  .competition-callout summary:focus-visible { outline: 3px solid #13745e; outline-offset: 4px; border-radius: 8px; }
+  .optional { font-size: .8em; font-weight: 500; }
+  .competition-toggle { font-size: 30px; line-height: 1; }
+  .competition-callout[open] .competition-toggle { transform: rotate(45deg); }
+  .competition-details { padding: 0 24px 24px; border-top: 1px solid #c5dfd5; }
+  .competition-details h2 { margin: 24px 0 12px; font-size: 24px; }
+  .competition-details p, .competition-details li { font-size: 14px; line-height: 1.7; }
+  .competition-details ol { padding-left: 22px; }
+  .competition-details li + li { margin-top: 8px; }
+  .competition-data-note { padding: 12px 16px; border-radius: 8px; background: #fff; }
+  .competition-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 24px; margin-top: 20px; font-size: 14px; font-weight: 650; }
   .deadline-banner { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 24px; padding: 24px 28px; margin-bottom: 28px; background: #fff0df; border: 1px solid #e8bd8b; border-left: 5px solid #b94c0b; border-radius: 12px; color: #913a08; }
   .deadline-copy h2 { margin: 0 0 10px; font-size: 12px; text-transform: uppercase; letter-spacing: .08em; }
   .deadline-copy time { display: block; font-size: 21px; font-weight: 650; }
