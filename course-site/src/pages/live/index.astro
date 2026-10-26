@@ -3,6 +3,7 @@
 // the current vote or one-sentence question, the classroom question board, and the check-in.
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import { course } from '../../data/course';
+import { withBase } from '../../lib/urls';
 import { academicYearKey, labSections, liveLessons, publishableKey, supabaseUrl } from '../../data/live';
 import '../../styles/live.css';
 
@@ -112,6 +113,12 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
       <summary class="live-card-title" id="last-title">Last class results</summary>
       <div id="last-body"></div>
     </details>
+    <!-- The lecturer's way in, so the screen and admin pages never depend on remembering a URL. -->
+    <nav class="live-staff" aria-label="Lecturer">
+      <span>Lecturer</span>
+      <a href={withBase('live/screen/')}>Class screen</a>
+      <a href={withBase('admin/')}>Feedback admin</a>
+    </nav>
   </section>
 
   <script>

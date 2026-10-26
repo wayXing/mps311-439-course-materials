@@ -394,3 +394,166 @@
   .admin-board-form { grid-template-columns: 1fr; }
   .admin-board-form > button { width: 100%; }
 }
+
+/* ------------------------------------------------------------ feedback: filters, charts, dense list */
+.fb-controls {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: end;
+  gap: 8px 10px;
+  margin-bottom: 12px;
+}
+
+.fb-controls label {
+  display: grid;
+  gap: 3px;
+  color: var(--ink-faint);
+  font-size: 9px;
+  font-weight: 720;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.fb-controls select {
+  min-height: 30px;
+  max-width: 190px;
+  padding: 0 6px;
+  color: var(--ink);
+  background: var(--surface-solid);
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  font: inherit;
+  font-size: 12px;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.fb-controls .fb-check {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 30px;
+  color: var(--ink-soft);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 0;
+  text-transform: none;
+}
+
+.fb-stats {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(170px, 1fr) minmax(170px, 1fr) minmax(260px, 2fr);
+  margin-bottom: 12px;
+}
+
+.fb-stats:empty { display: none; }
+
+.fb-chart {
+  margin: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.fb-chart figcaption {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 6px;
+  font-size: 12px;
+}
+
+.fb-chart figcaption span { color: var(--ink-faint); font-size: 10px; }
+
+.fb-bars {
+  display: grid;
+  align-items: end;
+  gap: 4px;
+  grid-template-columns: repeat(5, 1fr);
+  height: 112px;
+}
+
+.fb-bar {
+  display: grid;
+  align-content: end;
+  height: 100%;
+  grid-template-rows: auto 1fr auto;
+  justify-items: stretch;
+  text-align: center;
+}
+
+.fb-bar-value { color: var(--ink-soft); font-size: 10px; }
+.fb-bar-fill { align-self: end; min-height: 1px; border-radius: 4px 4px 0 0; }
+.fb-bar-label { padding-top: 3px; border-top: 1px solid var(--line); color: var(--ink-soft); font-size: 10px; line-height: 1.2; }
+.fb-bar-label small { display: block; color: var(--ink-faint); font-size: 8px; }
+
+.fb-rows { display: grid; gap: 3px; }
+
+.fb-row {
+  display: grid;
+  align-items: center;
+  gap: 8px;
+  grid-template-columns: minmax(110px, 46%) 1fr 22px;
+  font-size: 11px;
+}
+
+.fb-row-label { overflow: hidden; color: var(--ink-soft); text-overflow: ellipsis; white-space: nowrap; }
+.fb-row-track { height: 10px; }
+.fb-row-fill { display: block; height: 100%; min-width: 1px; background: #5e7ee8; border-radius: 0 4px 4px 0; }
+.fb-row.is-quiet .fb-row-fill { background: #c9c6bd; }
+.fb-row-value { color: var(--ink-soft); text-align: right; }
+
+.fb-table table { min-width: 860px; font-size: 12px; }
+.fb-table th,
+.fb-table td { padding: 5px 8px; vertical-align: middle; }
+.fb-table th button {
+  padding: 0;
+  color: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+.fb-table th button.is-sorted { color: var(--ink); text-decoration: underline; }
+.fb-table tbody tr:hover { background: rgba(23, 23, 19, 0.03); }
+.fb-table .message-cell { min-width: 220px; line-height: 1.35; }
+.fb-nowrap { white-space: nowrap; }
+.fb-faint { color: var(--ink-faint); }
+.fb-table small { color: var(--ink-faint); font-size: 10px; }
+
+.fb-tag {
+  padding: 1px 5px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+}
+
+.fb-tag.is-after { color: #2f5aa8 !important; border-color: #b9c9fb; }
+
+.fb-scale-cell { white-space: nowrap; }
+.fb-scale-cell b { margin-left: 5px; font-weight: 600; }
+.fb-scale { display: inline-flex; gap: 2px; vertical-align: middle; }
+.fb-scale i { width: 9px; height: 9px; background: rgba(23, 23, 19, 0.08); border-radius: 2px; }
+
+.fb-legacy { margin-top: 12px; font-size: 12px; }
+.fb-legacy summary { margin-bottom: 8px; color: var(--ink-faint); cursor: pointer; }
+
+/* Admin is a working page: less air around the cards. */
+.admin-page { padding: 28px 0 48px; }
+.admin-heading { margin-bottom: 16px; }
+.admin-heading h1 { font-size: clamp(30px, 4vw, 42px); }
+.admin-dashboard { gap: 14px; }
+.admin-years, .admin-records, .admin-boards { padding: 16px 18px; }
+.admin-record-section { margin-top: 14px; }
+.admin-section-label { padding: 10px 0; }
+
+@media (max-width: 860px) {
+  .fb-stats { grid-template-columns: 1fr 1fr; }
+  .fb-chart-wide { grid-column: 1 / -1; }
+}
+
+@media (max-width: 520px) {
+  .fb-stats { grid-template-columns: 1fr; }
+}

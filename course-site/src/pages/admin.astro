@@ -34,39 +34,6 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
     </section>
 
     <div class="admin-dashboard" id="admin-dashboard" hidden>
-      <section class="admin-card admin-boards" aria-labelledby="admin-boards-heading">
-        <div class="admin-card-heading">
-          <div>
-            <span class="admin-kicker">Classroom controls</span>
-            <h2 id="admin-boards-heading">Question board</h2>
-          </div>
-        </div>
-        <p class="admin-note">The current academic year's classroom board stays open. You can archive it here when needed; reopening an archived board also archives any other live board.</p>
-        <form id="admin-board-form" class="admin-board-form">
-          <label><span>Academic year</span><select id="admin-board-year" required></select></label>
-          <button type="submit">Reopen board</button>
-          <button type="button" class="admin-toggle" id="admin-archive-board">Archive live board</button>
-        </form>
-        <p class="admin-status" id="admin-board-status" aria-live="polite"></p>
-        <div class="admin-boards-list" id="admin-boards-list"></div>
-      </section>
-
-      <section class="admin-card admin-years" aria-labelledby="admin-years-heading">
-        <div class="admin-card-heading">
-          <div>
-            <span class="admin-kicker">Student selector</span>
-            <h2 id="admin-years-heading">Academic years</h2>
-          </div>
-          <form id="admin-year-form" class="admin-year-form">
-            <label class="sr-only" for="admin-year-input">New academic-year name</label>
-            <input id="admin-year-input" name="year" maxlength="80" placeholder="2026 Summer School" required />
-            <button type="submit">Add option</button>
-          </form>
-        </div>
-        <p class="admin-note">Hide keeps a year and its records in this dashboard, but removes it from the student selector. Remove deletes only the year option; records are still kept.</p>
-        <div id="admin-years-list" class="admin-years-list" aria-live="polite"></div>
-      </section>
-
       <section class="admin-card admin-records" aria-labelledby="admin-records-heading">
         <div class="admin-card-heading records-heading">
           <div>
@@ -81,14 +48,51 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
         <p class="admin-status" id="admin-dashboard-status" aria-live="polite"></p>
 
         <div class="admin-record-section">
-          <div class="admin-section-label"><h3>Anonymous feedback</h3><span id="admin-feedback-count">—</span></div>
+          <div class="admin-section-label"><h3>Feedback</h3><span id="admin-feedback-count">—</span></div>
+          <!-- Every submission, newest first; the class it was given for is kept as its label. -->
+          <form class="fb-controls" id="fb-controls">
+            <label><span>Class</span><select id="fb-class"><option value="">All classes</option></select></label>
+            <label><span>When</span><select id="fb-when"><option value="">In and after class</option><option value="in">In class</option><option value="after">After class</option></select></label>
+            <label><span>Module</span><select id="fb-module"><option value="">Both</option><option>MPS311</option><option>MPS439</option></select></label>
+            <label><span>Programming</span><select id="fb-background"><option value="">Any</option><option value="new">Hardly at all</option><option value="some">A little</option><option value="confident">Comfortable</option></select></label>
+            <label><span>Lost at</span><select id="fb-lost"><option value="">Anywhere</option></select></label>
+            <label><span>Sort</span><select id="fb-sort">
+              <option value="newest">Newest first</option>
+              <option value="oldest">Oldest first</option>
+              <option value="difficulty">Difficulty, hardest first</option>
+              <option value="pace">Pace, fastest first</option>
+              <option value="class">Class</option>
+              <option value="lost">Lost at</option>
+              <option value="module">Module</option>
+            </select></label>
+            <label class="fb-check"><input type="checkbox" id="fb-comments" />Comments only</label>
+            <label class="fb-check"><input type="checkbox" id="fb-latest" />Latest per student</label>
+          </form>
+          <div class="fb-stats" id="fb-stats"></div>
           <div class="admin-empty" id="admin-feedback-empty">Loading feedback…</div>
-          <div class="admin-table-wrap" id="admin-feedback-wrap" hidden>
+          <div class="admin-table-wrap fb-table" id="admin-feedback-wrap" hidden>
             <table>
-              <thead><tr><th>Session</th><th>Ratings</th><th>Suggestion</th><th>Submitted</th></tr></thead>
+              <thead><tr>
+                <th><button type="button" data-sort="newest">When</button></th>
+                <th><button type="button" data-sort="class">Class</button></th>
+                <th><button type="button" data-sort="difficulty">Difficulty</button></th>
+                <th><button type="button" data-sort="pace">Pace</button></th>
+                <th><button type="button" data-sort="lost">Lost at</button></th>
+                <th><button type="button" data-sort="module">Student</button></th>
+                <th>Comment</th>
+              </tr></thead>
               <tbody id="admin-feedback-body"></tbody>
             </table>
           </div>
+          <details class="fb-legacy" id="fb-legacy" hidden>
+            <summary>Older feedback (1–10 sliders, before the live page) · <span id="fb-legacy-count"></span></summary>
+            <div class="admin-table-wrap">
+              <table>
+                <thead><tr><th>Session</th><th>Ratings</th><th>Suggestion</th><th>Submitted</th></tr></thead>
+                <tbody id="fb-legacy-body"></tbody>
+              </table>
+            </div>
+          </details>
         </div>
 
         <div class="admin-record-section">
@@ -135,6 +139,39 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
           </div>
         </div>
       </section>
+      <section class="admin-card admin-boards" aria-labelledby="admin-boards-heading">
+        <div class="admin-card-heading">
+          <div>
+            <span class="admin-kicker">Classroom controls</span>
+            <h2 id="admin-boards-heading">Question board</h2>
+          </div>
+        </div>
+        <p class="admin-note">The current academic year's classroom board stays open. You can archive it here when needed; reopening an archived board also archives any other live board.</p>
+        <form id="admin-board-form" class="admin-board-form">
+          <label><span>Academic year</span><select id="admin-board-year" required></select></label>
+          <button type="submit">Reopen board</button>
+          <button type="button" class="admin-toggle" id="admin-archive-board">Archive live board</button>
+        </form>
+        <p class="admin-status" id="admin-board-status" aria-live="polite"></p>
+        <div class="admin-boards-list" id="admin-boards-list"></div>
+      </section>
+
+      <section class="admin-card admin-years" aria-labelledby="admin-years-heading">
+        <div class="admin-card-heading">
+          <div>
+            <span class="admin-kicker">Student selector</span>
+            <h2 id="admin-years-heading">Academic years</h2>
+          </div>
+          <form id="admin-year-form" class="admin-year-form">
+            <label class="sr-only" for="admin-year-input">New academic-year name</label>
+            <input id="admin-year-input" name="year" maxlength="80" placeholder="2026 Summer School" required />
+            <button type="submit">Add option</button>
+          </form>
+        </div>
+        <p class="admin-note">Hide keeps a year and its records in this dashboard, but removes it from the student selector. Remove deletes only the year option; records are still kept.</p>
+        <div id="admin-years-list" class="admin-years-list" aria-live="polite"></div>
+      </section>
+
     </div>
   </section>
 
@@ -211,32 +248,178 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
       return cell;
     };
 
-    const renderFeedback = (records) => {
-      feedbackBody.replaceChildren();
-      feedbackCount.textContent = `${records.length} record${records.length === 1 ? '' : 's'}`;
-      feedbackEmpty.hidden = records.length > 0;
-      feedbackWrap.hidden = records.length === 0;
+    // Feedback from before the live page: 1–10 sliders for difficulty, pace and content.
+    const renderLegacyFeedback = (records) => {
+      const body = document.querySelector('#fb-legacy-body');
+      body.replaceChildren();
+      document.querySelector('#fb-legacy').hidden = records.length === 0;
+      document.querySelector('#fb-legacy-count').textContent = `${records.length} record${records.length === 1 ? '' : 's'}`;
       records.forEach((record) => {
         const row = document.createElement('tr');
         row.append(
           createCell(sessionLabel(record.contextKey)),
-          // Check-ins from the live page use five points (3 = about right); older records use 1–10 sliders.
-          createCell(record.isCheckin
-            ? [
-              `${record.inClass ? 'In class' : 'After class'} · student ${record.student} · ${record.module ?? 'module not given'}`,
-              `Difficulty ${record.difficulty}/5 · Pace ${record.pace}/5 (3 = about right)`,
-              `Lost at: ${record.lostAt || 'not answered'}`,
-              `Programming: ${({ new: 'hardly at all', some: 'a little', confident: 'comfortable' })[record.background] ?? 'not given'}`,
-              record.changes ? `Changed ${record.changes} time${record.changes === 1 ? '' : 's'}; latest shown` : '',
-            ].filter(Boolean).join('\n')
-            : `D ${record.difficulty} · P ${record.pace} · C ${record.contentAmount}`, 'ratings-cell'),
+          createCell(`D ${record.difficulty} · P ${record.pace} · C ${record.contentAmount}`, 'ratings-cell'),
           createCell(record.comment || '—', 'message-cell'),
           createCell(formatDate(record.createdAt)),
         );
+        body.append(row);
+      });
+    };
+
+    // ------------------------------------------------------------ feedback, every submission
+    // The class reports hold every submission (not only the latest per student), so the list is
+    // built from them: one report per class of the selected year. S1, S2, … pair one student's
+    // rows within a class.
+    let feedbackRows = [];
+    const fbClass = document.querySelector('#fb-class');
+    const fbWhen = document.querySelector('#fb-when');
+    const fbModule = document.querySelector('#fb-module');
+    const fbBackground = document.querySelector('#fb-background');
+    const fbLost = document.querySelector('#fb-lost');
+    const fbSort = document.querySelector('#fb-sort');
+    const fbComments = document.querySelector('#fb-comments');
+    const fbLatest = document.querySelector('#fb-latest');
+    const fbStats = document.querySelector('#fb-stats');
+    const backgrounds = { new: 'hardly at all', some: 'a little', confident: 'comfortable' };
+    const difficultyNames = ['Much too easy', 'A bit easy', 'About right', 'A bit hard', 'Much too hard'];
+    const paceNames = ['Much too slow', 'A bit slow', 'About right', 'A bit fast', 'Much too fast'];
+    // Diverging: blue below "about right", gray at it, red above.
+    const scaleColors = ['#3769cf', '#9db4ee', '#c9c6bd', '#ef9a86', '#cc513f'];
+    const escapeHtml = (text) => String(text ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+    const lostLabel = (row) => row.lostAt || 'not answered';
+    const classStarts = () => {
+      const starts = new Map();
+      liveSessions.forEach((entry) => {
+        if (!starts.has(entry.context_key) || entry.opened_at < starts.get(entry.context_key)) starts.set(entry.context_key, entry.opened_at);
+      });
+      return starts;
+    };
+    const className = (contextKey) => {
+      const [, , slug, kind] = contextKey.match(/^(\d{4}-\d{2})-(.+)-(lecture|lab)$/) ?? [null, '', contextKey, ''];
+      return `${reportLessons[slug]?.label ?? slug}${kind ? ` ${kind}` : ''}`;
+    };
+
+    const loadFeedback = async () => {
+      const year = yearFilter.value;
+      const starts = classStarts();
+      const contexts = [...starts.keys()].filter((key) => !year || key.startsWith(`${year}-`));
+      const reports = await Promise.all(contexts.map((key) => requestAdmin('admin_class_report', { context_key: key })
+        .then((result) => result.report).catch(() => null)));
+      feedbackRows = reports.filter(Boolean).flatMap((report) => (report.feedback ?? []).map((row) => ({
+        ...row, contextKey: report.contextKey, classStart: starts.get(report.contextKey) ?? '',
+      })));
+      const keep = (select, options) => {
+        const value = select.value;
+        select.replaceChildren(select.options[0], ...options.map(([key, label]) => new Option(label, key)));
+        select.value = options.some(([key]) => key === value) ? value : '';
+      };
+      keep(fbClass, contexts.sort((a, b) => (starts.get(a) < starts.get(b) ? 1 : -1))
+        .map((key) => [key, `${className(key)} · ${new Date(starts.get(key)).toLocaleDateString([], { day: 'numeric', month: 'short' })}`]));
+      keep(fbLost, [...new Set(feedbackRows.map(lostLabel))].sort().map((key) => [key, key]));
+    };
+
+    const visibleFeedback = () => {
+      let rows = feedbackRows.filter((row) => (!fbClass.value || row.contextKey === fbClass.value)
+        && (!fbWhen.value || (fbWhen.value === 'in') === row.inClass)
+        && (!fbModule.value || row.module === fbModule.value)
+        && (!fbBackground.value || row.background === fbBackground.value)
+        && (!fbLost.value || lostLabel(row) === fbLost.value)
+        && (!fbComments.checked || row.comment));
+      if (fbLatest.checked) {
+        const latest = new Map();
+        rows.forEach((row) => {
+          const key = `${row.contextKey}|${row.student}|${row.inClass}`;
+          if (!latest.has(key) || latest.get(key).at < row.at) latest.set(key, row);
+        });
+        rows = [...latest.values()];
+      }
+      const newest = (a, b) => (a.at < b.at ? 1 : a.at > b.at ? -1 : 0);
+      const orders = {
+        newest,
+        oldest: (a, b) => -newest(a, b),
+        difficulty: (a, b) => b.difficulty - a.difficulty || newest(a, b),
+        pace: (a, b) => b.pace - a.pace || newest(a, b),
+        class: (a, b) => (a.classStart < b.classStart ? 1 : a.classStart > b.classStart ? -1 : 0) || newest(a, b),
+        lost: (a, b) => lostLabel(a).localeCompare(lostLabel(b)) || newest(a, b),
+        module: (a, b) => String(a.module ?? '~').localeCompare(String(b.module ?? '~')) || newest(a, b),
+      };
+      return rows.sort(orders[fbSort.value] ?? newest);
+    };
+
+    // A 1–5 rating as five small cells with the chosen one filled.
+    const scaleCell = (value, names, what) => {
+      const cell = document.createElement('td');
+      cell.className = 'fb-scale-cell';
+      cell.innerHTML = `<span class="fb-scale" title="${what} ${value}/5: ${names[value - 1] ?? ''}">${[1, 2, 3, 4, 5]
+        .map((step) => `<i${step === value ? ` style="background:${scaleColors[step - 1]}"` : ''}></i>`).join('')}</span><b>${value}</b>`;
+      return cell;
+    };
+
+    const histogram = (title, rows, key, names) => {
+      const counts = [1, 2, 3, 4, 5].map((step) => rows.filter((row) => row[key] === step).length);
+      const max = Math.max(1, ...counts);
+      const mean = rows.length ? (rows.reduce((sum, row) => sum + row[key], 0) / rows.length).toFixed(1) : '—';
+      return `<figure class="fb-chart"><figcaption><b>${title}</b><span>mean ${mean} · 3 = about right</span></figcaption>
+        <div class="fb-bars">${counts.map((count, index) => `<div class="fb-bar" title="${index + 1} · ${names[index]}: ${count} (${rows.length ? Math.round((100 * count) / rows.length) : 0}%)">
+          <span class="fb-bar-value">${count}</span>
+          <span class="fb-bar-fill" style="height:${(100 * count) / max}%;background:${scaleColors[index]}"></span>
+          <span class="fb-bar-label">${index + 1}<small>${names[index].replace(/^(Much too|A bit) /, '')}</small></span>
+        </div>`).join('')}</div></figure>`;
+    };
+
+    const lostChart = (rows) => {
+      const counts = {};
+      rows.forEach((row) => { counts[lostLabel(row)] = (counts[lostLabel(row)] ?? 0) + 1; });
+      const entries = Object.entries(counts).sort((a, b) => b[1] - a[1]);
+      const max = Math.max(1, ...entries.map(([, count]) => count));
+      return `<figure class="fb-chart fb-chart-wide"><figcaption><b>First got lost at</b><span>${entries.length} parts</span></figcaption>
+        <div class="fb-rows">${entries.map(([label, count]) => `<div class="fb-row${/^(followed everything|not answered)$/.test(label) ? ' is-quiet' : ''}" title="${escapeHtml(label)}: ${count} (${Math.round((100 * count) / rows.length)}%)">
+          <span class="fb-row-label">${escapeHtml(label)}</span>
+          <span class="fb-row-track"><span class="fb-row-fill" style="width:${(100 * count) / max}%"></span></span>
+          <span class="fb-row-value">${count}</span>
+        </div>`).join('')}</div></figure>`;
+    };
+
+    const renderFeedback = () => {
+      const rows = visibleFeedback();
+      const students = new Set(rows.map((row) => `${row.contextKey}|${row.student}`)).size;
+      feedbackCount.textContent = `${rows.length} of ${feedbackRows.length} submissions · ${students} student${students === 1 ? '' : 's'} (per class)`;
+      fbStats.innerHTML = rows.length
+        ? histogram('Difficulty', rows, 'difficulty', difficultyNames) + histogram('Pace', rows, 'pace', paceNames) + lostChart(rows)
+        : '';
+      feedbackBody.replaceChildren();
+      feedbackEmpty.hidden = rows.length > 0;
+      feedbackWrap.hidden = rows.length === 0;
+      feedbackEmpty.textContent = feedbackRows.length ? 'No feedback for this selection.' : 'No feedback yet.';
+      document.querySelectorAll('.fb-table th button').forEach((button) => button.classList.toggle('is-sorted', button.dataset.sort === fbSort.value
+        || (button.dataset.sort === 'newest' && fbSort.value === 'oldest')));
+      rows.forEach((record) => {
+        const row = document.createElement('tr');
+        const when = createCell(new Date(record.at).toLocaleString([], { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }), 'fb-nowrap');
+        const klass = createCell(className(record.contextKey), 'fb-nowrap');
+        const tag = document.createElement('small');
+        tag.className = `fb-tag${record.inClass ? '' : ' is-after'}`;
+        tag.textContent = record.inClass ? 'in class' : 'after';
+        klass.append(' ', tag);
+        const who = createCell(`${record.module ?? '—'} · ${backgrounds[record.background] ?? '—'}`, 'fb-nowrap fb-faint');
+        const student = document.createElement('small');
+        student.textContent = ` ${record.student}`;
+        who.append(student);
+        row.append(when, klass,
+          scaleCell(record.difficulty, difficultyNames, 'Difficulty'),
+          scaleCell(record.pace, paceNames, 'Pace'),
+          createCell(lostLabel(record), record.lostAt ? '' : 'fb-faint'),
+          who,
+          createCell(record.comment || '', 'message-cell'));
         feedbackBody.append(row);
       });
-      if (records.length === 0) feedbackEmpty.textContent = 'No feedback for this selection.';
     };
+
+    [fbClass, fbWhen, fbModule, fbBackground, fbLost, fbSort, fbComments, fbLatest].forEach((control) => control.addEventListener('change', renderFeedback));
+    document.querySelectorAll('.fb-table th button').forEach((button) => button.addEventListener('click', () => {
+      fbSort.value = button.dataset.sort === 'newest' && fbSort.value === 'newest' ? 'oldest' : button.dataset.sort;
+      renderFeedback();
+    }));
 
     // Questions all go to one board; the class a question belongs to is the live class at the time it was posted.
     let liveSessions = [];
@@ -568,9 +751,8 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
       const years = Array.isArray(overview?.years) ? overview.years : [];
       renderYears(years);
       renderBoards(Array.isArray(overview?.boards) ? overview.boards : [], years);
-      const checkins = Array.isArray(overview?.checkins) ? overview.checkins.map((record) => ({ ...record, isCheckin: true })) : [];
-      const sliders = Array.isArray(overview?.feedback) ? overview.feedback : [];
-      renderFeedback([...checkins, ...sliders].sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+      renderLegacyFeedback(Array.isArray(overview?.feedback) ? overview.feedback : []);
+      renderFeedback();
       renderLikes(Array.isArray(overview?.reactions) ? overview.reactions : []);
       renderReports();
       renderQuestions(Array.isArray(overview?.questions) ? overview.questions : []);
@@ -584,6 +766,7 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
         requestAdmin('admin_overview', { year_key: yearFilter.value || null }),
         loadLiveSessions(),
       ]);
+      await loadFeedback();
       renderOverview(result.overview, message);
     };
 

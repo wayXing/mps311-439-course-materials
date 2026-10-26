@@ -823,3 +823,24 @@
 .live-last[open] > summary {
   margin-bottom: 12px;
 }
+
+.live-staff {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 28px;
+  color: var(--ink-faint);
+  font-size: 13px;
+}
+
+.live-staff a {
+  padding: 6px 12px;
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  text-decoration: none;
+}
+
+.live-staff a:hover { color: var(--ink); border-color: var(--ink-faint); }
