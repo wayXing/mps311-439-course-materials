@@ -1,0 +1,143 @@
+"""从当前 Worksheet 生成学生用的 Colab workbook（lab_workbook.ipynb），并检查它能跑通：
+1. 代码全部放进 notebook，学生不用复制；只留 ML 判断的空，纯 API 的空（predict_proba）直接给出；
+2. 每个 Question 后面加一个“Your answer”文字格，Question first 的格子在代码之前，先写判断再运行；
+3. 不放 Answer（答案只在网页 worksheet 里，折叠）；
+4. 检查：把空按 build_solution.py 的 FILLS 填好，用真实 Jupyter 内核从头执行，断言 Core 的核对值。
+写出的 workbook 不含输出。
+运行：python build_workbook.py   （用有 sklearn 的 Python，例如 ~/opt/anaconda3/bin/python）
+"""
+from pathlib import Path
+import re
+import nbformat
+from nbclient import NotebookClient
+
+ROOT = Path(__file__).resolve().parent
+# 不需要 ML 判断的空直接给出，对应的 Hint 一并去掉：1.2 是方法名，3.1 是题面已经写出的两个阈值
+PREFILL = {
+    "1.2": [("model.____(", "model.predict_proba(")],
+    "3.1": [("[0.5, ____, ____]", "[0.5, 0.3, 0.1]"),
+            ("Run the cell after filling the two thresholds **0.3** and **0.1**. The loop is given in full.",
+             "Run the cell without changing it. It compares the thresholds 0.5, 0.3 and 0.1.")],
+}
+# Question first 的任务：代码下面的 Success check 会泄露答案，在 workbook 里折叠起来
+FOLD_CHECK = {"0.2", "1.2"}
+# 其余空按出现顺序的填写内容，只用于检查（与 build_solution.py 的 FILLS 相同，去掉 1.2 和 3.1）
+FILLS = [["0"], ["fit_transform", "transform"], ["7"], ["0.1"]]
+EXPECT = [
+    "(426, 30) (143, 30)", "159 53", "always guess benign: 0.6267", "[0 0 1 1 1]", "[0.253 0.747]", "[1. 1. 1.]",
+    "[[152   7]\n [  2 265]]", "0.956", "0.987",
+    "threshold 0.5 missed 7 false alarms 2", "threshold 0.3 missed 6 false alarms 9", "threshold 0.1 missed 3 false alarms 27",
+    "[[53  0]\n [11 79]]", "0.908",
+]
+WORKSHEET_URL = "https://ml.wxing.me/materials/lesson4/lab.html"
+
+qmd = (ROOT / "lab_worksheet.qmd").read_text()
+core = qmd.split("## Part 0:")[1].split("# After class: how today's lab helps with Assignment 2")[0]
+core = "## Part 0:" + core
+fence = re.compile(r"```python\n(.*?)```", re.S)
+callout = re.compile(r'::: \{[^\n]*title="([^"]+)"[^\n]*\}\n(.*?)\n:::', re.S)
+
+md = nbformat.v4.new_markdown_cell
+code_cell = nbformat.v4.new_code_cell
+nb = nbformat.v4.new_notebook()
+nb.metadata.update({
+    "kernelspec": {"display_name": "Python 3", "language": "python", "name": "python3"},
+    "language_info": {"name": "python", "version": "3"},
+    "colab": {"provenance": []},
+})
+nb.cells += [
+    md("# Lab 4 Workbook: From a Number to a Decision\n## MPS311/439 Machine Learning\n\n"
+       "The same tasks as the [Lab 4 worksheet](" + WORKSHEET_URL + "), with the code already in place: **nothing to copy**.\n\n"
+       "**What you do today.** The Python is given. What is left to you are the machine-learning decisions: "
+       "the blanks `____` and the questions. That is the lab. A cell with a blank stops with an error until you fill it."),
+    md("## How to work\n\n"
+       "1. **File → Save a copy in Drive**, and work in the copy so your answers are saved.\n"
+       "2. Run the cells from top to bottom (**▶** or **Shift + Enter**); each cell needs the cells above it.\n"
+       "3. Where you see **Your answer**, double-click the cell and write your answer **before** you run the next code cell. "
+       "A guess written down first is how you find out what you really expected.\n"
+       "4. Fill each `____`, run the cell, and compare with the **Success check** below it.\n"
+       "5. Stuck on a blank? Open the folded Hint. The folded Answers are on the [worksheet](" + WORKSHEET_URL + "); "
+       "if you fall behind, copy one and carry on.\n"
+       "6. The **Try with AI** cells are for when you finish early, or after class."),
+]
+
+
+def your_answer():
+    return md("**Your answer:** *(double-click to write)*")
+
+
+def add_text(text):
+    """Markdown 段：非空就成一格；含 Question 的段后面跟一个“Your answer”格。"""
+    text = text.strip()
+    if not text:
+        return
+    nb.cells.append(md(text))
+    if "**Question" in text:
+        nb.cells.append(your_answer())
+
+
+def add_body(body, task):
+    """按顺序把一段正文拆成文字格和代码格。"""
+    pos = 0
+    for block in fence.finditer(body):
+        add_text(body[pos:block.start()])
+        source = block.group(1).rstrip("\n")
+        for old, new in PREFILL.get(task, []):
+            source = source.replace(old, new)
+        nb.cells.append(code_cell(source))
+        pos = block.end()
+    add_text(body[pos:])
+
+
+for part in re.split(r"^(?=## Part )", core, flags=re.M):
+    if not part.strip():
+        continue
+    head, _, rest = part.partition("\n")
+    intro, *tasks = re.split(r"^(?=### )", rest, flags=re.M)
+    nb.cells.append(md(head.replace("## ", "# ", 1) + "\n\n" + intro.strip()))
+    for task_text in tasks:
+        title, _, body = task_text.partition("\n")
+        task = title[4:7]                                    # 例如 "1.2"
+        nb.cells.append(md(title.replace("### ", "## ", 1)))
+        if task in PREFILL:
+            body = re.sub(r"\*\*Hint:\*\*[^\n]*\n", "", body)
+            for old, new in PREFILL[task]:
+                body = body.replace(old, new)
+        # Hints often give the blank away: fold them, so students try first
+        body = re.sub(r"\*\*Hint:\*\* ([^\n]+)\n",
+                      r"<details><summary><b>Hint</b> (only if you are stuck)</summary>\n\n\1\n\n</details>\n", body)
+        if task in FOLD_CHECK:                               # "**Success check:** …" on one line
+            body = re.sub(r"\*\*Success check:\*\* ([^\n]+)\n",
+                          r"<details><summary><b>Success check</b> (open after you run the cell)</summary>\n\n\1\n\n</details>\n", body)
+        pos = 0
+        for box in callout.finditer(body):
+            add_body(body[pos:box.start()], task)
+            name, inner = box.groups()
+            if name != "Answer":                             # 答案不进 workbook
+                nb.cells.append(md(f"**{name}**"))
+                add_body(inner, task)
+            pos = box.end()
+        add_body(body[pos:], task)
+
+nb.cells.append(md(
+    "# After class\n\nHow today's lab helps with **Assignment 2**, the reflection questions and the **Advanced Study** "
+    "are at the end of the [worksheet](" + WORKSHEET_URL + ")."))
+
+# ------------------------------------------------------------ 检查：填好空，从头执行
+blank_cells = [cell for cell in nb.cells if cell.cell_type == "code" and "____" in cell.source]
+assert len(blank_cells) == len(FILLS), f"{len(blank_cells)} code cells have blanks, FILLS has {len(FILLS)}"
+assert not any(cell.source.startswith("**Answer") for cell in nb.cells), "an Answer box slipped into the workbook"
+test = nbformat.reads(nbformat.writes(nb), as_version=4)            # a copy to fill and run
+fills = iter(FILLS)
+for cell in test.cells:
+    if cell.cell_type == "code" and "____" in cell.source:
+        for value in next(fills):
+            cell.source = cell.source.replace("____", value, 1)
+NotebookClient(test, timeout=300, kernel_name="python3").execute()
+printed = "\n".join(out.get("text", "") for cell in test.cells if cell.cell_type == "code" for out in cell.get("outputs", []))
+missing = [value for value in EXPECT if value not in printed]
+assert not missing, f"Success checks not reproduced: {missing}"
+
+nbformat.write(nb, ROOT / "lab_workbook.ipynb")
+answers = sum(cell.source.startswith("**Your answer") for cell in nb.cells)
+print(f"lab_workbook.ipynb: {len(nb.cells)} cells, {len(blank_cells)} code cells with blanks, {answers} answer cells; all checks reproduced")

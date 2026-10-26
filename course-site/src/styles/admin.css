@@ -443,7 +443,7 @@
 .fb-stats {
   display: grid;
   gap: 10px;
-  grid-template-columns: minmax(170px, 1fr) minmax(170px, 1fr) minmax(260px, 2fr);
+  grid-template-columns: minmax(170px, 1fr) minmax(170px, 1fr) minmax(260px, 2fr) minmax(130px, 0.8fr);
   margin-bottom: 12px;
 }
 
@@ -557,3 +557,5 @@
 @media (max-width: 520px) {
   .fb-stats { grid-template-columns: 1fr; }
 }
+
+.fb-bars-3 { grid-template-columns: repeat(3, 1fr); }

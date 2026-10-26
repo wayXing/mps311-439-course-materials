@@ -56,6 +56,7 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
             <label><span>Module</span><select id="fb-module"><option value="">Both</option><option>MPS311</option><option>MPS439</option></select></label>
             <label><span>Programming</span><select id="fb-background"><option value="">Any</option><option value="new">Hardly at all</option><option value="some">A little</option><option value="confident">Comfortable</option></select></label>
             <label><span>Lost at</span><select id="fb-lost"><option value="">Anywhere</option></select></label>
+            <label><span>Change useful</span><select id="fb-useful"><option value="">Any answer</option><option value="yes">Yes</option><option value="no">No</option><option value="na">N/A</option></select></label>
             <label><span>Sort</span><select id="fb-sort">
               <option value="newest">Newest first</option>
               <option value="oldest">Oldest first</option>
@@ -79,6 +80,7 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
                 <th><button type="button" data-sort="pace">Pace</button></th>
                 <th><button type="button" data-sort="lost">Lost at</button></th>
                 <th><button type="button" data-sort="module">Student</button></th>
+                <th><button type="button" data-sort="useful">Change useful</button></th>
                 <th>Comment</th>
               </tr></thead>
               <tbody id="admin-feedback-body"></tbody>
@@ -276,6 +278,7 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
     const fbModule = document.querySelector('#fb-module');
     const fbBackground = document.querySelector('#fb-background');
     const fbLost = document.querySelector('#fb-lost');
+    const fbUseful = document.querySelector('#fb-useful');
     const fbSort = document.querySelector('#fb-sort');
     const fbComments = document.querySelector('#fb-comments');
     const fbLatest = document.querySelector('#fb-latest');
@@ -287,6 +290,9 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
     const scaleColors = ['#3769cf', '#9db4ee', '#c9c6bd', '#ef9a86', '#cc513f'];
     const escapeHtml = (text) => String(text ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
     const lostLabel = (row) => row.lostAt || 'not answered';
+    // "Was today's change useful?": yes, no, or N/A (null; the default when a class had no change).
+    const usefulLabel = (row) => ({ yes: 'Yes', no: 'No' })[row.improvementUseful] ?? 'N/A';
+    const usefulRank = (row) => ({ yes: 0, no: 1 })[row.improvementUseful] ?? 2;
     const classStarts = () => {
       const starts = new Map();
       liveSessions.forEach((entry) => {
@@ -324,6 +330,7 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
         && (!fbModule.value || row.module === fbModule.value)
         && (!fbBackground.value || row.background === fbBackground.value)
         && (!fbLost.value || lostLabel(row) === fbLost.value)
+        && (!fbUseful.value || (row.improvementUseful ?? 'na') === fbUseful.value)
         && (!fbComments.checked || row.comment));
       if (fbLatest.checked) {
         const latest = new Map();
@@ -342,6 +349,7 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
         class: (a, b) => (a.classStart < b.classStart ? 1 : a.classStart > b.classStart ? -1 : 0) || newest(a, b),
         lost: (a, b) => lostLabel(a).localeCompare(lostLabel(b)) || newest(a, b),
         module: (a, b) => String(a.module ?? '~').localeCompare(String(b.module ?? '~')) || newest(a, b),
+        useful: (a, b) => usefulRank(a) - usefulRank(b) || newest(a, b),
       };
       return rows.sort(orders[fbSort.value] ?? newest);
     };
@@ -380,12 +388,23 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
         </div>`).join('')}</div></figure>`;
     };
 
+    const usefulChart = (rows) => {
+      const counts = [['Yes', '#507e61'], ['No', '#cc513f'], ['N/A', '#c9c6bd']].map(([label, color]) => [label, color, rows.filter((row) => usefulLabel(row) === label).length]);
+      const max = Math.max(1, ...counts.map(([, , count]) => count));
+      return `<figure class="fb-chart"><figcaption><b>Change useful?</b><span>N/A = no change</span></figcaption>
+        <div class="fb-bars fb-bars-3">${counts.map(([label, color, count]) => `<div class="fb-bar" title="${label}: ${count} (${Math.round((100 * count) / rows.length)}%)">
+          <span class="fb-bar-value">${count}</span>
+          <span class="fb-bar-fill" style="height:${(100 * count) / max}%;background:${color}"></span>
+          <span class="fb-bar-label">${label}</span>
+        </div>`).join('')}</div></figure>`;
+    };
+
     const renderFeedback = () => {
       const rows = visibleFeedback();
       const students = new Set(rows.map((row) => `${row.contextKey}|${row.student}`)).size;
       feedbackCount.textContent = `${rows.length} of ${feedbackRows.length} submissions · ${students} student${students === 1 ? '' : 's'} (per class)`;
       fbStats.innerHTML = rows.length
-        ? histogram('Difficulty', rows, 'difficulty', difficultyNames) + histogram('Pace', rows, 'pace', paceNames) + lostChart(rows)
+        ? histogram('Difficulty', rows, 'difficulty', difficultyNames) + histogram('Pace', rows, 'pace', paceNames) + lostChart(rows) + usefulChart(rows)
         : '';
       feedbackBody.replaceChildren();
       feedbackEmpty.hidden = rows.length > 0;
@@ -410,12 +429,13 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
           scaleCell(record.pace, paceNames, 'Pace'),
           createCell(lostLabel(record), record.lostAt ? '' : 'fb-faint'),
           who,
+          createCell(usefulLabel(record), record.improvementUseful ? '' : 'fb-faint'),
           createCell(record.comment || '', 'message-cell'));
         feedbackBody.append(row);
       });
     };
 
-    [fbClass, fbWhen, fbModule, fbBackground, fbLost, fbSort, fbComments, fbLatest].forEach((control) => control.addEventListener('change', renderFeedback));
+    [fbClass, fbWhen, fbModule, fbBackground, fbLost, fbUseful, fbSort, fbComments, fbLatest].forEach((control) => control.addEventListener('change', renderFeedback));
     document.querySelectorAll('.fb-table th button').forEach((button) => button.addEventListener('click', () => {
       fbSort.value = button.dataset.sort === 'newest' && fbSort.value === 'newest' ? 'oldest' : button.dataset.sort;
       renderFeedback();
@@ -674,6 +694,8 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
         const lost = {};
         rows.forEach((row) => { const key = row.lostAt || 'not answered'; lost[key] = (lost[key] ?? 0) + 1; });
         lines.push('', 'First got lost at:', ...Object.entries(lost).sort((a, b) => b[1] - a[1]).map(([key, count]) => `- ${key}: ${count}`), '');
+        const useful = (value) => rows.filter((row) => (row.improvementUseful ?? null) === value).length;
+        lines.push(`Today's change useful? Yes ${useful('yes')} · No ${useful('no')} · N/A ${useful(null)}`, '');
         const comments = rows.filter((row) => row.comment);
         if (comments.length) lines.push('Comments:', ...comments.map((row) => `- ${row.student}: ${row.comment}`), '');
       });

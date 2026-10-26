@@ -11,7 +11,7 @@ const { lesson } = Astro.props;
 
 const resource = (kind: ResourceKind) => lesson.resources.find((item) => item.kind === kind);
 const lectureResources = [resource('guide'), resource('slides'), resource('notes'), resource('notebook')].filter(Boolean);
-const practiceResources = [resource('workbook'), resource('worksheet'), resource('solution')].filter(Boolean);
+const practiceResources = [resource('worksheet'), resource('workbook'), resource('solution')].filter(Boolean);
 const colabRepository = course.colab?.repository;
 const colabBranch = course.colab?.branch;
 const colabNotebookRoot = course.colab?.notebookRoot;
@@ -20,7 +20,7 @@ const resourceLabel = (kind: ResourceKind) => ({
   slides: 'Slides',
   notes: 'Notes',
   notebook: 'Demo',
-  workbook: 'Workbook',
+  workbook: 'Colab',
   worksheet: 'Lab',
   solution: 'Solution',
   pdf: 'PDF',

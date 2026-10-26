@@ -81,6 +81,13 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
         <fieldset class="live-choice" id="lost-field">
           <legend>Where did you first get lost?</legend>
         </fieldset>
+        <!-- N/A (the middle, selected by default) is for a class with no change; it is sent as null. -->
+        <fieldset class="live-choice">
+          <legend>Did you find today's improvement useful?</legend>
+          <label><input type="radio" name="improvementUseful" value="yes" />Yes</label>
+          <label><input type="radio" name="improvementUseful" value="" checked />N/A (no change today)</label>
+          <label><input type="radio" name="improvementUseful" value="no" />No</label>
+        </fieldset>
         <details class="live-more">
           <summary>Add a comment (optional)</summary>
           <textarea name="comment" rows="2" maxlength="2000"></textarea>
@@ -693,6 +700,7 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
           background: background ? String(background) : null,
           module: module ? String(module) : null,
           comment: String(data.get('comment') ?? ''),
+          improvement_useful: String(data.get('improvementUseful') ?? '') || null,
           website: String(data.get('website') ?? ''),
         });
         if (background) store.set(backgroundStorageKey, String(background));

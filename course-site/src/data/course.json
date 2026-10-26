@@ -426,6 +426,17 @@
           "href": "materials/lesson4/lab.html"
         },
         {
+          "label": "Lab workbook",
+          "description": "Opens in Google Colab with the code already in place: File → Save a copy in Drive, then work in the copy.",
+          "kind": "workbook",
+          "group": "Lab",
+          "source": "lesson4/lab/lab_workbook.ipynb",
+          "target": "materials/lesson4/workbook",
+          "href": "materials/lesson4/workbook/lab_workbook.html",
+          "downloadHref": "materials/lesson4/workbook/lab_workbook.ipynb",
+          "render": "quarto"
+        },
+        {
           "label": "Lab solution",
           "description": "Review the fully worked notebook in the browser.",
           "kind": "solution",

@@ -465,8 +465,16 @@ dd {
 .course-table-head,
 .course-row {
   display: grid;
-  grid-template-columns: 112px minmax(280px, 1.2fr) minmax(180px, 0.75fr) minmax(210px, 0.85fr);
+  grid-template-columns: 112px minmax(260px, 1.2fr) minmax(175px, 0.75fr) minmax(225px, 0.85fr);
   gap: 20px;
+}
+
+/* Wide layout: Lab, Colab and Solution share one line in every row (225px fits all three), and
+   "All files" always takes the next line, so the chips line up from row to row. */
+@media (min-width: 901px) {
+  .course-row-resources .all-files {
+    flex-basis: 100%;
+  }
 }
 
 .course-table-head {
