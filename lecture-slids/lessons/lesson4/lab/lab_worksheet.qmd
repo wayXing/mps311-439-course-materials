@@ -22,7 +22,7 @@ In the lecture we asked whether a lump is malignant or benign. Today you walk th
 1. find out what "good" means here, by comparing with the simplest guess;
 2. fit logistic regression and read its probabilities;
 3. count the two kinds of mistake with a confusion matrix;
-4. choose a threshold by the cost of each mistake, and use the test set only once.
+4. choose a threshold by the cost of each mistake, see every threshold at once on the ROC curve, and use the test set only once.
 
 Before each step you will see a question. **Write down your own answer first**, then run the code and compare.
 
@@ -233,9 +233,9 @@ Accuracy counts a missed cancer and a false alarm as the same kind of error, and
 **Check:** the two histograms contain `159` and `267` lumps; most malignant lumps sit near 1, most benign near 0.
 :::
 
-## Part 3: Choose a threshold, then read the test set once (8 minutes)
+## Part 3: Choose a threshold, then read the test set once (16 minutes)
 
-**Goal:** see how the threshold trades missed cancers against false alarms, choose one for a clinic, and report it on the test set.
+**Goal:** see how the threshold trades missed cancers against false alarms, choose one for a clinic, see every threshold at once on the ROC curve, and report your choice on the test set.
 
 ### 3.1 Try three thresholds
 
@@ -270,7 +270,64 @@ for t in [0.5, 0.3, 0.1]:
 0.1: missed cancers drop from 7 to 3. The price is 27 false alarms instead of 2, which means more follow-up checks for patients who do not have cancer.
 :::
 
-### 3.2 The test set, once
+### 3.2 ROC: every threshold at once
+
+3.1 tried three thresholds. The **ROC curve** (receiver operating characteristic) tries every threshold: each threshold gives one point, the **false alarm rate** (false alarms divided by all 267 benign lumps) against the **recall** (caught divided by all 159 malignant lumps). The **AUC** is the area under the curve. As in 3.1, this uses only the cross-validated probabilities of the training lumps.
+
+**Question first:** the plot will have the false alarm rate across (x axis) and the recall up (y axis). A perfect model catches every malignant lump and raises no false alarm. Which corner of the plot is that: top left, top right, bottom left or bottom right?
+
+```python
+from sklearn.metrics import roc_curve, auc                # the ROC curve and the area under it
+false_alarm_rate, recall, thresholds = roc_curve(y_train, ____)   # one point for every threshold
+print("points on the curve:", len(thresholds))            # how many thresholds were tried
+print("AUC:", round(auc(false_alarm_rate, recall), 3))   # the area under the curve
+plt.plot(false_alarm_rate, recall, label="ROC curve")    # the ROC curve
+plt.plot([0, 1], [0, 1], "--", color="gray", label="random guessing")   # a model that guesses at random
+for t in [0.5, 0.3, 0.1]:                                 # the three thresholds of 3.1
+    pred_t = (prob >= t).astype(int)                      # call malignant when probability >= t
+    rate_t = pred_t[y_train == 0].mean()                  # false alarm rate at t
+    recall_t = pred_t[y_train == 1].mean()                # recall at t
+    print("threshold", t, "false alarm rate", round(rate_t, 3), "recall", round(recall_t, 3))
+    plt.scatter(rate_t, recall_t, label=f"threshold {t}") # one dot for this threshold
+plt.xlabel("false alarm rate (false alarms / 267 benign)")
+plt.ylabel("recall (caught / 159 malignant)")
+plt.legend()                                              # which dot is which threshold
+plt.show()
+```
+
+**Hint:** `roc_curve` needs a score for every lump, not a 0/1 call: the probabilities you made in 2.1.
+
+**Success check:** `points on the curve: 22` (scikit-learn keeps only the thresholds where the curve turns, so far fewer than 426) and `AUC: 0.991`, then
+
+```
+threshold 0.5 false alarm rate 0.007 recall 0.956
+threshold 0.3 false alarm rate 0.034 recall 0.962
+threshold 0.1 false alarm rate 0.101 recall 0.981
+```
+
+and a plot with the curve, the dashed line and three dots.
+
+**Questions:**
+
+1. Where is your threshold from 3.1 on the curve, compared with the dashed line? Give its false alarm rate and recall.
+2. In one sentence: what does an AUC of 0.991 mean? (Note Section 7.1: pick one malignant and one benign lump at random.)
+3. Put `pred` (the 0/1 calls at threshold 0.5) into the blank instead and run again. How many points do you get, and what happens to the AUC? Then change it back.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+false_alarm_rate, recall, thresholds = roc_curve(y_train, prob)
+```
+
+Top left: a false alarm rate of 0 and a recall of 1.
+
+1. Far above the dashed line, close to the top left corner. Threshold 0.1: false alarm rate 27 / 267 = 0.10, recall 156 / 159 = 0.98 (0.3: 0.03 and 0.96; 0.5: 0.01 and 0.96).
+2. If we pick one malignant and one benign lump at random, the model gives the malignant one the higher probability 99.1% of the time. It describes the ordering of all lumps, not one threshold; we still have to choose a threshold.
+3. Only 3 points and an AUC of 0.974: a 0/1 call is one threshold already, so there is nothing left to sweep. The ROC curve needs the probabilities.
+:::
+
+The ROC curve shows every trade-off at once; it does not choose for you. The threshold is still chosen by what each mistake costs, as you did in 3.1.
+
+### 3.3 The test set, once
 
 The threshold was chosen inside the training set. Now, and only now, fit on all training lumps and read the test set once. Fill in your chosen threshold.
 
@@ -300,7 +357,7 @@ pred_test = (prob_test >= 0.1).astype(int)
 :::
 
 ::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
-**You want:** to see the whole trade-off, not only three thresholds.
+**You want:** to see the two counts (missed cancers and false alarms) against the threshold value itself, which the ROC curve does not show.
 
 **Tell the AI:** `prob` holds the cross-validated probability of malignant for each training lump; `y_train` holds the labels (1 = malignant).
 
@@ -358,6 +415,7 @@ Assignment 2 (handwritten digits, MNIST) starts with the same steps on a 10-clas
 2. Why does cross-entropy punish a confident mistake more than squared error does?
 3. What did the confusion matrix show that accuracy did not?
 4. Why must the threshold be chosen without the test set?
+5. What does the ROC curve show that one confusion matrix does not?
 
 # Advanced Study
 

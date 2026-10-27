@@ -21,13 +21,17 @@ FILLS = [
     ["predict_proba"],                # 1.2
     ["7"],                            # 2.2
     ["0.3", "0.1"],                   # 3.1
-    ["0.1"],                          # 3.2
+    ["prob"],                         # 3.2
+    ["0.1"],                          # 3.3
 ]
 # 执行后必须出现在输出里的核对值（与 worksheet 的 Success check 一致）
 EXPECT = [
     "(426, 30) (143, 30)", "159 53", "always guess benign: 0.6267", "[0 0 1 1 1]", "[0.253 0.747]", "[1. 1. 1.]",
     "[[152 7] [ 2 265]]", "0.956", "0.987",
     "threshold 0.5 missed 7 false alarms 2", "threshold 0.3 missed 6 false alarms 9", "threshold 0.1 missed 3 false alarms 27",
+    "points on the curve: 22", "AUC: 0.991",
+    "threshold 0.5 false alarm rate 0.007 recall 0.956", "threshold 0.3 false alarm rate 0.034 recall 0.962",
+    "threshold 0.1 false alarm rate 0.101 recall 0.981",
     "[[53 0] [11 79]]",
     "lumps in the two histograms: 159 267", "at threshold 0.5: 7 2", "0.908",
     "True", "0.958", "largest weight, almost no penalty: 264", "training accuracy, almost no penalty: 1.0",
@@ -111,7 +115,7 @@ for cell in nb.cells:
 norm = lambda s: " ".join(s.split())                    # ignore spacing differences
 missing = [e for e in EXPECT if norm(e) not in norm(text)]
 assert not missing, f"Expected values not found in outputs: {missing}"
-# 3.2 里给出的阈值 0.3 的测试矩阵由这里重算
+# 3.3 里给出的阈值 0.3 的测试矩阵由这里重算
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -122,6 +126,13 @@ _a, _b, _c, _e = train_test_split(_d.data, 1 - _d.target, test_size=0.25, random
 _s = StandardScaler().fit(_a)
 _p = LogisticRegression().fit(_s.transform(_a), _c).predict_proba(_s.transform(_b))[:, 1]
 assert confusion_matrix(_e, (_p >= 0.3).astype(int), labels=[1, 0]).tolist() == [[51, 2], [6, 84]]
+# 3.2 第 3 问：把 0/1 的预测放进 roc_curve，只有 3 个点、AUC 0.974
+from sklearn.model_selection import KFold, cross_val_predict
+from sklearn.metrics import roc_curve, auc
+_x = StandardScaler().fit_transform(_a)
+_q = cross_val_predict(LogisticRegression(), _x, _c, cv=KFold(5, shuffle=True, random_state=0), method="predict_proba")[:, 1]
+_f, _r, _t = roc_curve(_c, (_q >= 0.5).astype(int))
+assert len(_t) == 3 and round(auc(_f, _r), 3) == 0.974, (len(_t), auc(_f, _r))
 # 警告信息里带有本机的安装路径；公开的 Solution 不留本机路径
 for cell in nb.cells:
     for out in cell.get("outputs", []):
