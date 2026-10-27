@@ -1,7 +1,8 @@
 """从当前 Worksheet 生成带题号、文字答案和执行输出的 Solution，并做三项检查：
 1. 每个填空块的空数与 FILLS 一致；2. 每个 Answer 里的代码行都出现在填好的代码里；
 3. 用真实 Jupyter 内核从第一格顺序执行，输出写回 lab_solution.ipynb，并断言关键核对值。
-运行：python build_solution.py   （用有 sklearn 的 Python，例如 ~/opt/anaconda3/bin/python）
+运行：uv run --no-project --python 3.12 --with scikit-learn,matplotlib,pandas,nbclient,nbformat,ipykernel python build_solution.py
+（用 uv；~/.ipython 坏掉时先设 IPYTHONDIR 到一个可写的临时目录，见 COURSE_MATERIAL_WORKFLOW.md 第 5 节）
 """
 from pathlib import Path
 import re

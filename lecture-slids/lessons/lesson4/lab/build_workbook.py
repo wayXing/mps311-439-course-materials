@@ -4,7 +4,8 @@
 3. 不放 Answer（答案只在网页 worksheet 里，折叠）；
 4. 检查：把空按 build_solution.py 的 FILLS 填好，用真实 Jupyter 内核从头执行，断言 Core 的核对值。
 写出的 workbook 不含输出。
-运行：python build_workbook.py   （用有 sklearn 的 Python，例如 ~/opt/anaconda3/bin/python）
+运行：uv run --no-project --python 3.12 --with scikit-learn,matplotlib,pandas,nbclient,nbformat,ipykernel python build_workbook.py
+（用 uv；~/.ipython 坏掉时先设 IPYTHONDIR 到一个可写的临时目录，见 COURSE_MATERIAL_WORKFLOW.md 第 5 节）
 """
 from pathlib import Path
 import re
