@@ -1,5 +1,6 @@
 ---
 import { course, type CourseLesson, type ResourceKind } from '../data/course';
+import { timetable } from '../data/timetable';
 import { colabUrl, withBase } from '../lib/urls';
 import ResourceIcon from './ResourceIcon.astro';
 
@@ -26,22 +27,34 @@ const resourceLabel = (kind: ResourceKind) => ({
   pdf: 'PDF',
   data: 'Data',
 })[kind];
+
+// Dates let the home page mark the lesson in progress (see the script in index.astro).
+const lessonNumber = Number(lesson.slug.match(/^lesson-(\d+)$/)?.[1]);
+const dates = timetable.events.find((event) => event.lesson === lessonNumber);
+const lessonPage = withBase(`course/${lesson.slug}/`);
 ---
 
-<article class={`course-row accent-${lesson.accent}`}>
+<article
+  class="course-row"
+  data-lecture-date={dates?.lectureDate || undefined}
+  data-lab-date={dates?.labDate || undefined}
+>
   <div class="course-row-lesson">
     <span class="lesson-marker" aria-hidden="true"></span>
     <span>{lesson.label}</span>
+    <span class="lesson-now" data-kind="lecture" hidden></span>
+    <span class="lesson-now" data-kind="lab" hidden></span>
   </div>
 
   <div class="course-row-topic">
-    <a href={withBase(`course/${lesson.slug}/`)}>
-      <strong>{lesson.shortTitle}</strong>
-      <span>{lesson.summary}</span>
-    </a>
+    <div class="topic-title">
+      <a href={lessonPage}><strong>{lesson.shortTitle}</strong></a>
+      <a class="all-files" href={lessonPage} aria-label={`All files for ${lesson.title}`}><ResourceIcon kind="all" size={12} />All files</a>
+    </div>
+    <span>{lesson.summary}</span>
   </div>
 
-  <div class="course-row-resources">
+  <div class="course-row-resources course-row-lecture">
     <span class="column-label">Lecture</span>
     {lectureResources.length > 0
       ? lectureResources.map((item) => item && (
@@ -63,7 +76,7 @@ const resourceLabel = (kind: ResourceKind) => ({
     )}
   </div>
 
-  <div class="course-row-resources">
+  <div class="course-row-resources course-row-practice">
     <span class="column-label">Practice</span>
     {practiceResources.length > 0
       ? practiceResources.map((item) => item && (
@@ -75,6 +88,5 @@ const resourceLabel = (kind: ResourceKind) => ({
         ><ResourceIcon kind={item.kind} size={13} />{resourceLabel(item.kind)}</a>
       ))
       : <span class="resource-empty">—</span>}
-    <a class="all-files" href={withBase(`course/${lesson.slug}/`)} aria-label={`View all files for ${lesson.title}`}><ResourceIcon kind="all" size={12} />All files</a>
   </div>
 </article>

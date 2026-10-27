@@ -1,0 +1,47 @@
+---
+import { changelog } from '../data/changelog';
+import { course } from '../data/course';
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const typeLabel = { feedback: 'Feedback', added: 'Added', changed: 'Changed', fixed: 'Fixed' };
+const formatDate = (date: string) => new Intl.DateTimeFormat('en-GB', {
+  day: 'numeric', month: 'short', year: 'numeric', timeZone: 'UTC',
+}).format(new Date(`${date}T12:00:00Z`));
+---
+
+<SiteLayout
+  title={`Changelog · ${course.code}`}
+  description={`How ${course.code} ${course.title} has changed from release to release, and which changes came from student feedback.`}
+>
+  <section class="changelog-hero shell">
+    <span class="eyebrow">{course.code} · {course.title}</span>
+    <h1>Changelog</h1>
+    {changelog.commitment.map((paragraph) => <p>{paragraph}</p>)}
+    <ul class="changelog-legend" aria-label="Kinds of change">
+      <li><span class="change-tag change-feedback">Feedback</span> a change made in response to student feedback</li>
+      <li><span class="change-tag">Added</span><span class="change-tag">Changed</span><span class="change-tag">Fixed</span> everything else</li>
+    </ul>
+  </section>
+
+  <section class="changelog-list shell" aria-label="Releases">
+    {changelog.releases.map((release, index) => (
+      <article class="changelog-release" id={`v${release.version}`}>
+        <header>
+          <span class="release-version">v{release.version}</span>
+          <time datetime={release.date}>{release.dateLabel ?? formatDate(release.date)}</time>
+          {index === 0 && <span class="release-latest">Latest</span>}
+          <h2>{release.title}</h2>
+        </header>
+        <ul>
+          {release.items.map((item) => (
+            <li>
+              <span class:list={['change-tag', `change-${item.type}`]}>{typeLabel[item.type]}</span>
+              <p>{item.text}</p>
+            </li>
+          ))}
+        </ul>
+      </article>
+    ))}
+  </section>
+
+</SiteLayout>

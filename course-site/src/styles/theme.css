@@ -41,6 +41,19 @@
   --resource-data-soft: #d9efec;
   --resource-video: #b8364f;
   --resource-video-soft: #f6dde2;
+  /* Home table: cool family for Lecture, warm family for Practice; shades differ within each. */
+  --lecture-slides: #2a5bd0;
+  --lecture-slides-soft: #dde6fb;
+  --lecture-notes: #5a3fb0;
+  --lecture-notes-soft: #e8e2f7;
+  --lecture-video: #0e6f86;
+  --lecture-video-soft: #d3ecf0;
+  --practice-lab: #9c3f14;
+  --practice-lab-soft: #f8dccd;
+  --practice-colab: #7a5700;
+  --practice-colab-soft: #f5e8bf;
+  --practice-solution: #a3345a;
+  --practice-solution-soft: #f6dbe4;
 
   --radius-sm: 14px;
   --radius-md: 24px;

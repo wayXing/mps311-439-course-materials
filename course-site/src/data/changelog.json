@@ -1,0 +1,191 @@
+{
+  "commitment": [
+    "This course is not a list of algorithms. Our commitment is that students leave able to take a real problem, turn it into one that can be learned, solved and tested with data, and judge whether the answer deserves to be trusted, with machine learning and AI as their tools. Not only to pass the module, but to be able to solve problems.",
+    "So we run the course like software: we release, listen and improve. Students give anonymous feedback after every class; we read it regularly, and the changes it leads to are recorded here."
+  ],
+  "releases": [
+    {
+      "version": "0.3.8",
+      "date": "2026-10-27",
+      "title": "Find this week faster",
+      "items": [
+        {
+          "type": "added",
+          "text": "The home page marks this week's lecture and lab on their lessons, and shows the next assignment deadline at the top."
+        },
+        {
+          "type": "changed",
+          "text": "One name for each material across the site (Slides, Notes, Video, Lab, Colab, Solution), with a plain sentence on what each is for."
+        },
+        {
+          "type": "changed",
+          "text": "Lesson pages list the slides, notes and lab first; last year's files are folded away at the bottom."
+        },
+        {
+          "type": "added",
+          "text": "This changelog."
+        }
+      ]
+    },
+    {
+      "version": "0.3.7",
+      "date": "2026-10-27",
+      "title": "Labs 4–10 rebuilt",
+      "items": [
+        {
+          "type": "feedback",
+          "text": "In response to student feedback (“I preferred Lab1 where a google collab workbook was already made”), every lab from Lesson 4 now comes with a Colab notebook with the setup code already in place."
+        },
+        {
+          "type": "feedback",
+          "text": "Another student felt the Lab 3 worksheet left no room for their own thinking (“it is all either ‘copy and paste this’ or ‘ask chatgpt that’”). The notebooks therefore still leave the key modelling decisions blank, some tasks ask for your answer before you run the code, and the optional “Try with AI” prompts are folded by default."
+        },
+        {
+          "type": "fixed",
+          "text": "Lab 4 had no task on ROC curves and AUC, although they are a learning outcome of Lesson 4. Labs 5–10 were checked against every listed learning outcome and resized to fit a 50-minute session."
+        },
+        {
+          "type": "added",
+          "text": "The feedback form asks whether the latest change helped."
+        }
+      ]
+    },
+    {
+      "version": "0.3.6",
+      "date": "2026-10-22",
+      "title": "Kaggle competition",
+      "items": [
+        {
+          "type": "added",
+          "text": "An optional Kaggle competition for Assignment 1, with an anonymous leaderboard."
+        }
+      ]
+    },
+    {
+      "version": "0.3.5",
+      "date": "2026-10-19",
+      "title": "Live classroom and lesson videos",
+      "items": [
+        {
+          "type": "added",
+          "text": "One QR code for the whole course: in-class polls, a question board, “Got it” and “Lost” buttons, and anonymous feedback that can also be given after class."
+        },
+        {
+          "type": "added",
+          "text": "A short video for every lesson, with subtitles and chapters, on the lesson page and on YouTube."
+        }
+      ]
+    },
+    {
+      "version": "0.3.4",
+      "date": "2026-10-17",
+      "title": "Lessons 3–10 redesigned",
+      "items": [
+        {
+          "type": "changed",
+          "text": "Every lesson follows the same questions: what is the problem, how do we represent it, what counts as a good answer, how do we find it, and what evidence supports it."
+        },
+        {
+          "type": "changed",
+          "text": "The mathematics is part of each lesson rather than an aside, with optional Advanced sections for those who want more depth."
+        },
+        {
+          "type": "fixed",
+          "text": "Figures in the Lesson 3 notes did not show on the website."
+        }
+      ]
+    },
+    {
+      "version": "0.3.3",
+      "date": "2026-10-09",
+      "title": "Lesson 2 and the assignments",
+      "items": [
+        {
+          "type": "changed",
+          "text": "Lesson 2 redesigned around one clear problem, loss and solution, and its slides reworked so that each step builds on the one before."
+        },
+        {
+          "type": "added",
+          "text": "Pages for Assignments 1 and 2 with deadlines, a countdown and submission guidance."
+        },
+        {
+          "type": "fixed",
+          "text": "Formulas in Lesson 2 did not display correctly."
+        }
+      ]
+    },
+    {
+      "version": "0.3.2",
+      "date": "2026-10-05",
+      "title": "Lesson 1 after the first class",
+      "items": [
+        {
+          "type": "feedback",
+          "text": "In response to feedback on the first class, repeated explanations in Lesson 1 were combined and new examples added so the modelling questions can be applied to other situations. The version taught in class is kept in the archive."
+        },
+        {
+          "type": "added",
+          "text": "Advanced investigations and reference solutions in Lab 1."
+        }
+      ]
+    },
+    {
+      "version": "0.3.1",
+      "date": "2026-09-11",
+      "title": "Open materials",
+      "items": [
+        {
+          "type": "added",
+          "text": "One-click Colab demos and a public repository of the course materials."
+        },
+        {
+          "type": "added",
+          "text": "A question board for each class."
+        }
+      ]
+    },
+    {
+      "version": "0.3.0",
+      "date": "2026-08-28",
+      "title": "New course website",
+      "items": [
+        {
+          "type": "added",
+          "text": "One site for every lesson's slides, notes and labs."
+        },
+        {
+          "type": "added",
+          "text": "Anonymous feedback after each class."
+        }
+      ]
+    },
+    {
+      "version": "0.2",
+      "date": "2025-09-01",
+      "dateLabel": "2025–26",
+      "title": "Responding to the first year",
+      "items": [
+        {
+          "type": "feedback",
+          "text": "In response to student feedback in 2024–25, the module added feedback by QR code during the semester with changes made while it ran, Q&A sessions before each deadline, more detailed assignment feedback, and lectures combined with computer classes."
+        },
+        {
+          "type": "feedback",
+          "text": "Carried into v0.3 from 2025–26 student feedback: more mathematical depth in lectures, access for students not in the room to what is written on the board, and more independent work in the labs."
+        }
+      ]
+    },
+    {
+      "version": "0.1",
+      "date": "2024-09-01",
+      "dateLabel": "2024–25",
+      "title": "First version",
+      "items": [
+        {
+          "type": "added",
+          "text": "First run as MAS369 and MAS61007: lectures opening with recent developments in AI, AI-assisted coding in the labs, and assessment by coursework."
+        }
+      ]
+    }
+  ]
+}

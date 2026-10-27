@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import { currentVersion } from '../data/changelog';
 import { course } from '../data/course';
 import { withBase } from '../lib/urls';
 
@@ -16,6 +17,7 @@ const pathname = Astro.url.pathname;
 const isHome = pathname === withBase() || pathname === withBase('index.html');
 const isAssignment = pathname.includes('/assignment');
 const isLive = pathname.includes('/live');
+const isChangelog = pathname.includes('/changelog');
 ---
 
 <!doctype html>
@@ -39,6 +41,13 @@ const isLive = pathname.includes('/live');
           <a class:list={{ active: isHome }} href={withBase()} aria-current={isHome ? 'page' : undefined}>Home</a>
           <a class:list={{ active: isAssignment }} href={withBase('assignment/')} aria-current={isAssignment ? 'page' : undefined}>Assignment</a>
           <a class:list={{ active: isLive }} href={withBase('live/')} aria-current={isLive ? 'page' : undefined}>Class</a>
+          <a
+            class:list={['nav-version', { active: isChangelog }]}
+            href={withBase('changelog/')}
+            aria-current={isChangelog ? 'page' : undefined}
+            aria-label={`Course version ${currentVersion}: see what changed`}
+            title="What changed in this course"
+          >v{currentVersion}</a>
         </div>
       </nav>
     </header>

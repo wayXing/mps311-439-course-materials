@@ -1,54 +1,34 @@
 ---
 import CourseLessonRow from '../components/CourseLessonRow.astro';
 import SemesterProgress from '../components/SemesterProgress.astro';
-import ResourceIcon from '../components/ResourceIcon.astro';
+import { assignmentOne, assignmentTwo } from '../data/assignment';
 import { course } from '../data/course';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { withBase } from '../lib/urls';
 
-const preparation = course.lessons.find((lesson) => lesson.type === 'preparation');
+const deadlines = [
+  { name: 'Assignment 1', at: assignmentOne.deadlineAt, href: withBase('assignment/') },
+  { name: 'Assignment 2', at: assignmentTwo.deadlineAt, href: withBase('assignment/2/') },
+];
 ---
 
 <SiteLayout>
+  <!-- Students come here for this week's materials, so the lesson table starts right after a short header;
+       the course overview moves below it. -->
   <section class="home-intro shell" id="about">
-    <div>
-      <span class="eyebrow">{course.title} · {course.academicYear}</span>
-      <h1>Machine Learning</h1>
-      <p>
-        Find your lesson and open the slides, notes, demonstration, or lab directly.
-        Everything students need is listed below.
-      </p>
-    </div>
-    <dl class="course-meta">
-      <div><dt>Module</dt><dd>{course.code}</dd></div>
-      <div><dt>Academic year</dt><dd>{course.academicYear}</dd></div>
-      <div><dt>Instructor</dt><dd>{course.instructor}</dd></div>
-    </dl>
+    <span class="eyebrow">{course.code} · {course.academicYear} · {course.instructor}</span>
+    <h1>Machine Learning</h1>
+    <p>Slides, notes, videos and labs for every lesson.</p>
+    {deadlines.map((deadline) => (
+      <a class="home-deadline" href={deadline.href} data-deadline={deadline.at} hidden>
+        <strong>{deadline.name}</strong> due <time datetime={deadline.at}></time>
+        <span class="home-deadline-left"></span>
+        <span aria-hidden="true">→</span>
+      </a>
+    ))}
   </section>
 
-  <div class="shell">
-    <SemesterProgress />
-  </div>
-
-  {preparation && (
-    <aside class="start-strip shell">
-      <div>
-        <strong>New to Python?</strong>
-        <span>Complete the preparation guide before the first practical.</span>
-      </div>
-      <a href={withBase(`course/${preparation.slug}/`)}><ResourceIcon kind="guide" size={14} />Open preparation guide <span aria-hidden="true">→</span></a>
-    </aside>
-  )}
-
-  <section class="course-index shell" id="lessons" aria-labelledby="course-index-heading">
-    <div class="index-heading">
-      <div>
-        <span class="section-kicker">Course materials</span>
-        <h2 id="course-index-heading">Lesson index</h2>
-      </div>
-      <p>Use “All files” for additional materials and downloads.</p>
-    </div>
-
+  <section class="course-index shell" id="lessons" aria-label="Lessons">
     <div class="course-table">
       <div class="course-table-head" aria-hidden="true">
         <span>Lesson</span><span>Topic</span><span>Lecture</span><span>Practice</span>
@@ -56,4 +36,60 @@ const preparation = course.lessons.find((lesson) => lesson.type === 'preparation
       {course.lessons.map((lesson) => <CourseLessonRow lesson={lesson} />)}
     </div>
   </section>
+
+  <div class="shell home-journey">
+    <SemesterProgress />
+  </div>
 </SiteLayout>
+
+<script>
+  // A lesson's lecture is on a Friday and its lab on the next Tuesday, so one teaching week holds
+  // the lab of one lesson and the lecture of the next. Mark each activity of this week (Monday to
+  // Sunday, UK date; at the weekend, the coming week) on its own lesson and column. In a week with
+  // no classes, mark the next activity instead. Computed in the browser so the static build does
+  // not freeze it on the build day.
+  const DAY = 86_400_000;
+  const today = Date.parse(new Intl.DateTimeFormat('en-CA', { timeZone: 'Europe/London' }).format(new Date()));
+  const weekday = (new Date(today).getUTCDay() + 6) % 7; // Monday = 0
+  const weekStart = weekday >= 5 ? today + (7 - weekday) * DAY : today - weekday * DAY;
+  const weekEnd = weekStart + 6 * DAY;
+  const formatDay = new Intl.DateTimeFormat('en-GB', { weekday: 'short', day: 'numeric', month: 'short', timeZone: 'UTC' });
+
+  const activities = [...document.querySelectorAll<HTMLElement>('.course-row')].flatMap((row) => [
+    { row, kind: 'lecture', date: Date.parse(row.dataset.lectureDate ?? '') },
+    { row, kind: 'lab', date: Date.parse(row.dataset.labDate ?? '') },
+  ]).filter((activity) => !Number.isNaN(activity.date));
+
+  let marked = activities.filter((activity) => activity.date >= weekStart && activity.date <= weekEnd);
+  if (marked.length === 0) {
+    const next = Math.min(...activities.map((activity) => activity.date).filter((date) => date >= today));
+    marked = activities.filter((activity) => activity.date === next);
+  }
+
+  // Show the next assignment deadline that has not passed; it disappears once the last one is over.
+  const nextDeadline = [...document.querySelectorAll<HTMLElement>('.home-deadline')]
+    .find((link) => Date.parse(link.dataset.deadline ?? '') > Date.now());
+  if (nextDeadline) {
+    const at = Date.parse(nextDeadline.dataset.deadline ?? '');
+    const daysLeft = Math.floor((at - Date.now()) / DAY);
+    const time = nextDeadline.querySelector('time');
+    const left = nextDeadline.querySelector('.home-deadline-left');
+    if (time) {
+      time.textContent = new Intl.DateTimeFormat('en-GB', {
+        weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit', timeZone: 'Europe/London',
+      }).format(at);
+    }
+    if (left) left.textContent = daysLeft < 1 ? 'less than a day left' : `${daysLeft} ${daysLeft === 1 ? 'day' : 'days'} left`;
+    nextDeadline.hidden = false;
+  }
+
+  for (const { row, kind, date } of marked) {
+    const badge = row.querySelector<HTMLElement>(`.lesson-now[data-kind="${kind}"]`);
+    row.classList.add('is-current');
+    row.querySelector(kind === 'lecture' ? '.course-row-lecture' : '.course-row-practice')?.classList.add('is-this-week');
+    if (badge) {
+      badge.textContent = `${kind === 'lecture' ? 'Lecture' : 'Lab'} · ${formatDay.format(date)}`;
+      badge.hidden = false;
+    }
+  }
+</script>

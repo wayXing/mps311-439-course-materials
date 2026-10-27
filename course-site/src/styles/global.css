@@ -105,11 +105,174 @@ a {
   box-shadow: 0 2px 8px rgba(54, 48, 34, 0.08);
 }
 
-.home-intro {
+/* Course version: a small monospaced tag, like a software release, linking to the changelog. */
+.nav-links .nav-version {
+  margin-left: 4px;
+  padding: 4px 8px;
+  color: var(--ink-soft);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.nav-links .nav-version.active {
+  color: var(--surface-solid);
+  background: var(--ink);
+  border-color: var(--ink);
+  box-shadow: none;
+}
+
+/* Changelog */
+
+.changelog-hero {
+  padding: 52px 0 24px;
+}
+
+.changelog-hero > p,
+.changelog-legend,
+.changelog-release {
+  max-width: 820px;
+}
+
+.changelog-hero h1 {
+  margin-bottom: 18px;
+  font-family: var(--font-display);
+  font-size: clamp(40px, 4.4vw, 54px);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+  line-height: 1;
+}
+
+.changelog-hero p {
+  color: var(--ink-soft);
+  font-size: 16px;
+  line-height: 1.65;
+}
+
+.changelog-legend {
   display: grid;
-  gap: 72px;
-  grid-template-columns: minmax(0, 1fr) 260px;
-  padding: 76px 0 54px;
+  gap: 8px;
+  margin: 22px 0 0;
+  padding: 0;
+  color: var(--ink-faint);
+  font-size: 12px;
+  list-style: none;
+}
+
+.changelog-legend li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.change-tag {
+  display: inline-block;
+  min-width: 68px;
+  padding: 3px 8px;
+  color: var(--ink-soft);
+  background: var(--surface-solid);
+  border-radius: 6px;
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 10.5px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.change-tag.change-feedback {
+  color: var(--surface-solid);
+  background: var(--ink);
+  box-shadow: none;
+}
+
+.changelog-list {
+  padding-bottom: 72px;
+}
+
+.changelog-release {
+  padding: 26px 0;
+  border-top: 1px solid var(--line);
+}
+
+.changelog-release header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+  margin-bottom: 14px;
+}
+
+.release-version {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.changelog-release time {
+  color: var(--ink-faint);
+  font-size: 12px;
+}
+
+.release-latest {
+  padding: 2px 7px;
+  color: var(--surface-solid);
+  background: var(--ink);
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.changelog-release h2 {
+  flex-basis: 100%;
+  margin: 2px 0 0;
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.changelog-release ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.changelog-release li {
+  display: grid;
+  grid-template-columns: 80px minmax(0, 1fr);
+  gap: 12px;
+  align-items: baseline;
+  padding: 7px 0;
+}
+
+.changelog-release li p {
+  margin: 0;
+  color: var(--ink-soft);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 640px) {
+  .changelog-release li {
+    grid-template-columns: 1fr;
+    gap: 6px;
+  }
+
+  .changelog-release li .change-tag {
+    justify-self: start;
+  }
+}
+
+.home-intro {
+  padding: 44px 0 28px;
+}
+
+.home-intro .eyebrow {
+  margin-bottom: 12px;
 }
 
 .eyebrow,
@@ -133,44 +296,53 @@ dd {
 }
 
 .home-intro h1 {
-  margin-bottom: 20px;
+  margin-bottom: 10px;
   font-family: var(--font-display);
-  font-size: clamp(50px, 6vw, 76px);
+  font-size: clamp(40px, 4.4vw, 54px);
   font-weight: 500;
-  letter-spacing: -0.055em;
-  line-height: 0.98;
+  letter-spacing: -0.045em;
+  line-height: 1;
 }
 
 .home-intro p {
-  max-width: 650px;
   margin-bottom: 0;
   color: var(--ink-soft);
-  font-size: 18px;
-  line-height: 1.65;
+  font-size: 16px;
+  line-height: 1.5;
 }
 
-.course-meta {
-  margin: 4px 0 0;
-  border-top: 1px solid var(--line);
+.home-journey {
+  padding-bottom: 60px;
 }
 
-.course-meta div {
-  display: flex;
-  justify-content: space-between;
-  gap: 18px;
-  padding: 13px 0;
-  border-bottom: 1px solid var(--line);
-  font-size: 12px;
+.home-deadline {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 8px;
+  margin-top: 16px;
+  padding: 8px 14px;
+  color: var(--practice-lab);
+  background: var(--practice-lab-soft);
+  border-radius: var(--radius-pill);
+  font-size: 13px;
 }
 
-.course-meta dt {
-  color: var(--ink-faint);
+.home-deadline[hidden] {
+  display: none;
 }
 
-.course-meta dd {
-  margin-bottom: 0;
+.home-deadline time {
   font-weight: 650;
-  text-align: right;
+}
+
+.home-deadline-left {
+  color: color-mix(in srgb, var(--practice-lab) 75%, transparent);
+}
+
+.home-deadline:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .learning-journey {
@@ -433,7 +605,7 @@ dd {
 }
 
 .course-index {
-  padding: 82px 0 110px;
+  padding: 0 0 72px;
 }
 
 .index-heading {
@@ -465,16 +637,8 @@ dd {
 .course-table-head,
 .course-row {
   display: grid;
-  grid-template-columns: 112px minmax(260px, 1.2fr) minmax(175px, 0.75fr) minmax(225px, 0.85fr);
+  grid-template-columns: 124px minmax(260px, 1.2fr) minmax(175px, 0.75fr) minmax(225px, 0.85fr);
   gap: 20px;
-}
-
-/* Wide layout: Lab, Colab and Solution share one line in every row (225px fits all three), and
-   "All files" always takes the next line, so the chips line up from row to row. */
-@media (min-width: 901px) {
-  .course-row-resources .all-files {
-    flex-basis: 100%;
-  }
 }
 
 .course-table-head {
@@ -499,10 +663,18 @@ dd {
   background: rgba(255, 255, 255, 0.46);
 }
 
+/* The lesson in progress (set by the script on the home page): one dark marker, a badge and a
+   tinted row. Every other lesson stays neutral, so this is the only emphasis in the table. */
+.course-row.is-current {
+  background: var(--surface-solid);
+  box-shadow: inset 3px 0 0 var(--ink);
+}
+
 .course-row-lesson {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 10px;
+  gap: 6px 10px;
   color: var(--ink-faint);
   font-size: 11px;
   font-weight: 700;
@@ -514,14 +686,44 @@ dd {
   width: 7px;
   height: 7px;
   flex: 0 0 auto;
-  background: var(--accent);
+  background: color-mix(in srgb, var(--ink) 22%, transparent);
   border-radius: 50%;
 }
 
-.course-row-topic a {
+.is-current .course-row-lesson {
+  color: var(--ink);
+}
+
+.is-current .lesson-marker {
+  background: var(--ink);
+}
+
+.lesson-now {
+  padding: 3px 8px;
+  color: var(--surface-solid);
+  background: var(--ink);
+  border-radius: var(--radius-pill);
+  font-size: 10.5px;
+  letter-spacing: 0;
+  text-transform: none;
+  white-space: nowrap;
+}
+
+.lesson-now[hidden] {
+  display: none;
+}
+
+.course-row-topic {
   display: flex;
   flex-direction: column;
   gap: 6px;
+}
+
+.topic-title {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
 }
 
 .course-row-topic strong {
@@ -532,16 +734,33 @@ dd {
   line-height: 1.1;
 }
 
-.course-row-topic span {
-  color: var(--ink-faint);
-  font-size: 12px;
-  line-height: 1.45;
+.course-row-topic > span {
+  color: var(--ink-soft);
+  font-size: 13px;
+  line-height: 1.5;
 }
 
 .course-row-topic a:hover strong {
   text-decoration: underline;
-  text-decoration-color: color-mix(in srgb, var(--accent) 55%, transparent);
+  text-decoration-color: color-mix(in srgb, var(--ink) 35%, transparent);
   text-underline-offset: 4px;
+}
+
+/* Secondary link to the lesson page: quiet grey text so it does not compete with the chips. */
+.course-row-topic .all-files {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--ink-faint);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.course-row-topic .all-files:hover {
+  color: var(--ink);
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .course-row-resources {
@@ -563,39 +782,36 @@ dd {
   color: var(--ink-soft);
   background: rgba(23, 23, 19, 0.045);
   border-radius: 7px;
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 650;
 }
 
-.resource-slides {
-  --resource-color: var(--resource-slides);
-  --resource-soft: var(--resource-slides-soft);
+/* One colour per file type across the site: cool for lecture files, warm for practice files. */
+.resource-slides,
+.resource-guide {
+  --resource-color: var(--lecture-slides);
+  --resource-soft: var(--lecture-slides-soft);
 }
 
 .resource-notes {
-  --resource-color: var(--resource-notes);
-  --resource-soft: var(--resource-notes-soft);
+  --resource-color: var(--lecture-notes);
+  --resource-soft: var(--lecture-notes-soft);
 }
 
 .resource-notebook,
 .resource-workbook {
-  --resource-color: var(--resource-demo);
-  --resource-soft: var(--resource-demo-soft);
+  --resource-color: var(--practice-colab);
+  --resource-soft: var(--practice-colab-soft);
 }
 
 .resource-worksheet {
-  --resource-color: var(--resource-lab);
-  --resource-soft: var(--resource-lab-soft);
+  --resource-color: var(--practice-lab);
+  --resource-soft: var(--practice-lab-soft);
 }
 
 .resource-solution {
-  --resource-color: var(--resource-notes);
-  --resource-soft: var(--resource-notes-soft);
-}
-
-.resource-guide {
-  --resource-color: var(--resource-guide);
-  --resource-soft: var(--resource-guide-soft);
+  --resource-color: var(--practice-solution);
+  --resource-soft: var(--practice-solution-soft);
 }
 
 .resource-data {
@@ -604,8 +820,8 @@ dd {
 }
 
 .resource-video {
-  --resource-color: var(--resource-video);
-  --resource-soft: var(--resource-video-soft);
+  --resource-color: var(--lecture-video);
+  --resource-soft: var(--lecture-video-soft);
 }
 
 .course-row-resources .resource-link {
@@ -618,15 +834,34 @@ dd {
   background: color-mix(in srgb, var(--resource-soft) 72%, var(--resource-color));
 }
 
-.course-row-resources a:hover {
+/* Home table chips: one calm shape for every file (white, thin border, dark label); only the icon
+   carries colour, cool for lecture files and warm for practice files. */
+.course-row-lecture .resource-link,
+.course-row-practice .resource-link {
   color: var(--ink);
-  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  background: var(--surface-solid);
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 
-.course-row-resources .all-files {
-  padding-inline: 2px;
-  color: var(--ink-faint);
-  background: transparent;
+.course-row-lecture .resource-link svg,
+.course-row-practice .resource-link svg {
+  color: var(--resource-color);
+}
+
+.course-row-lecture .resource-link:hover,
+.course-row-practice .resource-link:hover {
+  color: var(--ink);
+  background: var(--resource-soft);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--resource-color) 35%, transparent);
+}
+
+/* This week's activity: an outline around the column it belongs to. Outline keeps the layout,
+   so the chips stay on the same line as the other column. */
+.course-row-resources.is-this-week {
+  justify-self: start;
+  border-radius: 10px;
+  outline: 1.5px solid var(--ink);
+  outline-offset: 5px;
 }
 
 .resource-empty {
@@ -849,7 +1084,9 @@ dd {
 
 /* Lesson detail pages */
 
-.detail-hero {
+/* Lesson pages use the same neutral ink as the home page instead of a colour per lesson. */
+.detail-hero[class*="accent-"] {
+  --accent: var(--ink-faint);
   padding: 38px 0 62px;
 }
 
@@ -894,6 +1131,15 @@ dd {
   color: var(--ink-soft);
   font-size: 17px;
   line-height: 1.65;
+}
+
+.detail-copy > .detail-subtitle {
+  margin: -8px 0 16px;
+  color: var(--ink);
+  font-family: var(--font-display);
+  font-size: 24px;
+  font-style: italic;
+  line-height: 1.3;
 }
 
 .button {
@@ -1012,6 +1258,7 @@ dd {
 }
 
 .lesson-video {
+  max-width: 760px;
   aspect-ratio: 16 / 9;
   margin-top: 18px;
   overflow: hidden;
@@ -1069,40 +1316,119 @@ dd {
   margin: 0 8px 0 20px;
 }
 
+@media (min-width: 641px) {
+  .resource-actions {
+    width: 262px;
+    justify-content: flex-end;
+  }
+}
+
+@media (max-width: 640px) {
+  .resource-actions:not(:has(a)) {
+    display: none;
+  }
+}
+
 .resource-download,
 .resource-read {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   padding: 7px 10px;
-  color: var(--resource-color, var(--ink-soft));
-  background: var(--resource-soft, var(--paper-deep));
+  color: var(--ink-soft);
+  background: var(--surface-solid);
   border-radius: 7px;
-  font-size: 10px;
-  font-weight: 700;
+  box-shadow: inset 0 0 0 1px var(--line);
+  font-size: 11px;
+  font-weight: 650;
+  white-space: nowrap;
+}
+
+.resource-download svg,
+.resource-read svg {
+  color: var(--resource-color, var(--ink-faint));
 }
 
 .resource-download:hover,
 .resource-read:hover {
-  background: color-mix(in srgb, var(--resource-soft) 72%, var(--resource-color));
+  color: var(--ink);
+  background: var(--resource-soft, var(--paper-deep));
 }
 
+/* Same look as the home chips: white tile, thin border, coloured icon. */
 .resource-icon {
   display: grid;
   width: 34px;
   height: 34px;
   place-items: center;
-  background: var(--resource-soft, color-mix(in srgb, var(--accent) 12%, transparent));
+  color: var(--resource-color, var(--ink-soft));
+  background: var(--surface-solid);
   border-radius: 8px;
+  box-shadow: inset 0 0 0 1px var(--line);
 }
 
-.resource-icon { color: var(--resource-color, var(--accent)); }
-
+/* A fixed name column, so every description starts at the same place whatever buttons follow. */
 .resource-card-copy {
   display: grid;
   gap: 2px 16px;
-  grid-template-columns: minmax(170px, 0.45fr) minmax(200px, 1fr);
+  grid-template-columns: 170px minmax(0, 1fr);
   align-items: baseline;
+}
+
+.resource-group-note {
+  margin: 12px 0 0;
+  color: var(--ink-soft);
+  font-size: 12px;
+}
+
+.resource-archive {
+  margin-top: 36px;
+}
+
+.resource-archive > summary {
+  cursor: pointer;
+  list-style: none;
+  border-bottom-color: var(--line);
+}
+
+.resource-archive > summary::-webkit-details-marker {
+  display: none;
+}
+
+.resource-archive > summary h3 {
+  color: var(--ink-faint);
+}
+
+.resource-archive .archive-toggle {
+  color: var(--ink-soft);
+  font-weight: 650;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.resource-archive[open] .archive-toggle {
+  visibility: hidden;
+}
+
+/* The whole row is the link: underline the name on hover so it reads as clickable. */
+.resource-card-main:hover strong {
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.resource-archive > summary h3::before {
+  display: inline-block;
+  margin-right: 8px;
+  content: "▸";
+  transition: transform 150ms ease;
+}
+
+.resource-archive[open] > summary h3::before {
+  transform: rotate(90deg);
+}
+
+.resource-archive .resource-card {
+  opacity: 0.78;
 }
 
 .resource-kind {
@@ -1308,17 +1634,15 @@ dd {
   }
 
   .home-intro {
-    gap: 42px;
-    grid-template-columns: 1fr;
-    padding: 54px 0 42px;
+    padding: 28px 0 18px;
   }
 
   .home-intro h1 {
-    font-size: 52px;
+    font-size: 38px;
   }
 
   .home-intro p {
-    font-size: 16px;
+    font-size: 15px;
   }
 
   .start-strip,
@@ -1393,13 +1717,17 @@ dd {
   }
 
   .course-index {
-    padding: 66px 0 84px;
+    padding: 0 0 56px;
   }
 
   .course-row {
     gap: 10px;
     grid-template-columns: 1fr;
     padding: 20px 2px;
+  }
+
+  .course-row.is-current {
+    padding-inline: 14px;
   }
 
   .course-row-topic,
@@ -1419,8 +1747,8 @@ dd {
     font-size: 24px;
   }
 
-  .course-row-topic span {
-    font-size: 13px;
+  .course-row-topic > span {
+    font-size: 14px;
   }
 
   .column-label {

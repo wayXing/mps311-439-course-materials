@@ -15,3 +15,6 @@ CLAUDE.md
 # them out of this Vercel deployment keeps the upload below the Hobby limit;
 # the original course files remain in the local materials directory.
 public/materials/**/*.pdf
+
+# Local record of the last release (scripts/collect-release-changes.mjs).
+.release-manifest.json

@@ -27,8 +27,8 @@
       ],
       "resources": [
         {
-          "label": "Python preparation guide",
-          "description": "Read the complete guide in the browser.",
+          "label": "Guide",
+          "description": "The Python preparation guide, in your browser.",
           "kind": "guide",
           "group": "Preparation",
           "source": "foundation/python_basics_guide.html",
@@ -49,7 +49,7 @@
     {
       "slug": "lesson-01",
       "number": "01",
-      "label": "Lesson 01",
+      "label": "Lesson 1",
       "title": "Why machine learning?",
       "shortTitle": "Why machine learning?",
       "summary": "Before choosing algorithms, we need a shared way to turn real questions into problems that data can answer.",
@@ -68,8 +68,8 @@
       },
       "resources": [
         {
-          "label": "Interactive slides",
-          "description": "Open the redesigned 2026/27 Quarto lecture.",
+          "label": "Slides",
+          "description": "The lecture slides, in your browser.",
           "kind": "slides",
           "group": "Lecture",
           "source": "lesson1/lecture/slides/slide.html",
@@ -77,8 +77,8 @@
           "href": "materials/lesson1/slides-2026/index.html"
         },
         {
-          "label": "Lecture notes",
-          "description": "Read the redesigned notes for this lesson.",
+          "label": "Notes",
+          "description": "The full written explanation of the lecture.",
           "kind": "notes",
           "group": "Lecture",
           "source": "lesson1/lecture/notes/_site",
@@ -88,7 +88,7 @@
         },
         {
           "label": "Slides (UoS 2025)",
-          "description": "Open the earlier Slidev version retained in the course archive.",
+          "description": "The 2025 version, kept for reference.",
           "kind": "slides",
           "group": "Archive",
           "source": "lesson1/lecture/archive/uos-2025/dist",
@@ -106,8 +106,8 @@
           "href": "materials/lesson1/archive/uos-2025/slides.pdf"
         },
         {
-          "label": "Lecture notes (UoS 2025)",
-          "description": "Read the notes that accompanied the archived lecture.",
+          "label": "Notes (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson1/lecture/archive/uos-2025/note.html",
@@ -124,10 +124,10 @@
           "href": "materials/lesson1/archive/uos-2025/notes.pdf"
         },
         {
-          "label": "Lab workbook",
-          "description": "Open the guided working copy in Google Colab, or download it and work locally.",
+          "label": "Colab",
+          "description": "The same lab as a notebook with the code already in place. Do the lab here: in Colab choose File → Save a copy in Drive, then work in your copy.",
           "kind": "workbook",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson1/lab/lab_workbook.ipynb",
           "target": "materials/lesson1/workbook",
           "href": "materials/lesson1/workbook/lab_workbook.html",
@@ -135,19 +135,19 @@
           "render": "quarto"
         },
         {
-          "label": "Lab worksheet",
-          "description": "Complete the guided EDA practical in your browser.",
+          "label": "Lab",
+          "description": "The lab on a web page: tasks, questions and code.",
           "kind": "worksheet",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson1/lab/lab_worksheet.html",
           "target": "materials/lesson1/lab.html",
           "href": "materials/lesson1/lab.html"
         },
         {
-          "label": "Lab solution",
-          "description": "Review the fully worked notebook in the browser.",
+          "label": "Solution",
+          "description": "The fully worked lab notebook, on a web page.",
           "kind": "solution",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson1/lab/lab_solution.ipynb",
           "target": "materials/lesson1/solution",
           "href": "materials/lesson1/solution/lab_solution.html",
@@ -158,7 +158,7 @@
           "label": "Lab worksheet (PDF)",
           "description": "Download a printable copy of the EDA worksheet.",
           "kind": "pdf",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson1/lab/lab_worksheet.pdf",
           "target": "materials/lesson1/lab.pdf",
           "href": "materials/lesson1/lab.pdf"
@@ -167,7 +167,7 @@
           "label": "Bike rentals dataset",
           "description": "Download the synthetic CSV used throughout Lab 1.",
           "kind": "data",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson1/lab/bike_rentals.csv",
           "target": "materials/lesson1/bike_rentals.csv",
           "href": "materials/lesson1/bike_rentals.csv"
@@ -177,7 +177,7 @@
     {
       "slug": "lesson-02",
       "number": "02",
-      "label": "Lesson 02",
+      "label": "Lesson 2",
       "title": "From a question to a tested model",
       "shortTitle": "Linear regression",
       "summary": "Build a first numerical model from a clear problem, loss and solution; then use unseen cars to test its value and limits.",
@@ -194,8 +194,8 @@
       },
       "resources": [
         {
-          "label": "Interactive slides",
-          "description": "Open the full Quarto/RevealJS presentation.",
+          "label": "Slides",
+          "description": "The lecture slides, in your browser.",
           "kind": "slides",
           "group": "Lecture",
           "source": "lesson2/lecture/slides/slide_v2.html",
@@ -203,8 +203,8 @@
           "href": "materials/lesson2/slides/index.html"
         },
         {
-          "label": "Lecture notes",
-          "description": "Read the extended explanation online.",
+          "label": "Notes",
+          "description": "The full written explanation of the lecture.",
           "kind": "notes",
           "group": "Lecture",
           "source": "lesson2/lecture/note_en.html",
@@ -212,10 +212,10 @@
           "href": "materials/lesson2/notes.html"
         },
         {
-          "label": "Lab worksheet",
-          "description": "Open the guided practical worksheet.",
+          "label": "Lab",
+          "description": "The lab on a web page: tasks, questions and code.",
           "kind": "worksheet",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson2/lab/lab_worksheet.html",
           "target": "materials/lesson2/lab.html",
           "href": "materials/lesson2/lab.html"
@@ -224,16 +224,16 @@
           "label": "Auto MPG data (CSV)",
           "description": "Download the historical car dataset used in Lab 2.",
           "kind": "data",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson2/lab/auto_mpg.csv",
           "target": "materials/lesson2/auto_mpg.csv",
           "href": "materials/lesson2/auto_mpg.csv"
         },
         {
-          "label": "Lab solution",
-          "description": "Review the fully worked notebook in the browser.",
+          "label": "Solution",
+          "description": "The fully worked lab notebook, on a web page.",
           "kind": "solution",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson2/lab/lab_solution.ipynb",
           "target": "materials/lesson2/solution",
           "href": "materials/lesson2/solution/lab_solution.html",
@@ -242,7 +242,7 @@
         },
         {
           "label": "Slides (UoS 2025)",
-          "description": "Open the 2025 lecture retained in the course archive.",
+          "description": "The 2025 version, kept for reference.",
           "kind": "slides",
           "group": "Archive",
           "source": "lesson2/archive/uos-2025/lecture/dist",
@@ -251,8 +251,8 @@
           "directory": true
         },
         {
-          "label": "Lecture notes (UoS 2025)",
-          "description": "Read the notes accompanying the 2025 lecture.",
+          "label": "Notes (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson2/archive/uos-2025/lecture/note.html",
@@ -260,8 +260,8 @@
           "href": "materials/lesson2/archive/uos-2025/notes.html"
         },
         {
-          "label": "Lab worksheet (UoS 2025)",
-          "description": "Open the 2025 practical worksheet.",
+          "label": "Lab (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "worksheet",
           "group": "Archive",
           "source": "lesson2/archive/uos-2025/lab/lab_worksheet.html",
@@ -273,7 +273,7 @@
     {
       "slug": "lesson-03",
       "number": "03",
-      "label": "Lesson 03",
+      "label": "Lesson 3",
       "title": "Making the model stronger",
       "shortTitle": "Features & regularisation",
       "summary": "When a straight line misses the pattern, build better features; when the model becomes too flexible, hold it down with a penalty, and choose how flexible with cross-validation.",
@@ -290,8 +290,8 @@
       },
       "resources": [
         {
-          "label": "Interactive slides",
-          "description": "Open the full Quarto/RevealJS presentation.",
+          "label": "Slides",
+          "description": "The lecture slides, in your browser.",
           "kind": "slides",
           "group": "Lecture",
           "source": "lesson3/lecture/slides/slide.html",
@@ -299,8 +299,8 @@
           "href": "materials/lesson3/slides/index.html"
         },
         {
-          "label": "Lecture notes",
-          "description": "Read the extended explanation online.",
+          "label": "Notes",
+          "description": "The full written explanation of the lecture.",
           "kind": "notes",
           "group": "Lecture",
           "source": "lesson3/lecture/note_en.html",
@@ -308,19 +308,19 @@
           "href": "materials/lesson3/notes.html"
         },
         {
-          "label": "Lab worksheet",
-          "description": "Open the guided practical worksheet.",
+          "label": "Lab",
+          "description": "The lab on a web page: tasks, questions and code.",
           "kind": "worksheet",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson3/lab/lab_worksheet.html",
           "target": "materials/lesson3/lab.html",
           "href": "materials/lesson3/lab.html"
         },
         {
-          "label": "Lab solution",
-          "description": "Review the fully worked notebook in the browser.",
+          "label": "Solution",
+          "description": "The fully worked lab notebook, on a web page.",
           "kind": "solution",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson3/lab/lab_solution.ipynb",
           "target": "materials/lesson3/solution",
           "href": "materials/lesson3/solution/lab_solution.html",
@@ -329,7 +329,7 @@
         },
         {
           "label": "Slides (UoS 2025)",
-          "description": "Open the 2025 lecture retained in the course archive.",
+          "description": "The 2025 version, kept for reference.",
           "kind": "slides",
           "group": "Archive",
           "source": "lesson3/archive/uos-2025/lecture/dist",
@@ -338,8 +338,8 @@
           "directory": true
         },
         {
-          "label": "Lecture notes (UoS 2025)",
-          "description": "Read the notes accompanying the 2025 lecture.",
+          "label": "Notes (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson3/archive/uos-2025/lecture/note.html",
@@ -347,8 +347,8 @@
           "href": "materials/lesson3/archive/uos-2025/notes.html"
         },
         {
-          "label": "Lab worksheet (UoS 2025)",
-          "description": "Open the 2025 practical worksheet.",
+          "label": "Lab (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "worksheet",
           "group": "Archive",
           "source": "lesson3/archive/uos-2025/lab/lab_worksheet.html",
@@ -356,8 +356,8 @@
           "href": "materials/lesson3/archive/uos-2025/lab.html"
         },
         {
-          "label": "Demo notebook (UoS 2025)",
-          "description": "Read the 2025 worked examples in the browser.",
+          "label": "Demo (UoS 2025)",
+          "description": "Worked code examples from the 2025 lecture.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson3/archive/uos-2025/lecture/demo.ipynb",
@@ -367,8 +367,8 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution (UoS 2025)",
-          "description": "Review the 2025 worked lab notebook in the browser.",
+          "label": "Solution (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "solution",
           "group": "Archive",
           "source": "lesson3/archive/uos-2025/lab/lab_solution.ipynb",
@@ -382,7 +382,7 @@
     {
       "slug": "lesson-04",
       "number": "04",
-      "label": "Lesson 04",
+      "label": "Lesson 4",
       "title": "From a number to a decision",
       "shortTitle": "Logistic regression",
       "summary": "When the answer is a class, output a probability, train it with cross-entropy, check it against a baseline and a confusion matrix, and choose a threshold by what each mistake costs.",
@@ -399,8 +399,8 @@
       },
       "resources": [
         {
-          "label": "Interactive slides",
-          "description": "Open the full Quarto/RevealJS presentation.",
+          "label": "Slides",
+          "description": "The lecture slides, in your browser.",
           "kind": "slides",
           "group": "Lecture",
           "source": "lesson4/lecture/slides/slide.html",
@@ -408,8 +408,8 @@
           "href": "materials/lesson4/slides/index.html"
         },
         {
-          "label": "Lecture notes",
-          "description": "Read the extended explanation online.",
+          "label": "Notes",
+          "description": "The full written explanation of the lecture.",
           "kind": "notes",
           "group": "Lecture",
           "source": "lesson4/lecture/note_en.html",
@@ -417,19 +417,19 @@
           "href": "materials/lesson4/notes.html"
         },
         {
-          "label": "Lab worksheet",
-          "description": "Open the guided practical worksheet.",
+          "label": "Lab",
+          "description": "The lab on a web page: tasks, questions and code.",
           "kind": "worksheet",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson4/lab/lab_worksheet.html",
           "target": "materials/lesson4/lab.html",
           "href": "materials/lesson4/lab.html"
         },
         {
-          "label": "Lab workbook",
-          "description": "Opens in Google Colab with the code already in place: File → Save a copy in Drive, then work in the copy.",
+          "label": "Colab",
+          "description": "The same lab as a notebook with the code already in place. Do the lab here: in Colab choose File → Save a copy in Drive, then work in your copy.",
           "kind": "workbook",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson4/lab/lab_workbook.ipynb",
           "target": "materials/lesson4/workbook",
           "href": "materials/lesson4/workbook/lab_workbook.html",
@@ -437,10 +437,10 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution",
-          "description": "Review the fully worked notebook in the browser.",
+          "label": "Solution",
+          "description": "The fully worked lab notebook, on a web page.",
           "kind": "solution",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson4/lab/lab_solution.ipynb",
           "target": "materials/lesson4/solution",
           "href": "materials/lesson4/solution/lab_solution.html",
@@ -449,7 +449,7 @@
         },
         {
           "label": "Slides (UoS 2025)",
-          "description": "Open the 2025 lecture retained in the course archive.",
+          "description": "The 2025 version, kept for reference.",
           "kind": "slides",
           "group": "Archive",
           "source": "lesson4/archive/uos-2025/lecture/dist",
@@ -458,8 +458,8 @@
           "directory": true
         },
         {
-          "label": "Lecture notes (UoS 2025)",
-          "description": "Read the notes accompanying the 2025 lecture.",
+          "label": "Notes (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson4/archive/uos-2025/lecture/note.html",
@@ -467,8 +467,8 @@
           "href": "materials/lesson4/archive/uos-2025/notes.html"
         },
         {
-          "label": "Lab worksheet (UoS 2025)",
-          "description": "Open the 2025 practical worksheet.",
+          "label": "Lab (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "worksheet",
           "group": "Archive",
           "source": "lesson4/archive/uos-2025/lab/lab_worksheet.html",
@@ -476,8 +476,8 @@
           "href": "materials/lesson4/archive/uos-2025/lab.html"
         },
         {
-          "label": "Demo notebook (UoS 2025)",
-          "description": "Read the 2025 worked examples in the browser.",
+          "label": "Demo (UoS 2025)",
+          "description": "Worked code examples from the 2025 lecture.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson4/archive/uos-2025/lecture/demo.ipynb",
@@ -487,8 +487,8 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution (UoS 2025)",
-          "description": "Review the 2025 worked lab notebook in the browser.",
+          "label": "Solution (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "solution",
           "group": "Archive",
           "source": "lesson4/archive/uos-2025/lab/lab_solution.ipynb",
@@ -502,7 +502,7 @@
     {
       "slug": "lesson-05",
       "number": "05",
-      "label": "Lesson 05",
+      "label": "Lesson 5",
       "title": "Describe each class, then decide",
       "shortTitle": "LDA and QDA",
       "summary": "Instead of learning a boundary, describe where each class's points fall and how spread out they are, then ask which class more likely produced a point; shrink the spreads when there is too little data.",
@@ -519,8 +519,8 @@
       },
       "resources": [
         {
-          "label": "Interactive slides",
-          "description": "Open the full Quarto/RevealJS presentation.",
+          "label": "Slides",
+          "description": "The lecture slides, in your browser.",
           "kind": "slides",
           "group": "Lecture",
           "source": "lesson5/lecture/slides/slide.html",
@@ -528,8 +528,8 @@
           "href": "materials/lesson5/slides/index.html"
         },
         {
-          "label": "Lecture notes",
-          "description": "Read the extended explanation online.",
+          "label": "Notes",
+          "description": "The full written explanation of the lecture.",
           "kind": "notes",
           "group": "Lecture",
           "source": "lesson5/lecture/note_en.html",
@@ -537,19 +537,19 @@
           "href": "materials/lesson5/notes.html"
         },
         {
-          "label": "Lab worksheet",
-          "description": "Open the guided practical worksheet.",
+          "label": "Lab",
+          "description": "The lab on a web page: tasks, questions and code.",
           "kind": "worksheet",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson5/lab/lab_worksheet.html",
           "target": "materials/lesson5/lab.html",
           "href": "materials/lesson5/lab.html"
         },
         {
-          "label": "Lab workbook",
-          "description": "Opens in Google Colab with the code already in place: File → Save a copy in Drive, then work in the copy.",
+          "label": "Colab",
+          "description": "The same lab as a notebook with the code already in place. Do the lab here: in Colab choose File → Save a copy in Drive, then work in your copy.",
           "kind": "workbook",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson5/lab/lab_workbook.ipynb",
           "target": "materials/lesson5/workbook",
           "href": "materials/lesson5/workbook/lab_workbook.html",
@@ -557,10 +557,10 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution",
-          "description": "Review the fully worked notebook in the browser.",
+          "label": "Solution",
+          "description": "The fully worked lab notebook, on a web page.",
           "kind": "solution",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson5/lab/lab_solution.ipynb",
           "target": "materials/lesson5/solution",
           "href": "materials/lesson5/solution/lab_solution.html",
@@ -569,7 +569,7 @@
         },
         {
           "label": "Slides (UoS 2025)",
-          "description": "Open the 2025 lecture retained in the course archive.",
+          "description": "The 2025 version, kept for reference.",
           "kind": "slides",
           "group": "Archive",
           "source": "lesson5/archive/uos-2025/lecture/dist",
@@ -578,8 +578,8 @@
           "directory": true
         },
         {
-          "label": "Lecture notes (UoS 2025)",
-          "description": "Read the notes accompanying the 2025 lecture.",
+          "label": "Notes (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson5/archive/uos-2025/lecture/note.html",
@@ -587,8 +587,8 @@
           "href": "materials/lesson5/archive/uos-2025/notes.html"
         },
         {
-          "label": "Lab worksheet (UoS 2025)",
-          "description": "Open the 2025 practical worksheet.",
+          "label": "Lab (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "worksheet",
           "group": "Archive",
           "source": "lesson5/archive/uos-2025/lab/lab_worksheet.html",
@@ -596,8 +596,8 @@
           "href": "materials/lesson5/archive/uos-2025/lab.html"
         },
         {
-          "label": "Demo notebook (UoS 2025)",
-          "description": "Read the 2025 worked examples in the browser.",
+          "label": "Demo (UoS 2025)",
+          "description": "Worked code examples from the 2025 lecture.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson5/archive/uos-2025/lecture/demo.ipynb",
@@ -607,8 +607,8 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution (UoS 2025)",
-          "description": "Review the 2025 worked lab notebook in the browser.",
+          "label": "Solution (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "solution",
           "group": "Archive",
           "source": "lesson5/archive/uos-2025/lab/lab_solution.ipynb",
@@ -622,7 +622,7 @@
     {
       "slug": "lesson-06",
       "number": "06",
-      "label": "Lesson 06",
+      "label": "Lesson 6",
       "title": "A chain of yes-or-no questions",
       "shortTitle": "Decision trees",
       "summary": "Let the machine write if-then rules one cut at a time, stop the tree before it memorises the training set, and choose its depth on a validation set.",
@@ -639,8 +639,8 @@
       },
       "resources": [
         {
-          "label": "Interactive slides",
-          "description": "Open the full Quarto/RevealJS presentation.",
+          "label": "Slides",
+          "description": "The lecture slides, in your browser.",
           "kind": "slides",
           "group": "Lecture",
           "source": "lesson6/lecture/slides/slide.html",
@@ -648,8 +648,8 @@
           "href": "materials/lesson6/slides/index.html"
         },
         {
-          "label": "Lecture notes",
-          "description": "Read the extended explanation online.",
+          "label": "Notes",
+          "description": "The full written explanation of the lecture.",
           "kind": "notes",
           "group": "Lecture",
           "source": "lesson6/lecture/note_en.html",
@@ -657,19 +657,19 @@
           "href": "materials/lesson6/notes.html"
         },
         {
-          "label": "Lab worksheet",
-          "description": "Open the guided practical worksheet.",
+          "label": "Lab",
+          "description": "The lab on a web page: tasks, questions and code.",
           "kind": "worksheet",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson6/lab/lab_worksheet.html",
           "target": "materials/lesson6/lab.html",
           "href": "materials/lesson6/lab.html"
         },
         {
-          "label": "Lab workbook",
-          "description": "Opens in Google Colab with the code already in place: File → Save a copy in Drive, then work in the copy.",
+          "label": "Colab",
+          "description": "The same lab as a notebook with the code already in place. Do the lab here: in Colab choose File → Save a copy in Drive, then work in your copy.",
           "kind": "workbook",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson6/lab/lab_workbook.ipynb",
           "target": "materials/lesson6/workbook",
           "href": "materials/lesson6/workbook/lab_workbook.html",
@@ -677,10 +677,10 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution",
-          "description": "Review the fully worked notebook in the browser.",
+          "label": "Solution",
+          "description": "The fully worked lab notebook, on a web page.",
           "kind": "solution",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson6/lab/lab_solution.ipynb",
           "target": "materials/lesson6/solution",
           "href": "materials/lesson6/solution/lab_solution.html",
@@ -689,7 +689,7 @@
         },
         {
           "label": "Slides (UoS 2025)",
-          "description": "Open the 2025 lecture retained in the course archive.",
+          "description": "The 2025 version, kept for reference.",
           "kind": "slides",
           "group": "Archive",
           "source": "lesson6/archive/uos-2025/lecture/dist",
@@ -698,8 +698,8 @@
           "directory": true
         },
         {
-          "label": "Lecture notes (UoS 2025)",
-          "description": "Read the notes accompanying the 2025 lecture.",
+          "label": "Notes (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson6/archive/uos-2025/lecture/note.html",
@@ -707,8 +707,8 @@
           "href": "materials/lesson6/archive/uos-2025/notes.html"
         },
         {
-          "label": "Lab worksheet (UoS 2025)",
-          "description": "Open the 2025 practical worksheet.",
+          "label": "Lab (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "worksheet",
           "group": "Archive",
           "source": "lesson6/archive/uos-2025/lab/lab_worksheet.html",
@@ -716,8 +716,8 @@
           "href": "materials/lesson6/archive/uos-2025/lab.html"
         },
         {
-          "label": "Demo notebook (UoS 2025)",
-          "description": "Read the 2025 worked examples in the browser.",
+          "label": "Demo (UoS 2025)",
+          "description": "Worked code examples from the 2025 lecture.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson6/archive/uos-2025/lecture/demo.ipynb",
@@ -727,8 +727,8 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution (UoS 2025)",
-          "description": "Review the 2025 worked lab notebook in the browser.",
+          "label": "Solution (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "solution",
           "group": "Archive",
           "source": "lesson6/archive/uos-2025/lab/lab_solution.ipynb",
@@ -742,7 +742,7 @@
     {
       "slug": "lesson-07",
       "number": "07",
-      "label": "Lesson 07",
+      "label": "Lesson 7",
       "title": "Fewer numbers for the same data",
       "shortTitle": "PCA",
       "summary": "Replace many features by a few combinations of them: the directions of widest spread, chosen on the fitting data only, with how many to keep decided on the validation set.",
@@ -759,8 +759,8 @@
       },
       "resources": [
         {
-          "label": "Interactive slides",
-          "description": "Open the full Quarto/RevealJS presentation.",
+          "label": "Slides",
+          "description": "The lecture slides, in your browser.",
           "kind": "slides",
           "group": "Lecture",
           "source": "lesson7/lecture/slides/slide.html",
@@ -768,8 +768,8 @@
           "href": "materials/lesson7/slides/index.html"
         },
         {
-          "label": "Lecture notes",
-          "description": "Read the extended explanation online.",
+          "label": "Notes",
+          "description": "The full written explanation of the lecture.",
           "kind": "notes",
           "group": "Lecture",
           "source": "lesson7/lecture/note_en.html",
@@ -777,19 +777,19 @@
           "href": "materials/lesson7/notes.html"
         },
         {
-          "label": "Lab worksheet",
-          "description": "Open the guided practical worksheet.",
+          "label": "Lab",
+          "description": "The lab on a web page: tasks, questions and code.",
           "kind": "worksheet",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson7/lab/lab_worksheet.html",
           "target": "materials/lesson7/lab.html",
           "href": "materials/lesson7/lab.html"
         },
         {
-          "label": "Lab workbook",
-          "description": "Opens in Google Colab with the code already in place: File → Save a copy in Drive, then work in the copy.",
+          "label": "Colab",
+          "description": "The same lab as a notebook with the code already in place. Do the lab here: in Colab choose File → Save a copy in Drive, then work in your copy.",
           "kind": "workbook",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson7/lab/lab_workbook.ipynb",
           "target": "materials/lesson7/workbook",
           "href": "materials/lesson7/workbook/lab_workbook.html",
@@ -797,10 +797,10 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution",
-          "description": "Review the fully worked notebook in the browser.",
+          "label": "Solution",
+          "description": "The fully worked lab notebook, on a web page.",
           "kind": "solution",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson7/lab/lab_solution.ipynb",
           "target": "materials/lesson7/solution",
           "href": "materials/lesson7/solution/lab_solution.html",
@@ -809,7 +809,7 @@
         },
         {
           "label": "Slides (UoS 2025)",
-          "description": "Open the 2025 lecture retained in the course archive.",
+          "description": "The 2025 version, kept for reference.",
           "kind": "slides",
           "group": "Archive",
           "source": "lesson7/archive/uos-2025/lecture/dist",
@@ -818,8 +818,8 @@
           "directory": true
         },
         {
-          "label": "Lecture notes (UoS 2025)",
-          "description": "Read the notes accompanying the 2025 lecture.",
+          "label": "Notes (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson7/archive/uos-2025/lecture/note.html",
@@ -827,8 +827,8 @@
           "href": "materials/lesson7/archive/uos-2025/notes.html"
         },
         {
-          "label": "Lab worksheet (UoS 2025)",
-          "description": "Open the 2025 practical worksheet.",
+          "label": "Lab (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "worksheet",
           "group": "Archive",
           "source": "lesson7/archive/uos-2025/lab/lab_worksheet.html",
@@ -836,8 +836,8 @@
           "href": "materials/lesson7/archive/uos-2025/lab.html"
         },
         {
-          "label": "Demo notebook (UoS 2025)",
-          "description": "Read the 2025 worked examples in the browser.",
+          "label": "Demo (UoS 2025)",
+          "description": "Worked code examples from the 2025 lecture.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson7/archive/uos-2025/lecture/demo.ipynb",
@@ -847,8 +847,8 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution (UoS 2025)",
-          "description": "Review the 2025 worked lab notebook in the browser.",
+          "label": "Solution (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "solution",
           "group": "Archive",
           "source": "lesson7/archive/uos-2025/lab/lab_solution.ipynb",
@@ -862,7 +862,7 @@
     {
       "slug": "lesson-08",
       "number": "08",
-      "label": "Lesson 08",
+      "label": "Lesson 8",
       "title": "Finding groups without labels",
       "shortTitle": "Clustering",
       "summary": "With no labels at all, group points by their nearest centre (K-means) or by merging the nearest groups step by step (hierarchical clustering), and check the groups afterwards with a count table.",
@@ -879,8 +879,8 @@
       },
       "resources": [
         {
-          "label": "Interactive slides",
-          "description": "Open the full Quarto/RevealJS presentation.",
+          "label": "Slides",
+          "description": "The lecture slides, in your browser.",
           "kind": "slides",
           "group": "Lecture",
           "source": "lesson8/lecture/slides/slide.html",
@@ -888,8 +888,8 @@
           "href": "materials/lesson8/slides/index.html"
         },
         {
-          "label": "Lecture notes",
-          "description": "Read the extended explanation online.",
+          "label": "Notes",
+          "description": "The full written explanation of the lecture.",
           "kind": "notes",
           "group": "Lecture",
           "source": "lesson8/lecture/note_en.html",
@@ -897,19 +897,19 @@
           "href": "materials/lesson8/notes.html"
         },
         {
-          "label": "Lab worksheet",
-          "description": "Open the guided practical worksheet.",
+          "label": "Lab",
+          "description": "The lab on a web page: tasks, questions and code.",
           "kind": "worksheet",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson8/lab/lab_worksheet.html",
           "target": "materials/lesson8/lab.html",
           "href": "materials/lesson8/lab.html"
         },
         {
-          "label": "Lab workbook",
-          "description": "Opens in Google Colab with the code already in place: File → Save a copy in Drive, then work in the copy.",
+          "label": "Colab",
+          "description": "The same lab as a notebook with the code already in place. Do the lab here: in Colab choose File → Save a copy in Drive, then work in your copy.",
           "kind": "workbook",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson8/lab/lab_workbook.ipynb",
           "target": "materials/lesson8/workbook",
           "href": "materials/lesson8/workbook/lab_workbook.html",
@@ -917,10 +917,10 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution",
-          "description": "Review the fully worked notebook in the browser.",
+          "label": "Solution",
+          "description": "The fully worked lab notebook, on a web page.",
           "kind": "solution",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson8/lab/lab_solution.ipynb",
           "target": "materials/lesson8/solution",
           "href": "materials/lesson8/solution/lab_solution.html",
@@ -929,7 +929,7 @@
         },
         {
           "label": "Slides (UoS 2025)",
-          "description": "Open the 2025 lecture retained in the course archive.",
+          "description": "The 2025 version, kept for reference.",
           "kind": "slides",
           "group": "Archive",
           "source": "lesson8/archive/uos-2025/lecture/dist",
@@ -938,8 +938,8 @@
           "directory": true
         },
         {
-          "label": "Lecture notes (UoS 2025)",
-          "description": "Read the notes accompanying the 2025 lecture.",
+          "label": "Notes (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson8/archive/uos-2025/lecture/note.html",
@@ -947,8 +947,8 @@
           "href": "materials/lesson8/archive/uos-2025/notes.html"
         },
         {
-          "label": "Lab worksheet (UoS 2025)",
-          "description": "Open the 2025 practical worksheet.",
+          "label": "Lab (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "worksheet",
           "group": "Archive",
           "source": "lesson8/archive/uos-2025/lab/lab_worksheet.html",
@@ -956,8 +956,8 @@
           "href": "materials/lesson8/archive/uos-2025/lab.html"
         },
         {
-          "label": "Demo notebook (UoS 2025)",
-          "description": "Read the 2025 worked examples in the browser.",
+          "label": "Demo (UoS 2025)",
+          "description": "Worked code examples from the 2025 lecture.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson8/archive/uos-2025/lecture/demo.ipynb",
@@ -967,8 +967,8 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution (UoS 2025)",
-          "description": "Review the 2025 worked lab notebook in the browser.",
+          "label": "Solution (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "solution",
           "group": "Archive",
           "source": "lesson8/archive/uos-2025/lab/lab_solution.ipynb",
@@ -982,7 +982,7 @@
     {
       "slug": "lesson-09",
       "number": "09",
-      "label": "Lesson 09",
+      "label": "Lesson 9",
       "title": "Letting the model make its own features",
       "shortTitle": "Neural networks",
       "summary": "When a straight line is not enough and no one can think of the right feature, a network of small logistic regressions builds its own features; training and validation curves show when it starts to memorise.",
@@ -1001,8 +1001,8 @@
       },
       "resources": [
         {
-          "label": "Interactive slides",
-          "description": "Open the full Quarto/RevealJS presentation.",
+          "label": "Slides",
+          "description": "The lecture slides, in your browser.",
           "kind": "slides",
           "group": "Lecture",
           "source": "lesson9/lecture/slides/slide.html",
@@ -1010,8 +1010,8 @@
           "href": "materials/lesson9/slides/index.html"
         },
         {
-          "label": "Lecture notes",
-          "description": "Read the extended explanation online.",
+          "label": "Notes",
+          "description": "The full written explanation of the lecture.",
           "kind": "notes",
           "group": "Lecture",
           "source": "lesson9/lecture/note_en.html",
@@ -1019,19 +1019,19 @@
           "href": "materials/lesson9/notes.html"
         },
         {
-          "label": "Lab worksheet",
-          "description": "Open the guided practical worksheet.",
+          "label": "Lab",
+          "description": "The lab on a web page: tasks, questions and code.",
           "kind": "worksheet",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson9/lab/lab_worksheet.html",
           "target": "materials/lesson9/lab.html",
           "href": "materials/lesson9/lab.html"
         },
         {
-          "label": "Lab workbook",
-          "description": "Opens in Google Colab with the code already in place: File → Save a copy in Drive, then work in the copy.",
+          "label": "Colab",
+          "description": "The same lab as a notebook with the code already in place. Do the lab here: in Colab choose File → Save a copy in Drive, then work in your copy.",
           "kind": "workbook",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson9/lab/lab_workbook.ipynb",
           "target": "materials/lesson9/workbook",
           "href": "materials/lesson9/workbook/lab_workbook.html",
@@ -1039,10 +1039,10 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution",
-          "description": "Review the fully worked notebook in the browser.",
+          "label": "Solution",
+          "description": "The fully worked lab notebook, on a web page.",
           "kind": "solution",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson9/lab/lab_solution.ipynb",
           "target": "materials/lesson9/solution",
           "href": "materials/lesson9/solution/lab_solution.html",
@@ -1051,7 +1051,7 @@
         },
         {
           "label": "Slides (UoS 2025)",
-          "description": "Open the 2025 lecture retained in the course archive.",
+          "description": "The 2025 version, kept for reference.",
           "kind": "slides",
           "group": "Archive",
           "source": "lesson9/archive/uos-2025/lecture/dist",
@@ -1060,8 +1060,8 @@
           "directory": true
         },
         {
-          "label": "Lecture notes (UoS 2025)",
-          "description": "Read the notes accompanying the 2025 lecture.",
+          "label": "Notes (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson9/archive/uos-2025/lecture/note.html",
@@ -1069,8 +1069,8 @@
           "href": "materials/lesson9/archive/uos-2025/notes.html"
         },
         {
-          "label": "Lab worksheet (UoS 2025)",
-          "description": "Open the 2025 practical worksheet.",
+          "label": "Lab (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "worksheet",
           "group": "Archive",
           "source": "lesson9/archive/uos-2025/lab/lab_worksheet.html",
@@ -1078,8 +1078,8 @@
           "href": "materials/lesson9/archive/uos-2025/lab.html"
         },
         {
-          "label": "Demo notebook (UoS 2025)",
-          "description": "Read the 2025 worked examples in the browser.",
+          "label": "Demo (UoS 2025)",
+          "description": "Worked code examples from the 2025 lecture.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson9/archive/uos-2025/lecture/demo.ipynb",
@@ -1089,8 +1089,8 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution (UoS 2025)",
-          "description": "Review the 2025 worked lab notebook in the browser.",
+          "label": "Solution (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "solution",
           "group": "Archive",
           "source": "lesson9/archive/uos-2025/lab/lab_solution.ipynb",
@@ -1123,8 +1123,8 @@
       },
       "resources": [
         {
-          "label": "Interactive slides",
-          "description": "Open the full Quarto/RevealJS presentation.",
+          "label": "Slides",
+          "description": "The lecture slides, in your browser.",
           "kind": "slides",
           "group": "Lecture",
           "source": "lesson10/lecture/slides/slide.html",
@@ -1132,8 +1132,8 @@
           "href": "materials/lesson10/slides/index.html"
         },
         {
-          "label": "Lecture notes",
-          "description": "Read the extended explanation online.",
+          "label": "Notes",
+          "description": "The full written explanation of the lecture.",
           "kind": "notes",
           "group": "Lecture",
           "source": "lesson10/lecture/note_en.html",
@@ -1141,19 +1141,19 @@
           "href": "materials/lesson10/notes.html"
         },
         {
-          "label": "Lab worksheet",
-          "description": "Open the guided practical worksheet.",
+          "label": "Lab",
+          "description": "The lab on a web page: tasks, questions and code.",
           "kind": "worksheet",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson10/lab/lab_worksheet.html",
           "target": "materials/lesson10/lab.html",
           "href": "materials/lesson10/lab.html"
         },
         {
-          "label": "Lab workbook",
-          "description": "Opens in Google Colab with the code already in place: File → Save a copy in Drive, then work in the copy.",
+          "label": "Colab",
+          "description": "The same lab as a notebook with the code already in place. Do the lab here: in Colab choose File → Save a copy in Drive, then work in your copy.",
           "kind": "workbook",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson10/lab/lab_workbook.ipynb",
           "target": "materials/lesson10/workbook",
           "href": "materials/lesson10/workbook/lab_workbook.html",
@@ -1161,10 +1161,10 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution",
-          "description": "Review the fully worked notebook in the browser.",
+          "label": "Solution",
+          "description": "The fully worked lab notebook, on a web page.",
           "kind": "solution",
-          "group": "Lab",
+          "group": "Practice",
           "source": "lesson10/lab/lab_solution.ipynb",
           "target": "materials/lesson10/solution",
           "href": "materials/lesson10/solution/lab_solution.html",
@@ -1173,7 +1173,7 @@
         },
         {
           "label": "Slides (UoS 2025)",
-          "description": "Open the 2025 lecture retained in the course archive.",
+          "description": "The 2025 version, kept for reference.",
           "kind": "slides",
           "group": "Archive",
           "source": "lesson10/archive/uos-2025/lecture/dist",
@@ -1182,8 +1182,8 @@
           "directory": true
         },
         {
-          "label": "Lecture notes (UoS 2025)",
-          "description": "Read the notes accompanying the 2025 lecture.",
+          "label": "Notes (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson10/archive/uos-2025/lecture/note.html",
@@ -1191,8 +1191,8 @@
           "href": "materials/lesson10/archive/uos-2025/notes.html"
         },
         {
-          "label": "Lab worksheet (UoS 2025)",
-          "description": "Open the 2025 practical worksheet.",
+          "label": "Lab (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "worksheet",
           "group": "Archive",
           "source": "lesson10/archive/uos-2025/lab/lab_worksheet.html",
@@ -1200,8 +1200,8 @@
           "href": "materials/lesson10/archive/uos-2025/lab.html"
         },
         {
-          "label": "Demo notebook (UoS 2025)",
-          "description": "Read the 2025 worked examples in the browser.",
+          "label": "Demo (UoS 2025)",
+          "description": "Worked code examples from the 2025 lecture.",
           "kind": "notes",
           "group": "Archive",
           "source": "lesson10/archive/uos-2025/lecture/demo.ipynb",
@@ -1211,8 +1211,8 @@
           "render": "quarto"
         },
         {
-          "label": "Lab solution (UoS 2025)",
-          "description": "Review the 2025 worked lab notebook in the browser.",
+          "label": "Solution (UoS 2025)",
+          "description": "The 2025 version, kept for reference.",
           "kind": "solution",
           "group": "Archive",
           "source": "lesson10/archive/uos-2025/lab/lab_solution.ipynb",

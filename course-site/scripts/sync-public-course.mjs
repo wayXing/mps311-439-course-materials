@@ -14,6 +14,7 @@ const courseSiteIgnored = new Set([
   '.git', '.astro', '.openai', '.sites-artifacts', '.sites-stage', '.vercel', 'AGENTS.md', 'CLAUDE.md',
   'dist', 'node_modules', 'public/materials', 'public/assignments', 'supabase',
   'scripts/build-pdfs.mjs', 'scripts/slides-handout.py',   // private tooling (local paths)
+  '.release-manifest.json',   // local record of the last release, used by collect-release-changes.mjs
 ]);
 const lessonIgnoredNames = new Set([
   '.DS_Store', '.quarto', '.venv', '_site', 'shared', 'AGENTS.md', 'SLIDE_DESIGN_SYSTEM.md', 'NOTE_VISUAL_SYSTEM.md',

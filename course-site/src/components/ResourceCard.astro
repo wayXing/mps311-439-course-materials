@@ -1,0 +1,45 @@
+---
+import { course, type CourseResource } from '../data/course';
+import { colabUrl, withBase } from '../lib/urls';
+import ResourceIcon from './ResourceIcon.astro';
+
+interface Props {
+  resource: CourseResource;
+}
+
+const { resource } = Astro.props;
+const colabRepository = course.colab?.repository;
+const inColab = (resource.kind === 'notebook' || resource.kind === 'workbook') && Boolean(colabRepository);
+---
+
+<div class={`resource-card resource-${resource.kind}`}>
+  <a
+    class="resource-card-main"
+    href={inColab && colabRepository
+      ? colabUrl(colabRepository, resource.source, course.colab?.branch, course.colab?.notebookRoot)
+      : withBase(resource.href)}
+    target={inColab ? '_blank' : undefined}
+    rel={inColab ? 'noopener' : undefined}
+  >
+    <span class={`resource-icon resource-${resource.kind}`}><ResourceIcon kind={resource.kind} size={17} /></span>
+    <span class="resource-card-copy">
+      <strong>{resource.label}</strong>
+      <small>{resource.description}</small>
+    </span>
+  </a>
+  {/* Always present (empty when there is nothing to add), so the descriptions keep the same width. */}
+  <div class="resource-actions">
+    {inColab && (
+      <a class="resource-read" href={withBase(resource.href)}>
+        <ResourceIcon kind="notes" size={13} />
+        Preview
+      </a>
+    )}
+    {resource.downloadHref && (
+      <a class="resource-download" href={withBase(resource.downloadHref)} download>
+        <ResourceIcon kind="notebook" size={13} />
+        Download .ipynb
+      </a>
+    )}
+  </div>
+</div>

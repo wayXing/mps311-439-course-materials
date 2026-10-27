@@ -1,7 +1,8 @@
 ---
 import SiteLayout from '../../layouts/SiteLayout.astro';
 import { course, type CourseLesson } from '../../data/course';
-import { colabUrl, withBase } from '../../lib/urls';
+import { withBase } from '../../lib/urls';
+import ResourceCard from '../../components/ResourceCard.astro';
 import ResourceIcon from '../../components/ResourceIcon.astro';
 
 export function getStaticPaths() {
@@ -23,31 +24,26 @@ interface Props {
 
 const { lesson, previousLesson, nextLesson } = Astro.props;
 // Keep printable files in the source archive, but do not list them on the website.
-const visibleResources = lesson.resources.filter((resource) => resource.kind !== 'pdf');
-const groups = [...new Set(visibleResources.map((resource) => resource.group))]
-  .sort((left, right) => Number(left === 'Archive') - Number(right === 'Archive'));
+// Same order as the home page chips (Slides, Notes, … Lab, Colab, Solution); other kinds keep their place.
+const kindOrder = ['guide', 'slides', 'notes', 'notebook', 'worksheet', 'workbook', 'solution'];
+const rank = (kind: string) => (kindOrder.includes(kind) ? kindOrder.indexOf(kind) : kindOrder.length);
+const visibleResources = lesson.resources
+  .filter((resource) => resource.kind !== 'pdf')
+  .map((resource, index) => ({ resource, index }))
+  .sort((left, right) => rank(left.resource.kind) - rank(right.resource.kind) || left.index - right.index)
+  .map(({ resource }) => resource);
+// Current materials first (Lecture, Practice, …); last year's files fold away at the bottom.
+const mainGroups = [...new Set(visibleResources.map((resource) => resource.group))].filter((group) => group !== 'Archive');
+const resourcesIn = (group: string) => visibleResources.filter((resource) => resource.group === group);
+const archive = resourcesIn('Archive');
 const primaryResource = visibleResources.find((resource) => resource.kind === 'slides')
   ?? visibleResources.find((resource) => resource.kind === 'guide');
-const colabRepository = course.colab?.repository;
-const colabBranch = course.colab?.branch;
-const colabNotebookRoot = course.colab?.notebookRoot;
-const opensInColab = (kind: string) => kind === 'notebook' || kind === 'workbook';
-
-const resourceLabels: Record<string, string> = {
-  slides: 'Interactive',
-  pdf: 'PDF',
-  notes: 'Notes',
-  notebook: 'Google Colab demo',
-  workbook: 'Lab workbook',
-  worksheet: 'Worksheet',
-  solution: 'Worked solution',
-  guide: 'Guide',
-  data: 'Data',
-};
+// The heading uses the same short title as the home page; the longer title becomes a subtitle.
+const subtitle = lesson.title !== lesson.shortTitle ? lesson.title : null;
 ---
 
 <SiteLayout
-  title={`${lesson.label}: ${lesson.title} · ${course.code}`}
+  title={`${lesson.label}: ${lesson.shortTitle} · ${course.code}`}
   description={lesson.summary}
 >
   <section class={`detail-hero shell accent-${lesson.accent}`}>
@@ -56,12 +52,13 @@ const resourceLabels: Record<string, string> = {
     <div class="detail-hero-grid">
       <div class="detail-copy">
         <span class="eyebrow">{lesson.label} · {course.academicYear}</span>
-        <h1>{lesson.title}</h1>
+        <h1>{lesson.shortTitle}</h1>
+        {subtitle && <p class="detail-subtitle">{subtitle}</p>}
         <p>{lesson.summary}</p>
         {primaryResource && (
           <a class="button button-primary" href={withBase(primaryResource.href)}>
             <ResourceIcon kind={primaryResource.kind} size={15} />
-            {primaryResource.kind === 'slides' ? 'Open interactive slides' : 'Open preparation guide'}
+            {primaryResource.kind === 'slides' ? 'Open slides' : 'Open guide'}
             <span aria-hidden="true">↗</span>
           </a>
         )}
@@ -85,8 +82,40 @@ const resourceLabels: Record<string, string> = {
       <p>Everything for this lesson, collected in one place.</p>
     </div>
 
+    {mainGroups.length > 0 ? mainGroups.map((group) => (
+      <section class="resource-group" aria-labelledby={`group-${group.toLowerCase()}`}>
+        <div class="resource-group-heading">
+          <h3 id={`group-${group.toLowerCase()}`}>{group}</h3>
+        </div>
+        <div class="resource-grid">
+          {resourcesIn(group).map((resource) => <ResourceCard resource={resource} />)}
+          {group === 'Lecture' && lesson.video && (
+            <div class="resource-card resource-video">
+              <a class="resource-card-main" href="#video">
+                <span class="resource-icon resource-video"><ResourceIcon kind="video" size={17} /></span>
+                <span class="resource-card-copy">
+                  <strong>Video</strong>
+                  <small>The whole lesson in about {lesson.video.minutes} minutes, with subtitles and chapters. Plays below.</small>
+                </span>
+              </a>
+              <div class="resource-actions"></div>
+            </div>
+          )}
+        </div>
+        {group === 'Practice' && resourcesIn(group).some((resource) => resource.kind === 'solution') && (
+          <p class="resource-group-note">Try the lab yourself first, then open the solution to compare approaches and check your results.</p>
+        )}
+      </section>
+    )) : (
+      <div class="empty-state">
+        <span class="empty-orb" aria-hidden="true"></span>
+        <h3>Pause, review, connect.</h3>
+        <p>No new lecture or lab is scheduled. Use this time to consolidate earlier material.</p>
+      </div>
+    )}
+
     {lesson.video && (
-      <section class="resource-group" aria-labelledby="group-video">
+      <section class="resource-group" id="video" aria-labelledby="group-video">
         <div class="resource-group-heading">
           <h3 id="group-video">Video</h3>
           <span>About {lesson.video.minutes} min</span>
@@ -94,7 +123,7 @@ const resourceLabels: Record<string, string> = {
         <div class="lesson-video">
           <iframe
             src={`https://www.youtube-nocookie.com/embed/${lesson.video.youtubeId}?rel=0${course.videoPlaylist ? `&list=${course.videoPlaylist}` : ''}`}
-            title={`${lesson.label} video: ${lesson.title}`}
+            title={`${lesson.label} video: ${lesson.shortTitle}`}
             loading="lazy"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
             referrerpolicy="strict-origin-when-cross-origin"
@@ -108,62 +137,18 @@ const resourceLabels: Record<string, string> = {
       </section>
     )}
 
-    {groups.length > 0 ? groups.map((group) => (
-      <section class="resource-group" aria-labelledby={`group-${group.toLowerCase()}`}>
-        <div class="resource-group-heading">
-          <h3 id={`group-${group.toLowerCase()}`}>{group}</h3>
-          <span>{visibleResources.filter((resource) => resource.group === group).length} resources</span>
-        </div>
-        <div class="resource-grid">
-          {visibleResources.filter((resource) => resource.group === group).map((resource) => (
-            <div class={`resource-card resource-${resource.kind}`}>
-              <a
-                class="resource-card-main"
-                href={opensInColab(resource.kind) && colabRepository
-                  ? colabUrl(colabRepository, resource.source, colabBranch, colabNotebookRoot)
-                  : withBase(resource.href)}
-                target={opensInColab(resource.kind) && colabRepository ? '_blank' : undefined}
-                rel={opensInColab(resource.kind) && colabRepository ? 'noopener' : undefined}
-              >
-                <span class={`resource-icon resource-${resource.kind}`}><ResourceIcon kind={resource.kind} size={17} /></span>
-                <span class="resource-card-copy">
-                  <span class="resource-kind">{resourceLabels[resource.kind]}</span>
-                  <strong>{resource.label}</strong>
-                  <small>{resource.description}</small>
-                </span>
-                <span class="resource-arrow" aria-hidden="true">↗</span>
-              </a>
-              {(resource.downloadHref || (opensInColab(resource.kind) && colabRepository)) && (
-                <div class="resource-actions">
-                  {opensInColab(resource.kind) && colabRepository && (
-                    <a class="resource-read" href={withBase(resource.href)}>
-                      <ResourceIcon kind="notes" size={13} />
-                      Read online
-                    </a>
-                  )}
-                  {resource.downloadHref && (
-                    <a class="resource-download" href={withBase(resource.downloadHref)} download>
-                      <ResourceIcon kind="notebook" size={13} />
-                      Download .ipynb
-                    </a>
-                  )}
-                </div>
-              )}
-            </div>
-          ))}
-        </div>
-      </section>
-    )) : (
-      <div class="empty-state">
-        <span class="empty-orb" aria-hidden="true"></span>
-        <h3>Pause, review, connect.</h3>
-        <p>No new lecture or lab is scheduled. Use this time to consolidate earlier material.</p>
-      </div>
-    )}
-
     {lesson.note && <aside class="note-panel"><strong>Good to know</strong><p>{lesson.note}</p></aside>}
-    {lesson.resources.some((resource) => resource.kind === 'solution') && (
-      <aside class="note-panel quiet"><strong>Using the lab solution</strong><p>Attempt the worksheet first, then use the worked notebook to compare approaches and check your results.</p></aside>
+
+    {archive.length > 0 && (
+      <details class="resource-group resource-archive">
+        <summary class="resource-group-heading">
+          <h3>Previous year (UoS 2025)</h3>
+          <span class="archive-toggle">Show {archive.length} files</span>
+        </summary>
+        <div class="resource-grid">
+          {archive.map((resource) => <ResourceCard resource={resource} />)}
+        </div>
+      </details>
     )}
 
     <nav class="lesson-navigation" aria-label="Previous and next course lessons">
