@@ -17,15 +17,19 @@ DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-material
 LOCAL_DATA = (ROOT / "../../data/mnist10k.npz").resolve().as_uri()
 # 每个含 ____ 的代码块按出现顺序给出填写内容
 FILLS = [
-    ["fit"],            # 1.1
-    ["10"],             # 2.1
-    ["X_digits_val"],   # 3.1
-    ["40"],             # 3.2
+    ["u"],              # 1.1
+    ["fit"],            # 2.1
+    ["10"],             # 3.1
+    ["X_digits_val"],   # 4.1
+    ["40"],             # 4.2
 ]
 # 执行后必须出现在输出里的核对值（与 worksheet 的 Success check 一致）
 EXPECT = [
-    "(5625, 784) (1875, 784) (2500, 784)", "[0.0955 0.072 0.0619 0.0532 0.0493]", "0.489", "0.827", "0.917", "(1, 10) 25.2",
-    "10 0.885", "20 0.942", "30 0.952", "40 0.957", "50 0.956", "100 0.946", "0.962",
+    "(5625, 784) (1875, 784) (2500, 784)",
+    "angle variance rec_error sum", "0 2.966 1.398 4.364", "30 3.872 0.492 4.364", "120 0.492 3.872 4.364",
+    "angle of components_[0]: 31.2", "explained_variance_: [3.874 0.49 ]", "eigvalsh(S): [0.49  3.874]",
+    "[0.0955 0.072 0.0619 0.0532 0.0493]", "0.489", "0.827", "0.917", "(1, 10) 25.2",
+    "10 0.885", "20 0.942", "30 0.952", "40 0.957", "50 0.956", "60 0.956", "0.962",
     "k = 10: 0.49  k = 50: 0.83  first k with 90%: 86", "[0.452 0.177]",
     "share of the first eigenvalue: 0.1869 second: 0.1276", "largest difference below 1e-6: True", "eigenvalues below 1e-10: 322",
     "first variance: 5.0389 sklearn: 5.0389", "reconstruction error, k = 10: 27.05", "largest weight:",
@@ -33,7 +37,7 @@ EXPECT = [
 qmd = (ROOT / "lab_worksheet.qmd").read_text()
 core = qmd.split("# After class: how today's lab helps with Assignment 2")[0]
 fence = re.compile(r"```python\n(.*?)```", re.S)
-answer_re = re.compile(r'::: \{[^\n]*title="Answer"[^\n]*\}\n(.*?)\n:::', re.S)
+answer_re = re.compile(r'::: \{[^\n]*title="(?:Answer|What to take away[^"]*)"[^\n]*\}\n(.*?)\n:::', re.S)
 callout_re = re.compile(r"::: \{[^\n]*\}\n.*?\n:::", re.S)
 
 nb = nbformat.v4.new_notebook()
@@ -42,7 +46,7 @@ nb.cells.append(nbformat.v4.new_markdown_cell(
     "# Lab 7 Solution: Fewer Numbers for the Same Data\n\n"
     "This solution follows the worksheet task by task, including written answers. "
     "Run the Core tasks from top to bottom; the Advanced Study answers follow. "
-    "The data come with scikit-learn, so the notebook runs in a blank Colab notebook. "
+    "The digits are downloaded in Part 0, so the notebook runs in a blank Colab notebook. "
     "Try the worksheet before opening these answers."
 ))
 fi = 0

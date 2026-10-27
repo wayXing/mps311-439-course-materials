@@ -14,10 +14,11 @@ ROOT = Path(__file__).resolve().parent
 # 每个含 ____ 的代码块按出现顺序给出填写内容
 FILLS = [
     ["order"],            # 1.2
-    ["16", "3"],          # 2.1
+    ["1", "0", "-1"] * 3,   # 2.1
+    ["16", "3"],          # 2.2
 ]
 # 执行后必须出现在输出里的核对值（与 worksheet 的 Success check 一致）
-EXPECT = ["(50000, 28, 28, 1) (50000, 784)", "0.9741", "12,810", "160 4640 8010 12810", "108160", "0.9828", "0.8499", "0.9525",
+EXPECT = ["(50000, 28, 28, 1) (50000, 784)", "0.9741", "shape: (26, 26)", "positions above 1: horizontal 23 vertical 50", "12,810", "160 4640 8010 12810", "108160", "0.9828", "0.8499", "0.9525", "9828",
           "true 7 predicted 9 images 12", "true 5 predicted 8 images 10", "172", "CNN on shuffled pixels: 0.9384", "time ratio",
           "8-16 5258 0.9733", "16-32 no pooling 189130 0.9834", "moved 2: before 0.8499 after 0.9741 unmoved after 0.9729"]
 qmd = (ROOT / "lab_worksheet.qmd").read_text()

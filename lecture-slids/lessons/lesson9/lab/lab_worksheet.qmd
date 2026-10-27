@@ -17,12 +17,13 @@ format:
 
 ## What this lab is for
 
-In the lecture a few logistic units drew lines around the inner ring, and a network trained them all together. Today you train the network of Assignment 2, Section 4, on MNIST:
+In the lecture a few logistic units drew lines around the inner ring, and a network trained them all together. Today you first train that small network on the ring yourself, then the network of Assignment 2, Section 4, on MNIST:
 
-1. build the network in Keras and train it for 5 epochs;
-2. remove the activation in the middle and see what is lost;
-3. draw the training and validation curves and find where the network starts to memorise;
-4. read how much the result moves when only the random seed changes.
+1. train networks with 1 to 4 hidden units on the ring and see the lines they draw;
+2. build the MNIST network in Keras and train it for 5 epochs;
+3. remove the activation in the middle and see what is lost;
+4. draw the training and validation curves and find where the network starts to memorise;
+5. read how much the result moves when only the random seed changes.
 
 Before each step you will see a question. **Write down your own answer first**, then run the code and compare.
 
@@ -30,12 +31,12 @@ Most code is provided. Your job is to fill the blanks `____`, run the cell, and 
 
 ## How to work
 
-1. Open a **blank** Colab notebook (**File → New notebook in Drive**), as in Labs 1 to 8. Keras is already installed in Colab; you do not need a GPU.
-2. Copy each code block into a cell, fill in the blanks, and run it. Cells depend on the cells above, so run them from top to bottom.
+1. Open the **Lab workbook** from the course website: it opens in Colab with all the code of this page already in place, so there is nothing to copy (**File → Save a copy in Drive** first). Prefer to build your own? Open a **blank** Colab notebook (**File → New notebook in Drive**) and copy each code block into a cell. Keras is already installed in Colab; you do not need a GPU.
+2. Fill in the blanks and run each cell. Cells depend on the cells above, so run them from top to bottom.
 3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
 4. Each task has a one-line **Hint** and a folded **Answer**. Try first. Open the Answer only to check your work. If you fall behind, copy the Answer of a task and carry on: every later task still works.
 5. Running every cell and matching the Success checks is a complete lab. Your last digit or two may differ from the Success check: Colab and the computer that made this page do the arithmetic in a slightly different order. A difference in the third decimal place is fine.
-6. The **Try with AI** boxes are for when you finish early, or after class. They follow the four steps below.
+6. The **Try with AI** boxes are folded: open one when you finish early, or after class. They follow the four steps below.
 
 ### Using AI
 
@@ -46,7 +47,7 @@ The **Try with AI** boxes use an AI assistant for the Python you do not know yet
 3. **Ask:** the request.
 4. **Check:** compare the AI's result with a number or shape given on this page. If it does not match, the AI or your question is wrong. Find out which.
 
-## Part 0: Load MNIST and split it (6 minutes)
+## Part 0: Load MNIST and split it (5 minutes)
 
 **Goal:** the same images and the same split as Assignment 2.
 
@@ -74,15 +75,121 @@ print(y_fit[:10])                                         # the first ten labels
 
 We do not use `x_test` today. As in Assignment 2, the test images are used once, at the very end.
 
-## Part 1: Build and train the network (14 minutes)
+## Part 1: Lines around the ring (13 minutes)
+
+**Goal:** train the small network of Sections 2 to 4 of the Note yourself, and see how many hidden units it takes to enclose the inner ring.
+
+The data are the ring of Lesson 4: 150 inner points (class 1) and 150 outer points (class 0), two coordinates each. In Section 2 of the Note you placed three lines by hand. Here Keras places them.
+
+### 1.1 One unit, two, three, four
+
+Each hidden unit is one small logistic regression (Section 2 of the Note): it computes a weighted sum $z = w_1x_1 + w_2x_2 + b$ and squeezes it into a number between 0 and 1. The set $z = 0$ is a straight line. The output unit on top is one more logistic regression.
+
+**Question first:** a network with only **1** hidden unit has one line. What shape can the region it calls "inner ring" be?
+
+Fill the blank with the function each hidden unit uses to squeeze its weighted sum, then run. The cell trains four networks, with 1, 2, 3 and 4 hidden units, 300 steps each: about half a minute in Colab.
+
+```python
+rng = np.random.default_rng(0)                            # the random numbers of the Lesson 4 ring
+angle = rng.uniform(0, 2 * np.pi, 300)                    # an angle for every point
+inner_r = rng.normal(1.0, 0.25, 150)                      # radius of the 150 inner points
+outer_r = rng.normal(2.4, 0.3, 150)                       # radius of the 150 outer points
+radius = np.concatenate([inner_r, outer_r])               # all 300 radii
+x1 = radius * np.cos(angle)                               # first coordinate
+x2 = radius * np.sin(angle)                               # second coordinate
+X_ring = np.column_stack([x1, x2])                        # 300 rows, two columns
+y_ring = np.repeat([1, 0], 150)                           # 1 = inner ring (first 150), 0 = outer ring
+
+ring_models = {}                                          # the trained networks, by number of hidden units
+for units in [1, 2, 3, 4]:                                # 1, 2, 3 and 4 hidden units
+    keras.utils.set_random_seed(0)                        # the same random start for every network
+    ring_model = keras.Sequential([
+        keras.layers.Input((2,)),                         # two coordinates in
+        keras.layers.Dense(units, activation=____),       # the hidden units: small logistic regressions
+        keras.layers.Dense(1, activation="sigmoid"),      # one more logistic unit on top: probability of inner ring
+    ])
+    ring_model.compile(optimizer=keras.optimizers.Adam(0.05),   # a larger step size than the default
+                       loss="binary_crossentropy",              # cross-entropy for two classes
+                       metrics=["accuracy"])                    # also report accuracy
+    hist_ring = ring_model.fit(X_ring, y_ring, epochs=300,      # 300 steps
+                               batch_size=300, verbose=0)       # all 300 points in every step
+    ring_models[units] = ring_model                           # keep the network for the plots in 1.2
+    print("hidden units", units, "accuracy", round(hist_ring.history["accuracy"][-1], 3))   # training accuracy
+```
+
+**Hint:** the same function as the output unit: each hidden unit is a logistic regression.
+
+**Success check:**
+
+```
+hidden units 1 accuracy 0.69
+hidden units 2 accuracy 0.82
+hidden units 3 accuracy 0.97
+hidden units 4 accuracy 0.997
+```
+
+These are the numbers of the widget in Section 3 of the Note: the same data, the same network and the same training.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+        keras.layers.Dense(units, activation="sigmoid"),  # the hidden units: small logistic regressions
+```
+
+Question first: a half-plane, everything on one side of a straight line. The output unit only turns the one feature "how far on which side of the line" into a probability, so its edge is a straight line too (in 1.2 it runs parallel to the green line). The accuracy rises with every unit; 3 units (0.97) are the triangle of Section 2 of the Note, which got 0.967 by hand.
+:::
+
+### 1.2 Draw the lines
+
+Run the cell without changing it. It shades the region the network calls inner ring (probability above 0.5) and draws one green line per hidden unit, where that unit's weighted sum $z$ is 0. Left: the network with 1 unit; right: the network with 4 units.
+
+```python
+ticks = np.linspace(-3.6, 3.6, 200)                       # 200 positions along each axis
+gx, gy = np.meshgrid(ticks, ticks)                        # a 200 x 200 grid of points
+grid = np.column_stack([gx.ravel(), gy.ravel()])          # the grid as 40,000 rows of two coordinates
+colours = np.where(y_ring == 1, "#0072B2", "#E69F00")     # inner ring blue, outer ring orange
+hidden = [1, 4]                                           # left: 1 hidden unit; right: 4
+fig, axes = plt.subplots(1, 2, figsize=(10, 5))           # two plots side by side
+for i in [0, 1]:                                          # the left plot, then the right plot
+    units = hidden[i]                                     # the number of hidden units
+    net = ring_models[units]                              # the network trained in 1.1
+    prob = net.predict(grid, verbose=0)                   # probability of inner ring at every grid point
+    prob = prob.reshape(gx.shape)                         # back to the 200 x 200 grid
+    W1, b1 = net.layers[0].get_weights()                  # the weights and constants of the hidden units
+    Z = grid @ W1 + b1                                    # each hidden unit's weighted sum z at every grid point
+    axes[i].contourf(gx, gy, prob > 0.5, levels=[0.5, 1.5], colors=["#cfe3f3"])   # shade: called inner ring
+    for k in range(units):                                # one green line per hidden unit: where its z is 0
+        axes[i].contour(gx, gy, Z[:, k].reshape(gx.shape), levels=[0], colors="#00795A")
+    axes[i].scatter(X_ring[:, 0], X_ring[:, 1], c=colours, s=12)   # the 300 points
+    axes[i].set_title("hidden units: " + str(units))
+    axes[i].set_aspect("equal")
+plt.show()
+```
+
+**Success check:** two plots of the 300 points with a shaded region, 1 green line on the left and 4 green lines on the right. On the left, the edge of the shading is parallel to the green line but need not lie on it.
+
+**Questions:**
+
+1. On the right, what do the 4 green lines enclose? Each hidden unit only says which side of its own line a point is on. Which layer turns the 4 lines into "inside all four lines"? Answer in one sentence; "the output unit" and "the second layer" are both right names.
+2. Put `"linear"` in the blank of 1.1 instead (no squeeze: each unit passes on its weighted sum), and run 1.1 and 1.2 again (about half a minute). What is the accuracy with 4 units, and what is the edge of the shaded region now? Then put `"sigmoid"` back in the blank; you need not run it again: the ring networks are not used again after Part 1, so this does not affect Part 2.
+
+::: {.callout-note collapse="true" title="Answer"}
+1. A four-sided shape around the inner ring, and the shaded region fills its inside. The output unit on top (the second layer) combines the four "which side" features into "inside all four lines"; the hidden units alone only draw lines. Nobody told the network about the distance from the centre; training placed the four lines.
+2. 0.503 with any number of units, and the edge is one straight line through the middle of the ring: about half of the plot is shaded, as in Section 4 of the Note. Without a squeeze, the whole network is one weighted sum of the two coordinates: a line on top of a line is still a line, so the network is just one logistic regression on $x_1$ and $x_2$. The 4 green lines are still drawn, but they no longer decide the edge. Part 3 asks the same question on MNIST.
+:::
+
+::: {.callout-note collapse="true" title="If you are curious: why 0.69 with one line, and not the 0.50 of Lesson 4?"}
+Both are one line; what differs is where it lies. The logistic regression of Lesson 4 lets its probability grow steadily across the whole plane, and the best such line on a ring runs through the middle: 0.50. The hidden unit squeezes its sum, so points far inside its side all count about the same. Training could then move the line out to the edge, where it cuts off a slice of the outer ring (the white region on the left) that holds only orange points: those points are right, and the rest of the plane is called inner ring, which gives 0.69.
+:::
+
+## Part 2: Build and train the network (14 minutes)
 
 **Goal:** the network of Assignment 2, Section 4: 784 pixels in, two hidden layers of 128 units, 10 outputs.
 
-### 1.1 Build the network
+### 2.1 Build the network
 
 **Question first:** the output layer must give a probability for each of the 10 digits. Which function from Lesson 4 does that?
 
-Fill the blanks: the first hidden layer has 128 ReLU units (copy the second layer), and the output layer uses the function from your answer.
+Fill the blanks: the first hidden layer has 128 ReLU units (copy the second layer; in the workbook this is already filled in), and the output layer uses the function from your answer.
 
 ```python
 keras.utils.set_random_seed(0)                            # fix the random starting weights and batches
@@ -108,11 +215,9 @@ print(model.count_params())                               # how many weights the
 softmax, as in Lesson 4 for more than two classes.
 :::
 
-### 1.2 Where do 118,282 weights come from?
+### 2.2 Where do 118,282 weights come from?
 
-**Question first:** each unit of the first hidden layer has one weight for every pixel, plus one constant. How many numbers is that for the whole first layer?
-
-Run the cell without changing it.
+Each unit has one weight for every input, plus one constant. Run the cell without changing it: it counts the weights layer by layer.
 
 ```python
 layer1 = 784 * 128 + 128                                  # 128 units, each with 784 weights and one constant
@@ -130,7 +235,7 @@ print(784 * 10 + 10)                                      # logistic regression 
 About 15 times (118,282 against 7,850). With many more weights, the network can memorise the training images, so we must check it on the validation set.
 :::
 
-### 1.3 Train for 5 epochs
+### 2.3 Train for 5 epochs
 
 **Question first:** in the lecture, one epoch with batches of 32 images was 1563 steps. Roughly how many steps are 5 epochs?
 
@@ -148,7 +253,7 @@ print(np.round(hist.history["val_accuracy"], 4))          # validation accuracy 
 
 **Success check:** five numbers between about `0.96` and `0.975`; the last is about `0.970`.
 
-If you run this cell again, run 1.1 first: otherwise `fit` carries on from the weights it has already trained, and the numbers will not match.
+If you run this cell again, run 2.1 first: otherwise `fit` carries on from the weights it has already trained, and the numbers will not match.
 
 **Question:** logistic regression on the same split gives a validation accuracy of `0.9277` (Assignment 2, Table 1, asks you to compute it). Out of the 10,000 validation images, how many fewer mistakes does the network make?
 
@@ -156,7 +261,7 @@ If you run this cell again, run 1.1 first: otherwise `fit` carries on from the w
 5 epochs are about 7,800 steps. Logistic regression gets about 723 images wrong; the network about 300. So about 420 fewer mistakes.
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** to see what the units of the first hidden layer look for.
 
 **Tell the AI:** `model.layers[0].get_weights()[0]` is a 784 × 128 array: one column of 784 weights per unit.
@@ -166,26 +271,26 @@ If you run this cell again, run 1.1 first: otherwise `fit` carries on from the w
 **Check:** 10 red and blue patterns. None of them looks like a whole digit; most respond to a few areas of the image (compare Section 8 of the Note).
 :::
 
-## Part 2: Remove the activation in the middle (8 minutes)
+## Part 3: Remove the activation in the middle (5 minutes)
 
 **Goal:** see what the network loses without a bend in the middle.
 
-### 2.1 No activation
+### 3.1 No activation
 
-**Question first:** in the lecture, removing the activation on the ring left a straight line at 50.3%. What will it do on MNIST: near 0.97, near logistic regression's 0.9277, or much lower?
+**Question first:** on the ring (1.2, Question 2), removing the activation left one straight line at 0.503, however many hidden units. What will it do on MNIST: near 0.97, near logistic regression's 0.9277, or much lower?
 
-Fill both blanks with `"linear"` (no activation: each unit passes on its weighted sum) and run. It takes about half a minute.
+Fill both blanks with `"linear"` (no activation: each unit passes on its weighted sum) and run; in the workbook they are already filled in. It takes about half a minute.
 
 ```python
-keras.utils.set_random_seed(0)                            # the same starting point as Part 1
+keras.utils.set_random_seed(0)                            # the same starting point as Part 2
 flat = keras.Sequential([
     keras.layers.Input((784,)),                           # 784 pixels in
     keras.layers.Dense(128, activation=____),             # hidden layer 1, no bend
     keras.layers.Dense(128, activation=____),             # hidden layer 2, no bend
     keras.layers.Dense(10, activation="softmax"),         # output as before
 ])
-flat.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])   # as in 1.3
-hist_flat = flat.fit(X_fit, y_fit, epochs=5, validation_data=(X_val, y_val), verbose=0)       # as in 1.3
+flat.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])   # as in 2.3
+hist_flat = flat.fit(X_fit, y_fit, epochs=5, validation_data=(X_val, y_val), verbose=0)       # as in 2.3
 print(np.round(hist_flat.history["val_accuracy"], 4))     # validation accuracy after each epoch
 ```
 
@@ -204,15 +309,15 @@ print(np.round(hist_flat.history["val_accuracy"], 4))     # validation accuracy 
 Without a bend, weights times weights times pixels is still one set of weights times the pixels, plus a constant: the same form as logistic regression. The extra weights add nothing new.
 :::
 
-## Part 3: How many epochs? (12 minutes)
+## Part 4: How many epochs? (8 minutes)
 
 **Goal:** the training and validation curves, as in Figure 2 of Assignment 2.
 
-### 3.1 Train for 8 epochs and draw the curves
+### 4.1 Train for 8 epochs and draw the curves
 
 **Question first:** the training loss falls at every epoch. Will the validation loss do the same?
 
-Run the cell without changing it. It builds the network of Part 1 again from the same seed and trains it for 8 epochs: about one minute in Colab.
+Run the cell without changing it. It builds the network of Part 2 again from the same seed and trains it for 8 epochs: about one minute in Colab.
 
 ```python
 keras.utils.set_random_seed(0)                            # start again from the same point
@@ -221,8 +326,8 @@ model = keras.Sequential([
     keras.layers.Dense(128, activation="relu"),
     keras.layers.Dense(128, activation="relu"),
     keras.layers.Dense(10, activation="softmax"),
-])                                                        # the network of Part 1
-model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])   # as in 1.3
+])                                                        # the network of Part 2
+model.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])   # as in 2.3
 hist = model.fit(X_fit, y_fit, epochs=8, validation_data=(X_val, y_val), verbose=0)   # 8 epochs
 h = hist.history                                          # four lists: loss, val_loss, accuracy, val_accuracy
 epochs = np.arange(1, 9)                                  # 1 to 8
@@ -254,31 +359,33 @@ print(np.argmin(h["val_loss"]) + 1, round(min(h["val_loss"]), 3))     # the epoc
 2. Mostly memorising: the training loss keeps falling while the validation loss rises after epoch 4. The validation accuracy may still creep up a little, but the wrong answers become over-confident, which the loss shows. The evidence is the validation curve, not the training curve (Lesson 6).
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** training that stops by itself when the validation loss stops improving.
 
-**Tell the AI:** the model is built and compiled as in 3.1; `X_fit`, `y_fit`, `X_val`, `y_val` as above.
+**Tell the AI:** the model is built and compiled as in 4.1; `X_fit`, `y_fit`, `X_val`, `y_val` as above.
 
-**Ask:** *"Rebuild the model of 3.1 with keras.utils.set_random_seed(0), then train it for at most 20 epochs with keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True). Print the number of epochs it ran and the final validation accuracy."*
+**Ask:** *"Rebuild the model of 4.1 with keras.utils.set_random_seed(0), then train it for at most 20 epochs with keras.callbacks.EarlyStopping(monitor='val_loss', patience=3, restore_best_weights=True). Print the number of epochs it ran and the final validation accuracy."*
 
 **Check:** it stops at epoch 7 (three epochs after the best, epoch 4) and keeps the weights of epoch 4; the validation accuracy is about `0.974`.
 :::
 
-## Part 4: Does the seed matter? (4 minutes)
+## Part 5: Does the seed matter? (5 minutes)
 
 **Goal:** see how much the result moves when only the random seed changes. To save time in class, this part has no training: read the results below.
 
 **Question first:** the seed fixes the starting weights and the order of the batches. If you change it, will the validation accuracy after 5 epochs still be exactly 0.970?
 
-The network of Part 1 was trained twice more, changing only the seed:
+::: {.callout-note collapse="true" title="The results: open after you have written your answer"}
+The network of Part 2 was trained twice more, changing only the seed:
 
-| | seed 0 (Part 1) | seed 1 |
+| | seed 0 (Part 2) | seed 1 |
 |---|---:|---:|
 | validation accuracy after 5 epochs | 0.9700 | 0.9760 |
 
-After 20 epochs (Section 7 of the Note), seeds 0, 1 and 2 give 0.9780, 0.9755 and 0.9781. Use the 20-epoch spread (up to 0.26 percentage points) as the size of the seed's luck: after 5 epochs seed 0 happens to dip, so that gap is larger.
+After 20 epochs (Section 7 of the Note), seeds 0, 1 and 2 give 0.9780, 0.9755 and 0.9781. Use the 20-epoch spread, 0.26 percentage points, as the size of the seed's luck, not the 0.6 points at 5 epochs: after 20 epochs the networks have settled, while at 5 epochs seed 0 happens to be in a dip.
+:::
 
-**Question:** a classmate's changed network beats yours by 0.1 percentage points. Is that evidence that their network is better? What would you ask them to do?
+**Question:** (If you are short of time, answer this one after class.) A classmate's changed network beats yours by 0.1 percentage points. Is that evidence that their network is better? Use the 20-epoch spread (0.26 points) in your answer. What would you ask them to do?
 
 ::: {.callout-note collapse="true" title="Answer"}
 No. Changing only the seed moved the validation accuracy after 5 epochs by 0.6 percentage points (0.970 to 0.976); after 20 epochs the three seeds differ by up to 0.26 points. (The two gaps differ because seed 0 happens to dip at epoch 5; after 20 epochs the curves have settled.) A 0.1-point lead is well inside this. Ask them to train both networks with a few seeds and compare the averages and the spread.
@@ -292,31 +399,21 @@ other = keras.Sequential([
     keras.layers.Dense(128, activation="relu"),
     keras.layers.Dense(128, activation="relu"),
     keras.layers.Dense(10, activation="softmax"),
-])                                                        # the network of Part 1
-other.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])   # as in 1.3
-hist_other = other.fit(X_fit, y_fit, epochs=5, validation_data=(X_val, y_val), verbose=0)       # 5 epochs, as in 1.3
+])                                                        # the network of Part 2
+other.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])   # as in 2.3
+hist_other = other.fit(X_fit, y_fit, epochs=5, validation_data=(X_val, y_val), verbose=0)       # 5 epochs, as in 2.3
 print(round(hist_other.history["val_accuracy"][-1], 4))   # validation accuracy after 5 epochs: about 0.976
 ```
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** which digits the network confuses, as a 10 × 10 confusion matrix on the validation set (Lesson 4).
 
-**Tell the AI:** `model` is the network trained in 3.1; `X_val` and `y_val` are the validation images and labels.
+**Tell the AI:** `model` is the network trained in 4.1; `X_val` and `y_val` are the validation images and labels.
 
 **Ask:** *"Compute model.predict(X_val), take the argmax of each row as the predicted digit, and print sklearn.metrics.confusion_matrix(y_val, predicted). Then print the three largest numbers off the diagonal with their true and predicted digits."*
 
-**Check:** the diagonal adds up to about `9,740` of the 10,000 images (the validation accuracy of 3.1 after 8 epochs). Each off-diagonal number is small (a few tens at most).
-:::
-
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
-**You want:** the network of the lecture on the ring: 3 hidden sigmoid units, and a picture of where it says "inner ring".
-
-**Tell the AI:** the ring of Lesson 4: `rng = np.random.default_rng(0)`, `angle = rng.uniform(0, 2 * np.pi, 300)`, `radius = np.r_[rng.normal(1.0, 0.25, 150), rng.normal(2.4, 0.3, 150)]`; the points are `radius * cos(angle)`, `radius * sin(angle)`; the first 150 are class 1.
-
-**Ask:** *"Build these 300 points, then train keras.Sequential([Input((2,)), Dense(3, activation='sigmoid'), Dense(1, activation='sigmoid')]) with Adam(0.05), loss 'binary_crossentropy', 300 epochs, batch_size=300, after keras.utils.set_random_seed(0). Shade the region where the predicted probability is above 0.5 on a grid from -3.6 to 3.6, and draw the points on top."*
-
-**Check:** the training accuracy is about `0.97`, and the shaded region is a triangle around the inner ring, as in Section 3 of the Note with 3 units.
+**Check:** the diagonal adds up to about `9,740` of the 10,000 images (the validation accuracy of 4.1 after 8 epochs). Each off-diagonal number is small (a few tens at most).
 :::
 
 # After class: how today's lab helps with Assignment 2
@@ -326,10 +423,10 @@ Assignment 2 (handwritten digits, MNIST) asks for this network in Section 4. **F
 | What you did today | Where it appears in Assignment 2 |
 |---|---|
 | Part 0: load MNIST, first 50,000 to fit, last 10,000 to validate | Data: "A fixed split, used throughout". The assignment calls the arrays `X_train`, `y_train` (our `X_fit`, `y_fit`) and `X_val`, `y_val`. Its Option 1 loads the same Keras file, joins the training and test images, then splits them; the first 50,000 and the next 10,000 are the same images as today |
-| Part 1: `Sequential`, `Dense(128, "relu")` twice, `Dense(10, "softmax")`, `compile`, `fit(validation_data=...)` | Section 4: "two hidden layers of 128 ReLU units each … the Adam optimiser and the loss `sparse_categorical_crossentropy` … pass the validation set as `validation_data`" |
-| Part 3: the two plots of loss and accuracy against the epoch | Section 4, **Figure 2**: "on the left, the training loss and the validation loss … on the right, the training accuracy and the validation accuracy" |
-| Part 4: `set_random_seed`, and how much one seed moves the result | Randomness: "write `keras.utils.set_random_seed(0)` before you build the model"; Going further: "Train again with three different random seeds" |
-| The second Try with AI box after Part 4: the confusion matrix | Section 4: Table 5, "the 5 most frequent kinds of mistake" (in the assignment, on `test`, once) |
+| Part 2: `Sequential`, `Dense(128, "relu")` twice, `Dense(10, "softmax")`, `compile`, `fit(validation_data=...)` | Section 4: "two hidden layers of 128 ReLU units each … the Adam optimiser and the loss `sparse_categorical_crossentropy` … pass the validation set as `validation_data`" |
+| Part 4: the two plots of loss and accuracy against the epoch | Section 4, **Figure 2**: "on the left, the training loss and the validation loss … on the right, the training accuracy and the validation accuracy" |
+| Part 5: `set_random_seed`, and how much one seed moves the result | Randomness: "write `keras.utils.set_random_seed(0)` before you build the model"; Going further: "Train again with three different random seeds" |
+| The Try with AI box after Part 5: the confusion matrix | Section 4: Table 5, "the 5 most frequent kinds of mistake" (in the assignment, on `test`, once) |
 
 **Two things that are different in the assignment.**
 
@@ -338,7 +435,7 @@ Assignment 2 (handwritten digits, MNIST) asks for this network in Section 4. **F
 
 **Reflection** (after class, one or two sentences each):
 
-1. Why must there be an activation between the layers?
+1. What can 4 hidden units do on the ring that 1 unit cannot, and why must there be an activation between the layers?
 2. What does one epoch mean, and how many steps is it with batches of 32 on 50,000 images?
 3. Why do we decide the number of epochs from the validation curve and not from the training curve?
 4. How large a difference between two networks would you trust, and why?
@@ -353,9 +450,9 @@ Advanced Study 2 of the Note trains this network with sigmoid hidden units. Here
 
 **Tasks**
 
-1. Build the ring of Lesson 4 (the code is in the last Try with AI box, or in Section 9 of the Note) as `X_ring` (300 × 2) and `y_ring`.
+1. Build the ring of Lesson 4 as `X_ring` (300 × 2) and `y_ring` (the first lines of 1.1 do this; so does Section 9 of the Note).
 2. Using only numpy, train a network with 4 **ReLU** hidden units and one logistic output by gradient descent: 5000 steps, step size 0.5, all 300 points in every step. Start from a new `rng = np.random.default_rng(0)` (make it again after building the ring): first `W1 = rng.normal(0, 1, (2, 4))`, then `w2 = rng.normal(0, 1, 4)`; both constants start at 0. Write the gradients yourself with the four steps of Advanced Study 1 of the Note; only step 3 changes, because the slope of ReLU is 1 where its weighted sum is positive and 0 elsewhere.
-3. Print the loss at the start and at the end, and the training accuracy. Compare with Keras (Section 9 of the Note: 0.997 with 4 units).
+3. Print the loss at the start and at the end, and the training accuracy. Compare with Keras (1.1: 0.997 with 4 sigmoid units).
 
 ::: {.callout-tip title="Ask AI"}
 Ask: *"Why does the gradient of the cross-entropy with respect to the output score of a logistic unit equal p − y?"* Check its argument against Lesson 4, Advanced Study 1.
@@ -371,13 +468,13 @@ For sigmoid units the four steps in numpy are `g = (p - y_ring) / 300`; `gw2 = H
 
 After A, pick one weight, for example `W1[0, 0]`. Compute the loss with `1e-5` added to it and with `1e-5` taken away, and divide the difference by `2e-5`. Compare with `gW1[0, 0]` computed again at the final weights (the last `gW1` inside your loop used the weights before the last update). (Advanced Study 2 of the Note adds `1e-5` only once; stepping both ways, a central difference, is more accurate, and here it is needed to agree to three figures.)
 
-**Self-check:** the two numbers agree in their first three significant figures (about `0.0000575`). Then explain in one sentence why this check is too slow to train the network of Part 1 with (Section 5 of the Note).
+**Self-check:** the two numbers agree in their first three significant figures (about `0.0000575`). Then explain in one sentence why this check is too slow to train the network of Part 2 with (Section 5 of the Note).
 
 ## C. Dropout
 
-Rebuild the network of 3.1 with `keras.layers.Dropout(0.2)` after each hidden layer, train for 8 epochs, and draw the same two plots.
+Rebuild the network of 4.1 with `keras.layers.Dropout(0.2)` after each hidden layer, train for 8 epochs, and draw the same two plots.
 
-**Self-check:** the lowest validation loss is now at epoch `7` (about `0.078`), and after 8 epochs the validation loss is only about `0.016` above the training loss, against about `0.091` in 3.1.
+**Self-check:** the lowest validation loss is now at epoch `7` (about `0.078`), and after 8 epochs the validation loss is only about `0.016` above the training loss, against about `0.091` in 4.1.
 
 ## Advanced Study log
 

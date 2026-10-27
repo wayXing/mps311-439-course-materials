@@ -13,14 +13,16 @@ from jupyter_client import KernelManager
 ROOT = Path(__file__).resolve().parent
 # 每个含 ____ 的代码块按出现顺序给出填写内容
 FILLS = [
-    ["128", '"relu"', '"softmax"'],   # 1.1
-    ['"linear"', '"linear"'],         # 2.1
+    ['"sigmoid"'],                    # 1.1
+    ["128", '"relu"', '"softmax"'],   # 2.1
+    ['"linear"', '"linear"'],         # 3.1
 ]
 # 执行后必须出现在输出里的核对值（与 worksheet 的 Success check 一致）
 EXPECT = [
+    "hidden units 1 accuracy 0.69", "hidden units 2 accuracy 0.82", "hidden units 3 accuracy 0.97", "hidden units 4 accuracy 0.997", "hidden units 1 accuracy 0.503", "hidden units 4 accuracy 0.503",
     "(50000, 784) (10000, 784)", "[5 0 4 1 9 2 1 3 1 4]", "118282", "100480 16512 1290 118282", "7850",
     "0.9645 0.9716 0.9741 0.9743 0.97", "0.9159 0.9176 0.919 0.9205 0.9203", "4 0.093", "lowest validation loss at epoch 7 0.078", "final gap (val loss - train loss): 0.016 without dropout: 0.091", 
-    "early stop after 7 epochs", "ring accuracy 0.97", "diagonal 9743", "loss 0.651 -> 0.019 accuracy 0.997", "agree: True",
+    "early stop after 7 epochs", "diagonal 9743", "loss 0.651 -> 0.019 accuracy 0.997", "agree: True",
 ]
 qmd = (ROOT / "lab_worksheet.qmd").read_text()
 core = qmd.split("# After class: how today's lab helps with Assignment 2")[0]
@@ -45,6 +47,7 @@ for match in re.finditer(r"^### (\d\.\d [^\n]+)\n(.*?)(?=^### |^## |^# |\Z)", co
     nb.cells.append(nbformat.v4.new_markdown_cell("## " + title))
     filled_blocks = []
     for code in fence.findall(task_body):
+        raw = code
         if "____" in code:
             assert code.count("____") == len(FILLS[fi]), f"Blank count changed in {title}"
             for value in FILLS[fi]:
@@ -52,6 +55,14 @@ for match in re.finditer(r"^### (\d\.\d [^\n]+)\n(.*?)(?=^### |^## |^# |\Z)", co
             fi += 1
         filled_blocks.append(code)
         nb.cells.append(nbformat.v4.new_code_cell(code))
+        if title.startswith("1.1"):
+            ring_linear = raw.replace("____", '"linear"', 1)  # 1.2 Question 2: the same cell without the squeeze
+        if title.startswith("1.2"):
+            ring_plot = code
+    if title.startswith("1.2"):                        # run Question 2, then put "sigmoid" back
+        nb.cells.append(nbformat.v4.new_markdown_cell('Question 2: 1.1 and 1.2 again with `"linear"` in the blank.'))
+        nb.cells.append(nbformat.v4.new_code_cell(ring_linear))
+        nb.cells.append(nbformat.v4.new_code_cell(ring_plot))
     for ans in answers:
         for code in fence.findall(ans):
             for line in code.strip().splitlines():

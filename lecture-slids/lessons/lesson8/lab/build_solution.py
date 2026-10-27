@@ -19,14 +19,23 @@ LOCAL_DATA = (ROOT / "../../data/mnist10k.npz").resolve().as_uri()
 FILLS = [
     ["10"],               # 1.1
     ["y_digits_fit"],     # 2.1
-    ['"ward"'],           # 4.1 (the worksheet also asks for "single"; the solution shows ward and adds single below)
+    ["single"],         # 4.1 (two rings)
 ]
 # 执行后必须出现在输出里的核对值（与 worksheet 的 Success check 一致）
 EXPECT = [
-    "(5625, 50)", "169025.6", "5625", "[0 0 1 1 2 3 4 6 7 8]", "0.576", "0 169033.3 0.586", "1 169714.5 0.599", "2 169349.4 0.594",
-    "3 169025.8 0.576", "4 169026.9 0.581", "0.597", "single: 0.115", "k = 10: 169026", "500 images, majority vote: 0.592",
-    "best 162656.2 worst 164594.3", "scikit-learn, k = 12: 162836.0", "eps 0.5 groups",
+    "(5625, 50)", "169025.6", "5625", "[0 0 1 1 2 3 4 6 7 8]", "0.576", "blobs: [968.4, 486.2, 127.0, 108.5, 93.0, 77.8, 67.2]", "2 226671.5", "10 169025.6", "15 155577.4",
+    "K-means 0.625", "hierarchical 1.0", "ward 0.597", "single 0.115", "5616", "500 images, majority vote: 0.592",
+    "best 162656.2 worst 164594.3", "2 0.098", "8 0.097", "10 0.085", "scikit-learn, k = 12: 162836.0", "eps 0.5 groups",
 ]
+# 3.1：单起点 K-means 在不同机器、不同线程数下末位可能不同，只核对到 3 位有效数字
+SEED_CHECK = {0: (169000, 0.586), 1: (170000, 0.599), 2: (169000, 0.594), 3: (169000, 0.576), 4: (169000, 0.581)}
+
+
+def seeds_ok(text):
+    """3.1 的五行：种子、平方和（3 位有效数字）、多数票（差 0.01 以内）。"""
+    found = {int(a): (float(b), float(c)) for a, b, c in re.findall(r"^(\d) (\d+\.\d) (0\.\d+)$", text, re.M)}
+    return all(k in found and float(f"{found[k][0]:.3g}") == v and abs(found[k][1] - m) < 0.011
+               for k, (v, m) in SEED_CHECK.items())
 qmd = (ROOT / "lab_worksheet.qmd").read_text()
 core = qmd.split("# After class: how today's lab helps with Assignment 2")[0]
 fence = re.compile(r"```python\n(.*?)```", re.S)
@@ -39,11 +48,11 @@ nb.cells.append(nbformat.v4.new_markdown_cell(
     "# Lab 8 Solution: Finding Groups Without Labels\n\n"
     "This solution follows the worksheet task by task, including written answers. "
     "Run the Core tasks from top to bottom; the Advanced Study answers follow. "
-    "The data come with scikit-learn, so the notebook runs in a blank Colab notebook. "
+    "Part 0 downloads the data, so the notebook runs in a blank Colab notebook. "
     "Try the worksheet before opening these answers."
 ))
 fi = 0
-for match in re.finditer(r"^### (\d\.\d [^\n]+)\n(.*?)(?=^### |^## |^# |\Z)", core, re.M | re.S):
+for match in re.finditer(r"^### (\d\.\d [^\n]+)\n(.*?)(?=^### |^## |\Z)", core, re.M | re.S):
     title, body = match.groups()
     answers = answer_re.findall(body)
     task_body = callout_re.sub("", body)              # drop Answer, Ask AI and Hint callouts
@@ -67,15 +76,6 @@ for match in re.finditer(r"^### (\d\.\d [^\n]+)\n(.*?)(?=^### |^## |^# |\Z)", co
             nb.cells.append(nbformat.v4.new_markdown_cell(prose))
 assert fi == len(FILLS), (fi, len(FILLS))
 
-nb.cells.append(nbformat.v4.new_code_cell(
-    "# 4.1 again, with linkage=\"single\"\n"
-    "hc = AgglomerativeClustering(n_clusters=10, linkage=\"single\")\n"
-    "groups_hc = hc.fit_predict(Z_fit)\n"
-    "t = np.zeros((10, 10), dtype=int)\n"
-    "for i in range(len(Z_fit)):\n"
-    "    t[groups_hc[i], y_digits_fit[i]] += 1\n"
-    "print(\"single:\", round(t.max(axis=1).sum() / len(Z_fit), 3))\n"
-    "print(np.bincount(groups_hc))\n"))
 nb.cells.append(nbformat.v4.new_markdown_cell(
     "# Try with AI: one possible answer for each box\n\nYour AI may write it differently; what matters is that the Check in the worksheet passes."))
 for section in (ROOT / "ai_examples.py").read_text().split("#%%"):
@@ -117,6 +117,7 @@ for cell in nb.cells:
         assert out.get("output_type") != "error", f"Error in cell: {cell.source[:80]}"
 norm = lambda s: " ".join(s.split())                    # ignore spacing differences
 missing = [e for e in EXPECT if norm(e) not in norm(text)]
+assert seeds_ok(text), "3.1: the five single starts do not match to 3 significant figures"
 assert not missing, f"Expected values not found in outputs: {missing}\n{text[:3000]}"
 # 警告信息里带有本机的安装路径；公开的 Solution 不留本机路径
 for cell in nb.cells:

@@ -1,5 +1,5 @@
 #%%
-# ---- Try with AI 1.2: the cumulative share against k ----
+# ---- Try with AI 2.2: the cumulative share against k ----
 ks = np.arange(1, 201)                                    # k = 1 to 200
 plt.plot(ks, cum[:200])                                   # the first 200 values
 plt.axhline(0.9, linestyle=":", color="grey")
@@ -8,7 +8,7 @@ plt.ylabel("cumulative explained variance")
 plt.show()
 print("k = 10:", round(cum[9], 2), " k = 50:", round(cum[49], 2), " first k with 90%:", int(np.argmax(cum >= 0.9)) + 1)
 #%%
-# ---- Try with AI 2.1: the first six components as images ----
+# ---- Try with AI 3.1: the first six components as images ----
 fig, axes = plt.subplots(1, 6, figsize=(12, 2.4))
 limit = np.abs(pca.components_[:6]).max()                 # the same colour scale for all six
 for k in range(6):
@@ -19,7 +19,7 @@ for k in range(6):
 plt.show()
 print("shares of the first six:", pca.explained_variance_ratio_[:6].round(3))
 #%%
-# ---- Try with AI 3.2 (first box): the fitting images on two components ----
+# ---- Try with AI 4.2 (first box): the fitting images on two components ----
 Z2 = pca.transform(X_digits_fit)                          # all 784 scores; we plot the first two
 plt.figure(figsize=(6, 5))
 plt.scatter(Z2[:, 0], Z2[:, 1], c=y_digits_fit, cmap="tab10", s=8)
@@ -29,7 +29,7 @@ plt.xlabel("component 1")
 plt.ylabel("component 2")
 plt.show()
 #%%
-# ---- Try with AI 3.2 (second box): the lumps, as given in the box ----
+# ---- Try with AI 4.2 (second box): the lumps, as given in the box ----
 from sklearn.datasets import load_breast_cancer           # the 569 lumps
 from sklearn.preprocessing import StandardScaler          # rescales columns
 data = load_breast_cancer()

@@ -19,9 +19,10 @@ format:
 
 In the lecture we replaced the 784 pixels of each digit by a few principal components. Today you do it in code:
 
-1. learn the components from the fitting images only, and read how much variance each one keeps;
-2. rebuild one image from k components;
-3. choose k on the validation set for QDA, and read the test set once.
+1. turn a line through the cloud of 200 points from the lecture, see that the direction with the widest spread is also the one that loses least, and compare its spread with what scikit-learn stores for the first component;
+2. learn the components from the fitting images only, and read how much variance each one keeps;
+3. rebuild one image from k components;
+4. choose k on the validation set for QDA, and read the test set once.
 
 Before each step you will see a question. **Write down your own answer first**, then run the code and compare.
 
@@ -29,12 +30,12 @@ Most code is provided. Your job is to fill the blanks `____`, run the cell, and 
 
 ## How to work
 
-1. Open a **blank** Colab notebook (**File → New notebook in Drive**), as in Labs 1 to 6.
-2. Copy each code block into a cell, fill in the blanks, and run it. Cells depend on the cells above, so run them from top to bottom.
+1. Open the **Lab workbook** from the course website: it opens in Colab with all the code of this page already in place, so there is nothing to copy (**File → Save a copy in Drive** first). Prefer to build your own? Open a **blank** Colab notebook (**File → New notebook in Drive**) and copy each code block into a cell.
+2. Fill in the blanks and run each cell. Cells depend on the cells above, so run them from top to bottom.
 3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
 4. Each task has a one-line **Hint** and a folded **Answer**. Try first. Open the Answer only to check your work. If you fall behind, copy the Answer of a task and carry on: every later task still works.
 5. Running every cell and matching the Success checks is a complete lab.
-6. The **Try with AI** boxes are for when you finish early, or after class. They follow the four steps below.
+6. The **Try with AI** boxes are folded: open one when you finish early, or after class. They follow the four steps below.
 
 ### Using AI
 
@@ -75,15 +76,78 @@ print(X_digits_fit.shape, X_digits_val.shape, X_digits_test.shape)   # fitting, 
 
 **Success check:** `(5625, 784) (1875, 784) (2500, 784)`.
 
-## Part 1: Learn the components (12 minutes)
+## Part 1: Variance along a direction (17 minutes)
+
+**Goal:** before the 784 pixels, turn the line of Note Section 3 through the cloud of 200 points in code, and see what scikit-learn calls the variance along a principal component.
+
+### 1.1 Turn the line
+
+The cell makes the same 200 points with two features as the widget in Note Section 3, and subtracts their mean. For the directions 0°, 15°, 30°, …, 165° it prints four numbers: the angle, the **variance** of the points along the line, the **reconstruction error** (the squared distance from each point to the line, averaged), and the sum of the two. Then it fits PCA on the 200 points. Last, it prints two numbers that `np.linalg.eigvalsh` computes from S, the 2 × 2 covariance matrix of the points (Lesson 5); question 2 asks what they are.
+
+The widget in the Note divides by 200 and shows 3.85, 0.49 and 4.34. Here every number is divided by 199 (n − 1, as with `ddof=1` in Lab 5), as scikit-learn and `np.cov` do, so the numbers are slightly larger and can be compared with what scikit-learn prints.
+
+**Question first:** which direction keeps the most of the cloud? Will its reconstruction error be the largest or the smallest of all directions?
+
+Fill the blank with the direction the points are projected onto.
+
+```python
+rng = np.random.default_rng(0)                            # the same random numbers as the lecture widget
+cloud = rng.multivariate_normal([0, 0], [[3, 1.6], [1.6, 1.5]], 200)   # 200 points, two features x1 and x2
+cloud_c = cloud - cloud.mean(axis=0)                      # subtract the mean point, so the cloud is centred at 0
+print("angle variance rec_error sum")                     # the names of the four columns below
+for angle in range(0, 180, 15):                           # the directions 0, 15, 30, ..., 165 degrees
+    radians = np.radians(angle)                           # the angle in radians, for cos and sin
+    u = np.array([np.cos(radians), np.sin(radians)])      # a direction of length 1 at this angle
+    z = cloud_c @ ____                                    # each point's position along the line (its score)
+    projection = np.outer(z, u)                           # each point replaced by its projection on the line, z times u
+    variance = (z ** 2).sum() / 199                       # how widely the points spread along the line
+    rec_error = ((cloud_c - projection) ** 2).sum() / 199 # squared distance from each point to the line
+    print(angle, round(variance, 3), round(rec_error, 3), round(variance + rec_error, 3))
+pca_cloud = PCA()                                         # keep both components
+pca_cloud.fit(cloud)                                      # learn the directions from the 200 points
+first = pca_cloud.components_[0]                          # the first principal component, a direction of length 1
+first_angle = np.degrees(np.arctan2(first[1], first[0]))  # its angle in degrees
+print("angle of components_[0]:", round(first_angle % 180, 1))   # % 180: a line at 211 degrees is the line at 31
+print("explained_variance_:", pca_cloud.explained_variance_.round(3))   # scikit-learn: the variance along each component
+S = np.cov(cloud.T)                                       # the 2 x 2 covariance matrix of the cloud (Lesson 5)
+print("eigvalsh(S):", np.linalg.eigvalsh(S).round(3))   # two numbers computed from S, smallest first
+```
+
+**Hint:** the direction variable made on the line just above the blank (the score $z = u_1x_1 + u_2x_2$ of Note Section 3).
+
+**Success check:** the line of column names, then 12 rows, one per angle, starting with `0 2.966 1.398 4.364`; the last number is `4.364` in every row. Then three more lines: the angle of `components_[0]`, the two numbers of `explained_variance_` and the two numbers of `eigvalsh(S)`. `eigvalsh` lists its two numbers smallest first, `explained_variance_` largest first.
+
+**Questions:**
+
+1. Of the twelve angles, which one has the largest variance, and which the smallest reconstruction error? How close is it to the angle of `components_[0]`, and why is it not exactly the same?
+2. The two numbers of `eigvalsh(S)` have a name in linear algebra; you do not need the name yet, only what they mean for the cloud.
+    (a) Take the largest variance in your table. Compare it with `explained_variance_[0]` and with the larger number of `eigvalsh(S)`.
+    (b) Take the smallest variance in your table. At which angle is it? Compare it with `explained_variance_[1]` and with the smaller number of `eigvalsh(S)`.
+3. Add the two numbers of `explained_variance_`. Which column of the table do you get? In one sentence, why can no turn of the line change that column? (Think of each point's distance to the centre: does it depend on the line?)
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+    z = cloud_c @ u
+```
+
+The direction with the largest variance, and its reconstruction error is the **smallest**: the two numbers always add up to the same total (Pythagoras, Note Section 3), so the more one keeps, the less one loses.
+
+1. 30°: the largest variance (3.872) and the smallest reconstruction error (0.492) are in the same row. `components_[0]` is at 31.2°; we only tried every 15°, and 30° is the nearest angle we tried.
+2. (a) 3.872 against 3.874 and 3.874: the same, apart from the 1.2° we did not try. (b) At 120°, 0.492 against 0.49 and 0.49: the same again. 120° is at right angles to 30°: the second component (Note Section 4, about 121°).
+3. 3.874 + 0.490 = 4.364, the last column. For each point, its squared distance to the centre is its squared position along the line plus its squared distance to the line (Pythagoras); the distances to the centre do not depend on the line, so their total, the total variance, stays the same.
+:::
+
+::: {.callout-note collapse="true" title="What to take away (open after you answer the questions)"}
+`eigvalsh` computes the **eigenvalues** of S (Note, Advanced Study 1). You found that they are the variances along the two principal components: **an eigenvalue is the variance along its direction**, and scikit-learn stores it as `explained_variance_`. The explained variance ratio is one eigenvalue divided by the sum of all of them: here 3.874 / 4.364 = 0.888, the "keeps 89%" of Note Section 3. On the 784 pixels in 2.1, the first share 0.0955 is the first eigenvalue divided by the sum of all 784.
+:::
+
+## Part 2: Learn the components (5 minutes)
 
 **Goal:** learn the directions from the fitting images, and read how much variance each one keeps.
 
-### 1.1 Fit PCA
+### 2.1 Fit PCA
 
-**Question first:** PCA learns its directions from data. From which of the three parts should it learn them?
-
-Fill the blank with the method that **learns** the directions.
+Fill the blank with the method that **learns** the directions. (In the workbook this is already filled in.)
 
 ```python
 pca = PCA()                                               # keep all 784 components for now
@@ -100,11 +164,9 @@ print(ratios[:5].round(4))                                # the first five share
 ```python
 pca.fit(X_digits_fit)
 ```
-
-From the fitting images only. If PCA also learned from the validation or test images, those images would no longer be unseen, and their accuracy would not be a fair estimate.
 :::
 
-### 1.2 The cumulative share
+### 2.2 The cumulative share
 
 Run the cell without changing it.
 
@@ -127,7 +189,7 @@ print(round(cum[99], 3))                                  # first 100
 2. 48.9%. Each component combines all 784 pixels, while 10 pixels repeat each other's information and throw the other 774 pixels away.
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** the cumulative share of variance against the number of components.
 
 **Tell the AI:** `cum` holds the cumulative share for k = 1 to 784 (`cum[0]` is k = 1).
@@ -137,15 +199,15 @@ print(round(cum[99], 3))                                  # first 100
 **Check:** the curve passes about `0.49` at k = 10 and `0.83` at k = 50, and crosses 0.9 at k = 86.
 :::
 
-## Part 2: Rebuild one image (10 minutes)
+## Part 3: Rebuild one image (6 minutes)
 
 **Goal:** see what k components keep of one validation image, and what they lose.
 
-### 2.1 Rebuild from k components
+### 3.1 Rebuild from k components
 
 **Question first:** with 2 components, do you expect to recognise the digit? With 10?
 
-Fill the blank with the number of components, first `2`, run, then `10`, run again.
+Fill the blank with the number of components, first `2`, run, then `10`, run again. (In the workbook the `2` is already filled in.)
 
 ```python
 pca_k = PCA(n_components=____, random_state=0)            # keep k components; random_state=0 gives the same result every run
@@ -169,7 +231,7 @@ plt.show()
 
 **Success check:** with `2`, it prints `(1, 2) 57.7` and the rebuilt image is a blur; with `10`, it prints `(1, 10) 25.2`, you can read a 6, and the error image is much paler.
 
-**Question:** the original image has 784 numbers. With k = 10, how many numbers do you store for this image? What else do you need to keep to rebuild it?
+**Question:** (If you are short of time, answer this one after class.) The original image has 784 numbers. With k = 10, how many numbers do you store for this image? What else do you need to keep to rebuild it?
 
 ::: {.callout-note collapse="true" title="Answer"}
 ```python
@@ -179,7 +241,7 @@ pca_k = PCA(n_components=10, random_state=0)            # keep k components; ran
 10 numbers. To rebuild it you also need the mean image and the 10 components, but those are stored once and shared by all images.
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** to see what the first components look like as images.
 
 **Tell the AI:** `pca.components_` has 784 rows (one per component) of 784 numbers, one per pixel of a 28 × 28 image.
@@ -189,18 +251,18 @@ pca_k = PCA(n_components=10, random_state=0)            # keep k components; ran
 **Check:** 6 images with titles about `0.0955`, `0.072`, `0.062`, `0.053`, `0.049`, `0.044`; the first looks like a red 0 with a blue centre.
 :::
 
-## Part 3: Choose k for QDA, then the test set (14 minutes)
+## Part 4: Choose k for QDA, then the test set (16 minutes)
 
 **Goal:** let the validation accuracy of QDA decide how many components to keep.
 
-### 3.1 Try six values of k
+### 4.1 Try six values of k
 
 **Question first:** in Lesson 5, QDA on all 784 pixels without shrinking scored poorly. Will QDA on 10 components do better or worse?
 
 Fill the blank so that the validation images are turned into k numbers with the **same** directions.
 
 ```python
-for k in [10, 20, 30, 40, 50, 100]:                       # candidate numbers of components
+for k in [10, 20, 30, 40, 50, 60]:                        # candidate numbers of components
     pca_k = PCA(n_components=k, random_state=0)           # keep k components
     pca_k.fit(X_digits_fit)                               # learn them from the fitting images only
     Z_fit = pca_k.transform(X_digits_fit)                 # k numbers per fitting image
@@ -220,27 +282,31 @@ for k in [10, 20, 30, 40, 50, 100]:                       # candidate numbers of
 30 0.952
 40 0.957
 50 0.956
-100 0.946
+60 0.956
 ```
+
+The Note (Section 6) also tries k = 100 (0.946). With 100 components QDA warns that the covariance matrix of a class is "not full rank", the problem of Lesson 5 coming back, so here we stop at 60.
 
 **Questions:**
 
 1. Which k is best? Is it at an end of the range you tried?
-2. On all 784 pixels without shrinking, QDA scores 0.725 on the same validation set. In one sentence: which directions does PCA throw away, and why does that help QDA?
+2. On all 784 pixels without shrinking, QDA scores 0.725 on the same validation set. Recall Lesson 5: on the pixels, each class's spread is flat (zero thickness) in some directions, and scikit-learn warned that the covariance matrix is "not full rank". In one sentence: which directions does PCA throw away, and why does that help QDA?
+3. In the loop, `fit` uses only `X_digits_fit`, and the validation images only go through `transform`. If PCA learned its directions from the fitting and validation images together, could the validation images then still count as images the model has never seen? Why? (Note Section 7.)
 
 ::: {.callout-note collapse="true" title="Answer"}
 ```python
     Z_val = pca_k.transform(X_digits_val)
 ```
 
-1. k = 40 (0.957). It is in the middle of 10 to 100 (30 and 50 are within 0.005).
+1. k = 40 (0.957). It is in the middle of 10 to 60 (30, 50 and 60 are within 0.005).
 2. PCA throws away the directions in which almost nothing varies; those are the directions that made each class's 784-pixel spread flat, so without them QDA can estimate the spreads (Lesson 5).
+3. No. The directions would have "seen" the validation images, so they would no longer be unseen, and their accuracy would not be a fair estimate. In Note Section 7 the number hardly moves here (k = 10: 0.885 against 0.883), but the rule does not depend on how much the number moves: anything learned from the data is learned from the fitting part only, as with standardising in Lesson 3.
 :::
 
-### 3.2 The test set, once
+### 4.2 The test set, once
 
 ```python
-pca_k = PCA(n_components=____, random_state=0)            # the k chosen in 3.1
+pca_k = PCA(n_components=____, random_state=0)            # the k chosen in 4.1
 pca_k.fit(X_digits_fit)                                   # fitting images only
 Z_fit = pca_k.transform(X_digits_fit)                     # k numbers per fitting image
 Z_test = pca_k.transform(X_digits_test)                   # the test images, with the same directions
@@ -249,27 +315,27 @@ qda.fit(Z_fit, y_digits_fit)                              # train on the reduced
 print(round(qda.score(Z_test, y_digits_test), 3))         # the test set, read once
 ```
 
-**Hint:** your answer to question 1 of 3.1.
+**Hint:** your answer to question 1 of 4.1.
 
 **Success check:** `0.962`.
 
 ::: {.callout-note collapse="true" title="Answer"}
 ```python
-pca_k = PCA(n_components=40, random_state=0)            # the k chosen in 3.1
+pca_k = PCA(n_components=40, random_state=0)            # the k chosen in 4.1
 ```
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** the fitting images drawn on the first two components, coloured by digit.
 
-**Tell the AI:** `pca` (from 1.1) is fitted on `X_digits_fit`; `y_digits_fit` holds the digits.
+**Tell the AI:** `pca` (from 2.1) is fitted on `X_digits_fit`; `y_digits_fit` holds the digits.
 
 **Ask:** *"Use pca.transform(X_digits_fit) and plot its first two columns as a scatter plot, coloured by y_digits_fit with the tab10 colour map, and write each digit at the average position of its points."*
 
 **Check:** 0 sits far right and 1 far left; 4, 7 and 9 sit at the top; 2, 3, 5, 6 and 8 crowd in the middle (as on the lecture slide).
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** the 30 measurements of the breast lumps (Labs 4 and 5) drawn on two components.
 
 Run this cell first, without changing it.
@@ -301,9 +367,9 @@ Assignment 2 (handwritten digits, MNIST) asks for PCA in Section 3. **From today
 
 | What you did today | Where it appears in Assignment 2 |
 |---|---|
-| 1.1: fit PCA on the fitting part only; 3.1: only `transform` the validation set | Section 3: "Fit PCA on the training set only, then use it to transform the training and validation sets" (the assignment calls the fitting part `X_train`) |
-| 1.2: `explained_variance_ratio_` and the cumulative share | Section 3, Table 3: "the cumulative fraction of variance that this k keeps" |
-| 3.1: compare a method on several values of k | Section 3, Table 3: k = 10, 50 and 100 for four methods (the same 784-pixel images; today you tried k from 10 to 100 for QDA) |
+| 2.1: fit PCA on the fitting part only; 4.1: only `transform` the validation set | Section 3: "Fit PCA on the training set only, then use it to transform the training and validation sets" (the assignment calls the fitting part `X_train`) |
+| 2.2: `explained_variance_ratio_` and the cumulative share | Section 3, Table 3: "the cumulative fraction of variance that this k keeps" |
+| 4.1: compare a method on several values of k | Section 3, Table 3: k = 10, 50 and 100 for four methods (the same 784-pixel images; today you tried k from 10 to 60 for QDA) |
 | The second Try with AI box: components as images | Section 3, Going further: "Turn the first few principal components back into 28 × 28 images" |
 | The third Try with AI box: the scatter plot | Section 3, Going further: "Plot the training set on the plane of the first two components (k = 2), coloured by digit" |
 
@@ -353,7 +419,7 @@ Ask: *"Why can an eigenvector from np.linalg.eigh differ from sklearn's PCA comp
 
 ## C. Does standardising matter?
 
-First run the lumps cell in the last Try with AI box of Part 3 (it makes `X_train` and `X_train_s`). Then fit `PCA(n_components=2)` on the breast lumps **without** standardising (`X_train` instead of `X_train_s`). Which feature has the largest weight in the first component (`components_[0]`), and what share of the variance does that component keep? Explain why, from the scales of the features.
+First run the lumps cell in the last Try with AI box of Part 4 (it makes `X_train` and `X_train_s`). Then fit `PCA(n_components=2)` on the breast lumps **without** standardising (`X_train` instead of `X_train_s`). Which feature has the largest weight in the first component (`components_[0]`), and what share of the variance does that component keep? Explain why, from the scales of the features.
 
 **Self-check:** write the feature name and the share you found, and compare them with the standardised version (0.452).
 

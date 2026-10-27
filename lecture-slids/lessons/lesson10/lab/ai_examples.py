@@ -1,5 +1,5 @@
 #%%
-# ---- Try with AI 2.3: the 16 first-layer filters ----
+# ---- Try with AI 2.4: the 16 first-layer filters ----
 W = cnn.layers[0].get_weights()[0]                       # 3 x 3 x 1 x 16
 fig, axes = plt.subplots(2, 8, figsize=(12, 3.2))
 for k in range(16):

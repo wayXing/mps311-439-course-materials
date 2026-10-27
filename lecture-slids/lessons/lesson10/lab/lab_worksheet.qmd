@@ -20,7 +20,7 @@ format:
 In the lecture we saw that the fully connected network of Lesson 9 does not care where the pixels are, and a convolutional network (CNN) does. Today you check this yourself on MNIST:
 
 1. shuffle the pixels and see that the fully connected network does not mind;
-2. build a small CNN, count its weights and train it;
+2. slide one filter over a digit by hand, then build a small CNN, count its weights and train it;
 3. move the digits 2 pixels to the right and test both networks;
 4. look at the CNN's mistakes, as Assignment 2 asks.
 
@@ -30,13 +30,12 @@ Most code is provided. Your job is to fill the blanks `____`, run the cell, and 
 
 ## How to work
 
-1. Open a **blank** Colab notebook (**File → New notebook in Drive**), as in Labs 1 to 9. Keras is already installed in Colab; you do not need a GPU.
-2. Copy each code block into a cell, fill in the blanks, and run it. Cells depend on the cells above, so run them from top to bottom.
+1. Open the **Lab workbook** from the course website: it opens in Colab with all the code of this page already in place, so there is nothing to copy (**File → Save a copy in Drive** first). Prefer to build your own? Open a **blank** Colab notebook (**File → New notebook in Drive**) and copy each code block into a cell. Keras is already installed in Colab; you do not need a GPU.
+2. Fill in the blanks and run each cell. Cells depend on the cells above, so run them from top to bottom. If you run a training cell a second time, run the cell that builds that network first; otherwise `fit` carries on from the weights it has already trained.
 3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
 4. Each task has a one-line **Hint** and a folded **Answer**. Try first. Open the Answer only to check your work. If you fall behind, copy the Answer of a task and carry on: every later task still works.
 5. Running every cell and matching the Success checks is a complete lab. Your last digit or two may differ from the Success check: Colab and the computer that made this page do the arithmetic in a slightly different order. A difference in the third decimal place is fine.
-6. If you run a training cell a second time, run the cell that builds that network first; otherwise `fit` carries on from the weights it has already trained.
-7. The **Try with AI** boxes are for when you finish early, or after class. They follow the four steps below.
+6. The **Try with AI** boxes are folded: open one when you finish early, or after class. They follow the four steps below.
 
 ### Using AI
 
@@ -47,7 +46,7 @@ The **Try with AI** boxes use an AI assistant for the Python you do not know yet
 3. **Ask:** the request.
 4. **Check:** compare the AI's result with a number or shape given on this page. If it does not match, the AI or your question is wrong. Find out which.
 
-## Part 0: Load MNIST in two shapes (6 minutes)
+## Part 0: Load MNIST in two shapes (5 minutes)
 
 **Goal:** the split of Assignment 2, once as rows of 784 numbers (for the fully connected network) and once as 28 × 28 × 1 images (for the CNN).
 
@@ -82,7 +81,7 @@ print(X_fit.shape, X_fit_flat.shape)                      # the two shapes
 
 ### 1.1 The fully connected network, as in Lab 9
 
-Run the cell without changing it. It trains for 3 epochs: about 20 seconds in Colab.
+Run the cell without changing it. It trains for 3 epochs: about 20 to 30 seconds on Colab's CPU. Nothing is shown while it trains; that is normal.
 
 ```python
 keras.utils.set_random_seed(0)                            # fix the random start
@@ -134,7 +133,7 @@ X_val_mixed = X_val_flat[:, order]                        # every validation ima
 Each pixel has its own weight, and nothing in the network says which pixels are neighbours; moving the columns only moves the weights with them, so it is the same problem.
 :::
 
-::: {.callout-note collapse="true" title="After class: train it yourself (about 20 seconds in Colab)"}
+::: {.callout-note collapse="true" title="After class: train it yourself (about 20 to 30 seconds in Colab)"}
 ```python
 keras.utils.set_random_seed(0)                            # the same start as 1.1
 mixed = keras.Sequential([
@@ -149,15 +148,77 @@ print(round(hist_mixed.history["val_accuracy"][-1], 4))   # validation accuracy 
 ```
 :::
 
-## Part 2: Build and train a CNN (14 minutes)
+## Part 2: From one filter to a CNN (24 minutes)
 
-**Goal:** the CNN of the lecture: two convolutions, each followed by max pooling, then 10 softmax units.
+**Goal:** first one filter by hand, as in the widget of Note Section 2; then the CNN of the lecture: two convolutions, each followed by max pooling, then 10 softmax units.
 
-### 2.1 Build the CNN
+### 2.1 One filter, by hand
 
-**Question first:** the first layer should have 16 filters, each looking at a 3 × 3 patch. What are the two numbers?
+A **filter** is a 3 × 3 square of weights. We slide it from the top left of the image to the bottom right. At each position we multiply its 9 weights by the 9 pixels under it, one by one, and add: one number. These numbers form the **feature map**. As in the lecture, negative numbers then become 0 (ReLU). In the image, ink is 1 (shown dark) and paper is 0; in a feature map, dark means a large number. This cell does it with two filters chosen by hand, on the same 7 as the widget in Note Section 2.
 
-Fill the two blanks of the first `Conv2D`: the number of filters, then the size of each filter.
+**Question first:** the **Horizontal edge** filter has 1 in its upper row, 0 in the middle row and −1 in its lower row. On which stroke of the 7 will its feature map be darkest: the top bar, or the long stroke going down? (Naming the top bar or the long stroke is enough.)
+
+The **Vertical edge** filter has 1 in the left column, 0 in the middle and −1 in the right (Note Section 2): it is largest where the pixels on the left are dark and the pixels on the right are light. Fill its nine numbers into the blanks, row by row, then run.
+
+```python
+digits = X_val[y_val == 7]                                # all the validation images of this digit
+image = digits[0, :, :, 0]                                # the first image of this digit, 28 x 28 (as in the lecture)
+horizontal = np.array([[ 1,  1,  1],
+                       [ 0,  0,  0],
+                       [-1, -1, -1]])                     # "Horizontal edge": upper row 1, lower row -1
+vertical = np.array([[____, ____, ____],
+                     [____, ____, ____],
+                     [____, ____, ____]])                 # "Vertical edge"
+
+horizontal_map = np.zeros((26, 26))                       # one number per position of the filter
+vertical_map = np.zeros((26, 26))
+for i in range(26):                                       # every row of the feature map
+    for j in range(26):                                   # every column of the feature map
+        patch = image[i:i + 3, j:j + 3]                   # the 3 x 3 pixels under the filter
+        horizontal_map[i, j] = np.sum(horizontal * patch) # multiply one by one, then add
+        vertical_map[i, j] = np.sum(vertical * patch)
+horizontal_map = np.maximum(horizontal_map, 0)            # ReLU: negative numbers become 0
+vertical_map = np.maximum(vertical_map, 0)
+print("shape:", horizontal_map.shape)
+print("positions above 1: horizontal", (horizontal_map > 1).sum(), "vertical", (vertical_map > 1).sum())   # where it clearly lights up
+
+fig, axes = plt.subplots(1, 3, figsize=(9, 3))            # the image and its two feature maps
+axes[0].imshow(image, cmap="Greys")
+axes[0].set_title("image, 28 x 28")
+axes[1].imshow(horizontal_map, cmap="Greys", vmin=0, vmax=3)   # both maps on the same scale: 0 white, 3 black
+axes[1].set_title("Horizontal edge")
+axes[2].imshow(vertical_map, cmap="Greys", vmin=0, vmax=3)
+axes[2].set_title("Vertical edge")
+plt.show()
+```
+
+**Hint:** each row of `vertical` reads left, middle, right, so every row is the same. If you do not get `vertical 50`, check that the 1s and −1s are not swapped between left and right.
+
+**Success check:** `shape: (26, 26)` and `positions above 1: horizontal 23 vertical 50`, then the 7 and its two feature maps.
+
+**Questions:**
+
+1. The image is 28 × 28, but each feature map is 26 × 26. Why? (Count where the 3 × 3 filter can sit in one row of 28 pixels.)
+2. In the first line, change `y_val == 7` to `y_val == 1` and run again. Which feature map lights up along the stroke of the 1, and which only here and there? (You need not change it back to 7: later cells do not use `image`.)
+
+**Success check (question 2):** `positions above 1: horizontal 10 vertical 37`.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+vertical = np.array([[1, 0, -1], [1, 0, -1], [1, 0, -1]])
+```
+
+Question first: the top bar; more precisely, the lower edge of the top bar (Note Section 2). There the pixels above are dark and the pixels below are light, so multiplying and adding gives the largest number.
+
+1. The filter must lie fully inside the image: in a row of 28 pixels it can start at the first 26 positions (28 − 3 + 1 = 26), and the same down a column, so 26 × 26 = 676 positions, one number each.
+2. **Vertical edge** lights up along the whole stroke (37 positions above 1, against 10); **Horizontal edge** only at the two ends and where the stroke is slanted. The same filter looks for the same thing everywhere, and lights up wherever it finds it.
+:::
+
+### 2.2 Build the CNN
+
+The first layer of this CNN has 16 filters of 3 × 3, like the two filters of 2.1, with one difference: nobody chooses their 9 numbers by hand. They are learned like the other weights of the network, with cross-entropy and gradient descent (end of Note Section 2; Note Section 7 shows what they learn).
+
+Fill the two blanks of the first `Conv2D`: the number of filters (16), then the size of each filter (3 × 3).
 
 ```python
 keras.utils.set_random_seed(0)                            # fix the random start
@@ -183,9 +244,9 @@ cnn.summary()                                             # the shape and the we
 ```
 :::
 
-### 2.2 Count the weights by hand
+### 2.3 Count the weights by hand
 
-**Question first:** each first-layer filter has 3 × 3 weights plus one constant. How many weights does the first layer have?
+**Question first:** `cnn.summary()` gave the first layer 160 parameters (weights plus constants: its `Param #`), because its 16 filters are shared by all positions. Suppose instead that every one of the 26 × 26 positions had its own 3 × 3 weights plus one constant, for each of the 16 filters. How many parameters would the first layer need?
 
 Run the cell without changing it.
 
@@ -199,15 +260,17 @@ print(26 * 26 * 16 * (3 * 3 + 1))                         # the first layer if e
 
 **Success check:** `160 4640 8010 12810`, then `108160`.
 
-**Question:** the fully connected network of 1.1 has 118,282 weights. Which network has more, and by how many times?
+**Question:** the fully connected network of 1.1 has 118,282 parameters. Which network has more, and by how many times?
 
 ::: {.callout-note collapse="true" title="Answer"}
-The fully connected network has about 9 times as many (118,282 against 12,810). Sharing one small filter across all positions is what keeps the CNN small: without sharing, its first layer alone would need 108,160.
+Question first: 26 × 26 × 16 × (3 × 3 + 1) = 108,160 parameters (Note Section 2), close to the 118,282 of the whole fully connected network of 1.1.
+
+The fully connected network has about 9 times as many parameters (118,282 against 12,810). Sharing one small filter across all positions is what keeps the CNN small: without sharing, its first layer alone would need 108,160.
 :::
 
-### 2.3 Train for 2 epochs
+### 2.4 Train for 2 epochs
 
-Run the cell without changing it. A CNN is slower per epoch: these 2 epochs take about one minute in Colab.
+Run the cell without changing it. A CNN is slower per epoch: these 2 epochs take about 1 to 2 minutes on Colab's CPU. Nothing is shown while it trains; that is normal.
 
 ```python
 cnn.compile(optimizer="adam", loss="sparse_categorical_crossentropy", metrics=["accuracy"])   # as in 1.1
@@ -223,7 +286,7 @@ print(round(hist_cnn.history["val_accuracy"][-1], 4))     # validation accuracy 
 The number of epochs should be the same. The present comparison is unfair to the CNN, which had fewer epochs. (Assignment 2 also fixes the seed and asks for the training time.)
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** the 16 filters of the first layer, as small images.
 
 **Tell the AI:** `cnn.layers[0].get_weights()[0]` has shape 3 × 3 × 1 × 16: one 3 × 3 filter per column of the last axis.
@@ -247,34 +310,34 @@ Run the cell without changing it.
 X_shift = np.zeros_like(X_val)                            # same shape as X_val, all white
 X_shift[:, :, 2:] = X_val[:, :, :-2]                      # every image moved 2 pixels to the right
 print(round(dense.evaluate(X_shift.reshape(-1, 784), y_val, verbose=0)[1], 4))   # fully connected network of 1.1
-print(round(cnn.evaluate(X_shift, y_val, verbose=0)[1], 4))                      # CNN of 2.3
+print(round(cnn.evaluate(X_shift, y_val, verbose=0)[1], 4))                      # CNN of 2.4
 ```
 
 **Success check:** about `0.850`, then about `0.953`.
 
-**Question:** each network fell from its own accuracy on the unmoved images (0.974 and 0.983). By how many percentage points did each fall? Why does the CNN fall less?
+**Question:** each network fell from its own accuracy on the unmoved images (0.974 and 0.983). By how many percentage points did each fall (the difference of the two accuracies, not a relative %)? Why does the CNN fall less?
 
 ::: {.callout-note collapse="true" title="Answer"}
 The fully connected network fell about 12 points (0.974 to 0.850); the CNN about 3 points (0.983 to 0.953). The CNN uses the same filter at every position, so a moved stroke is still found, only one place further; max pooling then absorbs part of the move. The fully connected network learned "pixel 300 dark", and after the move the stroke is on other pixels.
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** to check that the CNN really uses which pixel is next to which, by training it on the shuffled pixels of 1.2.
 
-**Tell the AI:** `X_fit_mixed` and `X_val_mixed` hold the shuffled images as rows of 784; the CNN of 2.1 wants images of 28 × 28 × 1.
+**Tell the AI:** `X_fit_mixed` and `X_val_mixed` hold the shuffled images as rows of 784; the CNN of 2.2 wants images of 28 × 28 × 1.
 
-**Ask:** *"Reshape X_fit_mixed and X_val_mixed to (-1, 28, 28, 1), build the CNN of 2.1 again with keras.utils.set_random_seed(0), train it for 2 epochs on the shuffled images, and print the last validation accuracy."*
+**Ask:** *"Reshape X_fit_mixed and X_val_mixed to (-1, 28, 28, 1), build the CNN of 2.2 again with keras.utils.set_random_seed(0), train it for 2 epochs on the shuffled images, and print the last validation accuracy."*
 
 **Check:** about `0.938`, clearly below the CNN on the real images (0.983). The fully connected network did not mind the shuffle; the CNN does.
 :::
 
-## Part 4: Where does the CNN go wrong? (10 minutes)
+## Part 4: Where does the CNN go wrong? (7 minutes)
 
 **Goal:** the error analysis of Assignment 2, Section 4, here on the validation set.
 
 ### 4.1 Confusion matrix and the most common mistakes
 
-**Question first:** which digit do you expect the CNN to mistake most often, and for what? (After only 2 epochs, the most common mistakes can differ from the lecture's 5-epoch network.)
+**Question first:** which digit do you expect the CNN to mistake most often, and for what? A guess is fine: name one pair and say why. (After only 2 epochs, the most common mistakes can differ from the lecture's 5-epoch network.)
 
 Run the cell without changing it.
 
@@ -284,6 +347,7 @@ from sklearn.metrics import confusion_matrix              # the 10 x 10 table of
 pred = cnn.predict(X_val, verbose=0).argmax(axis=1)       # the most probable digit of each image
 cm = confusion_matrix(y_val, pred)                        # rows: true digit, columns: predicted digit
 print(cm)                                                 # the table
+print(np.trace(cm))                                       # the diagonal added up: images it gets right
 mistakes = cm.copy()                                      # a copy to keep only the mistakes
 np.fill_diagonal(mistakes, 0)                             # the diagonal is right: set it to 0
 for k in range(5):                                        # the 5 most common mistakes
@@ -294,7 +358,7 @@ for k in range(5):                                        # the 5 most common mi
     mistakes[i, j] = 0                                    # remove it and look for the next one
 ```
 
-**Success check:** a 10 × 10 table whose diagonal adds up to about `9,830`; then five lines. The first is `true 7 predicted 9` with about `12` images, then `true 5 predicted 8` (about `10`).
+**Success check:** a 10 × 10 table, then about `9828` (the diagonal added up); then five lines. The first is `true 7 predicted 9` with about `12` images, then `true 5 predicted 8` (about `10`).
 
 ### 4.2 Ten images it gets wrong
 
@@ -314,16 +378,16 @@ plt.show()
 
 **Success check:** about `172`, then 10 images with their titles.
 
-**Question:** in one or two sentences, what do the mistakes have in common?
+**Question:** (If you are short of time, answer this one after class.) In one or two sentences, what do the mistakes have in common?
 
 ::: {.callout-note collapse="true" title="Answer"}
 Many are written in an unusual way: a stroke is missing or added, or the digit is slanted or squeezed so that it looks like another one. Some mistakes come from unclear data, not only from the model.
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** the time each network takes to train, as in Table A of Assignment 2.
 
-**Tell the AI:** `dense` and `cnn` are built as in 1.1 and 2.1; use `X_fit_flat`/`X_fit` and the validation sets as above.
+**Tell the AI:** `dense` and `cnn` are built as in 1.1 and 2.2; use `X_fit_flat`/`X_fit` and the validation sets as above.
 
 **Ask:** *"Build both networks again with keras.utils.set_random_seed(0), train each for 2 epochs, measure the seconds taken by fit with time.time(), and print a small table: network, number of parameters, validation accuracy, seconds."*
 
@@ -337,7 +401,7 @@ Assignment 2 (handwritten digits, MNIST) asks for error analysis in Section 4 an
 | What you did today | Where it appears in Assignment 2 |
 |---|---|
 | Part 0: images as 28 × 28 × 1 | Extension task A: "input 28 × 28 × 1" |
-| 2.1 and 2.2: `Conv2D`, `MaxPooling2D`, the number of parameters | Extension task A: "at least two `Conv2D` layers"; Table A: "the number of parameters" |
+| 2.2 and 2.3: `Conv2D`, `MaxPooling2D`, the number of parameters | Extension task A: "at least two `Conv2D` layers"; Table A: "the number of parameters" |
 | The last Try with AI box: seconds taken by `fit` | Table A: "the training time (seconds taken by the call to `fit`)" |
 | Part 3: move the images 2 pixels to the right | Extension task A: "Shift the images 2 pixels to the right. How much does the validation accuracy of each network fall?" |
 | 4.1: the 5 most common mistakes | Section 4, **Table 5**: "the 5 most frequent kinds of mistake (true digit, predicted digit)" |
@@ -364,7 +428,7 @@ MPS311 students are encouraged to try one. **MPS439 students complete A**, the m
 
 **Tasks**
 
-1. Choose one structural choice: either the number of filters (three versions: 8 and 16, 16 and 32, 32 and 64), or pooling (two versions: the CNN of 2.1 with and without its two `MaxPooling2D` layers).
+1. Choose one structural choice: either the number of filters (three versions: 8 and 16, 16 and 32, 32 and 64), or pooling (two versions: the CNN of 2.2 with and without its two `MaxPooling2D` layers).
 2. For each version, train for 2 epochs with `keras.utils.set_random_seed(0)` and record: the number of parameters, the validation accuracy, the seconds taken by `fit`, and the validation accuracy after moving the images 2 pixels to the right (3.1).
 3. Put the results in one table and write three or four sentences: what does the choice buy, and what does it cost? Is the difference in accuracy larger than what a change of seed would give? You do not need to retrain with other seeds: in Lesson 9, changing only the seed moved the validation accuracy by up to 0.26 percentage points.
 
@@ -373,7 +437,7 @@ Ask: *"Why does removing the max pooling layers from a small CNN increase the nu
 :::
 
 ::: {.callout-note collapse="true" title="Hint"}
-Copy the cell of 2.1 once for each version and change only the numbers in the two `Conv2D` layers (or delete the two `MaxPooling2D` lines). `import time`, then `start = time.time()` before `fit` and `time.time() - start` after it.
+Copy the cell of 2.2 once for each version and change only the numbers in the two `Conv2D` layers (or delete the two `MaxPooling2D` lines). `import time`, then `start = time.time()` before `fit` and `time.time() - start` after it.
 :::
 
 **Self-check:** after 2 epochs, the validation accuracy and the accuracy after a 2-pixel move are about: 8 and 16 filters `0.973` and `0.930` (5,258 parameters); 16 and 32 `0.983` and `0.953` (12,810); 32 and 64 `0.985` and `0.957` (34,826); 16 and 32 without pooling `0.983` and `0.937` (189,130).

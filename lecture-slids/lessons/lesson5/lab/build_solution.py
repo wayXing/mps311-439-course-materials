@@ -1,7 +1,8 @@
 """从当前 Worksheet 生成带题号、文字答案和执行输出的 Solution，并做三项检查：
 1. 每个填空块的空数与 FILLS 一致；2. 每个 Answer 里的代码行都出现在填好的代码里；
 3. 用真实 Jupyter 内核从第一格顺序执行，输出写回 lab_solution.ipynb，并断言关键核对值。
-运行：uv run --no-project --python 3.12 --with scikit-learn,matplotlib,pandas,nbclient,nbformat,ipykernel python build_solution.py
+运行：uv run --no-project --python 3.12 --with "scikit-learn==1.6.1",matplotlib,pandas,scipy,nbclient,nbformat,ipykernel python build_solution.py
+（scikit-learn 固定 1.6.1：1.8 起 QDA 遇到不满秩的协方差直接报 LinAlgError，2.2、3.1、3.2 会停下）
 （用 uv；~/.ipython 坏掉时先设 IPYTHONDIR 到一个可写的临时目录，见 COURSE_MATERIAL_WORKFLOW.md 第 5 节）
 """
 from pathlib import Path
@@ -19,14 +20,14 @@ LOCAL_DATA = (ROOT / "../../data/mnist10k.npz").resolve().as_uri()
 FILLS = [
     ["1", "1", "0", "0"],                                             # 1.1
     ["1", "0"],                                                       # 1.2
-    ["LinearDiscriminantAnalysis", "QuadraticDiscriminantAnalysis"],  # 2.1
+    ["LinearDiscriminantAnalysis"],                                   # 2.1
     ["0.001"],                                                        # 3.3
 ]
 # 执行后必须出现在输出里的核对值（与 worksheet 的 Success check 一致）
 EXPECT = [
     "(426, 30) 159", "17.35", "12.17", "0.1139", "0.9788", "0.96", "0.9576",
-    "0 0.71", "0.0001 0.843", "0.001 0.863", "0.01 0.784", "0.1 0.557", "0.5 0.505", "1 0.804", "0.8608",
-    "heights at 12.8:", "0.7194", "0.8666",
+    "0 0.712", "0.0001 0.843", "0.001 0.863", "0.01 0.784", "0.1 0.557", "0.5 0.505", "1 0.804", "0.8608",
+    "heights at 12.8:", "0.7194444444444444", "0.8666666666666667",
     "test accuracy, mine: 0.958  sklearn: 0.958", "rank of the 784 x 784 matrix: 471", "largest weight: 19.2  intercept: -2.45 -2.45",
 ]
 qmd = (ROOT / "lab_worksheet.qmd").read_text()
@@ -45,7 +46,7 @@ nb.cells.append(nbformat.v4.new_markdown_cell(
     "Try the worksheet before opening these answers."
 ))
 fi = 0
-for match in re.finditer(r"^### (\d\.\d [^\n]+)\n(.*?)(?=^### |^## |^# |\Z)", core, re.M | re.S):
+for match in re.finditer(r"^### (\d\.\d [^\n]+)\n(.*?)(?=^### \d|^## Part |\Z)", core, re.M | re.S):  # 不在 "# " 处断开：代码里的注释行也以 "# " 开头
     title, body = match.groups()
     answers = answer_re.findall(body)
     task_body = callout_re.sub("", body)              # drop Answer, Ask AI and Hint callouts

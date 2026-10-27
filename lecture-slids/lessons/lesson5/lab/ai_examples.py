@@ -38,24 +38,3 @@ for k in range(10):
     ax.set_xticks([])
     ax.set_yticks([])
 plt.show()
-#%%
-# ---- Try with AI 3.3 (third box): the two-feature data of the lecture, as given in the box ----
-rng = np.random.default_rng(0)                            # the same random numbers as the lecture
-X1 = rng.multivariate_normal([0, 0], [[0.35, 0.15], [0.15, 0.35]], 120)      # class 1: tight
-X0 = rng.multivariate_normal([1.0, 0.6], [[2.2, -0.6], [-0.6, 1.6]], 240)    # class 0: spread out
-X_two = np.vstack([X1, X0])                               # 360 points, 2 features
-y_two = np.concatenate([np.ones(120), np.zeros(240)])     # their labels
-lda_two = LinearDiscriminantAnalysis().fit(X_two, y_two)  # one shared spread
-qda_two = QuadraticDiscriminantAnalysis().fit(X_two, y_two)   # one spread per class
-print(lda_two.score(X_two, y_two), qda_two.score(X_two, y_two))   # accuracy on these 360 points
-#%%
-# the AI's part: the two boundaries
-gx, gy = np.meshgrid(np.linspace(-3.5, 5.5, 300), np.linspace(-3.5, 4.5, 300))   # a grid over the plane
-grid_points = np.column_stack([gx.ravel(), gy.ravel()])                         # one row per grid point
-fig, axes = plt.subplots(1, 2, figsize=(11, 4.5))
-for ax, model, title in [(axes[0], lda_two, "LDA"), (axes[1], qda_two, "QDA")]:
-    p = model.predict_proba(grid_points)[:, 1].reshape(gx.shape)               # probability of class 1
-    ax.scatter(X_two[:, 0], X_two[:, 1], c=y_two, cmap="coolwarm", s=10)
-    ax.contour(gx, gy, p, levels=[0.5], colors="green")                         # the boundary p = 0.5
-    ax.set_title(title)
-plt.show()

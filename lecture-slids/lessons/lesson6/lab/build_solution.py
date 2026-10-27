@@ -1,7 +1,7 @@
 """从当前 Worksheet 生成带题号、文字答案和执行输出的 Solution，并做三项检查：
 1. 每个填空块的空数与 FILLS 一致；2. 每个 Answer 里的代码行都出现在填好的代码里；
 3. 用真实 Jupyter 内核从第一格顺序执行，输出写回 lab_solution.ipynb，并断言关键核对值。
-运行：uv run --no-project --python 3.12 --with scikit-learn,matplotlib,pandas,nbclient,nbformat,ipykernel python build_solution.py
+运行：uv run --no-project --python 3.12 --with scikit-learn==1.6.1,matplotlib,pandas,scipy,nbclient,nbformat,ipykernel python build_solution.py
 （用 uv；~/.ipython 坏掉时先设 IPYTHONDIR 到一个可写的临时目录，见 COURSE_MATERIAL_WORKFLOW.md 第 5 节）
 """
 from pathlib import Path
@@ -21,13 +21,16 @@ FILLS = [
     ["1"],             # 1.1
     ["35", "84"],      # 1.2
     ["X_digits_val", "y_digits_val"],   # 2.2
-    ["15"],            # 3.1
+    ["0"],             # 3.1 (the call read off the depth-2 tree)
+    ["15"],            # 3.2
 ]
 # 执行后必须出现在输出里的核对值（与 worksheet 的 Success check 一致）
 EXPECT = [
-    "(319, 30) (107, 30) (143, 30)", "15.045", "228 35", "91 84", "0.26 0.142 0.226", "5625 1875 2500",
-    "1 0.195 0.195", "15 0.996 0.781", "20 1.0 0.771", "0.776",
-    "root: 0 15.045", "best validation: 0.781 at depth 15", "largest: mean concave points 0.72",
+    "(319, 30) (107, 30) (143, 30)", "0\n15.045", "228 35", "91 84", "0.26 0.142 0.226", "5625 1875 2500",
+    "1 0.195 0.195", "15 0.996 0.781", "20 1.0 0.771",
+    "mean concave points 0.717", "worst concavity 0.069", "worst radius 0.061", "mean texture 0.034", "worst area 0.025",
+    "mean radius 0.017 mean perimeter 0.0", "correlation of radius and perimeter: 0.998", "your call: 0 the tree's call: 0", "0.776",
+    "highest: Gini 0.5 entropy 1.0", "best validation: 0.781 at depth 15",
     "left node, radius: best cut 13.405 weighted Gini 0.218", "left node, texture: best cut 18.635", "tree, left node: 0 13.405", "fewest errors of any cut: 35 of 228 ; without a cut: 35",
     "mean concave points", "worst perimeter", "worst concave points", "random forest, validation accuracy:",
 ]

@@ -20,7 +20,7 @@ format:
 In the lecture we stopped learning a boundary directly. Instead we described each class by its centre and spread, and asked which class more likely produced a point. Today you walk the same path in code:
 
 1. describe each class of lumps by one bell curve, and work out the probability for the opening lump of Lesson 4 by hand;
-2. compare logistic regression, LDA and QDA with the same cross-validation as Lab 4;
+2. see the straight and the curved boundary on the two-feature data of the lecture, then compare logistic regression, LDA and QDA with the same cross-validation as Lab 4;
 3. see QDA break on the digits, fix it with `reg_param`, and choose the value by cross-validation.
 
 Before each step you will see a question. **Write down your own answer first**, then run the code and compare.
@@ -29,12 +29,12 @@ Most code is provided. Your job is to fill the blanks `____`, run the cell, and 
 
 ## How to work
 
-1. Open a **blank** Colab notebook (**File → New notebook in Drive**), as in Labs 1 to 4.
-2. Copy each code block into a cell, fill in the blanks, and run it. Cells depend on the cells above, so run them from top to bottom.
+1. Open the **Lab workbook** from the course website: it opens in Colab with all the code of this page already in place, so there is nothing to copy (**File → Save a copy in Drive** first). Prefer to build your own? Open a **blank** Colab notebook (**File → New notebook in Drive**) and copy each code block into a cell.
+2. Fill in the blanks and run each cell. Cells depend on the cells above, so run them from top to bottom.
 3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
 4. Each task has a one-line **Hint** and a folded **Answer**. Try first. Open the Answer only to check your work. If you fall behind, copy the Answer of a task and carry on: every later task still works.
 5. Running every cell and matching the Success checks is a complete lab.
-6. The **Try with AI** boxes are for when you finish early, or after class. They follow the four steps below.
+6. The **Try with AI** boxes are folded: open one when you finish early, or after class. They follow the four steps below.
 
 ### Using AI
 
@@ -60,7 +60,7 @@ from scipy.stats import norm                              # the bell curve (norm
 from sklearn.datasets import load_breast_cancer          # the lumps
 import urllib.request                                     # to download a file
 import warnings                                           # controls Python's warning messages
-warnings.filterwarnings("once")                           # show each warning only once, not once per fold
+warnings.filterwarnings("once")                           # show each warning only once
 from sklearn.model_selection import train_test_split, KFold, cross_val_score   # splitting and cross-validation
 from sklearn.preprocessing import StandardScaler          # rescales columns
 from sklearn.linear_model import LogisticRegression       # the model of Lesson 4
@@ -80,7 +80,7 @@ print(X_train.shape, y_train.sum())                       # training lumps, and 
 
 **Success check:** `(426, 30) 159`.
 
-## Part 1: Describe each class, then compare (14 minutes)
+## Part 1: Describe each class, then compare (13 minutes)
 
 **Goal:** describe each class of lumps by the mean radius alone, and turn the two descriptions into a probability with Bayes' rule.
 
@@ -140,7 +140,7 @@ print(top / bottom)                                       # Bayes' rule: probabi
 **Questions:**
 
 1. In Lesson 4, logistic regression with the radius alone gave this lump 0.122. Which of the two did logistic regression do: (a) learn the boundary directly, or (b) describe each class first and then compare? Which did you do here?
-2. Benign is 4.6 times higher at 12.8, but the probability of benign is not 4.6 times the probability of malignant. Which numbers make the difference?
+2. (If you are short of time, answer this one after class.) Benign is 4.6 times higher at 12.8, but the probability of benign is not 4.6 times the probability of malignant. Which numbers make the difference?
 
 ::: {.callout-note collapse="true" title="Answer"}
 ```python
@@ -152,7 +152,7 @@ share_ben = (y_train == 0).mean()
 2. The shares: 0.627 of the training lumps are benign and only 0.373 malignant, so the benign side is multiplied by a larger number.
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** to see the two descriptions on top of the data.
 
 **Tell the AI:** `radius` holds the mean radius of each training lump and `y_train` the labels (1 = malignant); `mean_mal`, `sd_mal`, `mean_ben`, `sd_ben` are the centres and spreads.
@@ -162,20 +162,87 @@ share_ben = (y_train == 0).mean()
 **Check:** the grey (benign) curve peaks near 12.2 and the malignant one near 17.4; at 12.8 the curves have heights about `0.211` and `0.046`.
 :::
 
-## Part 2: Two candidates against logistic regression (12 minutes)
+## Part 2: Two candidates, then against logistic regression (18 minutes)
 
-**Goal:** compare the two ways of estimating the spread with the model of Lesson 4, on all 30 measurements and the same folds.
+**Goal:** see what the two ways of estimating the spread do to the boundary on the two-feature data of the lecture; then compare them with the model of Lesson 4 on all 30 measurements and the same folds.
 
-### 2.1 The same cross-validation for three models
+### 2.1 One shared spread, or one each
 
-**Question first:** QDA was clearly best on the two-feature data in the lecture. Will it also be best here?
+This is the hand-made data of Note Section 1 (the accuracies are in Section 4): class 1 is tight (120 points), class 0 is spread out (240 points). The cell makes the same 360 points, fits the two candidates, and prints the accuracy of each on these 360 points, as in the lecture. Then it draws the boundary of each: the curve where the probability of class 1 is 0.5.
 
-Fill in the two model names from today's lecture: one shared spread (straight boundary), and one spread per class (curved boundary).
+**Question first:** the left plot uses one spread shared by both classes; the right plot gives each class its own spread. Which boundary will be a straight line: the left, the right, or both?
+
+Fill in the model that uses one shared spread. The other model is given.
+
+```python
+rng = np.random.default_rng(0)                            # the same random numbers as the lecture
+X1 = rng.multivariate_normal([0, 0], [[0.35, 0.15], [0.15, 0.35]], 120)      # class 1: tight
+X0 = rng.multivariate_normal([1.0, 0.6], [[2.2, -0.6], [-0.6, 1.6]], 240)    # class 0: spread out
+X_two = np.vstack([X1, X0])                               # 360 points, 2 features
+y_two = np.concatenate([np.ones(120), np.zeros(240)])     # their labels
+model_shared = ____()                                     # one spread shared by both classes
+model_shared.fit(X_two, y_two)                            # estimate the two centres and the shared spread
+model_own = QuadraticDiscriminantAnalysis()               # one spread per class
+model_own.fit(X_two, y_two)                               # estimate the two centres and the two spreads
+print(model_shared.score(X_two, y_two))                   # accuracy on these 360 points, shared spread
+print(model_own.score(X_two, y_two))                      # accuracy on these 360 points, one spread each
+```
+
+Then run the next cell without changing it. It draws the two boundaries.
+
+```python
+# compute the probability on a grid of points, then draw the curve where it equals 0.5
+xs = np.linspace(-3.5, 5.5, 300)                          # 300 positions across
+ys = np.linspace(-3.5, 4.5, 300)                          # 300 positions up
+gx, gy = np.meshgrid(xs, ys)                              # a grid of 300 x 300 points over the plane
+grid_points = np.column_stack([gx.ravel(), gy.ravel()])   # one row per grid point, 2 columns
+prob_shared = model_shared.predict_proba(grid_points)[:, 1]   # probability of class 1 at each grid point
+prob_own = model_own.predict_proba(grid_points)[:, 1]         # the same for the other model
+p_shared = prob_shared.reshape(gx.shape)                  # back to the 300 x 300 grid, for drawing
+p_own = prob_own.reshape(gx.shape)
+fig, axes = plt.subplots(1, 2, figsize=(11, 4.5))         # two plots side by side
+axes[0].scatter(X0[:, 0], X0[:, 1], s=10, facecolor="none", edgecolor="grey", label="class 0")   # spread-out class
+axes[0].scatter(X1[:, 0], X1[:, 1], s=10, color="tab:blue", label="class 1")                     # tight class
+axes[0].contour(gx, gy, p_shared, levels=[0.5], colors="green")   # the boundary: probability 0.5
+axes[0].set_title("one shared spread")
+axes[0].legend()
+axes[1].scatter(X0[:, 0], X0[:, 1], s=10, facecolor="none", edgecolor="grey")   # the same points again
+axes[1].scatter(X1[:, 0], X1[:, 1], s=10, color="tab:blue")
+axes[1].contour(gx, gy, p_own, levels=[0.5], colors="green")      # the boundary: probability 0.5
+axes[1].set_title("one spread per class")
+plt.show()
+```
+
+**Hint:** both names were imported in 0.1. Which one did the lecture call "one shared spread"? (Note Section 4.)
+
+**Success check:** `0.7194444444444444` and `0.8666666666666667`, the 0.719 and 0.867 of Note Section 4; the left boundary is straight, the right one is a green ellipse around the blue points.
+
+**Questions:**
+
+1. What does the left model assume about the two classes that is not true for this data?
+2. In 2.2 you go back to the lumps, with all 30 measurements instead of 2. Will one spread per class still beat one shared spread there? Write your guess; 2.2 checks it.
+
+::: {.callout-note collapse="true" title="Answer"}
+```python
+model_shared = LinearDiscriminantAnalysis()
+```
+
+The left boundary is straight; the right one is an ellipse around the tight class.
+
+1. The left model (LDA) assumes that the two classes have the same shape, size and direction and differ only in their centres. Here class 1 is tight and class 0 is spread out, so it can only draw a line (0.719, almost the 0.722 of logistic regression), while QDA wraps an ellipse around the tight class (0.867).
+2. 2.2 shows the answer: no. QDA gets 0.958 and LDA 0.960, about the same, so the extra flexibility buys nothing there; logistic regression is best. Question 2 of 2.2 shows why.
+:::
+
+### 2.2 The same cross-validation for three models
+
+Back to the lumps, with all 30 measurements. Run the cell without changing it, and check your guess from 2.1, question 2.
 
 ```python
 lr = LogisticRegression()                                 # Lesson 4: learns the boundary directly
-lda = ____()                                              # one shared spread: straight boundary
-qda = ____()                                              # one spread per class: curved boundary
+lda = LinearDiscriminantAnalysis()                        # one shared spread
+qda = QuadraticDiscriminantAnalysis()                     # one spread per class
+qda.fit(X_train_s, y_train)                               # fit QDA once on all training lumps: it warns here
+warnings.filterwarnings("ignore")                         # hide warnings during cross-validation (one per fold)
 scores_lr = cross_val_score(lr, X_train_s, y_train, cv=kf)     # accuracy on each of the 5 folds
 scores_lda = cross_val_score(lda, X_train_s, y_train, cv=kf)
 scores_qda = cross_val_score(qda, X_train_s, y_train, cv=kf)
@@ -184,32 +251,27 @@ print(scores_lda.mean())                                  # average accuracy, LD
 print(scores_qda.mean())                                  # average accuracy, QDA
 ```
 
-**Hint:** both names were imported in 0.1 and end in `DiscriminantAnalysis`.
-
-**Success check:** about `0.979`, `0.960` and `0.958`. Warnings appear for QDA: *"The covariance matrix of class 0 is not full rank"*. The three numbers are printed among or below them; scroll down if needed.
+**Success check:** one warning from the single QDA fit, *"The covariance matrix of class 0 is not full rank. Increasing the value of parameter `reg_param` might help reducing the collinearity."* (`reg_param` comes in Part 3), and the three accuracies, about `0.979`, `0.960` and `0.958`. "Not full rank" means that the ellipse of class 0 has no thickness in some direction. If you run this cell again, the warning does not appear a second time; that is normal.
 
 **Questions:**
 
-1. One covariance matrix for 30 features holds 30 × 31 / 2 different numbers. How many is that? QDA estimates one for each class.
-2. The warning says an ellipse is flat in some direction. Mean radius, mean perimeter and mean area are three of the 30 columns. Why could they make the ellipse flat? One sentence.
+1. Rank the three models. Which is higher, LDA or logistic regression, and by how much?
+2. One covariance matrix for 30 features holds 30 × 31 / 2 different numbers. How many is that? QDA estimates one for each class.
+3. Put 2.1 and 2.2 together. When does one spread per class pay off, and when is one shared spread (or logistic regression) the safer choice? One sentence each.
 
 ::: {.callout-note collapse="true" title="Answer"}
-```python
-lda = LinearDiscriminantAnalysis()
-qda = QuadraticDiscriminantAnalysis()
-```
-
-1. 465. QDA estimates two of them (930 numbers), plus two centres, from 426 training lumps.
-2. Perimeter and area are almost fixed once you know the radius, so the points hardly vary in some combination of these columns, and the spread in that direction is almost 0.
+1. Logistic regression (0.979), then LDA (0.960), then QDA (0.958). Logistic regression is higher than LDA by about 0.02. Both draw a straight boundary; logistic regression learns it directly, while LDA computes it from the centres and one shared spread, which assumes both classes have the same shape.
+2. 465. QDA estimates two of them (930 numbers), plus two centres, from 426 training lumps.
+3. One spread per class pays off when the classes really are spread differently and each spread can be estimated well from the data, as in 2.1 (2 features, 120 and 240 points). With many measurements and few points per class, as in 2.2 (465 numbers per spread from 426 lumps), one shared spread or logistic regression is safer.
 :::
 
-## Part 3: When the spread cannot be estimated (12 minutes)
+## Part 3: When the spread cannot be estimated (13 minutes)
 
 **Goal:** see QDA fail on handwritten digits (the MNIST subset of Lab 4), pull each spread towards a circle with `reg_param`, and choose the value by cross-validation.
 
 ### 3.1 QDA on 784 pixels
 
-Run the cell without changing it. It loads the MNIST subset as in Lab 4 and tries QDA with no shrinking. It takes about half a minute.
+Run the cell without changing it. It loads the MNIST subset as in Lab 4 and tries QDA with no shrinking: one fit on all training images, which shows the warnings, then cross-validation with the warnings hidden. It takes about half a minute.
 
 ```python
 DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/data/mnist10k.npz"
@@ -220,13 +282,16 @@ y_digits = mnist["y"]                                     # the digit, 0 to 9
 X_digits_train, X_digits_test, y_digits_train, y_digits_test = train_test_split(
     X_digits, y_digits, test_size=0.25, random_state=0, stratify=y_digits)
 qda = QuadraticDiscriminantAnalysis()                     # one spread per class, no shrinking
+warnings.filterwarnings("always")                         # show the warnings again for this one fit
+qda.fit(X_digits_train, y_digits_train)                   # fit once on all training images: it warns here
+warnings.filterwarnings("ignore")                         # hide them during cross-validation and from here on
 scores_qda = cross_val_score(qda, X_digits_train, y_digits_train, cv=kf)   # accuracy on each fold
 print(scores_qda.mean())                                  # average accuracy
 ```
 
-**Success check:** a warning that a covariance matrix is not full rank (shown once), and an accuracy of about `0.71`. Logistic regression (`C=0.1`, as in Lesson 4) gets about `0.901` with the same folds (Lesson 5 Note, Section 6).
+**Success check:** ten warnings from the single fit, one per digit: *"The covariance matrix of class 0 is not full rank"*, then class 1, and so on to class 9. Below them, an accuracy of about `0.712` (the Note shows 0.710; the third digit can differ between computers). Logistic regression (`C=0.1`, as in Lesson 4) gets about `0.901` with the same folds (Lesson 5 Note, Section 6).
 
-**Question:** each class has about 750 training images. In each class, 245 to 361 of the 784 pixels are 0 in every image. What is the spread of the class along such a pixel, and what happens to a new image that has a little ink there?
+**Question:** each class has about 750 training images. In each class, 245 to 361 of the 784 pixels are 0 in every image. What is the spread of the class along such a pixel, and what happens to a new image that has a little ink there? (Think of the spread along that pixel, and the height of the bell curve there.)
 
 ::: {.callout-note collapse="true" title="Answer"}
 The spread is 0, so the ellipse has no thickness in that direction. Measured by that spread, a new image with any ink there is infinitely far from the centre, and the class gives it a height of 0.
@@ -234,11 +299,9 @@ The spread is 0, so the ellipse has no thickness in that direction. Measured by 
 
 ### 3.2 Choose reg_param
 
-We have seen the warning; the first line below hides it from now on, so that the numbers are easy to read. Run the cell without changing it.
+The warnings stay hidden since 3.1, so the numbers are easy to read. Run the cell without changing it.
 
 ```python
-import warnings                                           # controls Python's warning messages
-warnings.filterwarnings("ignore")                         # hide the "not full rank" warnings from here on
 for r in [0, 0.0001, 0.001, 0.01, 0.1, 0.5, 1]:           # values of reg_param to try
     qda = QuadraticDiscriminantAnalysis(reg_param=r)      # pull each spread towards a circle by r
     scores_qda = cross_val_score(qda, X_digits_train, y_digits_train, cv=kf)   # accuracy on each fold
@@ -248,7 +311,7 @@ for r in [0, 0.0001, 0.001, 0.01, 0.1, 0.5, 1]:           # values of reg_param 
 **Success check:**
 
 ```
-0 0.71
+0 0.712
 0.0001 0.843
 0.001 0.863
 0.01 0.784
@@ -257,16 +320,12 @@ for r in [0, 0.0001, 0.001, 0.01, 0.1, 0.5, 1]:           # values of reg_param 
 1 0.804
 ```
 
-This takes about a minute: 7 values times 5 folds.
+This takes about a minute: 7 values times 5 folds. You need not explain the dip between 0.1 and 0.5; only check whether the best value sits at an end.
 
-**Questions:**
-
-1. Which value of `reg_param` is best? Is it at an end of the range you searched?
-2. Suppose you had tried only 0.01, 0.1, 0.3 and 0.5. Which value would you have chosen, and what should you do next?
+**Question:** which value of `reg_param` is best? Is it at an end of the range you searched?
 
 ::: {.callout-note collapse="true" title="Answer"}
-1. 0.001, with 0.863. It is in the middle of the range, so the range is wide enough. (The accuracy falls a lot between 0.1 and 0.5 and rises again at 1, where every class is the same circle; the lecture does not go into why.)
-2. 0.01, the best of those four, but it sits at the lower end. The best value may be smaller, so widen the range below 0.01 (for example 0.001, 0.0001) and choose again: you would find 0.001.
+0.001, with 0.863. It is in the middle of the range, so the range is wide enough. (The accuracy falls a lot between 0.1 and 0.5 and rises again at 1, where every class is the same circle; the lecture does not go into why.)
 :::
 
 ### 3.3 The test set, once
@@ -289,7 +348,7 @@ qda = QuadraticDiscriminantAnalysis(reg_param=0.001)
 ```
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** the cross-validation curve of 3.2 as a picture.
 
 **Tell the AI:** the values are `[0, 0.0001, 0.001, 0.01, 0.1, 0.5, 1]`; for each one, `cross_val_score(QuadraticDiscriminantAnalysis(reg_param=r), X_digits_train, y_digits_train, cv=kf).mean()` is the accuracy.
@@ -299,7 +358,7 @@ qda = QuadraticDiscriminantAnalysis(reg_param=0.001)
 **Check:** the curve rises from about `0.71` to a peak of about `0.863` at 0.001, falls to about `0.5` between 0.1 and 0.5, and rises again to about `0.80` at 1.
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** to see the centre of each class of digits, the first thing QDA estimates.
 
 **Tell the AI:** after 3.3, `qda.means_` has 10 rows (one per digit) of 784 numbers, one per pixel of a 28 × 28 image.
@@ -309,36 +368,13 @@ qda = QuadraticDiscriminantAnalysis(reg_param=0.001)
 **Check:** there are 10 blurred images, and you can read the digits 0 to 9 in them.
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
-Run this cell first, without changing it. It makes the same two-feature data as the lecture.
-
-```python
-rng = np.random.default_rng(0)                            # the same random numbers as the lecture
-X1 = rng.multivariate_normal([0, 0], [[0.35, 0.15], [0.15, 0.35]], 120)      # class 1: tight
-X0 = rng.multivariate_normal([1.0, 0.6], [[2.2, -0.6], [-0.6, 1.6]], 240)    # class 0: spread out
-X_two = np.vstack([X1, X0])                               # 360 points, 2 features
-y_two = np.concatenate([np.ones(120), np.zeros(240)])     # their labels
-lda_two = LinearDiscriminantAnalysis().fit(X_two, y_two)  # one shared spread
-qda_two = QuadraticDiscriminantAnalysis().fit(X_two, y_two)   # one spread per class
-print(lda_two.score(X_two, y_two), qda_two.score(X_two, y_two))   # accuracy on these 360 points
-```
-
-**You want:** to draw the straight LDA boundary and the curved QDA boundary on this data.
-
-**Tell the AI:** `X_two` has two columns; `y_two` holds the labels; `lda_two` and `qda_two` are fitted models.
-
-**Ask:** *"Draw two plots side by side. In each, colour the points of X_two by y_two, and draw the boundary where the model's predict_proba for class 1 equals 0.5, using a grid of points from -3.5 to 5.5 horizontally and -3.5 to 4.5 vertically. Use lda_two on the left and qda_two on the right."*
-
-**Check:** the printed accuracies are about `0.719` and `0.867`; the left boundary is a straight line and the right one is an ellipse around the tight class.
-:::
-
 # After class: how today's lab helps with Assignment 2
 
 Assignment 2 (handwritten digits, MNIST) asks for LDA and QDA in Section 2, and the MPS439 extension task C asks for a Gaussian classifier written by hand. **From today you can do the LDA and QDA rows of Table 2.**
 
 | What you did today | Where it appears in Assignment 2 |
 |---|---|
-| Part 2: `LinearDiscriminantAnalysis()` and `QuadraticDiscriminantAnalysis()` | Section 2, Table 2: the LDA and QDA rows |
+| Part 2.2: `LinearDiscriminantAnalysis()` and `QuadraticDiscriminantAnalysis()` | Section 2, Table 2: the LDA and QDA rows |
 | Part 3.1: the "not full rank" warning and a poor accuracy | Section 2, the reminder "QDA with default settings fails" (some pixels are 0 in every image of a class). The brief says you may get a `LinAlgError` or a very poor result; the current scikit-learn gives the warning and the poor result, as today |
 | Part 3.2: try several `reg_param` values; the best must not sit at an end | Section 2: "The chosen value must not lie at either end of your search range" |
 | Part 3.3: read the test set once | Section 4: `test` is used once, at the end |
