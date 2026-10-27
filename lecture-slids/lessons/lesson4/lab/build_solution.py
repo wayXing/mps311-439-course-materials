@@ -116,7 +116,7 @@ for cell in nb.cells:
 norm = lambda s: " ".join(s.split())                    # ignore spacing differences
 missing = [e for e in EXPECT if norm(e) not in norm(text)]
 assert not missing, f"Expected values not found in outputs: {missing}"
-# 3.3 里给出的阈值 0.3 的测试矩阵由这里重算
+# 3.3 里给出的阈值 0.3 和 0.5 的测试矩阵由这里重算
 from sklearn.datasets import load_breast_cancer
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
@@ -127,6 +127,7 @@ _a, _b, _c, _e = train_test_split(_d.data, 1 - _d.target, test_size=0.25, random
 _s = StandardScaler().fit(_a)
 _p = LogisticRegression().fit(_s.transform(_a), _c).predict_proba(_s.transform(_b))[:, 1]
 assert confusion_matrix(_e, (_p >= 0.3).astype(int), labels=[1, 0]).tolist() == [[51, 2], [6, 84]]
+assert confusion_matrix(_e, (_p >= 0.5).astype(int), labels=[1, 0]).tolist() == [[51, 2], [0, 90]]
 # 3.2 第 3 问：把 0/1 的预测放进 roc_curve，只有 3 个点、AUC 0.974
 from sklearn.model_selection import KFold, cross_val_predict
 from sklearn.metrics import roc_curve, auc

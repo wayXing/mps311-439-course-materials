@@ -35,7 +35,7 @@ Most code is provided. Your job is to fill the blanks `____`, run the cell, and 
 3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
 4. Each task has a one-line **Hint** and a folded **Answer**. Try first. Open the Answer only to check your work. If you fall behind, copy the Answer of a task and carry on: every later task still works.
 5. Running every cell and matching the Success checks is a complete lab.
-6. The **Try with AI** boxes are for when you finish early, or after class. They follow the four steps below.
+6. The **Try with AI** boxes are folded: open one when you finish early, or after class. They follow the four steps below.
 
 ### Using AI
 
@@ -116,7 +116,7 @@ print(X_train[:, 0].min(), X_train[:, 0].max())           # range of mean radius
 print(X_train[:, 3].min(), X_train[:, 3].max())           # range of mean area
 ```
 
-**Success check:** a yellow **ConvergenceWarning** appears, and the two ranges are about `7 to 28` and `144 to 2501`.
+**Success check:** a yellow **ConvergenceWarning** appears, and the two ranges are about `7 to 28` and `143 to 2501`.
 
 **Question:** the warning says the solver stopped before reaching the bottom. Using Lesson 3, what would you do to the columns first? One word.
 
@@ -150,7 +150,7 @@ The answer to the question is **standardise**. Mean area runs to 2501 while smoo
 model = LogisticRegression()                              # sigmoid model, trained with cross-entropy
 model.fit(X_train_s, y_train)                             # fit on the standardised training lumps
 prob_both = model.____(X_train_s[:5])                     # two probabilities for the first five training lumps
-print(prob_both.round(3))                                 # column 0: benign, column 1: malignant
+print(prob_both.round(3))                                 # two probabilities for each lump
 print(y_train[:5])                                        # the true labels of these five lumps
 ```
 
@@ -223,7 +223,7 @@ recall_by_hand = 152 / (152 + 7)
 Accuracy counts a missed cancer and a false alarm as the same kind of error, and malignant lumps are only 37% of the data, so a few missed cancers change accuracy very little.
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** to see how the cross-validated probabilities are spread for the two classes.
 
 **Tell the AI:** `prob` holds one probability of malignant per training lump; `y_train` holds the true labels (1 = malignant, 0 = benign).
@@ -348,7 +348,7 @@ print(confusion_matrix(y_test, pred_test, labels=[1, 0])) # the test set, read o
  [11 79]]
 ```
 
-All 53 malignant test lumps are found; 11 of the 90 benign lumps are false alarms. If you chose 0.3, you get `[[51 2] [6 84]]`: 2 missed, 6 false alarms.
+All 53 malignant test lumps are found; 11 of the 90 benign lumps are false alarms. If you chose 0.3, you get `[[51 2] [6 84]]`: 2 missed, 6 false alarms. If you chose 0.5, you get `[[51 2] [0 90]]`: 2 missed, no false alarm.
 
 ::: {.callout-note collapse="true" title="Answer"}
 ```python
@@ -356,7 +356,7 @@ pred_test = (prob_test >= 0.1).astype(int)
 ```
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** to see the two counts (missed cancers and false alarms) against the threshold value itself, which the ROC curve does not show.
 
 **Tell the AI:** `prob` holds the cross-validated probability of malignant for each training lump; `y_train` holds the labels (1 = malignant).
@@ -366,7 +366,7 @@ pred_test = (prob_test >= 0.1).astype(int)
 **Check:** at threshold 0.5 the two counts are `7` and `2`; missed cancers go down and false alarms go up as the threshold falls.
 :::
 
-::: {.callout-tip title="Try with AI (if you finish early, or after class)"}
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** to see what a multi-class logistic regression looks at, as in Assignment 2.
 
 Run this cell first, without changing it. It downloads the course's MNIST subset (10,000 handwritten digits of 28 × 28 pixels, about 1.6 MB; Labs 5 to 8 use it too) and fits logistic regression. It takes about half a minute.

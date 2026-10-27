@@ -9,22 +9,22 @@ plt.legend()
 plt.show()
 print("lumps in the two histograms:", (y_train == 1).sum(), (y_train == 0).sum())
 #%%
-# ---- Try with AI 3.2 (first box): missed cancers and false alarms for many thresholds ----
-thresholds = np.arange(0.05, 0.96, 0.05)                          # 0.05, 0.10, ..., 0.95
+# ---- Try with AI 3.3 (first box): missed cancers and false alarms for many thresholds ----
+threshold_grid = np.arange(0.05, 0.96, 0.05)                          # 0.05, 0.10, ..., 0.95
 missed_list = []
 alarm_list = []
-for t in thresholds:
+for t in threshold_grid:
     missed_list.append(((prob < t) & (y_train == 1)).sum())       # malignant but below the threshold
     alarm_list.append(((prob >= t) & (y_train == 0)).sum())       # benign but at or above the threshold
-plt.plot(thresholds, missed_list, marker="o", label="missed cancers")
-plt.plot(thresholds, alarm_list, marker="s", label="false alarms")
+plt.plot(threshold_grid, missed_list, marker="o", label="missed cancers")
+plt.plot(threshold_grid, alarm_list, marker="s", label="false alarms")
 plt.xlabel("threshold")
 plt.ylabel("count")
 plt.legend()
 plt.show()
 print("at threshold 0.5:", missed_list[9], alarm_list[9])
 #%%
-# ---- Try with AI 3.2 (second box): the digits, fitted with the code given in the box ----
+# ---- Try with AI 3.3 (second box): the digits, fitted with the code given in the box ----
 import urllib.request                                     # to download a file
 DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/data/mnist10k.npz"
 urllib.request.urlretrieve(DATA_URL, "mnist10k.npz")      # 10,000 MNIST images, about 1.6 MB
