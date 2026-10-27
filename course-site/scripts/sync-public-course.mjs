@@ -41,7 +41,7 @@ function shouldCopyCourseSite(source) {
 
 function shouldCopySlides(source) {
   const parts = relativeParts(sourceSlides, source);
-  if (parts.includes('admin') || parts.some((part) => lessonIgnoredNames.has(part) || part.startsWith('STUDENT_REVIEW'))) return false;
+  if (parts.includes('admin') || parts.some((part) => lessonIgnoredNames.has(part) || part.startsWith('STUDENT_REVIEW') || part.startsWith('LAB_COVERAGE_REVIEW'))) return false;
   if (parts.some((part) => /^(VIDEO|YOUTUBE)_.*\.md$/.test(part))) return false;  // video and YouTube production notes
   if (parts.includes('lab') && parts[parts.length - 1] === 'mnist10k.npz') return false;  // a copy downloaded when the solution runs; the public file is data/mnist10k.npz
   return !parts.some((part) => part.endsWith('.html') || part.endsWith('.pdf') || part.endsWith('.webloc'));
