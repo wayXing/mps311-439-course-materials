@@ -11,6 +11,7 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
   label: lesson.label,
   title: lesson.title,
   sections: lesson.sections,
+  workshop: lesson.workshop,
 }]));
 ---
 
@@ -135,6 +136,8 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
     const publishableKey = page.dataset.key;
     const lessons = JSON.parse(page.dataset.lessons);
     const labSections = JSON.parse(page.dataset.labSections);
+    // A workshop runs as a 'lecture' session; students see it called a workshop.
+    const kindWord = (slug, kind) => lessons[slug]?.workshop ? 'workshop' : kind;
     const submissionUrl = `${supabaseUrl}/functions/v1/course-feedback`;
     const deviceStorageKey = 'mps-course-feedback-device-v1';
     const backgroundStorageKey = 'mps-course-background-v1';
@@ -203,7 +206,7 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
       if (session) setFeedbackClass(session, true);
       if (!session || !changed) return;
       const lesson = lessons[session.lessonSlug] ?? { label: session.lessonSlug, title: '', sections: [] };
-      document.querySelector('#live-eyebrow').textContent = `${lesson.label} · ${session.kind === 'lab' ? 'lab' : 'lecture'} · live`;
+      document.querySelector('#live-eyebrow').textContent = `${lesson.label} · ${kindWord(session.lessonSlug, session.kind === 'lab' ? 'lab' : 'lecture')} · live`;
       document.querySelector('#live-title').textContent = lesson.title;
     };
 
@@ -223,7 +226,7 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
       if (!isLive) classSelect.value = entry.contextKey;
       feedbackClass = { key, contextKey: entry.contextKey };
       const lesson = lessons[entry.lessonSlug] ?? { label: entry.lessonSlug, sections: [] };
-      document.querySelector('#feedback-for').textContent = isLive ? `About ${lesson.label} ${entry.kind}, so far.` : '';
+      document.querySelector('#feedback-for').textContent = isLive ? `About ${lesson.label}${lesson.workshop ? '' : ` ${entry.kind}`}, so far.` : '';
       const sections = entry.kind === 'lab' ? labSections : lesson.sections;
       const lostField = document.querySelector('#lost-field');
       lostField.querySelectorAll('label').forEach((label) => label.remove());
@@ -243,7 +246,7 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
     const classLabel = (entry) => {
       const lesson = lessons[entry.lessonSlug] ?? { label: entry.lessonSlug };
       const day = new Date(entry.openedAt).toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
-      return `${lesson.label} · ${entry.kind === 'lab' ? 'Lab' : 'Lecture'} · ${day}`;
+      return `${lesson.label}${lesson.workshop ? '' : ` · ${entry.kind === 'lab' ? 'Lab' : 'Lecture'}`} · ${day}`;
     };
     const fillClassMenu = (classes) => {
       if (JSON.stringify(classes) !== JSON.stringify(pastClasses)) {
@@ -470,7 +473,7 @@ const lessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
         if (!lastHasResults) return;
         const lesson = lessons[last.lessonSlug] ?? { label: last.lessonSlug, title: '' };
         const day = new Date(last.openedAt).toLocaleDateString([], { weekday: 'short', day: 'numeric', month: 'short' });
-        document.querySelector('#last-title').textContent = `Last class results · ${lesson.label} ${last.kind} · ${day}`;
+        document.querySelector('#last-title').textContent = `Last class results · ${lesson.label}${lesson.workshop ? '' : ` ${last.kind}`} · ${day}`;
         last.polls.forEach((poll) => {
           const prompt = document.createElement('p');
           prompt.className = 'live-prompt live-prompt-small';

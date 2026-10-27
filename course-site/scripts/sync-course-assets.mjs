@@ -119,8 +119,14 @@ if (await stat(assignmentRoot).then(() => true).catch(() => false)) {
   for (const name of ['train.csv', 'test.csv', 'full.csv']) {
     await cp(join(assignmentRoot, 'data', name), join(assignmentOutput, name));
   }
+  // Optional help with writing the report: the guide, do and don't, the example report as a web
+  // page (deployments drop PDFs), and the LaTeX template. The pages link to each other by these names.
+  await mkdir(join(assignmentOutput, 'report-guide'), { recursive: true });
+  for (const name of ['report_guide_en.html', 'do_and_dont_en.html', 'example_report_en.html', 'report_template.tex']) {
+    await cp(join(assignmentRoot, 'report-guide', name), join(assignmentOutput, 'report-guide', name));
+  }
   await removePublicPdfLinks(assignmentOutput);
-  console.log('Synced Assignment 1 student brief and datasets.');
+  console.log('Synced Assignment 1 student brief, datasets and report guide.');
 }
 
 const assignmentTwoRoot = resolve(projectRoot, '../assessment/2026/assignment2');

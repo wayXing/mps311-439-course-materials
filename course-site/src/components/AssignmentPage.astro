@@ -78,8 +78,19 @@ const resources = withBase(`assignments/${number === 1 ? 'assignment-one' : 'ass
           <div class="data-links"><a href={`${resources}mnist.npz`} download><span>mnist.npz <small>60,000 training + 10,000 test images · 11 MB</small></span><span aria-hidden="true">↓</span></a></div>
         </>}
       </article>
+      {number === 1 && <article class="assignment-card writing-card">
+        <span class="step">03 · Write the report <span class="optional">(optional help)</span></span>
+        <h2>Writing the report</h2>
+        <p>The brief says what to hand in; how you write it is up to you. These help you build a clearer report. They are suggestions, not requirements.</p>
+        <div class="data-links">
+          <a href={`${resources}report-guide/report_guide_en.html`}><span>Writing your report <small>A structure that works, tables and figures, layout, making your notebook run anywhere</small></span><span aria-hidden="true">↗</span></a>
+          <a href={`${resources}report-guide/do_and_dont_en.html`}><span>Do and don't <small>Ten common problems, each with a better version</small></span><span aria-hidden="true">↗</span></a>
+          <a href={`${resources}report-guide/example_report_en.html`}><span>Example report <small>A whole report on the Lab 2 car data, at the Very good level</small></span><span aria-hidden="true">↗</span></a>
+          <a href={`${resources}report-guide/report_template.tex`} download><span>LaTeX template <small>11 pt, A4, 2 cm margins, compact headings</small></span><span aria-hidden="true">↓</span></a>
+        </div>
+      </article>}
       <article class="assignment-card submission-card">
-        <span class="step">03 · Hand in</span>
+        <span class="step">{number === 1 ? '04' : '03'} · Hand in</span>
         <h2>Submit on Blackboard</h2>
         <p>Upload these two files to the <strong>Assignment {number} submission area</strong> in Blackboard:</p>
         <ul><li>One PDF report</li><li>One notebook (.ipynb or .py)</li></ul>
@@ -153,7 +164,8 @@ const resources = withBase(`assignments/${number === 1 ? 'assignment-one' : 'ass
   .data-links a { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); font-size: 14px; font-weight: 650; }
   .data-links a:hover { color: var(--resource-data); }
   .data-links small { display: block; color: var(--ink-faint); font-size: 12px; font-weight: 400; margin-top: 4px; }
-  .submission-card { grid-column: 1 / -1; }
+  .submission-card, .writing-card { grid-column: 1 / -1; }
+  .writing-card .step .optional { font-weight: 400; text-transform: none; letter-spacing: 0; }
   .submission-card ul { display: flex; flex-wrap: wrap; gap: 12px 32px; padding-left: 20px; font-size: 14px; }
   .filename-note strong, .filename-note p { color: #b00020; font-weight: 750; }
   .assignment-tabs { display: flex; gap: 8px; margin: 22px 0; }

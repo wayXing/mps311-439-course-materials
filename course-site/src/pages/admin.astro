@@ -11,6 +11,7 @@ const reportCourse = `${course.code} ${course.title}`;
 const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slug, {
   label: lesson.label,
   title: lesson.title,
+  workshop: lesson.workshop,
   polls: Object.fromEntries(lesson.polls.map((poll) => [poll.key, poll.slide])),
 }]));
 ---
@@ -302,7 +303,8 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
     };
     const className = (contextKey) => {
       const [, , slug, kind] = contextKey.match(/^(\d{4}-\d{2})-(.+)-(lecture|lab)$/) ?? [null, '', contextKey, ''];
-      return `${reportLessons[slug]?.label ?? slug}${kind ? ` ${kind}` : ''}`;
+      // A workshop runs as a 'lecture' session; it is named without the kind.
+      return `${reportLessons[slug]?.label ?? slug}${kind && !reportLessons[slug]?.workshop ? ` ${kind}` : ''}`;
     };
 
     const loadFeedback = async () => {
@@ -457,7 +459,7 @@ const reportLessons = Object.fromEntries(liveLessons.map((lesson) => [lesson.slu
       const moment = new Date(time).getTime();
       const match = liveSessions.find((entry) => new Date(entry.opened_at).getTime() <= moment
         && moment <= new Date(entry.closed_at ?? entry.closes_at).getTime());
-      if (match) return `${match.lesson_slug.replace('lesson-', 'Lesson ')} ${match.kind}`;
+      if (match) return className(match.context_key);
       return liveSessions.length ? 'Between classes' : sessionLabel(fallbackKey);
     };
 

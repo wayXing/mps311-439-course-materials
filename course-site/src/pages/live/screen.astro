@@ -7,7 +7,7 @@ import '../../styles/live.css';
 import { course } from '../../data/course';
 import { academicYearKey, labSections, liveLessons, publishableKey, supabaseUrl } from '../../data/live';
 
-const lessons = liveLessons.map(({ slug, label, polls, sections }) => ({ slug, label, polls, sections }));
+const lessons = liveLessons.map(({ slug, label, polls, sections, workshop }) => ({ slug, label, polls, sections, workshop }));
 ---
 
 <!doctype html>
@@ -103,6 +103,7 @@ const lessons = liveLessons.map(({ slug, label, polls, sections }) => ({ slug, l
       // Two lecturer-made polls for questions asked on the spot.
       const quickPolls = [
         { key: 'quick-vote', kind: 'choice', slide: 'Quick vote', prompt: 'Answer the question on the screen.', options: ['A', 'B', 'C', 'D'] },
+        { key: 'quick-a-or-b', kind: 'choice', slide: 'A or B', prompt: 'A or B? Pick the one on the screen.', options: ['A', 'B'] },
         { key: 'quick-text', kind: 'text', slide: 'Quick one sentence', prompt: 'Answer the question on the screen in one sentence.' },
       ];
 
@@ -117,6 +118,17 @@ const lessons = liveLessons.map(({ slug, label, polls, sections }) => ({ slug, l
 
       let live = { session: null, polls: [], checkinCount: 0 };
       const lesson = () => lessons.find((entry) => entry.slug === lessonSelect.value);
+      // A workshop has no lecture/lab choice: it runs as a 'lecture' session and is shown as a workshop.
+      const isWorkshop = (slug) => Boolean(lessons.find((entry) => entry.slug === slug)?.workshop);
+      const sessionName = (slug, kind) => {
+        const label = lessons.find((entry) => entry.slug === slug)?.label ?? slug;
+        return isWorkshop(slug) ? label : `${label} ${kind}`;
+      };
+      const syncKind = () => {
+        kindSelect.hidden = isWorkshop(lessonSelect.value);
+        if (kindSelect.hidden) kindSelect.value = 'lecture';
+      };
+      syncKind();
       const contextKey = () => `${yearKey}-${lessonSelect.value}-${kindSelect.value}`;
       const getToken = () => { try { return sessionStorage.getItem(tokenStorageKey); } catch { return null; } };
 
@@ -261,9 +273,9 @@ const lessons = liveLessons.map(({ slug, label, polls, sections }) => ({ slug, l
         const line = document.querySelector('#live-line');
         if (live.session) {
           const until = new Date(live.session.closesAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-          const label = lessons.find((entry) => entry.slug === live.session.lessonSlug)?.label ?? live.session.lessonSlug;
-          status.textContent = `Live: ${label} ${live.session.kind} until ${until} · check-ins: ${live.checkinCount} · attendance code ${live.session.attendanceCode ? 'on phones' : 'not set'}`;
-          line.textContent = `${label} ${live.session.kind} is live. Scan once: votes, answers, questions and the check-in.`;
+          const label = sessionName(live.session.lessonSlug, live.session.kind);
+          status.textContent = `Live: ${label} until ${until} · check-ins: ${live.checkinCount} · attendance code ${live.session.attendanceCode ? 'on phones' : 'not set'}`;
+          line.textContent = `${label} is live. Scan once: votes, answers, questions and the check-in.`;
         } else {
           status.textContent = 'No class live';
           line.textContent = 'Scan once: votes, answers, questions and the check-in.';
@@ -411,6 +423,7 @@ const lessons = liveLessons.map(({ slug, label, polls, sections }) => ({ slug, l
           if (next.session && next.session.contextKey !== asked) {
             lessonSelect.value = next.session.lessonSlug;
             kindSelect.value = next.session.kind;
+            syncKind();
             next = (await admin('admin_live_overview')).live;
           }
           if (serial !== requestSerial) return;
@@ -422,7 +435,7 @@ const lessons = liveLessons.map(({ slug, label, polls, sections }) => ({ slug, l
         drawQuestions();
       };
 
-      lessonSelect.addEventListener('change', refresh);
+      lessonSelect.addEventListener('change', () => { syncKind(); refresh(); });
       kindSelect.addEventListener('change', refresh);
       document.querySelector('#start-class').addEventListener('click', async () => {
         try {

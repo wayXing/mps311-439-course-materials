@@ -16,6 +16,7 @@ export interface LiveLesson {
 }
 
 const configured = liveJson.lessons as Record<string, LiveLesson>;
+const workshops = liveJson.workshops as Record<string, LiveLesson & { label: string; title: string }>;
 
 // Every teaching lesson can be started live; lessons without a configuration have no polls yet.
 export const liveLessons = course.lessons
@@ -26,12 +27,24 @@ export const liveLessons = course.lessons
     title: lesson.title,
     sections: configured[lesson.slug]?.sections ?? [],
     polls: configured[lesson.slug]?.polls ?? [],
+    workshop: false,
   }));
+
+// The optional assessment workshops sit in the same menu. The live system stores them as a
+// 'lecture' session (it knows only lecture and lab); the pages call them workshops.
+liveLessons.push(...Object.entries(workshops).map(([slug, workshop]) => ({
+  slug,
+  label: workshop.label,
+  title: workshop.title,
+  sections: workshop.sections,
+  polls: workshop.polls,
+  workshop: true,
+})));
 
 export const labSections = liveJson.labSections as string[];
 
 // The end-of-class "least clear" vote lists a lesson's parts plus "Everything was clear": at most 8 options.
-for (const [slug, lesson] of Object.entries(configured)) {
+for (const [slug, lesson] of Object.entries({ ...configured, ...workshops })) {
   if (lesson.sections.length > 7) throw new Error(`live.json: ${slug} has more than 7 sections.`);
 }
 if (labSections.length > 7) throw new Error('live.json: labSections has more than 7 entries.');

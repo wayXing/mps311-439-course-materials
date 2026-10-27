@@ -1,5 +1,5 @@
 {
-  "_comment": "Live classroom (/live/ and /live/screen/). One QR code for the whole course; the lecturer starts a class on the screen. For each lesson: 'sections' (at most 7) are the choices for 'where did you first get lost?' in a lecture check-in; 'polls' are opened from the screen at the matching slide. A poll is a choice (2-8 options) or, with \"kind\": \"text\", a one-sentence answer. Results show live unless \"showLive\": false. \"answer\" (0-based) marks the correct option, shown when the lecturer reveals; omit it for a decision with no single right answer.",
+  "_comment": "Live classroom (/live/ and /live/screen/). One QR code for the whole course; the lecturer starts a class on the screen. For each lesson: 'sections' (at most 7) are the choices for 'where did you first get lost?' in a lecture check-in; 'polls' are opened from the screen at the matching slide. A poll is a choice (2-8 options) or, with \"kind\": \"text\", a one-sentence answer. Results show live unless \"showLive\": false. \"answer\" (0-based) marks the correct option, shown when the lecturer reveals; omit it for a decision with no single right answer. 'workshops' are the optional assessment workshops: chosen in the same lesson menu, with no lecture/lab choice; their polls are two-way 'where next?' votes the lecturer opens as the class asks.",
   "lessons": {
     "lesson-01": {
       "sections": [
@@ -467,5 +467,117 @@
     "Understanding what a task asks",
     "Reading the results",
     "Answering the questions"
-  ]
+  ],
+  "workshops": {
+    "workshop-01": {
+      "label": "Workshop 1",
+      "title": "Optional workshop on Assessment 1",
+      "sections": [
+        "What the assignment asks",
+        "Getting the code to run",
+        "The required tables and plots",
+        "Reading my own results",
+        "Choosing what to investigate",
+        "Writing the report",
+        "Submitting: file names and deadline"
+      ],
+      "polls": [
+        {
+          "key": "next-required-or-beyond",
+          "slide": "Where next: required part or going beyond?",
+          "prompt": "Where next?",
+          "options": [
+            "Getting the required part done",
+            "Going beyond: my own investigation"
+          ],
+          "showLive": true
+        },
+        {
+          "key": "next-results-or-report",
+          "slide": "Where next: results or report?",
+          "prompt": "Where next?",
+          "options": [
+            "Making sense of my results and plots",
+            "Writing the report"
+          ],
+          "showLive": true
+        },
+        {
+          "key": "next-questions-or-experience",
+          "slide": "Where next: your questions or how I would do it?",
+          "prompt": "Where next?",
+          "options": [
+            "More of your questions",
+            "How the lecturer would approach it"
+          ],
+          "showLive": true
+        },
+        {
+          "key": "ready-check",
+          "slide": "How ready do you feel?",
+          "prompt": "How ready do you feel for Assessment 1?",
+          "options": [
+            "I know what to do next",
+            "Still not sure where to start"
+          ],
+          "showLive": true
+        }
+      ]
+    },
+    "workshop-02": {
+      "label": "Workshop 2",
+      "title": "Optional workshop on Assessment 2",
+      "sections": [
+        "What the assignment asks",
+        "Getting the code to run",
+        "The required tables and plots",
+        "Reading my own results",
+        "Choosing what to investigate",
+        "Writing the report",
+        "Submitting: file names and deadline"
+      ],
+      "polls": [
+        {
+          "key": "next-required-or-beyond",
+          "slide": "Where next: required part or going beyond?",
+          "prompt": "Where next?",
+          "options": [
+            "Getting the required part done",
+            "Going beyond: my own investigation"
+          ],
+          "showLive": true
+        },
+        {
+          "key": "next-results-or-report",
+          "slide": "Where next: results or report?",
+          "prompt": "Where next?",
+          "options": [
+            "Making sense of my results and plots",
+            "Writing the report"
+          ],
+          "showLive": true
+        },
+        {
+          "key": "next-questions-or-experience",
+          "slide": "Where next: your questions or how I would do it?",
+          "prompt": "Where next?",
+          "options": [
+            "More of your questions",
+            "How the lecturer would approach it"
+          ],
+          "showLive": true
+        },
+        {
+          "key": "ready-check",
+          "slide": "How ready do you feel?",
+          "prompt": "How ready do you feel for Assessment 2?",
+          "options": [
+            "I know what to do next",
+            "Still not sure where to start"
+          ],
+          "showLive": true
+        }
+      ]
+    }
+  }
 }
