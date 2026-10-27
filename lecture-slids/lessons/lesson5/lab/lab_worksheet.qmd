@@ -289,7 +289,7 @@ scores_qda = cross_val_score(qda, X_digits_train, y_digits_train, cv=kf)   # acc
 print(scores_qda.mean())                                  # average accuracy
 ```
 
-**Success check:** ten warnings from the single fit, one per digit: *"The covariance matrix of class 0 is not full rank"*, then class 1, and so on to class 9. Below them, an accuracy of about `0.712` (the Note shows 0.710; the third digit can differ between computers). Logistic regression (`C=0.1`, as in Lesson 4) gets about `0.901` with the same folds (Lesson 5 Note, Section 6).
+**Success check:** ten warnings from the single fit, one per digit: *"The covariance matrix of class 0 is not full rank"*, then class 1, and so on to class 9. (On scikit-learn 1.8 or newer, the cell stops with a `LinAlgError` instead: the same failure, reported as an error. Go on to 3.2.) Below them, an accuracy of about `0.712` (the Note shows 0.710; the third digit can differ between computers). Logistic regression (`C=0.1`, as in Lesson 4) gets about `0.901` with the same folds (Lesson 5 Note, Section 6).
 
 **Question:** each class has about 750 training images. In each class, 245 to 361 of the 784 pixels are 0 in every image. What is the spread of the class along such a pixel, and what happens to a new image that has a little ink there? (Think of the spread along that pixel, and the height of the bell curve there.)
 
@@ -302,7 +302,7 @@ The spread is 0, so the ellipse has no thickness in that direction. Measured by 
 The warnings stay hidden since 3.1, so the numbers are easy to read. Run the cell without changing it.
 
 ```python
-for r in [0, 0.0001, 0.001, 0.01, 0.1, 0.5, 1]:           # values of reg_param to try
+for r in [0.0001, 0.001, 0.01, 0.1, 0.5, 1]:              # values of reg_param to try
     qda = QuadraticDiscriminantAnalysis(reg_param=r)      # pull each spread towards a circle by r
     scores_qda = cross_val_score(qda, X_digits_train, y_digits_train, cv=kf)   # accuracy on each fold
     print(r, round(scores_qda.mean(), 3))                 # the value and its average accuracy
@@ -311,7 +311,6 @@ for r in [0, 0.0001, 0.001, 0.01, 0.1, 0.5, 1]:           # values of reg_param 
 **Success check:**
 
 ```
-0 0.712
 0.0001 0.843
 0.001 0.863
 0.01 0.784
@@ -320,12 +319,12 @@ for r in [0, 0.0001, 0.001, 0.01, 0.1, 0.5, 1]:           # values of reg_param 
 1 0.804
 ```
 
-This takes about a minute: 7 values times 5 folds. You need not explain the dip between 0.1 and 0.5; only check whether the best value sits at an end.
+The list leaves out 0 (no shrinking): you already saw it in 3.1 (about 0.712). In the assignment, start from a small positive value as well. This takes about a minute: 6 values times 5 folds. You need not explain the dip between 0.1 and 0.5; only check whether the best value sits at an end.
 
 **Question:** which value of `reg_param` is best? Is it at an end of the range you searched?
 
 ::: {.callout-note collapse="true" title="Answer"}
-0.001, with 0.863. It is in the middle of the range, so the range is wide enough. (The accuracy falls a lot between 0.1 and 0.5 and rises again at 1, where every class is the same circle; the lecture does not go into why.)
+0.001, with 0.863. It is not at an end (0.0001 is lower and 0.01 is higher), so the range is wide enough. (The accuracy falls a lot between 0.1 and 0.5 and rises again at 1, where every class is the same circle; the lecture does not go into why.)
 :::
 
 ### 3.3 The test set, once
@@ -351,11 +350,11 @@ qda = QuadraticDiscriminantAnalysis(reg_param=0.001)
 ::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
 **You want:** the cross-validation curve of 3.2 as a picture.
 
-**Tell the AI:** the values are `[0, 0.0001, 0.001, 0.01, 0.1, 0.5, 1]`; for each one, `cross_val_score(QuadraticDiscriminantAnalysis(reg_param=r), X_digits_train, y_digits_train, cv=kf).mean()` is the accuracy.
+**Tell the AI:** the values are `[0.0001, 0.001, 0.01, 0.1, 0.5, 1]`; for each one, `cross_val_score(QuadraticDiscriminantAnalysis(reg_param=r), X_digits_train, y_digits_train, cv=kf).mean()` is the accuracy.
 
-**Ask:** *"Store the seven accuracies in a list, and plot them against the values with markers on a log scale for the horizontal axis. 0 cannot sit on a log axis, so draw it at 0.00001 and label that tick 0."*
+**Ask:** *"Store the six accuracies in a list, and plot them against the values with markers on a log scale for the horizontal axis."*
 
-**Check:** the curve rises from about `0.71` to a peak of about `0.863` at 0.001, falls to about `0.5` between 0.1 and 0.5, and rises again to about `0.80` at 1.
+**Check:** the curve rises from about `0.84` to a peak of about `0.863` at 0.001, falls to about `0.5` between 0.1 and 0.5, and rises again to about `0.80` at 1.
 :::
 
 ::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
@@ -375,7 +374,7 @@ Assignment 2 (handwritten digits, MNIST) asks for LDA and QDA in Section 2, and 
 | What you did today | Where it appears in Assignment 2 |
 |---|---|
 | Part 2.2: `LinearDiscriminantAnalysis()` and `QuadraticDiscriminantAnalysis()` | Section 2, Table 2: the LDA and QDA rows |
-| Part 3.1: the "not full rank" warning and a poor accuracy | Section 2, the reminder "QDA with default settings fails" (some pixels are 0 in every image of a class). The brief says you may get a `LinAlgError` or a very poor result; the current scikit-learn gives the warning and the poor result, as today |
+| Part 3.1: the "not full rank" warning and a poor accuracy | Section 2, the reminder "QDA with default settings fails" (some pixels are 0 in every image of a class). The brief says you may get a `LinAlgError` or a very poor result; scikit-learn before 1.8 gives the warning and the poor result, as today; 1.8 or newer gives the `LinAlgError` |
 | Part 3.2: try several `reg_param` values; the best must not sit at an end | Section 2: "The chosen value must not lie at either end of your search range" |
 | Part 3.3: read the test set once | Section 4: `test` is used once, at the end |
 | Advanced Study A below: a Gaussian classifier in numpy, with shrinkage | MPS439 extension task C |

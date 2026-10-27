@@ -14,15 +14,14 @@ plt.show()
 print("heights at 12.8:", round(norm.pdf(12.8, mean_ben, sd_ben), 3), round(norm.pdf(12.8, mean_mal, sd_mal), 3))
 #%%
 # ---- Try with AI 3.3 (first box): the cross-validation curve of reg_param ----
-values = [0, 0.0001, 0.001, 0.01, 0.1, 0.5, 1]                    # the values tried in 3.2
+values = [0.0001, 0.001, 0.01, 0.1, 0.5, 1]                       # the values tried in 3.2
 scores = []
 for r in values:
     qda = QuadraticDiscriminantAnalysis(reg_param=r)
     scores.append(cross_val_score(qda, X_digits_train, y_digits_train, cv=kf).mean())
-positions = [0.00001, 0.0001, 0.001, 0.01, 0.1, 0.5, 1]           # 0 drawn at 0.00001 on the log axis
-plt.plot(positions, scores, marker="o")
+plt.plot(values, scores, marker="o")
 plt.xscale("log")
-plt.xticks(positions, ["0", "0.0001", "0.001", "0.01", "0.1", "0.5", "1"])
+plt.xticks(values, ["0.0001", "0.001", "0.01", "0.1", "0.5", "1"])
 plt.xlabel("reg_param")
 plt.ylabel("cross-validated accuracy")
 plt.show()

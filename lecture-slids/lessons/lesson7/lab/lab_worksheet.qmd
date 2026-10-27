@@ -285,7 +285,7 @@ for k in [10, 20, 30, 40, 50, 60]:                        # candidate numbers of
 60 0.956
 ```
 
-The Note (Section 6) also tries k = 100 (0.946). With 100 components QDA warns that the covariance matrix of a class is "not full rank", the problem of Lesson 5 coming back, so here we stop at 60.
+The Note (Section 6) also tries k = 100 (0.946). Here we stop at 60 because, with only about 560 fitting images per digit, 100 components make QDA warn that the covariance matrix of a class is "not full rank", the problem of Lesson 5 coming back. Assignment 2 fits on 50,000 images (about 5,000 per digit); there, QDA with k = 100 runs without this warning, so include k = 100 as the assignment asks.
 
 **Questions:**
 
@@ -373,7 +373,7 @@ Assignment 2 (handwritten digits, MNIST) asks for PCA in Section 3. **From today
 | The second Try with AI box: components as images | Section 3, Going further: "Turn the first few principal components back into 28 × 28 images" |
 | The third Try with AI box: the scatter plot | Section 3, Going further: "Plot the training set on the plane of the first two components (k = 2), coloured by digit" |
 
-**One thing that is different in the assignment.** Today you chose k for QDA. In the assignment, Table 3 reports all four methods at each k, using the parameter values chosen in Section 2.
+**One thing that is different in the assignment.** Today you chose k for QDA. In the assignment, Table 3 reports all four methods at each k, using the parameter values chosen in Section 2 (for QDA, the `reg_param` you chose there).
 
 **Reflection** (after class, one or two sentences each):
 
