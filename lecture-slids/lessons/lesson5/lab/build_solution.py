@@ -2,8 +2,8 @@
 1. 每个填空块的空数与 FILLS 一致；2. 每个 Answer 里的代码行都出现在填好的代码里；
 3. 用真实 Jupyter 内核从第一格顺序执行，输出写回 lab_solution.ipynb，并断言关键核对值。
 运行：uv run --no-project --python 3.12 --with "scikit-learn==1.6.1",matplotlib,pandas,scipy,nbclient,nbformat,ipykernel python build_solution.py
-（scikit-learn 固定 1.6.1：1.8 起 QDA 遇到不满秩的协方差直接报 LinAlgError，2.2、3.1、3.2 会停下）
-（用 uv；~/.ipython 坏掉时先设 IPYTHONDIR 到一个可写的临时目录，见 COURSE_MATERIAL_WORKFLOW.md 第 5 节）
+（scikit-learn 固定 1.6.1：1.8 起 QDA 遇到不满秩的协方差直接报 LinAlgError，3.1 会停下）
+（用 uv；~/.ipython 不可用时先设 IPYTHONDIR 到一个可写的临时目录）
 """
 from pathlib import Path
 import re
@@ -13,22 +13,20 @@ from nbclient import NotebookClient
 from jupyter_client import KernelManager
 
 ROOT = Path(__file__).resolve().parent
-# 课程的 MNIST 子集在公共镜像推送之前，公开网址上还没有：执行时改读本地同一个文件，写出时换回公开网址
-DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/data/mnist10k.npz"
-LOCAL_DATA = (ROOT / "../../data/mnist10k.npz").resolve().as_uri()
 # 每个含 ____ 的代码块按出现顺序给出填写内容
 FILLS = [
-    ["1", "1", "0", "0"],                                             # 1.1
-    ["1", "0"],                                                       # 1.2
+    ["k"],                                                            # 1.2
     ["LinearDiscriminantAnalysis"],                                   # 2.1
-    ["0.001"],                                                        # 3.3
+    ["2"],                                                            # 3.1
+    ["0.05"],                                                         # 3.3
 ]
 # 执行后必须出现在输出里的核对值（与 worksheet 的 Success check 一致）
 EXPECT = [
-    "(426, 30) 159", "17.35", "12.17", "0.1139", "0.9788", "0.96", "0.9576",
-    "0.0001 0.843", "0.001 0.863", "0.01 0.784", "0.1 0.557", "0.5 0.505", "1 0.804", "0.8608",
-    "heights at 12.8:", "0.7194444444444444", "0.8666666666666667",
-    "test accuracy, mine: 0.958  sklearn: 0.958", "rank of the 784 x 784 matrix: 471", "largest weight: 19.2  intercept: -2.45 -2.45",
+    "(133, 13) [44 53 36]", "13.75", "12.30", "13.19", "0.42217126 0.12971521 0.44811353",
+    "0.7194444444444444", "0.8666666666666667", "0.97008", "0.97037", "0.99259", "0.90199", "0.89487", "0.93190",
+    "(426, 30) [267 159]", "0.99544", "0.05 0.969", "1 0.927", "0.95804",
+    "heights at 13.32: 0.562 0.143 0.729", "best: 0.05 0.969",
+    "test accuracy, mine: 0.958  sklearn: 0.958", "smallest spread: 3e-05", "largest weight: 19.2  intercept: -2.45 -2.45",
 ]
 qmd = (ROOT / "lab_worksheet.qmd").read_text()
 core = qmd.split("# After class: how today's lab helps with Assignment 2")[0]
@@ -97,8 +95,6 @@ os.environ.setdefault("IPYTHONDIR", _tmp)
 os.environ.setdefault("JUPYTER_RUNTIME_DIR", _tmp)
 km = KernelManager(kernel_name="python3")
 km.kernel_spec.argv = [sys.executable, "-m", "ipykernel_launcher", "-f", "{connection_file}"]
-for cell in nb.cells:
-    cell.source = cell.source.replace(DATA_URL, LOCAL_DATA)
 NotebookClient(nb, timeout=600, kernel_manager=km,
                resources={"metadata": {"path": str(ROOT)}}).execute()
 
@@ -112,23 +108,13 @@ for cell in nb.cells:
 norm = lambda s: " ".join(s.split())                    # ignore spacing differences
 missing = [e for e in EXPECT if norm(e) not in norm(text)]
 assert not missing, f"Expected values not found in outputs: {missing}\n{text[:3000]}"
-# 3.1 里给出的 logistic regression 对照值、Advanced Study A 的“差 0 个”由这里重算
-import warnings
-from sklearn.model_selection import train_test_split, KFold, cross_val_score
-from sklearn.linear_model import LogisticRegression
-warnings.filterwarnings("ignore")
-import numpy as np
-_d = np.load(ROOT / "../../data/mnist10k.npz")
-_a, _b, _c, _e = train_test_split(_d["X"] / 255, _d["y"], test_size=0.25, random_state=0, stratify=_d["y"])
-assert round(cross_val_score(LogisticRegression(max_iter=1000, C=0.1), _a, _c, cv=KFold(5, shuffle=True, random_state=0)).mean(), 3) == 0.901
+# Advanced Study A 的“差 0 个”
 assert "\n0\n" in "\n" + text.replace("\r", "") + "\n" or "0\ntest accuracy" in text
 # 警告信息里带有本机的安装路径；公开的 Solution 不留本机路径
 for cell in nb.cells:
     for out in cell.get("outputs", []):
         if out.get("output_type") == "stream":
             out["text"] = re.sub(r"/\S*/site-packages/", "", out["text"])
-for cell in nb.cells:
-    cell.source = cell.source.replace(LOCAL_DATA, DATA_URL)
 nbformat.write(nb, ROOT / "lab_solution.ipynb")
 print(f"Validated {fi} blank blocks, all Core answers, {len(EXPECT)} check values and {images} figures; "
       f"wrote {len(nb.cells)} cells.")

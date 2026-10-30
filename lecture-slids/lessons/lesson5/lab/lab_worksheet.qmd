@@ -17,24 +17,17 @@ format:
 
 ## What this lab is for
 
-In the lecture we stopped learning a boundary directly. Instead we described each class by its centre and spread, and asked which class more likely produced a point. Today you walk the same path in code:
+In the lecture we assumed how the data of each class is generated (one bell-shaped hill per class) and used Bayes' rule to ask which class more likely produced a point. Today you do the same on a new dataset, **wines**, and then go back to the **lumps** to fix QDA when its spread cannot be estimated reliably.
 
-1. describe each class of lumps by one bell curve, and work out the probability for the opening lump of Lesson 4 by hand;
-2. see the straight and the curved boundary on the two-feature data of the lecture, then compare logistic regression, LDA and QDA with the same cross-validation as Lab 4;
-3. see QDA break on the digits, fix it with `reg_param`, and choose the value by cross-validation.
-
-Before each step you will see a question. **Write down your own answer first**, then run the code and compare.
-
-Most code is provided. Your job is to fill the blanks `____`, run the cell, and check your result against the **Success check**. At the end there is a short section on how today's lab helps with **Assignment 2**.
+Most of the time you will **change one value, run the cell again and compare**. Before each step there is a question: **write down your own answer first**, then run.
 
 ## How to work
 
-1. Open the **Lab workbook** from the course website: it opens in Colab with all the code of this page already in place, so there is nothing to copy (**File → Save a copy in Drive** first). Prefer to build your own? Open a **blank** Colab notebook (**File → New notebook in Drive**) and copy each code block into a cell.
-2. Fill in the blanks and run each cell. Cells depend on the cells above, so run them from top to bottom.
-3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
-4. Each task has a one-line **Hint** and a folded **Answer**. Try first. Open the Answer only to check your work. If you fall behind, copy the Answer of a task and carry on: every later task still works.
-5. Running every cell and matching the Success checks is a complete lab.
-6. The **Try with AI** boxes are folded: open one when you finish early, or after class. They follow the four steps below.
+1. Open the **Lab workbook** from the course website: it opens in Colab with all the code already in place (**File → Save a copy in Drive** first).
+2. Run the cells from top to bottom. Fill the blanks `____` where there are any, and check against the **Success check**.
+3. Write your answers to the **Questions** in a text cell (**+ Text**).
+4. Each task has a **Hint** and a folded **Answer**. If you fall behind, copy the Answer and carry on.
+5. The **Try with AI** boxes are folded: open one when you finish early, or after class. They follow the four steps below.
 
 ### Using AI
 
@@ -45,134 +38,127 @@ The **Try with AI** boxes use an AI assistant for the Python you do not know yet
 3. **Ask:** the request.
 4. **Check:** compare the AI's result with a number or shape given on this page. If it does not match, the AI or your question is wrong. Find out which.
 
-## Part 0: Load the data (6 minutes)
+## Part 0: Set up (4 minutes)
 
-**Goal:** the same 569 lumps, the same split and the same folds as Lab 4.
+### 0.1 The setup cell
 
-### 0.1 Load, split and standardise
-
-Run the cell without changing it. It repeats the first steps of Lab 4.
+Run this cell without reading it closely. It is the same at the start of every lab from now on.
 
 ```python
 import numpy as np                                        # numbers and arrays
 import matplotlib.pyplot as plt                           # plots
-from scipy.stats import norm                              # the bell curve (normal distribution)
-from sklearn.datasets import load_breast_cancer          # the lumps
-import urllib.request                                     # to download a file
 import warnings                                           # controls Python's warning messages
-warnings.filterwarnings("once")                           # show each warning only once
+from scipy.stats import norm                              # the bell curve (normal distribution)
+from sklearn.datasets import load_wine, load_breast_cancer   # today's two datasets
 from sklearn.model_selection import train_test_split, KFold, cross_val_score   # splitting and cross-validation
-from sklearn.preprocessing import StandardScaler          # rescales columns
+from sklearn.preprocessing import StandardScaler          # puts every column on one scale
+from sklearn.inspection import DecisionBoundaryDisplay    # draws a boundary
 from sklearn.linear_model import LogisticRegression       # the model of Lesson 4
 from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis   # today's models
+warnings.filterwarnings("once")                           # show each warning only once
+```
 
-data = load_breast_cancer()                               # 569 lumps, 30 measurements each
-X = data.data                                             # the 30 measurements (features)
-y = 1 - data.target                                       # sklearn uses 0 = malignant; we want 1 = malignant
+### The data block
+
+Every lab uses **this same block** to load a dataset, split it and standardise it. To use another dataset you change only the two lines marked `← change`; everything after it keeps the same names. It appears twice today (1.0 and 3.0); only the two lines marked `← change` differ.
+
+## Part 1: Three varieties of wine (12 minutes)
+
+**The data.** 178 wines from one region of Italy, made from three grape varieties (0, 1, 2), with 13 chemical measurements each. Column 0 is the alcohol content (%).
+
+### 1.0 Load the wines
+
+```python
+data = load_wine()                                        # ← change: which dataset
+X = data.data                                             # the measurements (features)
+y = data.target                                           # ← change if needed: the labels (here the variety: 0, 1, 2)
 X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.25, random_state=0, stratify=y)     # 3:1 split, same share of malignant in both parts
-scaler = StandardScaler()                                 # mean and standard deviation per column
-X_train_s = scaler.fit_transform(X_train)                 # learn them from the training lumps, and scale
-X_test_s = scaler.transform(X_test)                       # scale the test lumps the same way
-kf = KFold(5, shuffle=True, random_state=0)               # the same 5 folds as Lab 4
-print(X_train.shape, y_train.sum())                       # training lumps, and how many are malignant
+    X, y, test_size=0.25, random_state=0, stratify=y)     # 3:1 split, the same mix of labels in both parts
+scaler = StandardScaler()                                 # one scale for every column
+X_train_s = scaler.fit_transform(X_train)                 # learn the scale from the training data only
+X_test_s = scaler.transform(X_test)                       # apply the same scale to the test data
+kf = KFold(5, shuffle=True, random_state=0)               # the same 5 folds every time
+print(X_train.shape, np.bincount(y_train))                # training rows and columns; how many of each label
 ```
 
-**Success check:** `(426, 30) 159`.
+**Success check:** `(133, 13) [44 53 36]`: 133 training wines, 13 measurements, and 44, 53 and 36 wines of the three varieties.
 
-## Part 1: Describe each class, then compare (13 minutes)
+### 1.1 Describe each variety by its alcohol content
 
-**Goal:** describe each class of lumps by the mean radius alone, and turn the two descriptions into a probability with Bayes' rule.
-
-### 1.1 Centre and spread of each class
-
-**Question first:** in Lab 4 the malignant lumps tended to be larger. Guess the mean radius of each class before you run the code.
-
-Fill the class labels: 1 for malignant, 0 for benign.
+**Question first:** do you expect the three varieties to differ in alcohol by several percentage points, or by less than one or two?
 
 ```python
-radius = X_train[:, 0]                                    # column 0 is the mean radius
-mean_mal = radius[y_train == ____].mean()                 # centre of the malignant class
-sd_mal = radius[y_train == ____].std(ddof=1)              # spread of the malignant class
-mean_ben = radius[y_train == ____].mean()                 # centre of the benign class
-sd_ben = radius[y_train == ____].std(ddof=1)              # spread of the benign class
-print(mean_mal, sd_mal)                                   # malignant: centre and spread
-print(mean_ben, sd_ben)                                   # benign: centre and spread
+for k in [0, 1, 2]:                                       # the three varieties
+    alcohol_k = X_train[y_train == k, 0]                  # alcohol (column 0) of the training wines of variety k
+    print(k, alcohol_k.mean(), alcohol_k.std(ddof=1))     # centre and spread of variety k
 ```
 
-**Hint:** malignant is labelled 1, benign 0. `ddof=1` divides by n − 1, as scikit-learn does.
+**Success check:** about `13.75 0.45`, `12.30 0.57` and `13.19 0.53`. The centres are less than 1.5 points apart and each spread is about half a point, so the three bell curves overlap a lot.
 
-**Success check:** about `17.35 3.26` for malignant and `12.17 1.79` for benign.
+### 1.2 Bayes' rule for one wine
+
+As in Note Section 3, the probability of variety $k$ is $P(Y=k)$ times the height of variety $k$'s bell curve, divided by the same product added over all varieties. $P(Y=k)$ is the fraction of training wines of variety $k$.
+
+**Question first:** a wine has alcohol 13.32. Variety 2's bell curve is the highest there. Will variety 2 win clearly, or only just?
+
+Fill the blank so that `prior` is $P(Y=k)$, then run. **Then change `x` to 12.5, 13.0 and 14.0, running the cell each time.**
+
+```python
+x = 13.32                                                 # alcohol of one wine: then try 12.5, 13.0, 14.0
+tops = np.zeros(3)                                        # P(Y=k) times height, one per variety
+for k in [0, 1, 2]:                                       # the three varieties
+    alcohol_k = X_train[y_train == k, 0]                  # alcohol of the training wines of variety k
+    prior = (y_train == ____).mean()                      # P(Y=k): fraction of training wines of variety k
+    height = norm.pdf(x, alcohol_k.mean(), alcohol_k.std(ddof=1))   # height of variety k's bell curve at x
+    tops[k] = prior * height                              # P(Y=k) times height
+print(tops / tops.sum())                                  # Bayes' rule: probability of each variety
+```
+
+**Hint:** inside the loop, the variety is called `k`.
+
+**Success check:** at 13.32, about `[0.422 0.130 0.448]`. At 12.5, 13.0 and 14.0 the winners are varieties 1 (`0.738`), 2 (`0.482`) and 0 (`0.789`).
+
+**Question:** at 13.32, variety 2's curve is about 1.3 times as high as variety 0's, yet it wins only by 0.448 to 0.422. Which number holds it back? And why does the bottom of Bayes' rule here add three terms, when the lecture added two?
 
 ::: {.callout-note collapse="true" title="Answer"}
 ```python
-mean_mal = radius[y_train == 1].mean()
-sd_mal = radius[y_train == 1].std(ddof=1)
-mean_ben = radius[y_train == 0].mean()
-sd_ben = radius[y_train == 0].std(ddof=1)
+prior = (y_train == k).mean()
 ```
+
+$P(Y=k)$ holds it back: variety 2 is the rarest in the training set (0.271, against 0.331 for variety 0), so its higher curve is multiplied by a smaller number. The bottom adds three terms because a wine with this alcohol content belongs to one of three varieties.
 :::
 
-### 1.2 Bayes' rule for the opening lump
+### 1.3 The library does the same
 
-The opening lump of Lesson 4 is test lump 47, with radius 12.8. `norm.pdf(x, mean, sd)` gives the height of the bell curve at `x`.
-
-**Question first:** the benign curve is much higher at 12.8. Will the probability of malignant be closer to 0.1 or to 0.5?
-
-Fill the two shares (priors): the fraction of training lumps in each class.
+Run the cell. QDA fitted on the alcohol column alone describes each variety by one bell curve, exactly as you did.
 
 ```python
-x = X_test[47, 0]                                         # the opening lump, radius 12.8
-height_mal = norm.pdf(x, mean_mal, sd_mal)                # how common this radius is among malignant lumps
-height_ben = norm.pdf(x, mean_ben, sd_ben)                # how common it is among benign lumps
-share_mal = (y_train == ____).mean()                      # prior: share of malignant lumps
-share_ben = (y_train == ____).mean()                      # prior: share of benign lumps
-top = share_mal * height_mal                              # share times height, malignant
-bottom = share_mal * height_mal + share_ben * height_ben  # the same for both classes, added
-print(height_mal, height_ben)                             # the two heights
-print(top / bottom)                                       # Bayes' rule: probability of malignant
+qda_one = QuadraticDiscriminantAnalysis()                 # one bell curve per variety
+qda_one.fit(X_train[:, [0]], y_train)                     # alcohol only
+print(qda_one.predict_proba([[13.32]]))                   # its probabilities for alcohol 13.32
 ```
 
-**Hint:** the same labels as in 1.1.
-
-**Success check:** heights about `0.046` and `0.211`; probability about `0.114`.
-
-**Questions:**
-
-1. In Lesson 4, logistic regression with the radius alone gave this lump 0.122. Which of the two did logistic regression do: (a) learn the boundary directly, or (b) describe each class first and then compare? Which did you do here?
-2. (If you are short of time, answer this one after class.) Benign is 4.6 times higher at 12.8, but the probability of benign is not 4.6 times the probability of malignant. Which numbers make the difference?
-
-::: {.callout-note collapse="true" title="Answer"}
-```python
-share_mal = (y_train == 1).mean()
-share_ben = (y_train == 0).mean()
-```
-
-1. Logistic regression did (a): it learned the boundary directly with cross-entropy. Here we did (b): we described each class by a mean and a standard deviation, then compared the two descriptions.
-2. The shares: 0.627 of the training lumps are benign and only 0.373 malignant, so the benign side is multiplied by a larger number.
-:::
+**Success check:** `[[0.42217126 0.12971521 0.44811353]]`, the same as your numbers in 1.2.
 
 ::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
-**You want:** to see the two descriptions on top of the data.
+**You want:** the three bell curves on top of the data. (After class, run 1.0 again first: Part 3 replaces the wines with the lumps.)
 
-**Tell the AI:** `radius` holds the mean radius of each training lump and `y_train` the labels (1 = malignant); `mean_mal`, `sd_mal`, `mean_ben`, `sd_ben` are the centres and spreads.
+**Tell the AI:** `X_train[:, 0]` is the alcohol of each training wine and `y_train` its variety (0, 1 or 2).
 
-**Ask:** *"Draw two histograms of radius, one for y_train equal to 1 in blue and one for y_train equal to 0 in grey, scaled as densities (density=True). On the same axes, draw the normal curve for each class with norm.pdf in the same colours, and a dashed vertical line at 12.8."*
+**Ask:** *"For each variety, draw a semi-transparent histogram of X_train[:, 0] with density=True, and on top the normal curve with that variety's mean and standard deviation (ddof=1), in the same colour. Add a dashed vertical line at 13.32."*
 
-**Check:** the grey (benign) curve peaks near 12.2 and the malignant one near 17.4; at 12.8 the curves have heights about `0.211` and `0.046`.
+**Check:** the curves peak near 13.75, 12.30 and 13.19; at 13.32 their heights are about 0.56, 0.14 and 0.73.
 :::
 
-## Part 2: Two candidates, then against logistic regression (18 minutes)
+## Part 2: One shared spread, or one per class? (15 minutes)
 
-**Goal:** see what the two ways of estimating the spread do to the boundary on the two-feature data of the lecture; then compare them with the model of Lesson 4 on all 30 measurements and the same folds.
+### 2.1 The two boundaries on the lecture's data
 
-### 2.1 One shared spread, or one each
+This is the hand-made data of Note Section 1: class 1 is tight (120 points), class 0 is spread out (240 points).
 
-This is the hand-made data of Note Section 1 (the accuracies are in Section 4): class 1 is tight (120 points), class 0 is spread out (240 points). The cell makes the same 360 points, fits the two candidates, and prints the accuracy of each on these 360 points, as in the lecture. Then it draws the boundary of each: the curve where the probability of class 1 is 0.5.
+**Question first:** with one spread shared by both classes, will the boundary be straight or curved? And with one spread per class?
 
-**Question first:** the left plot uses one spread shared by both classes; the right plot gives each class its own spread. Which boundary will be a straight line: the left, the right, or both?
-
-Fill in the model that uses one shared spread. The other model is given.
+Fill in the model that uses one shared spread.
 
 ```python
 rng = np.random.default_rng(0)                            # the same random numbers as the lecture
@@ -181,190 +167,199 @@ X0 = rng.multivariate_normal([1.0, 0.6], [[2.2, -0.6], [-0.6, 1.6]], 240)    # c
 X_two = np.vstack([X1, X0])                               # 360 points, 2 features
 y_two = np.concatenate([np.ones(120), np.zeros(240)])     # their labels
 model_shared = ____()                                     # one spread shared by both classes
-model_shared.fit(X_two, y_two)                            # estimate the two centres and the shared spread
+model_shared.fit(X_two, y_two)
 model_own = QuadraticDiscriminantAnalysis()               # one spread per class
-model_own.fit(X_two, y_two)                               # estimate the two centres and the two spreads
-print(model_shared.score(X_two, y_two))                   # accuracy on these 360 points, shared spread
-print(model_own.score(X_two, y_two))                      # accuracy on these 360 points, one spread each
+model_own.fit(X_two, y_two)
+print(model_shared.score(X_two, y_two))                   # accuracy, shared spread
+print(model_own.score(X_two, y_two))                      # accuracy, one spread per class
 ```
 
-Then run the next cell without changing it. It draws the two boundaries.
+**Hint:** both names were imported in Part 0. The lecture called the shared one LDA (Note Section 5).
+
+**Success check:** `0.7194444444444444` and `0.8666666666666667`.
+
+Now draw the two boundaries:
 
 ```python
-# compute the probability on a grid of points, then draw the curve where it equals 0.5
-xs = np.linspace(-3.5, 5.5, 300)                          # 300 positions across
-ys = np.linspace(-3.5, 4.5, 300)                          # 300 positions up
-gx, gy = np.meshgrid(xs, ys)                              # a grid of 300 x 300 points over the plane
-grid_points = np.column_stack([gx.ravel(), gy.ravel()])   # one row per grid point, 2 columns
-prob_shared = model_shared.predict_proba(grid_points)[:, 1]   # probability of class 1 at each grid point
-prob_own = model_own.predict_proba(grid_points)[:, 1]         # the same for the other model
-p_shared = prob_shared.reshape(gx.shape)                  # back to the 300 x 300 grid, for drawing
-p_own = prob_own.reshape(gx.shape)
 fig, axes = plt.subplots(1, 2, figsize=(11, 4.5))         # two plots side by side
-axes[0].scatter(X0[:, 0], X0[:, 1], s=10, facecolor="none", edgecolor="grey", label="class 0")   # spread-out class
-axes[0].scatter(X1[:, 0], X1[:, 1], s=10, color="tab:blue", label="class 1")                     # tight class
-axes[0].contour(gx, gy, p_shared, levels=[0.5], colors="green")   # the boundary: probability 0.5
+DecisionBoundaryDisplay.from_estimator(model_shared, X_two, response_method="predict", alpha=0.3, ax=axes[0])   # shade each predicted class
+axes[0].scatter(X_two[:, 0], X_two[:, 1], c=y_two, s=10)  # the points, coloured by class
 axes[0].set_title("one shared spread")
-axes[0].legend()
-axes[1].scatter(X0[:, 0], X0[:, 1], s=10, facecolor="none", edgecolor="grey")   # the same points again
-axes[1].scatter(X1[:, 0], X1[:, 1], s=10, color="tab:blue")
-axes[1].contour(gx, gy, p_own, levels=[0.5], colors="green")      # the boundary: probability 0.5
+DecisionBoundaryDisplay.from_estimator(model_own, X_two, response_method="predict", alpha=0.3, ax=axes[1])
+axes[1].scatter(X_two[:, 0], X_two[:, 1], c=y_two, s=10)
 axes[1].set_title("one spread per class")
 plt.show()
 ```
 
-**Hint:** both names were imported in 0.1. Which one did the lecture call "one shared spread"? (Note Section 4.)
+**Success check:** on the left the two regions meet along a straight line; on the right one region is an ellipse around the tight class.
 
-**Success check:** `0.7194444444444444` and `0.8666666666666667`, the 0.719 and 0.867 of Note Section 4; the left boundary is straight, the right one is a green ellipse around the blue points.
-
-**Questions:**
-
-1. What does the left model assume about the two classes that is not true for this data?
-2. In 2.2 you go back to the lumps, with all 30 measurements instead of 2. Will one spread per class still beat one shared spread there? Write your guess; 2.2 checks it.
+**Question:** what does the left model assume about the two classes that is not true for this data?
 
 ::: {.callout-note collapse="true" title="Answer"}
 ```python
 model_shared = LinearDiscriminantAnalysis()
 ```
 
-The left boundary is straight; the right one is an ellipse around the tight class.
-
-1. The left model (LDA) assumes that the two classes have the same shape, size and direction and differ only in their centres. Here class 1 is tight and class 0 is spread out, so it can only draw a line (0.719, almost the 0.722 of logistic regression), while QDA wraps an ellipse around the tight class (0.867).
-2. 2.2 shows the answer: no. QDA gets 0.958 and LDA 0.960, about the same, so the extra flexibility buys nothing there; logistic regression is best. Question 2 of 2.2 shows why.
+LDA assumes the two classes have the same shape, size and direction and differ only in where they sit. Here class 1 is tight and class 0 spread out, so the shared spread can only give a straight line (0.719); one spread per class wraps an ellipse around the tight class (0.867).
 :::
 
-### 2.2 The same cross-validation for three models
+### 2.2 Three models on the wines
 
-Back to the lumps, with all 30 measurements. Run the cell without changing it, and check your guess from 2.1, question 2.
+Back to the wines, all 13 measurements, the same 5 folds.
+
+**Question first:** in the lecture, on the lumps, QDA came last (logistic regression 0.979, LDA 0.960, QDA 0.958). Will it come last on the wines too?
 
 ```python
-lr = LogisticRegression()                                 # Lesson 4: learns the boundary directly
-lda = LinearDiscriminantAnalysis()                        # one shared spread
-qda = QuadraticDiscriminantAnalysis()                     # one spread per class
-qda.fit(X_train_s, y_train)                               # fit QDA once on all training lumps: it warns here
-warnings.filterwarnings("ignore")                         # hide warnings during cross-validation (one per fold)
-scores_lr = cross_val_score(lr, X_train_s, y_train, cv=kf)     # accuracy on each of the 5 folds
-scores_lda = cross_val_score(lda, X_train_s, y_train, cv=kf)
-scores_qda = cross_val_score(qda, X_train_s, y_train, cv=kf)
-print(scores_lr.mean())                                   # average accuracy, logistic regression
-print(scores_lda.mean())                                  # average accuracy, LDA
-print(scores_qda.mean())                                  # average accuracy, QDA
+warnings.filterwarnings("ignore")                         # keep the output short
+for model in [LogisticRegression(), LinearDiscriminantAnalysis(), QuadraticDiscriminantAnalysis()]:
+    scores = cross_val_score(model, X_train_s, y_train, cv=kf)   # accuracy on each of the 5 folds
+    print(model, scores.mean())                           # the model and its average accuracy
 ```
 
-**Success check:** one warning from the single QDA fit, *"The covariance matrix of class 0 is not full rank. Increasing the value of parameter `reg_param` might help reducing the collinearity."* (`reg_param` comes in Part 3), and the three accuracies, about `0.979`, `0.960` and `0.958`. "Not full rank" means that the ellipse of class 0 has no thickness in some direction. If you run this cell again, the warning does not appear a second time; that is normal.
+**Success check:** about `0.970`, `0.970` and `0.993`: on the wines QDA comes **first**.
+
+Now use only two measurements. Run the cell with `[6, 9]` (flavanoids and colour intensity), then **choose two other columns** (any two of 0 to 12, for example `[0, 1]`) and run it again.
+
+```python
+cols = [6, 9]                                             # two columns: then choose your own
+for model in [LogisticRegression(), LinearDiscriminantAnalysis(), QuadraticDiscriminantAnalysis()]:
+    scores = cross_val_score(model, X_train_s[:, cols], y_train, cv=kf)   # only the chosen columns
+    print(model, scores.mean())
+```
+
+**Success check:** with `[6, 9]`, about `0.902`, `0.895` and `0.932`. With `[0, 1]` the three are close, all about `0.77` to `0.79`.
 
 **Questions:**
 
-1. Rank the three models. Which is higher, LDA or logistic regression, and by how much?
-2. One covariance matrix for 30 features holds 30 × 31 / 2 different numbers. How many is that? QDA estimates one for each class.
-3. Put 2.1 and 2.2 together. When does one spread per class pay off, and when is one shared spread (or logistic regression) the safer choice? One sentence each.
+1. QDA is first on the wines but last on the lumps. Each wine variety has 36 to 53 training wines and 13 measurements (91 numbers per spread); each class of lumps has 159 or 267 lumps and 30 measurements (465 numbers per spread). Use these numbers to explain the difference.
+2. Did the order of the three models stay the same for the columns you chose?
 
 ::: {.callout-note collapse="true" title="Answer"}
-1. Logistic regression (0.979), then LDA (0.960), then QDA (0.958). Logistic regression is higher than LDA by about 0.02. Both draw a straight boundary; logistic regression learns it directly, while LDA computes it from the centres and one shared spread, which assumes both classes have the same shape.
-2. 465. QDA estimates two of them (930 numbers), plus two centres, from 426 training lumps.
-3. One spread per class pays off when the classes really are spread differently and each spread can be estimated well from the data, as in 2.1 (2 features, 120 and 240 points). With many measurements and few points per class, as in 2.2 (465 numbers per spread from 426 lumps), one shared spread or logistic regression is safer.
+1. On the wines, each spread has 91 numbers to estimate from about 40 wines per variety, and the varieties really do spread differently, so the extra flexibility pays off. On the lumps, each spread has 465 numbers, and radius, perimeter and area almost determine one another (Part 3), so the spreads are estimated badly and the flexibility does not pay.
+2. It depends on the columns: with `[6, 9]` QDA is first; with `[0, 1]` the three are within about 0.02 of each other. Which method is best depends on the data, so we compare them under the same cross-validation.
 :::
 
-## Part 3: When the spread cannot be estimated (13 minutes)
+## Part 3: When the spread cannot be estimated reliably (14 minutes)
 
-**Goal:** see QDA fail on handwritten digits (the MNIST subset of Lab 4), pull each spread towards a circle with `reg_param`, and choose the value by cross-validation.
+### 3.0 Load the lumps
 
-### 3.1 QDA on 784 pixels
-
-Run the cell without changing it. It loads the MNIST subset as in Lab 4 and tries QDA with no shrinking: one fit on all training images, which shows the warnings, then cross-validation with the warnings hidden. It takes about half a minute.
+The data block again, with the two marked lines changed. The lumps are the data of Lessons 4 and 5; we want 1 for malignant, but scikit-learn uses 0, so we flip the labels.
 
 ```python
-DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/data/mnist10k.npz"
-urllib.request.urlretrieve(DATA_URL, "mnist10k.npz")      # 10,000 MNIST images, about 1.6 MB
-mnist = np.load("mnist10k.npz")                           # the file holds two arrays, X and y
-X_digits = mnist["X"] / 255                               # 784 pixels per image (28 x 28), scaled to 0 to 1
-y_digits = mnist["y"]                                     # the digit, 0 to 9
-X_digits_train, X_digits_test, y_digits_train, y_digits_test = train_test_split(
-    X_digits, y_digits, test_size=0.25, random_state=0, stratify=y_digits)
-qda = QuadraticDiscriminantAnalysis()                     # one spread per class, no shrinking
-warnings.filterwarnings("always")                         # show the warnings again for this one fit
-qda.fit(X_digits_train, y_digits_train)                   # fit once on all training images: it warns here
-warnings.filterwarnings("ignore")                         # hide them during cross-validation and from here on
-scores_qda = cross_val_score(qda, X_digits_train, y_digits_train, cv=kf)   # accuracy on each fold
-print(scores_qda.mean())                                  # average accuracy
+data = load_breast_cancer()                               # ← change: which dataset
+X = data.data                                             # the measurements (features)
+y = 1 - data.target                                       # ← change if needed: 1 = malignant, 0 = benign
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=0, stratify=y)     # 3:1 split, the same mix of labels in both parts
+scaler = StandardScaler()                                 # one scale for every column
+X_train_s = scaler.fit_transform(X_train)                 # learn the scale from the training data only
+X_test_s = scaler.transform(X_test)                       # apply the same scale to the test data
+kf = KFold(5, shuffle=True, random_state=0)               # the same 5 folds every time
+print(X_train.shape, np.bincount(y_train))                # training rows and columns; how many of each label
 ```
 
-**Success check:** ten warnings from the single fit, one per digit: *"The covariance matrix of class 0 is not full rank"*, then class 1, and so on to class 9. (On scikit-learn 1.8 or newer, the cell stops with a `LinAlgError` instead: the same failure, reported as an error. Go on to 3.2.) Below them, an accuracy of about `0.712` (the Note shows 0.710; the third digit can differ between computers). Logistic regression (`C=0.1`, as in Lesson 4) gets about `0.901` with the same folds (Lesson 5 Note, Section 6).
+**Success check:** `(426, 30) [267 159]`, the same split as Lab 4.
 
-**Question:** each class has about 750 training images. In each class, 245 to 361 of the 784 pixels are 0 in every image. What is the spread of the class along such a pixel, and what happens to a new image that has a little ink there? (Think of the spread along that pixel, and the height of the bell curve there.)
+### 3.1 Why QDA warns
+
+**Question first:** the perimeter of a lump is roughly 2π times its radius. Within the malignant lumps, how close to 1 do you expect the correlation between mean radius and mean perimeter to be?
+
+Fill the column of the mean perimeter (column 2).
+
+```python
+malignant = X_train[y_train == 1]                         # the malignant training lumps
+corr = np.corrcoef(malignant[:, 0], malignant[:, ____])[0, 1]   # radius (column 0) against perimeter
+print(corr)                                               # correlation within the malignant class
+warnings.filterwarnings("always")                         # show the warning for this one fit
+qda = QuadraticDiscriminantAnalysis()                     # one spread per class, no shrinking
+qda.fit(X_train_s, y_train)                               # it warns here
+warnings.filterwarnings("ignore")                         # hide warnings from here on
+```
+
+**Hint:** `malignant[:, 2]` is the mean perimeter.
+
+**Success check:** a correlation of about `0.995`, then the warning *"The covariance matrix of class 0 is not full rank. Increasing the value of parameter `reg_param` might help reducing the collinearity."* (On scikit-learn 1.8 or newer the fit stops with a `LinAlgError` instead: the same failure, reported as an error. Go on to 3.2.)
+
+**Question:** the points lie almost on a line. What is the spread of a class across that line, and why does that trouble QDA, whose bell-shaped hill needs the inverse of the covariance matrix?
 
 ::: {.callout-note collapse="true" title="Answer"}
-The spread is 0, so the ellipse has no thickness in that direction. Measured by that spread, a new image with any ink there is infinitely far from the centre, and the class gives it a height of 0.
+```python
+corr = np.corrcoef(malignant[:, 0], malignant[:, 2])[0, 1]
+```
+
+Across the line the spread is almost 0: the ellipse has almost no thickness in that direction. The inverse divides by that tiny spread, so it becomes enormous and swings with the smallest change in the data; the estimated hill cannot be trusted (Note Section 8).
+:::
+
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
+**You want:** to see the line the lumps lie on.
+
+**Tell the AI:** `X_train` holds the training lumps (column 0 is the mean radius, column 2 the mean perimeter) and `y_train` the labels (1 = malignant).
+
+**Ask:** *"Draw a scatter plot of column 2 against column 0 of X_train, with malignant lumps as filled blue dots and benign lumps as hollow grey circles."*
+
+**Check:** the points of both classes lie close to one straight line, from about (7, 44) to about (28, 188).
 :::
 
 ### 3.2 Choose reg_param
 
-The warnings stay hidden since 3.1, so the numbers are easy to read. Run the cell without changing it.
+Without shrinking, QDA scored 0.958 in the lecture. Run the cell, then **change the list to `[0.1, 0.2, 0.3]` and run it again**.
 
 ```python
-for r in [0.0001, 0.001, 0.01, 0.1, 0.5, 1]:              # values of reg_param to try
+for r in [0.0001, 0.001, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5, 1]:   # values of reg_param: then try [0.1, 0.2, 0.3]
     qda = QuadraticDiscriminantAnalysis(reg_param=r)      # pull each spread towards a circle by r
-    scores_qda = cross_val_score(qda, X_digits_train, y_digits_train, cv=kf)   # accuracy on each fold
-    print(r, round(scores_qda.mean(), 3))                 # the value and its average accuracy
+    scores = cross_val_score(qda, X_train_s, y_train, cv=kf)   # accuracy on each fold
+    print(r, round(scores.mean(), 3))                     # the value and its average accuracy
 ```
 
-**Success check:**
+**Success check:** the full list gives
 
 ```
-0.0001 0.843
-0.001 0.863
-0.01 0.784
-0.1 0.557
-0.5 0.505
-1 0.804
+0.0001 0.962
+0.001 0.955
+0.01 0.958
+0.02 0.962
+0.05 0.969
+0.1 0.967
+0.2 0.965
+0.3 0.965
+0.5 0.967
+1 0.927
 ```
 
-The list leaves out 0 (no shrinking): you already saw it in 3.1 (about 0.712). In the assignment, start from a small positive value as well. This takes about a minute: 6 values times 5 folds. You need not explain the dip between 0.1 and 0.5; only check whether the best value sits at an end.
+and `[0.1, 0.2, 0.3]` gives `0.967`, `0.965`, `0.965`. The list leaves out 0: newer versions of scikit-learn stop with an error there, so in the assignment, too, start from a small positive value.
 
-**Question:** which value of `reg_param` is best? Is it at an end of the range you searched?
+**Question:** which value is best in the full list, and is it at an end? With only `[0.1, 0.2, 0.3]`, where is the best value, and what should you do next?
 
 ::: {.callout-note collapse="true" title="Answer"}
-0.001, with 0.863. It is not at an end (0.0001 is lower and 0.01 is higher), so the range is wide enough. (The accuracy falls a lot between 0.1 and 0.5 and rises again at 1, where every class is the same circle; the lecture does not go into why.)
+In the full list, 0.05 (0.969), not at an end. With only `[0.1, 0.2, 0.3]`, the best is 0.1, at the left end: the true best may lie below 0.1, so extend the range on that side and search again, which finds 0.05. (0.969 is only about 0.01 above no shrinking, smaller than the change from one fold to another; what shrinking does for certain is give every spread some thickness, so QDA runs reliably.)
+:::
+
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
+**You want:** the curve of 3.2 as a picture.
+
+**Tell the AI:** for each `r` in `[0.0001, 0.001, 0.01, 0.02, 0.05, 0.1, 0.2, 0.3, 0.5, 1]`, `cross_val_score(QuadraticDiscriminantAnalysis(reg_param=r), X_train_s, y_train, cv=kf).mean()` is the accuracy.
+
+**Ask:** *"Store the ten accuracies in a list and plot them against the values with markers, with a log scale on the horizontal axis and a dashed horizontal line at 0.958."*
+
+**Check:** a peak of about `0.969` at 0.05 and a drop to about `0.927` at 1; compare Note Section 8.
 :::
 
 ### 3.3 The test set, once
 
-All the choosing is done. Now fit on all training images with your chosen value and read the test set once.
+All choosing is done. Fit with your chosen value and read the test set once.
 
 ```python
 qda = QuadraticDiscriminantAnalysis(reg_param=____)       # the value chosen in 3.2
-qda.fit(X_digits_train, y_digits_train)                   # train on all 7500 training images
-print(qda.score(X_digits_test, y_digits_test))            # the test set, read once
+qda.fit(X_train_s, y_train)                               # train on all 426 training lumps
+print(qda.score(X_test_s, y_test))                        # the test set, read once
 ```
 
-**Hint:** the best value from 3.2.
-
-**Success check:** about `0.861`. For comparison, logistic regression scored 0.908 and LDA 0.832 on the same test images (Lesson 4 Note, Section 8, and Lesson 5 Note, Section 6). Shrinking made QDA usable, but on 784 pixels logistic regression is still better.
+**Success check:** about `0.958`. For comparison, on the same test lumps QDA without shrinking gets 0.937, LDA 0.951 and logistic regression (threshold 0.5) 0.986 (Note Section 8).
 
 ::: {.callout-note collapse="true" title="Answer"}
 ```python
-qda = QuadraticDiscriminantAnalysis(reg_param=0.001)
+qda = QuadraticDiscriminantAnalysis(reg_param=0.05)
 ```
-:::
-
-::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
-**You want:** the cross-validation curve of 3.2 as a picture.
-
-**Tell the AI:** the values are `[0.0001, 0.001, 0.01, 0.1, 0.5, 1]`; for each one, `cross_val_score(QuadraticDiscriminantAnalysis(reg_param=r), X_digits_train, y_digits_train, cv=kf).mean()` is the accuracy.
-
-**Ask:** *"Store the six accuracies in a list, and plot them against the values with markers on a log scale for the horizontal axis."*
-
-**Check:** the curve rises from about `0.84` to a peak of about `0.863` at 0.001, falls to about `0.5` between 0.1 and 0.5, and rises again to about `0.80` at 1.
-:::
-
-::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
-**You want:** to see the centre of each class of digits, the first thing QDA estimates.
-
-**Tell the AI:** after 3.3, `qda.means_` has 10 rows (one per digit) of 784 numbers, one per pixel of a 28 × 28 image.
-
-**Ask:** *"Show each row of qda.means_ as a 28 × 28 grey image, in a grid of 2 rows and 5 columns, with the digit as each title."*
-
-**Check:** there are 10 blurred images, and you can read the digits 0 to 9 in them.
 :::
 
 # After class: how today's lab helps with Assignment 2
@@ -373,35 +368,36 @@ Assignment 2 (handwritten digits, MNIST) asks for LDA and QDA in Section 2, and 
 
 | What you did today | Where it appears in Assignment 2 |
 |---|---|
-| Part 2.2: `LinearDiscriminantAnalysis()` and `QuadraticDiscriminantAnalysis()` | Section 2, Table 2: the LDA and QDA rows |
-| Part 3.1: the "not full rank" warning and a poor accuracy | Section 2, the reminder "QDA with default settings fails" (some pixels are 0 in every image of a class). The brief says you may get a `LinAlgError` or a very poor result; scikit-learn before 1.8 gives the warning and the poor result, as today; 1.8 or newer gives the `LinAlgError` |
-| Part 3.2: try several `reg_param` values; the best must not sit at an end | Section 2: "The chosen value must not lie at either end of your search range" |
+| The data block | Load the digits as the brief explains and give them the same names (`X_train`, `y_train`, ...); everything after that works unchanged |
+| Part 2.2: LDA and QDA under one cross-validation | Section 2, Table 2: the LDA and QDA rows |
+| Part 3.1: the "not full rank" warning, from a direction with almost no thickness | Section 2, the reminder "QDA with default settings fails". On the digits the flat directions come from pixels that are 0 in every image of a class: the same failure, only more extreme. scikit-learn before 1.8 gives the warning and a poor result, 1.8 or newer a `LinAlgError` |
+| Part 3.2: try several `reg_param` values, starting above 0; the best must not sit at an end | Section 2: "The chosen value must not lie at either end of your search range" |
 | Part 3.3: read the test set once | Section 4: `test` is used once, at the end |
-| Advanced Study A below: a Gaussian classifier in numpy, with shrinkage | MPS439 extension task C |
+| Advanced Study A below | MPS439 extension task C |
 
-**One thing that is different in the assignment.** With 50,000 training images, cross-validation is slow, so the assignment chooses `reg_param` on a separate **validation set** instead. The rule is the same as today: choose on data that the final test never sees, and read the test set once at the end. The validation set is the one from Lesson 3.
+**Two differences in the assignment.** The brief divides the pixels by 255 instead of standardising them. And with 50,000 training images cross-validation is slow, so the assignment chooses `reg_param` on a separate **validation set**; the rule is the same as today: choose on data the final test never sees, and read the test set once at the end.
 
 **Reflection** (after class, one or two sentences each):
 
-1. Why do we multiply the height of each bell curve by the share of its class?
+1. Why do we multiply the height of each bell curve by $P(Y=k)$?
 2. What does LDA assume that QDA does not, and what does that do to the boundary?
-3. Why can QDA be worse than LDA or logistic regression, even though it is more flexible?
+3. Why is QDA the best method on the wines but the worst on the lumps?
 4. What does `reg_param = 1` do to every class's spread?
 
 # Advanced Study
 
-MPS311 students are encouraged to try one. **MPS439 students complete A**, the main task, and record it in the log at the end. Allow about 30 minutes for A. B and C are extras for everyone. Write your own code; you may ask AI for help, but you are responsible for checking the result.
+MPS311 students are encouraged to try one. **MPS439 students complete A**, the main task, and record it in the log at the end. Allow about 30 minutes for A. B and C are extras for everyone. These use the lumps of Part 3 (`X_train_s`, `X_test_s`, `y_train`, `y_test`).
 
 ## A. A Gaussian classifier in numpy
 
 **Tasks**
 
-1. Using only numpy, estimate for each class of lumps (on `X_train_s`, `y_train`): the centre, the covariance matrix pulled towards a circle by `r = 0.5`, that is `(1 - r) * np.cov(...) + r * np.eye(30)`, and the share. (Advanced Study 2 of the Note uses `r = 0.1`; here you use `0.5`, so its numbers will not match yours.)
-2. For every test lump in `X_test_s`, compute the log of share times height for each class, and predict the class with the larger value. Advanced Study 2 of the Note shows the formula; you may drop the constant that is the same for both classes.
-3. Compare your predictions with `QuadraticDiscriminantAnalysis(reg_param=0.5)`. Then take the training images of digit 0, `X_digits_train[y_digits_train == 0]`, compute their spread `S` with `r = 0`, and print `np.linalg.matrix_rank(S)` and `np.linalg.slogdet(S)`. Explain what goes wrong for `np.linalg.inv` and for the height of the bell (the density, Section 3 of the Note).
+1. Using only numpy, estimate for each class of lumps: the centre, the covariance matrix pulled towards a circle by `r = 0.5`, that is `(1 - r) * np.cov(...) + r * np.eye(30)`, and $P(Y=k)$, the fraction of training lumps in the class. (Advanced Study 4 of the Note uses `r = 0.1`; here you use `0.5`, so its numbers will not match yours.)
+2. For every test lump in `X_test_s`, compute the log of $P(Y=k)$ times height for each class, and predict the class with the larger value. Advanced Study 4 of the Note shows the formula; you may drop the constant that is the same for both classes.
+3. Compare your predictions with `QuadraticDiscriminantAnalysis(reg_param=0.5)`. Then take the benign training lumps, `X_train_s[y_train == 0]`, compute their spread `S` with `r = 0`, and print the smallest value of `np.linalg.eigvalsh(S)` (the spread in the flattest direction) and `np.linalg.slogdet(S)`. Explain what this does to `np.linalg.inv(S)` and to the height of the bell (Note Sections 4 and 8).
 
 ::: {.callout-tip title="Ask AI"}
-Ask: *"Why is the log of the Gaussian density equal to -0.5 times the squared distance measured by the class's own spread (the inverse covariance), minus half the log of the determinant, plus a constant?"* Check its steps against Section 3 of the Note.
+Ask: *"Why is the log of the Gaussian density equal to -0.5 times the squared distance measured by the class's own spread (the inverse covariance), minus half the log of the determinant, plus a constant?"* Check its steps against Section 4 of the Note.
 :::
 
 ::: {.callout-note collapse="true" title="Hint"}
@@ -415,13 +411,13 @@ ref = QuadraticDiscriminantAnalysis(reg_param=0.5).fit(X_train_s, y_train)   # s
 print((mine != ref.predict(X_test_s)).sum())              # number of test lumps where the two disagree
 ```
 
-The result should be `0`, and both have a test accuracy of about `0.958` (with the Note's `r = 0.1` it would be `0.951`). For digit 0 with `r = 0`: the rank is `471`, not 784, and `slogdet` gives sign `0` and `-inf`; `np.linalg.inv(S)` either stops with a `LinAlgError` or returns enormous numbers, depending on rounding. Either result counts: there is no proper inverse.
+The result should be `0`, and both have a test accuracy of about `0.958` (with the Note's `r = 0.1` it would be `0.951`). For the benign lumps with `r = 0`: the smallest spread is about `0.00003`, against a largest of about 5, and `slogdet` gives sign `1` and about `-98.7`. The inverse multiplies by about 1 / 0.00003, that is about 34,000, along the flattest direction, so a tiny change in a lump moves its distance, and its height, enormously.
 
 ## B. Why one shared spread gives a straight line
 
 **Tasks**
 
-1. Follow Advanced Study 1 of the Note and derive $\mathbf w = \Sigma^{-1}(\boldsymbol\mu_1-\boldsymbol\mu_0)$ and $b$ for LDA. Write the derivation in a text cell.
+1. Follow Advanced Study 2 of the Note and derive $\mathbf w = \Sigma^{-1}(\boldsymbol\mu_1-\boldsymbol\mu_0)$ and $b$ for LDA. Write the derivation in a text cell.
 2. Compute the shared spread yourself: `((n1 - 1) * S1 + (n0 - 1) * S0) / (n1 + n0 - 2)`, where `S1`, `S0` are `np.cov` of each class of `X_train_s` and `n1`, `n0` the class sizes. Then compute `w` and `b`.
 3. Compare `w` with `LinearDiscriminantAnalysis().fit(X_train_s, y_train).coef_[0]`, and `b` with its `intercept_`.
 
@@ -432,9 +428,9 @@ The result should be `0`, and both have a test accuracy of about `0.958` (with t
 Choose one.
 
 1. **Naive Bayes.** `sklearn.naive_bayes.GaussianNB` assumes that the features in each class do not vary together: only the diagonal of each covariance matrix is kept. Compare its cross-validated accuracy (with `kf`) on `X_train_s` with LDA and QDA. How many numbers does it estimate?
-2. **Different shares.** A screening centre sees far fewer malignant lumps than this data set. Fit `QuadraticDiscriminantAnalysis(priors=[0.99, 0.01])` on the radius alone (`X_train[:, [0]]`) and print the probability of malignant for the opening lump. Compare this with lowering the threshold in Lab 4.
+2. **Different class probabilities.** A screening centre sees far fewer malignant lumps than this data set. Fit `QuadraticDiscriminantAnalysis(priors=[0.99, 0.01])` on the radius alone (`X_train[:, [0]]`) and print the probability of malignant for test lump 47 (radius 12.8), the opening lump of Lesson 4. Compare this with lowering the threshold in Lab 4.
 
-**Self-check:** for naive Bayes, write the accuracy you found and the count of numbers; for different shares, the probability should be far below `0.114`.
+**Self-check:** for naive Bayes, write the accuracy you found and the count of numbers; for different class probabilities, the probability should be far below `0.114`, the lecture's value.
 
 ## Advanced Study log
 

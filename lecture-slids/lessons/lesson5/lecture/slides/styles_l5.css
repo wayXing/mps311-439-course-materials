@@ -44,3 +44,22 @@
 /* lesson 5: keep the QR clear of the opening widget's readout, and leave room for the vote under S5q */
 .reveal .stage.top .scan{bottom:250px;right:50px}
 .reveal .fig-s5q{width:1250px}
+/* Two-part readings, small tables, wide figures and Note pointers (Lesson 5 slides). */
+.reveal .v2reading { display:flex; flex-direction:column; gap:24px; }
+.reveal .v2reading > div { border-top:2px solid var(--rule); padding-top:14px; }
+.reveal .v2label { display:block; font-size:20px; font-weight:700; letter-spacing:.08em; color:var(--slate); }
+.reveal .v2reading b { display:block; font-size:1.3em; line-height:1.15; margin-top:8px; color:var(--data); }
+.reveal .v2reading p { font-size:.9em; line-height:1.32; margin-top:5px; color:var(--ink); }
+.reveal .two.side.v2compare { grid-template-columns:760px 1fr; gap:60px; }
+.reveal .v2compare .fig { width:760px; max-height:390px; object-fit:contain; }
+.reveal .v2compare .v2reading b { font-size:1.2em; }
+.reveal .two.even.v2singular { grid-template-columns:640px 1fr; gap:70px; }
+.reveal .v2singular .v2plot, .reveal .v2singular .v2matrix { display:block; }
+.reveal .v2plot svg { display:block; width:600px; height:350px; }
+.reveal .v2plot p, .reveal .v2matrix p { font-size:1.05em; line-height:1.35; }
+.reveal .v2matrix mjx-container[display="true"] { font-size:1.35em!important; margin:.55em 0!important; }
+.reveal .v2matrix p + p { margin-top:22px; }
+.reveal .note-pointer { font-size:.72em; color:var(--slate); margin-top:14px; }
+.reveal .v3table table { font-size:.9em; margin:0 auto; }
+.reveal .two.side.v3fig { grid-template-columns:860px 1fr; gap:50px; }
+.reveal .v3fig .fig { width:860px; max-height:470px; object-fit:contain; }

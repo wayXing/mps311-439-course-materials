@@ -201,7 +201,7 @@
       "polls": [
         {
           "key": "share-matters",
-          "slide": "Compare: Benign is 4.6 times higher here. So 4.6 times more likely?",
+          "slide": "Model: Benign is 4.6 times higher here. So 4.6 times more likely?",
           "prompt": "Benign: 63% of lumps, curve 4.6 times higher at radius 12.8. Benign is…",
           "options": [
             "exactly 4.6 times as likely",
@@ -213,7 +213,7 @@
         },
         {
           "key": "shared-spread-boundary",
-          "slide": "Two candidates: How do we estimate each spread?",
+          "slide": "Model: One more assumption: one shared spread, or one per class?",
           "prompt": "Both classes share one spread. The boundary is…",
           "options": [
             "a straight line",
@@ -225,8 +225,8 @@
         },
         {
           "key": "shrink-target",
-          "slide": "Shrink: Regularise: pull each spread towards which shape?",
-          "prompt": "Pixels that are 0 in every digit: pull each spread towards…",
+          "slide": "Solution: Back to the solution: no thickness across the line",
+          "prompt": "Radius and perimeter lie on a line. Pull each spread towards…",
           "options": [
             "the shared spread",
             "its diagonal only",

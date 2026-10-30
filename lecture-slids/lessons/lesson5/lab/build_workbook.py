@@ -20,17 +20,14 @@ ROOT = Path(__file__).resolve().parent
 # 不需要 ML 判断的空直接给出：本讲没有
 PREFILL = {}
 # Question first 的任务：代码下面的 Success check 会泄露答案，在 workbook 里折叠起来
-FOLD_CHECK = {"1.1", "1.2", "2.1", "2.2"}
+FOLD_CHECK = {"1.1", "1.2", "2.1", "2.2", "3.1"}
 # 每个空按出现顺序的填写内容，只用于检查（与 build_solution.py 的 FILLS 相同）
-FILLS = [["1", "1", "0", "0"], ["1", "0"], ["LinearDiscriminantAnalysis"], ["0.001"]]
+FILLS = [["k"], ["LinearDiscriminantAnalysis"], ["2"], ["0.05"]]
 EXPECT = [
-    "(426, 30) 159", "17.35", "12.17", "0.1139", "0.7194444444444444", "0.8666666666666667",
-    "0.9788", "0.96", "0.9576",
-    "0.0001 0.843", "0.001 0.863", "0.01 0.784", "0.1 0.557", "0.5 0.505", "1 0.804", "0.8608",
+    "(133, 13) [44 53 36]", "13.75", "12.30", "13.19", "0.42217126 0.12971521 0.44811353",
+    "0.7194444444444444", "0.8666666666666667", "0.97008", "0.97037", "0.99259", "0.90199", "0.89487", "0.93190",
+    "(426, 30) [267 159]", "0.99544", "0.05 0.969", "1 0.927", "0.95804",
 ]
-# 课程的 MNIST 子集：检查时读本地同一个文件，写出的 workbook 保留公开网址（同 build_solution.py）
-DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/data/mnist10k.npz"
-LOCAL_DATA = (ROOT / "../../data/mnist10k.npz").resolve().as_uri()
 WORKSHEET_URL = "https://ml.wxing.me/materials/lesson5/lab.html"
 
 qmd = (ROOT / "lab_worksheet.qmd").read_text()
@@ -209,7 +206,6 @@ test = nbformat.reads(nbformat.writes(nb), as_version=4)            # a copy to 
 test.cells = test.cells[:core_cells]                                 # Advanced Study needs the students' own code
 fills = iter(FILLS)
 for cell in test.cells:
-    cell.source = cell.source.replace(DATA_URL, LOCAL_DATA)
     if cell.cell_type == "code" and "____" in cell.source:
         for value in next(fills):
             cell.source = cell.source.replace("____", value, 1)

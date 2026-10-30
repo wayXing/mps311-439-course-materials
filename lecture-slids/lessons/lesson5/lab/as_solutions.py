@@ -10,7 +10,7 @@ diff_ben = X_test_s - X_ben.mean(axis=0)         # each test lump minus the cent
 diff_mal = X_test_s - X_mal.mean(axis=0)         # each test lump minus the centre of class 1
 dist_ben = np.sum(diff_ben @ np.linalg.inv(S_ben) * diff_ben, axis=1)   # squared distance by the class's own spread
 dist_mal = np.sum(diff_mal @ np.linalg.inv(S_mal) * diff_mal, axis=1)
-log_ben = -0.5 * dist_ben - 0.5 * np.linalg.slogdet(S_ben)[1] + np.log(len(X_ben) / len(X_train_s))   # log of share times height
+log_ben = -0.5 * dist_ben - 0.5 * np.linalg.slogdet(S_ben)[1] + np.log(len(X_ben) / len(X_train_s))   # log of P(Y) times height
 log_mal = -0.5 * dist_mal - 0.5 * np.linalg.slogdet(S_mal)[1] + np.log(len(X_mal) / len(X_train_s))
 mine = (log_mal > log_ben).astype(int)          # 1 when malignant wins
 #%%
@@ -19,11 +19,11 @@ ref = QuadraticDiscriminantAnalysis(reg_param=0.5).fit(X_train_s, y_train)   # s
 print((mine != ref.predict(X_test_s)).sum())              # number of test lumps where the two disagree
 print("test accuracy, mine:", round((mine == y_test).mean(), 3), " sklearn:", round(ref.score(X_test_s, y_test), 3))
 #%%
-# the digits with r = 0: the spread of digit 0 is flat in some directions
-S_zero = np.cov(X_digits_train[y_digits_train == 0].T)    # 784 x 784, no shrinking
-print("rank of the 784 x 784 matrix:", np.linalg.matrix_rank(S_zero))
-print("slogdet:", np.linalg.slogdet(S_zero))              # sign 0 and log-determinant -inf: the matrix is singular
-# np.linalg.inv(S_zero) fails or returns huge numbers: the distance in a flat direction is infinite
+# the benign lumps with r = 0: the spread is almost flat in one direction
+S_zero = np.cov(X_train_s[y_train == 0].T)                # 30 x 30, no shrinking
+print("smallest spread:", round(np.linalg.eigvalsh(S_zero).min(), 5), " largest:", round(np.linalg.eigvalsh(S_zero).max(), 1))
+print("slogdet:", np.linalg.slogdet(S_zero))              # sign 1, log-determinant about -98.7
+# np.linalg.inv(S_zero) multiplies by about 1 / 0.00003 along the flattest direction, so distances swing wildly
 #%%
 # ---- Advanced Study B ----
 X_mal = X_train_s[y_train == 1]
@@ -43,6 +43,6 @@ print("largest weight:", round(np.abs(w).max(), 1), " intercept:", round(b, 2), 
 from sklearn.naive_bayes import GaussianNB
 nb = GaussianNB()                                          # only the diagonal of each spread
 print("naive Bayes:", round(cross_val_score(nb, X_train_s, y_train, cv=kf).mean(), 3))
-print("numbers estimated: 2 x 30 means + 2 x 30 variances + 1 share =", 2 * 30 + 2 * 30 + 1)
+print("numbers estimated: 2 x 30 means + 2 x 30 variances + 1 class probability =", 2 * 30 + 2 * 30 + 1)
 rare = QuadraticDiscriminantAnalysis(priors=[0.99, 0.01]).fit(X_train[:, [0]], y_train)   # malignant only 1%
-print("opening lump, shares 0.99 and 0.01:", round(rare.predict_proba(X_test[[47]][:, [0]])[0, 1], 4))
+print("opening lump, P(Y=0) = 0.99 and P(Y=1) = 0.01:", round(rare.predict_proba(X_test[[47]][:, [0]])[0, 1], 4))
