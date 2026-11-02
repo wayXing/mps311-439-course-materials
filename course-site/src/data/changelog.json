@@ -5,6 +5,21 @@
   ],
   "releases": [
     {
+      "version": "0.3.11",
+      "date": "2026-11-02",
+      "title": "AI declaration in both assignments",
+      "items": [
+        {
+          "type": "added",
+          "text": "Both assignment briefs now include the University statement on generative AI and academic misconduct."
+        },
+        {
+          "type": "added",
+          "text": "Both assignments now ask for a short AI declaration at the end of the report: a few sentences on which AI tools you used and what for, or one line saying you did not use any. It does not count towards the page limit and is not marked. Nothing else in the tasks or the marking has changed."
+        }
+      ]
+    },
+    {
       "version": "0.3.10",
       "date": "2026-10-30",
       "title": "Lesson 5 follows the five steps",
