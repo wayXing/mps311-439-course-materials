@@ -625,13 +625,13 @@
       "label": "Lesson 6",
       "title": "A chain of yes-or-no questions",
       "shortTitle": "Decision trees",
-      "summary": "Let the machine write if-then rules one cut at a time, stop the tree before it memorises the training set, and choose its depth on a validation set.",
+      "summary": "Let the machine write yes-or-no rules one cut at a time, choose how deep the tree goes on data it has not seen, and read why it decides as it does.",
       "accent": "coral",
       "type": "teaching",
       "topics": [
         "Choosing a cut with Gini",
-        "Growing and stopping a tree",
-        "Validation sets"
+        "Choosing the depth",
+        "Reading a tree and feature importance"
       ],
       "video": {
         "youtubeId": "57b09IwdBXc",

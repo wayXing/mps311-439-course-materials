@@ -239,17 +239,17 @@
     },
     "lesson-06": {
       "sections": [
-        "Writing a sorting rule by hand on the ring",
-        "Scoring how mixed each side of a cut is",
-        "Cutting again and reading the tree",
-        "Deeper trees memorising the training points",
-        "Choosing the depth with a validation set",
-        "Comparing the tree with earlier models, and the code"
+        "One cut is not enough: cutting again",
+        "A tree of yes-or-no questions on the Titanic passengers",
+        "Scoring a cut: Gini, entropy and the error rate",
+        "Growing the tree greedily, and choosing its depth",
+        "Reading a tree: one passenger, and feature importance",
+        "Three classes, regression trees, and the code"
       ],
       "polls": [
         {
           "key": "error-vs-gini",
-          "slide": "One cut: A good cut leaves both sides pure. How do we score \"mixed\"?",
+          "slide": "Loss: Error rate or Gini: does it matter?",
           "prompt": "Error rate and Gini: will they always rank the cuts the same?",
           "options": [
             "yes, same ranking",
@@ -260,8 +260,8 @@
         },
         {
           "key": "choose-depth-how",
-          "slide": "Choose: How do we choose max_depth?",
-          "prompt": "50,000 images: choose max_depth using…",
+          "slide": "Test: How do we choose max_depth?",
+          "prompt": "With 50,000 data points, choose max_depth using…",
           "options": [
             "5-fold cross-validation",
             "one validation split",
@@ -269,6 +269,17 @@
           ],
           "showLive": false,
           "answer": 1
+        },
+        {
+          "key": "fare-importance",
+          "slide": "Test: Fare scores only 0.045. Is it useless?",
+          "prompt": "Fare has importance 0.045. Remove it: the accuracy will…",
+          "options": [
+            "barely change",
+            "drop clearly"
+          ],
+          "showLive": false,
+          "answer": 0
         }
       ]
     },

@@ -5,6 +5,29 @@
   ],
   "releases": [
     {
+      "version": "0.3.12",
+      "date": "2026-11-06",
+      "title": "Lesson 6 rebuilt: grow a tree, choose its depth, read it",
+      "items": [
+        {
+          "type": "changed",
+          "text": "Lesson 6 (decision trees) has been rebuilt around the Titanic passenger list. The lesson follows the five steps (problem, model, loss, solution, test), and the test step now also asks why the tree decides as it does and whether that reading can be trusted, the same chain of evidence the assignments are marked on."
+        },
+        {
+          "type": "added",
+          "text": "New in the Lesson 6 Notes: reading a tree (one passenger's path, and feature importance computed from the drop in Gini), a worked investigation of when importance misleads, trees for more than two classes (iris), and regression trees. The Advanced Studies are now derivations: why a cut can only lower Gini, where multi-class Gini comes from, why averaging many trees helps, and why fitting residuals is gradient descent."
+        },
+        {
+          "type": "added",
+          "text": "A new interactive figure in the Notes and slides: drag the depth of a tree on the passengers' age and fare, and watch training accuracy rise while cross-validated accuracy falls."
+        },
+        {
+          "type": "changed",
+          "text": "Lab 6 now uses the iris flowers. All the code is given, with no blanks: you change one value at a time, see what goes wrong with the tree, and try a fix. Each part has a discussion question and a challenge for those who finish early; choosing the depth on a single validation set, which Assignment 2 uses, is in the after-class part."
+        }
+      ]
+    },
+    {
       "version": "0.3.11",
       "date": "2026-11-02",
       "title": "AI declaration in both assignments",

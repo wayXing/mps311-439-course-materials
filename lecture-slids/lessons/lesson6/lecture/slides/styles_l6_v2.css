@@ -1,0 +1,40 @@
+/* Lesson 6 Slides V2 only (2026-11-05); loaded after styles_l6.css */
+.reveal .flow.eight{grid-template-columns:repeat(8,1fr);gap:10px}
+.reveal .flow.eight div{font-size:.95em;padding:22px 6px}
+.reveal .flow.eight div.new{border-color:var(--slate);background:#eef3f8}
+.reveal .fig-v2-f1{width:1250px}
+.reveal .fig-v2-f2{width:1050px}
+.reveal .fig-v2-f6{width:1500px}
+.reveal .fig-v2-s1{width:1350px}
+.reveal .fig-v2-s2{width:700px}
+.reveal .fig-v2-s3{width:900px}
+.reveal .fig-v2-s4{width:1500px}
+.reveal #w-i1x svg{width:430px;max-width:430px!important;margin:0 auto}
+.reveal #w-i1x .wrow{justify-content:center}
+.reveal #w-i4 svg{width:760px;max-width:760px!important;margin:0 auto}
+.reveal .six{display:flex;gap:10px;justify-content:center;font-size:.8em;margin-top:6px}
+.reveal .six span{border:2px solid var(--slate);border-radius:10px;padding:6px 14px;color:var(--slate);font-weight:650}
+.reveal .rule{font-size:1.25em;line-height:1.5;border-left:8px solid var(--rule);padding-left:28px}
+.reveal #w-i1x svg{width:320px;max-width:320px!important}
+.reveal #w-i4 svg{width:560px;max-width:560px!important}
+.reveal .rule{font-size:1.5em}
+.reveal pre{font-size:.8em}
+.reveal .flow div small{display:block;font-size:.55em;font-weight:500;color:var(--muted);margin-top:8px}
+.reveal .fig-v2-s5{width:1350px}
+.reveal .fig-v2-f1m{width:1300px}
+.reveal .fig-v2-s7{width:1100px}
+.reveal .fig-v2-s8{width:1300px}
+.reveal .fig-v2-s9{width:820px}
+.reveal .fig-v2-s10{width:1350px}
+.reveal .fig-v2-s11{width:1520px}
+.reveal .fig-v2-s2b{width:640px}
+.reveal .one{font-size:1.45em;text-align:center;line-height:1.35}
+.reveal .fig-v2-s12{width:1000px}
+.reveal .fig-v2-s13{width:1250px}
+.reveal #w-i5 svg{width:520px;max-width:520px!important;margin:0 auto}
+.reveal #w-i5 .wrow{justify-content:center}
+.reveal .fig-v2-s3{width:720px}
+.reveal .six{display:grid;grid-template-columns:repeat(3,auto);justify-content:center;gap:8px 12px;font-size:.72em}
+.reveal .six > p{display:grid;grid-template-columns:repeat(3,auto);justify-content:center;gap:8px 12px;margin:0}
+.reveal .six span{text-align:center}
+.reveal #w-i5 svg{width:640px;max-width:640px!important}

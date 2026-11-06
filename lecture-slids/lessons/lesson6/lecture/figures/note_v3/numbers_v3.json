@@ -1,0 +1,352 @@
+{
+ "f1": {
+  "nodes": [
+   {
+    "i": 0,
+    "n": 319,
+    "mal": 119,
+    "p": 0.373,
+    "gini": 0.468,
+    "nG": 149.2,
+    "feat": 0,
+    "thr": 15.05,
+    "left": 1,
+    "right": 4
+   },
+   {
+    "i": 1,
+    "n": 228,
+    "mal": 35,
+    "p": 0.154,
+    "gini": 0.26,
+    "nG": 59.3,
+    "feat": 0,
+    "thr": 13.41,
+    "left": 2,
+    "right": 3
+   },
+   {
+    "i": 2,
+    "n": 167,
+    "mal": 11,
+    "p": 0.066,
+    "gini": 0.123,
+    "nG": 20.6,
+    "feat": -2,
+    "thr": -2.0,
+    "left": -1,
+    "right": -1
+   },
+   {
+    "i": 3,
+    "n": 61,
+    "mal": 24,
+    "p": 0.393,
+    "gini": 0.477,
+    "nG": 29.1,
+    "feat": -2,
+    "thr": -2.0,
+    "left": -1,
+    "right": -1
+   },
+   {
+    "i": 4,
+    "n": 91,
+    "mal": 84,
+    "p": 0.923,
+    "gini": 0.142,
+    "nG": 12.9,
+    "feat": 1,
+    "thr": 15.82,
+    "left": 5,
+    "right": 6
+   },
+   {
+    "i": 5,
+    "n": 10,
+    "mal": 4,
+    "p": 0.4,
+    "gini": 0.48,
+    "nG": 4.8,
+    "feat": -2,
+    "thr": -2.0,
+    "left": -1,
+    "right": -1
+   },
+   {
+    "i": 6,
+    "n": 81,
+    "mal": 80,
+    "p": 0.988,
+    "gini": 0.024,
+    "nG": 2.0,
+    "feat": -2,
+    "thr": -2.0,
+    "left": -1,
+    "right": -1
+   }
+  ],
+  "dec": [
+   {
+    "node": 0,
+    "feat": 0,
+    "before": 149.2,
+    "left": 59.3,
+    "right": 12.9,
+    "drop": 77.0
+   },
+   {
+    "node": 1,
+    "feat": 0,
+    "before": 59.3,
+    "left": 20.6,
+    "right": 29.1,
+    "drop": 9.6
+   },
+   {
+    "node": 4,
+    "feat": 1,
+    "before": 12.9,
+    "left": 4.8,
+    "right": 2.0,
+    "drop": 6.1
+   }
+  ],
+  "imp": [
+   0.934,
+   0.066
+  ]
+ },
+ "iris": {
+  "n": 112,
+  "root": [
+   37,
+   37,
+   38
+  ],
+  "root_gini": 0.667,
+  "cut": [
+   "petal width (cm)",
+   0.8
+  ],
+  "left": [
+   37,
+   0,
+   0
+  ],
+  "left_gini": 0.0,
+  "right": [
+   0,
+   37,
+   38
+  ],
+  "right_gini": 0.5,
+  "imp": [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ],
+  "corr_len_wid": 0.964,
+  "cv": [
+   0.616,
+   0.955,
+   0.947,
+   0.947,
+   0.947
+  ]
+ },
+ "path": {
+  "lump": 0,
+  "steps": [
+   {
+    "feat": "mean concave points",
+    "thr": 0.049,
+    "val": 0.1
+   },
+   {
+    "feat": "worst concavity",
+    "thr": 0.224,
+    "val": 0.516
+   },
+   {
+    "feat": "worst area",
+    "thr": 710.2,
+    "val": 1437.0
+   }
+  ],
+  "leaf_n": 141,
+  "leaf_mal": 138,
+  "proba": 0.979,
+  "cv3": 0.901
+ },
+ "imp30": {
+  "top": [
+   [
+    "mean concave points",
+    0.717
+   ],
+   [
+    "worst concavity",
+    0.069
+   ],
+   [
+    "worst radius",
+    0.061
+   ],
+   [
+    "mean texture",
+    0.034
+   ],
+   [
+    "worst area",
+    0.025
+   ]
+  ],
+  "nonzero": 13,
+  "leaves": 16,
+  "perimeter": 0.0,
+  "radius": 0.017,
+  "corr_rad_per": 0.998,
+  "cv_all": 0.927,
+  "cv_drop": 0.922,
+  "top_drop": [
+   [
+    "worst perimeter",
+    0.7
+   ],
+   [
+    "worst concave points",
+    0.116
+   ],
+   [
+    "worst texture",
+    0.03
+   ],
+   [
+    "mean texture",
+    0.029
+   ],
+   [
+    "mean concavity",
+    0.028
+   ]
+  ],
+  "corr_mcp_wp": 0.873,
+  "mcp_mean": [
+   0.025,
+   0.089
+  ]
+ },
+ "perm": {
+  "perm_top": [
+   [
+    "worst concavity",
+    0.17
+   ],
+   [
+    "worst radius",
+    0.135
+   ],
+   [
+    "worst perimeter",
+    0.064
+   ],
+   [
+    "mean concave points",
+    0.059
+   ],
+   [
+    "radius error",
+    0.052
+   ]
+  ],
+  "gini_top": [
+   [
+    "mean concave points",
+    0.7
+   ],
+   [
+    "worst perimeter",
+    0.069
+   ],
+   [
+    "worst radius",
+    0.068
+   ],
+   [
+    "worst texture",
+    0.053
+   ],
+   [
+    "mean texture",
+    0.031
+   ]
+  ],
+  "val_acc": 0.963
+ },
+ "mpg": {
+  "cv_depth": [
+   5.3,
+   4.31,
+   3.68,
+   3.35,
+   3.22,
+   3.26,
+   3.33,
+   3.43,
+   3.51,
+   3.58
+  ],
+  "best": 5,
+  "linear": 3.56,
+  "leaves": [
+   {
+    "n": 101,
+    "mpg": 32.2
+   },
+   {
+    "n": 75,
+    "mpg": 24.6
+   },
+   {
+    "n": 59,
+    "mpg": 19.4
+   },
+   {
+    "n": 78,
+    "mpg": 14.6
+   }
+  ],
+  "splits": [
+   [
+    "displacement",
+    198.5
+   ],
+   [
+    "horsepower",
+    84.5
+   ],
+   [
+    "horsepower",
+    127.0
+   ]
+  ],
+  "imp": {
+   "displacement": 0.667,
+   "horsepower": 0.178,
+   "model_year": 0.096,
+   "weight": 0.049,
+   "acceleration": 0.007,
+   "cylinders": 0.002
+  },
+  "corr_disp_weight": 0.93,
+  "corr_disp_hp": 0.89,
+  "corr_disp_cyl": 0.95
+ },
+ "xor_cv": {
+  "logit": 0.487,
+  "tree2": 0.938,
+  "tree3": 0.975
+ }
+}

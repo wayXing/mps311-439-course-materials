@@ -1,12 +1,12 @@
 ---
 title: "Lesson 6: A Chain of Yes-or-No Questions"
-subtitle: "Decision trees, Gini and choosing the depth"
+subtitle: "Decision trees: grow them, choose their depth, read them"
 author: "Dr Wei Xing"
 institute: "MPS311/439 Machine Learning<br>2026–27"
 format:
   revealjs:
     theme: [default, course-theme.scss]
-    css: [styles.css, styles_l6.css]
+    css: [styles.css, styles_l6.css, styles_l6_v2.css]
     include-after-body:
       - random-cover.html
       - text: '<script data-external="1" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>'
@@ -36,16 +36,10 @@ title-slide-attributes:
   data-background-opacity: "0.58"
 ---
 
-## The ring from Lesson 4: a straight line scores 0.50
+## [Problem:]{.stg} A straight line is one cut. Is one cut enough?
 
-::: {.stage}
-::: {.two .side}
-![](../figures/slides/S1.svg){.fig .fig-s1 fig-alt="The ring data: blue class 1 points in the middle, grey class 0 points in a ring around them"}
-
-::: {.ask}
-<small>Your turn</small>
-Forget models for a moment. Write a rule by hand that sorts these points.
-:::
+::: {.stage .top}
+{{< include ../figures/note_en/I1x.html >}}
 :::
 
 ::: {.scan}
@@ -53,75 +47,88 @@ Forget models for a moment. Write a rule by hand that sorts these points.
 <b>Scan now</b>
 votes, questions, feedback
 :::
-:::
 
 ::: {.notes}
-约 1.5 分钟。先请大家扫右下角（或右屏）的二维码，页面整节课开着。Lesson 4 第 9 节的环形数据：logistic 只能画直线，0.50 和瞎猜一样；Lesson 5 的 QDA 要假设每一类是椭圆小山。让学生口头说规则：期待“中间那块是蓝的”“x₁、x₂ 都不太大就是蓝的”。
-:::
-
-## Write the rule yourself: four cuts make a box
-
-::: {.stage .top}
-{{< include ../figures/note_en/I1.html >}}
-:::
-
-::: {.notes}
-约 4 分钟。请一位学生指挥四个滑块，其余人看准确率。把四条线拖到 ±1.6 附近：0.983。念出规则：“如果 −1.6 < x₁ < 1.6 且 −1.6 < x₂ < 1.6，判为类 1”。强调：四个是非题，每个只看一个特征。生活里的规则也这样：下雨就带伞；体温超过 38 度且咳嗽就去检查。
-:::
-
-## [Problem:]{.stg} What we want
-
-::: {.stage}
-::: {.say .xl .center}
-Let the machine write these rules: **one cut at a time**.
-:::
-
-::: {.ask}
-<small>Your turn</small>
-With 30 features, why can't we keep dragging lines by hand?
-:::
-:::
-
-::: {.notes}
-约 1 分钟。期待：特征多了看不出在哪切；切线多了拖不过来。机器的办法：每次只选一个特征、一个切点。
+约 4 分钟。先请大家扫码，页面整节课开着。logistic regression 用一条直线分类：直线的一边判 1、另一边判 0，就是在平面上切一刀。请一位学生指挥拖竖线：不管放在哪里都在 0.5 左右（最好 0.544），logistic 找到的最好斜线 0.51。问：一刀不够怎么办？等学生说“再切”，再勾选 “one more cut on each side”，左右各拖一条横线到 2.5 附近：0.988。
 :::
 
 ## What you will be able to do
 
 ::: {.stage .tight}
 ::: {.say .xl}
-**Read and grow** a tree of yes-or-no questions, **stop it** before it memorises, and **choose its depth** without touching the test set.
+Grow a tree of yes-or-no questions, choose how deep it goes, and **read why** it decides.
 :::
 
-::: {.flow .four}
-<div><span>1</span>One cut</div>
-<div><span>2</span>Grow a tree</div>
-<div><span>3</span>Stop</div>
-<div><span>4</span>Choose the depth</div>
+::: {.flow}
+<div><span>1</span>Problem</div>
+<div><span>2</span>Model</div>
+<div><span>3</span>Loss</div>
+<div><span>4</span>Solution</div>
+<div><span>5</span>Test</div>
 :::
 :::
 
 ::: {.notes}
-约 1 分钟。能力承诺，念出四段路线。改的是五步里的“模型”和“检验”：模型变成一串是非题；选复杂度回到 Lesson 3 的验证集，第一次用单次划分来选。
+约 1 分钟。能力承诺：不想先猜边界的形状，或者要一份别人能照着执行、说得出理由的规则时，换成一串是非题这个假设。念五步路线。今天的检验多问两件事：它为什么这样判（解释），这个读法能不能信（边界），就是作业评分标准里的“解释”和“边界”。
 :::
 
-## [One cut:]{.stg} A good cut leaves both sides pure. How do we score "mixed"?
+## [Problem:]{.stg} Three cuts, one feature each
 
 ::: {.stage}
-::: {.two .even}
-::: {.tile .txt}
-**Candidate 1: error rate**
-
-Each side predicts its majority. Share wrong: $\min(p,\,1-p)$
+![](../figures/slides_v2/S5.svg){.fig .fig-v2-s5 fig-alt="Left: the four clusters with three cuts, one vertical and two horizontal, accuracy 0.988. Right: the same three cuts written as a tree of three questions"}
 :::
 
-::: {.tile .txt}
-**Candidate 2: Gini**
+::: {.notes}
+约 1 分钟。把上一页的三刀按顺序念成一串是非题：先问 x₁，答案决定下一个问题问什么。每个问题只看一个特征。
+:::
 
-Draw two points from one side. Chance they differ: $2p(1-p)$
+## [Problem:]{.stg} People already decide this way
+
+::: {.stage}
+![](../figures/slides_v2/S1.svg){.fig .fig-v2-s1 fig-alt="Two small rule trees. A loan officer: income below 20k? yes, high risk; no, then debt above half of income? yes high risk, no low risk. Lifeboats, 1912: a woman? yes, to the boat; no, then a child? yes, to the boat; no, wait"}
+
+::: {.ask}
+<small>Your turn</small>
+"Women and children first": was it really followed? How would you check?
 :::
 :::
 
+::: {.notes}
+约 1.5 分钟。审批员、急诊分诊、救生艇：一次只问一个问题。让学生说怎么查：看乘客名单。想法：把一问接一问本身当成模型，让机器从数据里找该问什么、切在哪里。
+:::
+
+## [Model:]{.stg} The tree the machine grew on the passenger list
+
+::: {.stage}
+![](../figures/slides_v2/F1m.svg){.fig .fig-v2-f1m fig-alt="A depth-2 tree on 535 Titanic passengers: male?; males then age at most 13, females then first or second class. One node is marked one feature, one number; one leaf is marked 115 of 123 survived, a probability of 0.935"}
+
+::: {.ask}
+<small>Your turn</small>
+What did the machine ask first? Follow a 40-year-old man.
+:::
+:::
+
+::: {.notes}
+约 3.5 分钟。数据：891 人的名单里 714 人有年龄，6 个特征（舱位、性别、年龄、兄弟姐妹/配偶、父母/子女、票价），分层 3:1，535 训练。两条假设（指着红字说）：每个问题只看一个特征和一个数；落在同一片叶子里的人，各类比例固定，按多数判，这个比例就是概率（predict_proba）。点名 decision tree、root、node、leaf、depth。40 岁男人：男性？是；≤ 13？否；304 人里 52 人生还，判遇难。机器自己选了性别做第一问，几乎就是“妇女和儿童先上”；三等舱女性 79 人只有 32 人生还，它多看出了舱位。
+:::
+
+## [Loss:]{.stg} A leaf predicts a share $p$. How wrong is it?
+
+::: {.stage}
+![](../figures/slides_v2/S2.svg){.fig .fig-v2-s2b fig-alt="Three curves against the share p: the error rate is a tent, Gini 2p(1-p) and halved entropy are smooth hills; all zero at p = 0 and 1, largest at 0.5"}
+
+::: {.one}
+Linear regression's squared error: $p(1-p)^2 + (1-p)\,p^2 = p(1-p)$. Twice that: **Gini** $2p(1-p)$.
+:::
+:::
+
+::: {.notes}
+约 2.5 分钟。一边里每个点的标签是 0 或 1，模型都给 p。先让学生写：类 1 的点错多少？类 0 的呢？再按比例平均，就是这一行推导。乘 2 叫 Gini impurity，不改变哪一刀更好。logistic regression 的交叉熵平均下来是熵（图里除以 2 画在一起）。最直接的想法是错分率 min(p, 1−p)，图里的折线。一刀的得分：两边按点数加权平均，越小越好。
+:::
+
+## [Loss:]{.stg} Error rate or Gini: does it matter?
+
+::: {.stage}
 ::: {.ask .vote}
 <small>Vote on your phone</small>
 Error rate and Gini: will they always rank the cuts the same?
@@ -134,91 +141,67 @@ Error rate and Gini: will they always rank the cuts the same?
 :::
 
 ::: {.notes}
-约 3 分钟。投票（右屏 One cut: How do we score "mixed" → Open，30 秒，先不显示结果）；分歧大时让邻座讨论一分钟再 Vote again（本讲只在这一题这样做），再 Reveal；请选 A 的同学说理由（两者在纯的时候都是 0），答案留给下一页拖动揭晓：错分率对每一刀都是 0.200，排不出先后，Gini 能排出来。p 是一边里类 1 的比例。先让学生想“怎样衡量混”，常见答案就是错分率；第二个候选：抽两个点类别不同的概率。一刀的得分：两边按点数加权平均，越小越好。下一页让学生自己试。
+约 1 分钟。投票（右屏 Loss: Error rate or Gini → Open，30 秒，先不显示结果）；分歧大时邻座讨论一分钟再 Vote again，再 Reveal。请选 A 的同学说理由。答案在下一页拖动揭晓。
 :::
 
-## [One cut:]{.stg} Drag the cut: which score notices?
+## [Loss:]{.stg} Drag the cut: which score notices?
 
 ::: {.stage .top}
 {{< include ../figures/note_en/I2.html >}}
 :::
 
 ::: {.notes}
-约 4 分钟。一个节点 100 个点：20 个蓝点挤在中间。拖动切线：错分率处处 0.200 不动，因为两边都是灰点占多数，错的总是那 20 个蓝点。Gini 在 5.75 最低（0.271，切之前 0.320）：右边 38 个全灰，蓝点留给下一刀。点名 Gini impurity。sklearn 默认用 Gini；熵（entropy）形状相近，Note 里一句。
+约 2 分钟。100 个点，20 个蓝点挤在中间。错分率处处 0.200 不动：两边都是灰点多，错的总是那 20 个蓝点。Gini 在 5.75 最低（0.271，切之前 0.320）：右边 38 个全灰。错分率看不出切出了一块纯的，所以选 Gini；sklearn 默认也是它。
 :::
 
-## [One cut:]{.stg} On the breast lumps (Lessons 4–5): the best first cut
+## [Loss:]{.stg} The passengers' best first cut
 
-::: {.stage .tight}
-| | Malignant | Benign | $p$ | Gini $2p(1-p)$ |
-|---|---:|---:|---:|---:|
-| before the cut | 119 | 200 | 0.373 | 0.468 |
-| radius ≤ 15.05 | 35 | 193 | 0.154 | **?** |
-| radius > 15.05 | 84 | 7 | 0.923 | 0.142 |
+::: {.stage}
+![](../figures/slides_v2/S7.svg){.fig .fig-v2-s7 fig-alt="Three bars of survived and died: all 535 passengers, Gini 0.482; after cutting on sex, males 333 with Gini 0.332 and females 202 with Gini 0.396; weighted 0.356"}
+:::
+
+::: {.notes}
+约 1.5 分钟。机器把 6 个特征的每个切点都试一遍，按性别这一刀加权 Gini 最小：(333×0.332 + 202×0.396)/535 = 0.356。可以让学生核对桥：男性 p = 0.210，p(1−p) = 0.166，正好是 Gini 的一半。
+:::
+
+## [Solution:]{.stg} How do we find the best tree?
+
+::: {.stage}
+![](../figures/slides_v2/S3.svg){.fig .fig-v2-s3 fig-alt="Weighted Gini of a cut on age for 30 men as the cut moves from 0 to 75: a staircase, flat between two ages and jumping when the cut passes a person"}
 
 ::: {.ask}
 <small>Your turn</small>
-Work out the Gini of the left side. Then weight the two sides by 228 and 91 out of 319.
+Linear regression had a formula; logistic regression walked downhill. Why do both fail here?
+:::
+
+::: {.one}
+Flat, then a jump: **no slope**. 291 cuts, about $10^{17}$ trees of depth 3 → **greedy**: the best cut for this node, then the same on each side.
 :::
 :::
 
 ::: {.notes}
-约 3 分钟。两个特征：半径、纹理。319 个肿块（426 个训练肿块里分出 107 个作验证集，validation lumps，第 11 页会用到）。给学生一分钟自己算。左边 2×0.154×0.846 = 0.260；加权 (228×0.260 + 91×0.142)/319 = 0.226，比 0.468 小了一半多。机器把两个特征的每个切点都这样试一遍，选加权 Gini 最小的。
+约 3 分钟。让学生看图说：挪切点只要没越过一个人，两边不变，损失不变；越过时突然跳，没有坡度，梯度下降不知道往哪走。全试也不行：291 个候选切点，深度 3 有 7 个问题，约 1.8×10¹⁷ 种树。办法是贪心：只找这个节点最好的一刀，再在两边各做一遍。代价一句：只看一步，对称的四团点上找不到第一刀（Note 第 5 节）。
 :::
 
-## [Grow:]{.stg} Cut each side again: a decision tree
-
-::: {.stage}
-![](../figures/slides/F1.svg){.fig .fig-f1 fig-alt="A depth-2 tree: the root asks radius at most 15.05; the left node asks radius at most 13.41; the right node asks texture at most 15.82; only the rightmost leaf (80 malignant, 1 benign) predicts malignant"}
-
-::: {.say .center}
-**Root**, **nodes**, **leaves**. Questions from root to the deepest leaf: the **depth**.
-:::
-:::
-
-::: {.notes}
-约 1.5 分钟。点名 decision tree、root、node、leaf、depth。方框里的数是落进来的训练肿块：恶性 : 良性。叶子按多数类判断。
-:::
-
-## [Grow:]{.stg} Read the tree: follow one lump
-
-::: {.stage}
-![](../figures/slides/F1.svg){.fig .fig-f1r fig-alt="The same depth-2 tree"}
-
-::: {.ask}
-<small>Your turn</small>
-A lump with radius 16 and texture 20. Which leaf does it reach? Write that leaf's box as two inequalities, for example "radius > … and texture > …".
-:::
-:::
-
-::: {.notes}
-约 2 分钟。半径 16 > 15.05 → 否，走右；纹理 20 > 15.82 → 否，走右；最右叶子，判为恶性。这片叶子在平面上是“半径 > 15.05 且纹理 > 15.82”的矩形：每个问题只问一个特征，所以边界横平竖直。下一页的互动就是这些矩形。
-:::
-
-## [Stop:]{.stg} Deeper trees, smaller boxes: does it memorise?
+## [Test:]{.stg} The tree can keep cutting. Should it?
 
 ::: {.stage .top}
-{{< include ../figures/note_en/I3.html >}}
-
-::: {.say .center}
-Training climbs, accuracy on the validation lumps (Lesson 3) falls: **overfitting**. Limit the depth: `max_depth`.<br><small>426 training lumps = 319 to fit the tree + 107 in the validation set to check it.</small>
-:::
+{{< include ../figures/note_en/I5.html >}}
 :::
 
 ::: {.notes}
-约 4 分钟。从深度 1 拖到 10：矩形越切越碎，深度 10 有 41 片叶子，训练准确率 0.997。再勾选 “validation lumps”：验证集的 107 个没参与拟合的肿块，深度 10 只有 0.832，比深度 1 的 0.944 还低。小矩形只为把一两个点框对。点名 overfitting（和 Lesson 3 的多项式阶数同一件事）；解决办法：限制深度，max_depth 是超参数。树长到底：深度 11、42 片叶、训练 1.00。
+约 3 分钟。只用年龄和票价两个特征，矩形才画得出来。先问：一直切下去，好不好？请一位学生拖深度：深度 2 训练 0.716、交叉验证 0.695；深度 10 有 114 片叶子，训练 0.880，交叉验证 0.626；拖到最右（不限深度）207 片叶子，训练 0.976，交叉验证只剩 0.604。很多小矩形只框住一两个乘客。点名 overfitting：模型越灵活，越会背下训练数据里的偶然，和多项式阶数太高是同一件事。用 max_depth 控制。
 :::
 
-## [Choose:]{.stg} How do we choose `max_depth`?
+## [Test:]{.stg} How do we choose `max_depth`?
 
 ::: {.stage}
-::: {.say .xl .center}
-Assignment 2: **50,000** images, **20** depths to try.
-:::
+::: {.two .side}
+![](../figures/slides_v2/F2.svg){.fig .fig-v2-f2 fig-alt="The same curves plus five thin green lines from five validation splits of 134 passengers; their best depths are 4, 5, 4, 3 and 5"}
 
 ::: {.ask .vote}
 <small>Vote on your phone</small>
-50,000 images: choose `max_depth` using…
+With 50,000 data points, choose `max_depth` using…
 
 ::: {.opts}
 <span><b>A</b>5-fold cross-validation</span>
@@ -227,121 +210,175 @@ Assignment 2: **50,000** images, **20** depths to try.
 :::
 :::
 :::
-
-::: {.notes}
-约 2 分钟。投票（右屏 Choose: How do we choose max_depth → Open，30 秒，先不显示结果，再 Reveal）；先问选 C 的同学：用测试集选，测试分数还算数吗？再问选 A 的同学：5 折试 20 个深度要拟合几棵树？答案在下一页揭晓：一次验证集划分。期待：100 棵，每棵 4 万张图；第 4 节的神经网络一次就要几分钟。更便宜的办法：Lesson 3 的验证集，我们其实已经在用了，那 107 个肿块。
 :::
 
-## [Choose:]{.stg} Back to Lesson 3: cross-validation or one validation split
+::: {.notes}
+约 3.5 分钟。换回全部 6 个特征。黑线是交叉验证，深度 4 最高 0.822。细绿线：从 535 人里留 134 人做验证集，换 5 种分法，选出 4、5、4、3、5，看运气；535 人不多，所以这里用交叉验证。投票（右屏 Test: How do we choose max_depth → Open，30 秒，再 Reveal）。选 C：测试分数还算数吗？选 A：20 个深度 × 5 折 = 100 棵树。答案 B：5 万张图时验证集也有 1 万张，不怕运气。数据少用交叉验证，数据多用验证集。深度 4 不在两端；所有选择做完，测试集读一次：0.810。
+:::
+
+## [Test:]{.stg} Little data or a lot?
 
 ::: {.stage}
-![](../figures/slides/S3.svg){.fig .fig-s3 fig-alt="Left: five rows of five blocks, a different block held out in each row: cross-validation fits 5 times per depth. Right: one bar split into a fitting part, a validation block and a separate test block: the validation set fits once per depth"}
-
-::: {.say .center}
-5-fold CV: 5 fits × 20 depths **= 100 fits**. The **validation set** (Lesson 3): 1 fit per depth, 20 fits. Cheaper, but it depends on which points land in it.
+::: {.say .xl .center}
+535 passengers: **cross-validation**. 50,000 points: **one validation set**: large enough not to depend on luck, and 5 times cheaper.<br>Never at an end of the range. Then read the test set once: **0.810**.
 :::
 :::
 
 ::: {.notes}
-约 2 分钟。回顾 Lesson 3 的 validation set（不是新概念）：从训练集里一次性分出，不参与拟合，只用来评估和选择；Lesson 3 因为数据少选了交叉验证，今天数据多，回到单次划分。测试集仍只在最后读一次。三份数据三种职责：拟合、验证、测试。代码一行：train_test_split(X_train, y_train, test_size=0.25, stratify=...)。交叉验证每个点都当过一次评估，结果稳；验证集便宜，但看运气。
+约 0.5 分钟。揭晓上一页的投票：答案 B。数据少时一份验证集太小、看运气，用交叉验证；数据多时验证集本身就大，只拟合一次就够。深度 4 在 1 到 12 的中间。所有选择做完，测试集读一次 0.810。
 :::
 
-## [Choose:]{.stg} With 107 lumps, the validation set is luck
+## [Test:]{.stg} Why did the tree say "survived" for her?
+
+::: {.stage}
+![](../figures/slides_v2/S4.svg){.fig .fig-v2-s4 fig-alt="A depth-3 tree. One path is highlighted: not male, not first or second class, fare at most 20.8, ending in a leaf with 31 survived and 30 died"}
+
+::: {.ask}
+<small>Your turn</small>
+Third-class women with a dearer ticket: 1 of 18 survived. Why would a dear ticket be bad news?
+:::
+:::
+
+::: {.notes}
+约 3 分钟。深度 3 的树（交叉验证 0.806，为了读得短）。测试集里一位三等舱女性，24 岁，带两个父母或子女，票价 16.7：三问后落进 61 人、31 人生还的叶子，概率 0.508，判生还，离 0.5 很近。讨论第三问：三等舱票价高，多半是一张票上一大家子（平均同行 4.8 个亲属，票价低的 0.9 个），一大家子很难一起挤上救生艇。树没有“家庭人数”这个特征，它从票价里读出来了。logistic regression 是 6 个系数乘 6 个数再相加，读不出这几句话。
+:::
+
+## [Test:]{.stg} Which features does the whole tree rely on?
+
+::: {.stage}
+![](../figures/slides_v2/S8.svg){.fig .fig-v2-s8 fig-alt="One bar of 105.0, the Gini taken away by the three cuts of the depth-2 tree: sex 67.3, class 27.0, age 10.7; their shares 0.641, 0.257 and 0.102"}
+
+::: {.one}
+**Feature importance**: each feature's share of the Gini its cuts took away.
+:::
+:::
+
+::: {.notes}
+约 2.5 分钟。每一刀拿走的量 = 切之前的“样本数 × Gini”减去两边的：根 258.0 → 110.6 + 80.1，拿走 67.3；男性按年龄 10.7；女性按舱位 27.0。同一特征加起来，再除以总和 105.0，就是 feature_importances_，加起来为 1。它只有大小，没有方向：女性更容易生还，要回到树的路上读；logistic regression 的系数有正负号。
+:::
+
+## [Test:]{.stg} Fare scores only 0.045. Is it useless?
+
+::: {.stage}
+::: {.ask .vote}
+<small>Vote on your phone</small>
+In the depth-4 tree, fare has importance 0.045. Remove fare and grow the tree again: the accuracy will…
+
+::: {.opts}
+<span><b>A</b>barely change</span>
+<span><b>B</b>drop clearly</span>
+:::
+:::
+:::
+
+::: {.notes}
+约 1 分钟。深度 4 的树里票价的重要性只有 0.045。投票（右屏 Test: Fare scores only 0.045 → Open，30 秒，先不显示结果，再 Reveal）。请两边各说一个理由：选 B 的常说“票价和贫富有关”；选 A 的常说“重要性小就是没用”。答案在下一页。
+:::
+
+## [Test:]{.stg} Remove fare: what happens?
+
+::: {.stage}
+![](../figures/slides_v2/S12.svg){.fig .fig-v2-s12 fig-alt="Accuracy in each of the five folds with fare and without fare: means 0.822 and 0.809; four folds a little lower without fare, one a little higher; the folds themselves range from 0.794 to 0.869"}
+:::
+
+::: {.notes}
+约 1.5 分钟。揭晓投票：平均从 0.822 到 0.809，差 0.013。五折里四折略低、一折略高，每折变化在 −0.028 到 +0.009 之间；可五折本身就从 0.794 到 0.869，相差 0.075。所以几乎不变，答案 A。再问：可票价在三个舱位之间差那么多，它的重要性为什么这么低？
+:::
+
+## [Test:]{.stg} Why does fare score so low?
+
+::: {.stage}
+![](../figures/slides_v2/S13.svg){.fig .fig-v2-s13 fig-alt="Left: median fare by class, 66.6, 19.5 and 8.1. Right: the importance of fare is 0.045 with class in the data and 0.155 without class"}
+
+::: {.six}
+<span>observe: fare 0.045</span><span>idea: class says the same</span><span>action: remove one feature</span><span>test: same 5 folds</span><span>explain: class was picked first</span><span>limits: this tree only</span>
+:::
+:::
+
+::: {.notes}
+约 2.5 分钟。先看左图：票价和舱位几乎是同一件事（相关 −0.58）。请学生猜：如果把舱位拿掉，票价会怎样？右图：票价的重要性从 0.045 升到 0.155，准确率 0.783。树每一刀只挑当前最好的特征，舱位先被挑中，拿走了两者共有的功劳。所以重要性说明的是这一棵树用了什么；读它之前，先看有没有说同一件事的特征。最后指着六个词：刚才三页就是一次调查，观察（票价 0.045）、想法（它和舱位说同一件事）、行动（拿掉一个特征）、检验（同样的 5 折）、解释、边界。作业要的就是这样一次调查。
+:::
+
+## [Model:]{.stg} Three classes: what changes?
 
 ::: {.stage}
 ::: {.two .side}
-![](../figures/slides/F3.svg){.fig fig-alt="Five thin green validation curves from five different splits, each with a different best depth (1, 4, 1, 1, 4); the black cross-validation curve is steady and highest at depth 1 and 2"}
+![](../figures/slides_v2/S9.svg){.fig .fig-v2-s9 fig-alt="Iris training flowers, petal length against petal width, three species; a cut at petal width 0.80 separates setosa, a cut at 1.75 separates versicolor from virginica"}
 
 ::: {.say}
-Little data: **cross-validation**. Much data: a **validation set**.<br><small>Two features, as on the earlier slides. The fall after depth 2 shows in the cross-validation curve too: the overfitting is real; only the chosen depth is luck. Depth 1 is the lower end of the range, but a tree cannot be shallower than 1: there is nothing further to try.</small>
+Only Gini:
+$$1-\sum_k p_k^2$$
 :::
 :::
 :::
 
 ::: {.notes}
-约 3 分钟。同样 426 个肿块换 5 种分法（只改 random_state），选出的最好深度 1、4、1、1、4。交叉验证平稳，深度 1 和 2 并列 0.883；深度 1 已是下界，范围没法再往下扩：这份二维数据上一刀就够。数据多时验证集也大，运气影响小，而交叉验证要多拟合几倍。
+约 2 分钟。先问：三类时树要改什么？叶子照样放各类比例、按多数判；只有 Gini 要推广，两类时 1 − p² − (1−p)² 就是 2p(1−p)。鸢尾花 112 朵训练花（37、37、38），Gini 0.667；第一刀花瓣宽度 ≤ 0.80 切出全纯的山鸢尾，第二刀 ≤ 1.75 再分；交叉验证深度 2 最高 0.955。作业 2 的十个数字：代码一行不改。花瓣长度重要性 0，但和宽度相关 0.964：和票价同一件事。
 :::
 
-## [Choose:]{.stg} MNIST: choose the depth on the validation set
+## [Model:]{.stg} Regression tree: a mean in each leaf (horsepower only)
+
+::: {.stage .top}
+{{< include ../figures/note_en/I4.html >}}
+:::
+
+::: {.notes}
+约 2.5 分钟。要预测一个数（汽车的油耗，线性回归用过的那份数据）：叶子放落进来的车的平均值，损失是平方误差，求解仍是贪心，DecisionTreeRegressor。拖深度：深度 1 两级台阶 5.63，比直线 4.98 还差；深度 5 最低 4.23；再深台阶上下乱跳，训练 RMSE 降到 3.36，交叉验证升到 4.35：和乘客平面上的小矩形是同一种过拟合。
+:::
+
+## [Test:]{.stg} Where is a tree better than a straight line?
 
 ::: {.stage}
-![](../figures/slides/F4a.svg){.fig .fig-f4a fig-alt="Ten MNIST digits of 28 by 28 pixels, one each of 0 to 9"}
+![](../figures/slides_v2/S10.svg){.fig .fig-v2-s10 fig-alt="Dot plot of 5-fold cross-validated accuracy, straight line against tree: four clusters 0.487 and 0.975, Titanic 0.783 and 0.822, iris 0.947 and 0.955, breast lumps 0.979 and 0.927. Auto MPG RMSE: straight line 3.56, tree 3.22"}
 
-::: {.two .side}
-![](../figures/slides/F4.svg){.fig fig-alt="MNIST subset: training accuracy rises to 1.0 by depth 20; validation accuracy rises to about 0.78 by depth 10, then moves between 0.77 and 0.78, highest 0.781 at depth 15"}
-
-::: {.say}
-Course MNIST subset (10,000 images). Best: depth **15** (0.781), in the middle of 1 to 20; from depth 10 on, all within about 0.01. Test set, once: **0.776**.
-:::
+::: {.ask}
+<small>Your turn</small>
+On which data is the tree better, and on which is it worse? What do those data have in common?
 :::
 :::
 
 ::: {.notes}
-约 3 分钟。MNIST 子集：7500 张训练图分成 5625 拟合、1875 验证（每张 784 个像素）。深度 15 最高 0.781（16 也是，取浅的）；深度 10 以后都在 0.77 到 0.78 之间，是一段平台。不落在两端：15 在中间；如果只试 1 到 8，最好的 8 就在端点，要往大扩。对照：全部 7500 张做 5 折交叉验证，最好深度 10（0.784），也在这段平台上。测试一次 0.776，和验证的 0.781 差一点是正常波动；logistic 是 0.908。作业 2 第 2 节就是这样选 max_depth，选做图就是这两条曲线。
+约 2 分钟。让学生说：四团点、乘客上要“先看一个、再看另一个”（同样是女性，舱位不同，生还比例差一倍多）；油耗随马力弯着下降；乳腺肿块大致沿一个斜面分开，直线一次切对，树要用很多台阶，差 0.05。所以关系弯、特征有组合，或者要一份能执行的规则时，考虑树；树只能横平竖直地切，两类沿斜面分开时就吃亏。树不需要标准化。很多棵树合起来：bagging（每棵用一批略不同的数据，再投票）、gradient boosting（一棵接一棵修误差，XGBoost、LightGBM），准确率高了，但读不出理由了。为什么有效见 Note 的 Advanced 3、4。
 :::
 
-## [Compare:]{.stg} The tree against Lessons 4–5
+## [Test:]{.stg} What these datasets have in common
 
 ::: {.stage}
-![](../figures/slides/F5.svg){.fig .fig-f5 fig-alt="Left: 5-fold cross-validated accuracy: logistic regression 0.979, LDA 0.960, QDA 0.958, decision tree 0.927. Right: feature importance of the tree: mean concave points 0.72, the rest below 0.07"}
-
 ::: {.say .center}
-All 30 features; tree depth 5, chosen by the same 5-fold CV. Less accurate here, but you can **read** it. **Feature importance**: how much of the tree's total Gini reduction each feature did (they add up to 1). Here one feature does **72%**.
+**Tree better** where features combine (four clusters; "woman **and** third class") or the relation bends (Auto MPG).<br>**About the same** on iris: 0.955 against 0.947 is within the fold-to-fold wobble.<br>**Line better** on the breast lumps (0.05). A tree cuts only horizontally and vertically; a tilted boundary may be why.
 :::
 :::
 
 ::: {.notes}
-约 2 分钟。426 个肿块不多，所以用交叉验证选深度（同 Lesson 4、5 的 5 折），最好深度 5，0.927。边界只能横平竖直，不如斜的平面。feature_importances_：每个特征一共帮树降低了多少 Gini，加起来为 1；平均凹点数占 0.72。注意：两个特征高度相关时，树只用其中一个。
+约 1 分钟。揭晓上一页的问题。鸢尾花上的差别在折与折之间的波动以内，不说哪个更好。乳腺肿块那一条是可能的原因，这一讲没有检验，口头说清楚。很多棵树合起来（bagging、gradient boosting、XGBoost）放在这里一句带过。
 :::
 
 ## Today in code
 
 ::: {.stage}
 ```python
-X_digits_fit, X_digits_val, y_digits_fit, y_digits_val = train_test_split(
-    X_digits_train, y_digits_train, test_size=0.25, random_state=0,
-    stratify=y_digits_train)                             # hold out a validation set
-
-for depth in range(1, 21):                               # candidate depths
-    tree = DecisionTreeClassifier(max_depth=depth, random_state=0)
-    tree.fit(X_digits_fit, y_digits_fit)                 # fit on the fitting part
-    print(depth, tree.score(X_digits_fit, y_digits_fit), # training accuracy
-          tree.score(X_digits_val, y_digits_val))        # validation accuracy
-
-tree = DecisionTreeClassifier(max_depth=15, random_state=0)  # chosen depth
-tree.fit(X_digits_fit, y_digits_fit)
-print(tree.score(X_digits_test, y_digits_test))          # the test set, once
+tree = DecisionTreeClassifier(max_depth=4, random_state=0)    # at most 4 questions
+print(cross_val_score(tree, X_train, y_train, cv=kf).mean())  # CV accuracy
+tree.fit(X_train, y_train)                                    # grow the tree
+print(tree.feature_importances_)                              # Gini taken by each feature
 ```
 :::
 
 ::: {.notes}
-约 1 分钟。每一块对应今天的一段，不讲语法。树不需要标准化：每个问题只比较一个特征和一个数。Lab 6 会在乳腺肿块上手算一刀的 Gini，再在 digits 上用验证集选深度。
-:::
-
-## Back to the ring
-
-::: {.stage}
-![](../figures/slides/F6.svg){.fig .fig-f6 fig-alt="Left: the hand-written box, accuracy 0.98. Right: the region found by a depth-4 tree with 9 leaves, accuracy 0.98"}
-
-::: {.say .center}
-A depth-4 tree finds the box by itself: **0.98**, 9 leaves.
-:::
-:::
-
-::: {.notes}
-约 1.5 分钟。回扣开场：机器一次一刀、选 Gini 降得最多的，长到合适深度，自己找到了方框。局限（口头）：边界横平竖直；换一批样本根节点都可能变（Note Advanced Study 2）；验证集小时不可信；特征重要性只说明这一棵树用了什么。
+约 1 分钟。四行，每行对应今天一段。三类不用改；预测一个数换成 DecisionTreeRegressor；树不需要标准化。Lab 6 在鸢尾花上动手：长树、看它在哪里出问题、怎么修。
 :::
 
 ## What you can do now {.final-slide}
 
 ::: {.takeaway}
 ::: {.rows .tiny .chain}
-<div><span class="n">see it</span><div><b>Rules a person can write</b><p>a straight line fails on the ring</p></div></div>
-<div><span class="n">one cut</span><div><b>Gini, not error rate</b><p>it notices a pure block</p></div></div>
-<div><span class="n">grow</span><div><b>A decision tree</b><p>cut each side again; boxes in the plane</p></div></div>
-<div><span class="n">stop</span><div><b>max_depth</b><p>deep trees memorise the training set</p></div></div>
-<div><span class="n">choose</span><div><b>Validation set or CV</b><p>much data: a validation set; the chosen depth must not be at either end of the range</p></div></div>
-<div><span class="n">test</span><div><b>Read the test set once</b><p>choose a method by the same CV; then report its test score, once</p></div></div>
+<div><span class="n">problem</span><div><b>One cut is not enough</b><p>cut again, one feature at a time</p></div></div>
+<div><span class="n">model</span><div><b>A decision tree</b><p>leaf shares are probabilities</p></div></div>
+<div><span class="n">loss</span><div><b>Gini, not error rate</b><p>it notices a pure block</p></div></div>
+<div><span class="n">solution</span><div><b>Greedy</b><p>the best cut for this node, then each side</p></div></div>
+<div><span class="n">test</span><div><b>Choose max_depth on unseen data</b><p>little data: CV; much data: a validation set; never at an end</p></div></div>
+<div><span class="n">test</span><div><b>Read a path and the importance</b><p>why one case, which features overall</p></div></div>
+<div><span class="n">test</span><div><b>Check importance before you trust it</b><p>remove a feature and test again</p></div></div>
 :::
 
 ::: {.qr}
@@ -352,5 +389,5 @@ A depth-4 tree finds the box by itself: **0.98**, 9 leaves.
 :::
 
 ::: {.notes}
-约 1.5 分钟，课堂最终停在这一页。沿六行把整条链念一遍。答疑和扫码都在这里。课后 Lab 6，不预告下一讲。
+约 0.5 分钟，课堂停在这一页。沿五步把整条路念一遍；检验的后两行就是作业要的解释和边界。课后 Lab 6，不预告下一讲。
 :::
