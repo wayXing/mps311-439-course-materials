@@ -168,7 +168,7 @@ acc_dist = accuracy_score(ring_y, LogisticRegression().fit(dist, ring_y).predict
 N["ring"] = dict(x=[r(v, 3) for v in ring_X[:, 0]], y=[r(v, 3) for v in ring_X[:, 1]], label=ring_y.tolist(),
                  acc_line=r(acc_line, 2), acc_dist=r(acc_dist, 2))
 
-# ---------- Advanced Study 2: hand-written gradient descent vs sklearn (same default penalty) ----------
+# ---------- Advanced Study 3: hand-written gradient descent vs sklearn (same default penalty) ----------
 n_tr = len(ytr)
 w_gd, b_gd = np.zeros(Ztr.shape[1]), 0.0
 for step in range(5000):

@@ -165,11 +165,11 @@ When $y_i = 1$, the second term is 0, and only $-\log p_i$ is left. When $y_i = 
 
 ![How the two losses change with p when the lump is in fact malignant. As p falls from 0.1 to 0.01, the squared error hardly changes, but the cross-entropy doubles.](figures/note_en/F4.svg){fig-alt="Two falling curves: the squared error is never above 1, while the cross-entropy rises sharply as p gets close to 0"}
 
-There is another way to read it. $-\log p_i$ is the negative logarithm of "the probability the model gives to the true answer". A small cross-entropy means the model gives a high probability to the true answer. Advanced Study 3 looks at this idea again.
+There is another way to read it. $-\log p_i$ is the negative logarithm of "the probability the model gives to the true answer". A small cross-entropy means the model gives a high probability to the true answer. Advanced Study 1 looks at this idea again.
 
 ## 5. Solving: No More Normal Equation
 
-In Lesson 2, we solved linear regression by setting the derivative of the loss with respect to the parameters to 0. This gave the normal equation, which found the answer in one step. Let us try the same here and take the derivative with respect to $w_j$ (the derivation is in Advanced Study 1):
+In Lesson 2, we solved linear regression by setting the derivative of the loss with respect to the parameters to 0. This gave the normal equation, which found the answer in one step. Let us try the same here and take the derivative with respect to $w_j$ (the derivation is in Advanced Study 2):
 
 $$
 \frac{\partial L}{\partial w_j} = \frac{1}{n}\sum_{i=1}^{n}(p_i-y_i)\,x_{ij} .
@@ -245,7 +245,7 @@ There are two directions. One is to make the model itself better, for example by
 
 The 30 measurements have very different scales. The radius is between 7 and 28, the area is between 143 and 2501, and the smoothness is between 0.05 and 0.16. If we fit the model directly, `lbfgs` cannot reach the bottom within the default 100 steps, so it gives a `ConvergenceWarning`. If we standardise first, as in Lesson 3 (computing the mean and standard deviation from the training set only), the problem goes away.
 
-After standardisation, the default penalty is also fair. scikit-learn controls it with the parameter `C`, and `C` works the opposite way to $\lambda$ from Lesson 3: the smaller `C` is, the stronger the penalty (roughly $1/\lambda$; the exact conversion differs by a constant factor, see Advanced Study 2). On the breast lumps we always use the default `C = 1`.
+After standardisation, the default penalty is also fair. scikit-learn controls it with the parameter `C`, and `C` works the opposite way to $\lambda$ from Lesson 3: the smaller `C` is, the stronger the penalty (roughly $1/\lambda$; the exact conversion differs by a constant factor, see Advanced Study 3). On the breast lumps we always use the default `C = 1`.
 
 With 30 features, the cross-validated accuracy is 0.979. Missed cancers fall from 36 to 7, and false alarms fall from 22 to 2 (Figure F6, right). The recall is 0.956 and the precision is 0.987.
 
@@ -446,11 +446,76 @@ If you always guess "no default", the accuracy is about 95%, so an accuracy of 9
 
 ![Feedback QR code for this lesson](./feedback-qr.svg){fig-align="center" width="160px" fig-alt="Feedback QR code"}
 
-*The Advanced Studies below are not part of the main line, and each can be read on its own. MPS311 students are encouraged to read them; MPS439 students should complete Study 1 and Study 2.*
+*The Advanced Studies below are not part of the main line, and each can be read on its own. MPS311 students are encouraged to read them; MPS439 students should complete Study 2 and Study 3.*
 
 ---
 
-## Advanced Study 1: Deriving the Gradient from Cross-Entropy
+## Advanced Study 1: Where Cross-Entropy Comes From
+
+Section 4 chose the logarithm like this: squared error does not punish hard enough, we want a very confident mistake to be punished heavily, and the logarithm has exactly that property. Here we ask a different question. Can the loss come straight from the model's assumption, instead of being picked by that kind of feeling? It can.
+
+**The model's assumption.** The model in Section 2 says that, given the features $\mathbf x$, the probability that a lump is malignant is
+
+$$
+P(y=1\mid\mathbf x)=\sigma(z)=p,\qquad z=\mathbf w^\top\mathbf x+b .
+$$
+
+$y$ can only be 0 or 1, so the probability that the lump is benign is $P(y=0\mid\mathbf x)=1-p$. Once $\mathbf w$ and $b$ are given, the $p$ of every sample is fixed. What makes $\mathbf w$ and $b$ good? A natural standard is: **the more likely the model thinks our labels are, the better.**
+
+**Step 1: one sample.** What probability does the model give to this sample's true label? There are two cases:
+
+- true label $y=1$: the probability the model gives to "malignant" is $p$;
+- true label $y=0$: the probability the model gives to "benign" is $1-p$.
+
+The two lines combine into one formula:
+
+$$
+P(y\mid\mathbf x)=p^{\,y}\,(1-p)^{1-y}.
+$$
+
+Why is this right? Put in $y=1$: $p^{1}(1-p)^{0}=p$. Put in $y=0$: $p^{0}(1-p)^{1}=1-p$. The exponents $y$ and $1-y$ work like two switches: each time, only the term that matches the true label is kept.
+
+**Step 2: the whole training set.** Assume the samples are independent: the label of one lump does not affect another. The probability that independent events all happen is the product of their probabilities. So the probability that the labels of the $n$ samples are exactly $y_1,\dots,y_n$ is
+
+$$
+\mathcal L(\mathbf w,b)=\prod_{i=1}^{n}p_i^{\,y_i}(1-p_i)^{1-y_i},\qquad p_i=\sigma(\mathbf w^\top\mathbf x_i+b).
+$$
+
+This is called the **likelihood**. Finding the $\mathbf w$ and $b$ that make it as large as possible is called **maximum likelihood estimation**.
+
+**Step 3: take the logarithm.** Here are three lumps, with the probability of malignancy the model gives and the true label. Column 4 is the probability the model gives to the true label (the formula from Step 1):
+
+| Sample | True $y$ | Model's $p$ | Probability of the true label | Logarithm |
+|---|---:|---:|---:|---:|
+| 1 | 1 | 0.8 | 0.8 | $\log 0.8=-0.223$ |
+| 2 | 0 | 0.3 | $1-0.3=0.7$ | $\log 0.7=-0.357$ |
+| 3 | 1 | 0.1 | 0.1 | $\log 0.1=-2.303$ |
+
+The likelihood is the product of three numbers: $0.8\times0.7\times0.1=0.056$. The logarithm of a product is the sum of the logarithms, so
+
+$$
+\log 0.056=\log 0.8+\log 0.7+\log 0.1=-0.223-0.357-2.303=-2.882 .
+$$
+
+There are two reasons to take the logarithm. First, the product becomes a sum, which makes the derivative easier later (the derivation in Advanced Study 2 goes this way). Second, it avoids a numerical problem: multiply hundreds or thousands of numbers below 1 and the result becomes too small for the computer to store (1100 copies of 0.5 multiplied together give 0 in float64), while the sum of their logarithms is an ordinary negative number. The logarithm is an increasing function, so the likelihood and the log-likelihood are largest at the same place, and the $\mathbf w$ and $b$ we are looking for do not change.
+
+**Step 4: turn it into a loss.** For each sample, $\log\big[p_i^{y_i}(1-p_i)^{1-y_i}\big]=y_i\log p_i+(1-y_i)\log(1-p_i)$, so the log-likelihood is
+
+$$
+\log\mathcal L=\sum_{i=1}^{n}\Big[\,y_i\log p_i+(1-y_i)\log(1-p_i)\Big].
+$$
+
+We usually write a loss as "smaller is better", so we add a minus sign and turn the maximum into a minimum. We also divide by the number of samples $n$ to get an average, which does not grow with the number of samples and does not move the minimum:
+
+$$
+L(\mathbf w,b)=-\frac1n\sum_{i=1}^{n}\Big[\,y_i\log p_i+(1-y_i)\log(1-p_i)\Big].
+$$
+
+This is exactly the cross-entropy from Section 4. For the three lumps above, the average cross-entropy is $2.882/3=0.961$. Sample 3, whose $p=0.1$ is furthest from its true label 1, contributes $2.303$ on its own, about four fifths of the total.
+
+So cross-entropy is not picked by the feeling that "confident mistakes should be punished heavily". It follows from the model's assumption ($P(y=1\mid\mathbf x)=\sigma(z)$) together with independent samples: **minimising the cross-entropy is maximising the probability the model gives to the training labels.** The loss $-\log(\pi_y f_y(\mathbf x))$ in Lesson 5 is built the same way, with a different assumption about the data.
+
+## Advanced Study 2: Deriving the Gradient from Cross-Entropy
 
 The goal is to derive the formula from Section 5:
 
@@ -486,9 +551,9 @@ In matrix form: $\nabla_{\mathbf w}L = \frac{1}{n}X^\top(\mathbf p-\mathbf y)$. 
 
 **Why there is only one valley (optional).** If we differentiate once more, we get the matrix of second derivatives $\frac{1}{n}X^\top S X$. Here $S$ is a diagonal matrix with diagonal entries $p_i(1-p_i) > 0$. For any vector $\mathbf v$, $\mathbf v^\top X^\top S X\mathbf v = \sum_i p_i(1-p_i)(\mathbf x_i^\top\mathbf v)^2 \ge 0$. So cross-entropy is a convex function, and gradient descent cannot get stuck in some other local minimum.
 
-## Advanced Study 2: Implementing Gradient Descent Yourself
+## Advanced Study 3: Implementing Gradient Descent Yourself
 
-Use the gradient from Advanced Study 1 to write your own gradient descent, and compare it with scikit-learn. Use the standardised `X_train_s` and `y_train` from Section 10.
+Use the gradient from Advanced Study 2 to write your own gradient descent, and compare it with scikit-learn. Use the standardised `X_train_s` and `y_train` from Section 10.
 
 By default, scikit-learn adds a small Ridge-style penalty (Section 2.1, 6.2). To get matching results, your version must add the same penalty. With the default setting `C = 1`, this is the same as adding $\frac{1}{2n}\|\mathbf w\|^2$ to the cross-entropy. So the gradient gets an extra term $\frac{1}{n}\mathbf w$ ($b$ is not penalised). In general, scikit-learn minimises $\frac12\|\mathbf w\|^2 + C\sum_i(\text{cross-entropy of sample } i)$. Written the Lesson 3 Ridge way (sum of errors plus $\lambda\|\mathbf w\|^2$), this is $\lambda = \frac{1}{2C}$: that is the constant factor mentioned in Section 6.2.
 
@@ -523,11 +588,10 @@ Now try the following yourself:
 2. Change the learning rate to 0.05 and to 5, and compare the curves. What happens when it is too small, and what happens when it is too large?
 3. Remove almost all of the penalty. In your own version, delete `+ w / n`. In scikit-learn, use `LogisticRegression(C=1e6, max_iter=10000)` (a larger `C` means a weaker penalty, so a very large `C` means almost no penalty). What does the largest weight become (scikit-learn gives about 260)? Its accuracy on the training set is 1.0: with 30 features, the two classes can be separated perfectly on the training set. If they can be separated perfectly, how can the cross-entropy keep getting smaller? How is this related to the exploding coefficients in Lesson 3?
 
-## Advanced Study 3: Open Questions
+## Advanced Study 4: Open Questions
 
-This lesson does not develop the following four questions. Each comes with a starting point.
+This lesson does not develop the following three questions. Each comes with a starting point.
 
-1. **Where cross-entropy comes from.** Treat $p_i$ as the probability that "this sample is malignant". Then the probability of seeing exactly this set of training samples is $\prod_i p_i^{y_i}(1-p_i)^{1-y_i}$. Making it as large as possible is called **maximum likelihood estimation**. Starting point: take the logarithm, then the negative, and compare the result with cross-entropy.
-2. **Calibration.** Among the samples where the model says 0.2, are 20% really malignant? Starting point: group the cross-validated probabilities into 0 to 0.1, 0.1 to 0.2, and so on. For each group, compute the actual share of malignant samples, and plot it against the mean probability on the horizontal axis. Look up `sklearn.calibration.calibration_curve`.
-3. **Class imbalance and `class_weight`.** `LogisticRegression(class_weight="balanced")` gives each sample of the smaller class more weight in the loss. In what ways is it the same as "lowering the threshold", and in what ways is it different? Starting point: on the data in this lesson, compare the numbers of missed cancers and false alarms for the two approaches.
-4. **Reading AUC as a ranking.** Section 7.1 says that AUC is "the chance that, if we pick one malignant and one benign sample at random, the malignant one has the higher probability". Starting point: using the cross-validated probabilities, count the share of all (malignant, benign) pairs in which the malignant sample has the higher probability. Compare it with the result of `roc_auc_score`.
+1. **Calibration.** Among the samples where the model says 0.2, are 20% really malignant? Starting point: group the cross-validated probabilities into 0 to 0.1, 0.1 to 0.2, and so on. For each group, compute the actual share of malignant samples, and plot it against the mean probability on the horizontal axis. Look up `sklearn.calibration.calibration_curve`.
+2. **Class imbalance and `class_weight`.** `LogisticRegression(class_weight="balanced")` gives each sample of the smaller class more weight in the loss. In what ways is it the same as "lowering the threshold", and in what ways is it different? Starting point: on the data in this lesson, compare the numbers of missed cancers and false alarms for the two approaches.
+3. **Reading AUC as a ranking.** Section 7.1 says that AUC is "the chance that, if we pick one malignant and one benign sample at random, the malignant one has the higher probability". Starting point: using the cross-validated probabilities, count the share of all (malignant, benign) pairs in which the malignant sample has the higher probability. Compare it with the result of `roc_auc_score`.

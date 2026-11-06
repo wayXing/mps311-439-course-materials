@@ -5,6 +5,17 @@
   ],
   "releases": [
     {
+      "version": "0.3.13",
+      "date": "2026-11-06",
+      "title": "Lesson 4: where cross-entropy comes from",
+      "items": [
+        {
+          "type": "added",
+          "text": "A new Advanced Study 1 in the Lesson 4 Notes derives the cross-entropy from the model's own assumption: write down the probability the model gives to the training labels, take the logarithm, and the loss of Section 4 appears. The other Advanced Studies move up by one (MPS439: Studies 2 and 3), and the Lab's references follow."
+        }
+      ]
+    },
+    {
       "version": "0.3.12",
       "date": "2026-11-06",
       "title": "Lesson 6 rebuilt: grow a tree, choose its depth, read it",

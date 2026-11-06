@@ -244,7 +244,7 @@ There is no formula for the bottom. You start at $w=0$. How do you get there?
 :::
 
 ::: {.notes}
-约 2 分钟。导数 (1/n)Σ(p_i − y_i)x_ij 令为 0 解不出来，因为 w 藏在 sigmoid 里（只口头说，推导在 Note 的 Advanced Study 1）。图：一个特征（标准化半径），b 固定在最好的值。问：从 w = 0 出发怎样走到谷底？期待：往下坡方向挪一点，再看。不假设学生做过 Lesson 2 的 Advanced。
+约 2 分钟。导数 (1/n)Σ(p_i − y_i)x_ij 令为 0 解不出来，因为 w 藏在 sigmoid 里（只口头说，推导在 Note 的 Advanced Study 2）。图：一个特征（标准化半径），b 固定在最好的值。问：从 w = 0 出发怎样走到谷底？期待：往下坡方向挪一点，再看。不假设学生做过 Lesson 2 的 Advanced。
 :::
 
 ## [Solve:]{.stg} Gradient descent: step downhill, again and again

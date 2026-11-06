@@ -425,12 +425,12 @@ MPS311 students are encouraged to try one. **MPS439 students complete A** and re
 
 **Tasks**
 
-1. Follow Advanced Study 1 of the Note to derive the gradient of the cross-entropy, $\frac{1}{n}X^\top(\mathbf p - \mathbf y)$, and write the derivation in a text cell.
-2. On `X_train_s` and `y_train`, write gradient descent that matches `LogisticRegression(C=0.5)`: start from all-zero weights and intercept, learning rate 0.5, 5000 steps. Advanced Study 2 of the Note matches the default `C = 1` by adding $\frac{1}{n}\mathbf w$ to the weight gradient. Work out what this term becomes when `C = 0.5`, and use it (not on the intercept).
+1. Follow Advanced Study 2 of the Note to derive the gradient of the cross-entropy, $\frac{1}{n}X^\top(\mathbf p - \mathbf y)$, and write the derivation in a text cell.
+2. On `X_train_s` and `y_train`, write gradient descent that matches `LogisticRegression(C=0.5)`: start from all-zero weights and intercept, learning rate 0.5, 5000 steps. Advanced Study 3 of the Note matches the default `C = 1` by adding $\frac{1}{n}\mathbf w$ to the weight gradient. Work out what this term becomes when `C = 0.5`, and use it (not on the intercept).
 3. Record the training cross-entropy every 100 steps and plot it. Then try learning rates 0.05 and 5 and compare the curves.
 
 ::: {.callout-tip title="Ask AI"}
-Ask: *"Why does the derivative of the cross-entropy with respect to z come out as p minus y?"* Check its steps against Advanced Study 1 of the Note.
+Ask: *"Why does the derivative of the cross-entropy with respect to z come out as p minus y?"* Check its steps against Advanced Study 2 of the Note.
 :::
 
 ::: {.callout-note collapse="true" title="Hint"}
