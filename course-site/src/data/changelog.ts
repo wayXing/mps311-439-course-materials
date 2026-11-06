@@ -1,13 +1,18 @@
 import changelogJson from './changelog.json';
 
-export type ChangeType = 'feedback' | 'added' | 'changed' | 'fixed';
+export type ChangeType = 'improvement' | 'new' | 'fix';
+
+export interface ChangelogItem {
+  type: ChangeType;
+  text: string;
+}
 
 export interface ChangelogRelease {
   version: string;
   date: string;
   dateLabel?: string;
   title: string;
-  items: { type: ChangeType; text: string }[];
+  items: ChangelogItem[];
 }
 
 export interface ChangelogData {
@@ -15,6 +20,5 @@ export interface ChangelogData {
   releases: ChangelogRelease[];
 }
 
-// Newest release first; the site badge shows releases[0].
 export const changelog = changelogJson as ChangelogData;
 export const currentVersion = changelog.releases[0].version;

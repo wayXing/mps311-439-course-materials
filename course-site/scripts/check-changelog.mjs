@@ -12,7 +12,7 @@ import { fileURLToPath } from 'node:url';
 const projectRoot = join(dirname(fileURLToPath(import.meta.url)), '..');
 const mirror = join(projectRoot, '..', 'mps311-439-course-materials');
 const changelog = JSON.parse(await readFile(join(projectRoot, 'src/data/changelog.json'), 'utf8'));
-const types = new Set(['feedback', 'added', 'changed', 'fixed']);
+const types = new Set(['improvement', 'new', 'fix']);
 const problems = [];
 
 const releases = changelog.releases ?? [];

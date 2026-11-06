@@ -32,7 +32,6 @@ const expected = [
   ...['train.csv', 'test.csv', 'full.csv'].map((name) => `dist/assignments/assignment-one/${name}`),
   ...['report_guide_en.html', 'do_and_dont_en.html', 'example_report_en.html', 'report_template.tex']
     .map((name) => `dist/assignments/assignment-one/report-guide/${name}`),
-  'dist/style-samples/index.html',
   'dist/timetable/index.html',
   'dist/data/course-timetable.csv',
   ...course.lessons.map((lesson) => `dist/course/${lesson.slug}/index.html`),

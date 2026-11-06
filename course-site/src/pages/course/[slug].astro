@@ -40,6 +40,7 @@ const primaryResource = visibleResources.find((resource) => resource.kind === 's
   ?? visibleResources.find((resource) => resource.kind === 'guide');
 // The heading uses the same short title as the home page; the longer title becomes a subtitle.
 const subtitle = lesson.title !== lesson.shortTitle ? lesson.title : null;
+const video = course.showVideos === false ? undefined : lesson.video;
 ---
 
 <SiteLayout
@@ -89,13 +90,13 @@ const subtitle = lesson.title !== lesson.shortTitle ? lesson.title : null;
         </div>
         <div class="resource-grid">
           {resourcesIn(group).map((resource) => <ResourceCard resource={resource} />)}
-          {group === 'Lecture' && lesson.video && (
+          {group === 'Lecture' && video && (
             <div class="resource-card resource-video">
               <a class="resource-card-main" href="#video">
                 <span class="resource-icon resource-video"><ResourceIcon kind="video" size={17} /></span>
                 <span class="resource-card-copy">
                   <strong>Video</strong>
-                  <small>The whole lesson in about {lesson.video.minutes} minutes, with subtitles and chapters. Plays below.</small>
+                  <small>A recap of the lesson in about {video.minutes} minutes, for revision. Plays below.</small>
                 </span>
               </a>
               <div class="resource-actions"></div>
@@ -114,15 +115,15 @@ const subtitle = lesson.title !== lesson.shortTitle ? lesson.title : null;
       </div>
     )}
 
-    {lesson.video && (
+    {video && (
       <section class="resource-group" id="video" aria-labelledby="group-video">
         <div class="resource-group-heading">
           <h3 id="group-video">Video</h3>
-          <span>About {lesson.video.minutes} min</span>
+          <span>About {video.minutes} min</span>
         </div>
         <div class="lesson-video">
           <iframe
-            src={`https://www.youtube-nocookie.com/embed/${lesson.video.youtubeId}?rel=0${course.videoPlaylist ? `&list=${course.videoPlaylist}` : ''}`}
+            src={`https://www.youtube-nocookie.com/embed/${video.youtubeId}?rel=0${course.videoPlaylist ? `&list=${course.videoPlaylist}` : ''}`}
             title={`${lesson.label} video: ${lesson.shortTitle}`}
             loading="lazy"
             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
@@ -131,7 +132,7 @@ const subtitle = lesson.title !== lesson.shortTitle ? lesson.title : null;
           ></iframe>
         </div>
         <p class="lesson-video-caption">
-          Missed the class, or want to see it again? The whole lesson in about {lesson.video.minutes} minutes, with subtitles and chapters.
+          A short recap of the lesson for revision, about {video.minutes} minutes, with subtitles and chapters. It does not replace the lecture and the lab, where the full material and the practice are.
           {course.videoPlaylist && <a href={`https://www.youtube.com/playlist?list=${course.videoPlaylist}`} target="_blank" rel="noopener">All lesson videos on YouTube ↗</a>}
         </p>
       </section>

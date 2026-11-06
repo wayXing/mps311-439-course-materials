@@ -1,29 +1,20 @@
 {
   "commitment": [
-    "This course is not a list of algorithms. Our commitment is that students leave able to take a real problem, turn it into one that can be learned, solved and tested with data, and judge whether the answer deserves to be trusted, with machine learning and AI as their tools. Not only to pass the module, but to be able to solve problems.",
-    "So we run the course like software: we release, listen and improve. Students give anonymous feedback after every class; we read it regularly, and the changes it leads to are recorded here."
+    "Changes to the course materials this year, newest first. Many of them follow your feedback after class."
   ],
   "releases": [
     {
       "version": "0.3.14",
       "date": "2026-11-06",
-      "title": "Lesson 6 made lighter: the core for everyone, the analysis optional",
+      "title": "Lesson 6: focus on the key concepts",
       "items": [
         {
-          "type": "changed",
-          "text": "The Lesson 6 Notes now open with a short guide: Sections 1 to 7 and the one-page review are enough to follow the lecture, the lab and the assignment. Trees for more than two classes (iris) and regression trees stay in the Notes as Sections 8 and 9, as reading beyond the core; the worked investigation of feature importance is now a short paragraph, and averaging many trees (bagging, boosting) has moved into the Advanced Studies. The loss is now built from intuition: first count the mistakes a cut makes, then measure how mixed each side is, which gives the Gini."
+          "type": "improvement",
+          "text": "Following your feedback, the Lesson 6 lecture and lab concentrate on the key concepts, so class time goes on understanding them. The wider analysis is in the Notes and the optional Advanced tasks."
         },
         {
-          "type": "fixed",
-          "text": "The first interactive figure now lets you tilt the cut as well as move it. A sloping cut does better than an upright one (0.744 against 0.544) but still cannot separate the four clusters; the Notes said otherwise. The three-cut version now has its own figure in Section 2."
-        },
-        {
-          "type": "changed",
-          "text": "The Lesson 6 slides are shorter (20 slides), with a slide each for three classes and for regression trees. The fare question now shows its answer after the vote."
-        },
-        {
-          "type": "changed",
-          "text": "Lab 6 is shorter: four tasks of about 40 minutes, in each of which you write down one number and one sentence. The deeper checks (does importance hold when you remove a feature, can the tree's probabilities be trusted) are optional challenges, and the Titanic investigation is an optional after-class task."
+          "type": "fix",
+          "text": "The first interactive figure in the Lesson 6 Notes now lets you tilt the cut, and the text beside it is corrected."
         }
       ]
     },
@@ -33,31 +24,19 @@
       "title": "Lesson 4: where cross-entropy comes from",
       "items": [
         {
-          "type": "added",
-          "text": "A new Advanced Study 1 in the Lesson 4 Notes derives the cross-entropy from the model's own assumption: write down the probability the model gives to the training labels, take the logarithm, and the loss of Section 4 appears. The other Advanced Studies move up by one (MPS439: Studies 2 and 3), and the Lab's references follow."
+          "type": "new",
+          "text": "An optional derivation in the Lesson 4 Notes shows where the cross-entropy loss comes from."
         }
       ]
     },
     {
       "version": "0.3.12",
       "date": "2026-11-06",
-      "title": "Lesson 6 rebuilt: grow a tree, choose its depth, read it",
+      "title": "Lesson 6 on the Titanic passenger list",
       "items": [
         {
-          "type": "changed",
-          "text": "Lesson 6 (decision trees) has been rebuilt around the Titanic passenger list. The lesson follows the five steps (problem, model, loss, solution, test), and the test step now also asks why the tree decides as it does and whether that reading can be trusted, the same chain of evidence the assignments are marked on."
-        },
-        {
-          "type": "added",
-          "text": "New in the Lesson 6 Notes: reading a tree (one passenger's path, and feature importance computed from the drop in Gini), a worked investigation of when importance misleads, trees for more than two classes (iris), and regression trees. The Advanced Studies are now derivations: why a cut can only lower Gini, where multi-class Gini comes from, why averaging many trees helps, and why fitting residuals is gradient descent."
-        },
-        {
-          "type": "added",
-          "text": "A new interactive figure in the Notes and slides: drag the depth of a tree on the passengers' age and fare, and watch training accuracy rise while cross-validated accuracy falls."
-        },
-        {
-          "type": "changed",
-          "text": "Lab 6 now uses the iris flowers. All the code is given, with no blanks: you change one value at a time, see what goes wrong with the tree, and try a fix. Each part has a discussion question and a challenge for those who finish early; choosing the depth on a single validation set, which Assignment 2 uses, is in the after-class part."
+          "type": "improvement",
+          "text": "Lesson 6 (decision trees) now follows the five steps on the Titanic passenger list, with a figure where you drag the tree's depth and watch it overfit."
         }
       ]
     },
@@ -67,12 +46,8 @@
       "title": "AI declaration in both assignments",
       "items": [
         {
-          "type": "added",
-          "text": "Both assignment briefs now include the University statement on generative AI and academic misconduct."
-        },
-        {
-          "type": "added",
-          "text": "Both assignments now ask for a short AI declaration at the end of the report: a few sentences on which AI tools you used and what for, or one line saying you did not use any. It does not count towards the page limit and is not marked. Nothing else in the tasks or the marking has changed."
+          "type": "new",
+          "text": "Both assignments include the University statement on generative AI and ask for a short AI declaration, which is not marked."
         }
       ]
     },
@@ -82,20 +57,8 @@
       "title": "Lesson 5 follows the five steps",
       "items": [
         {
-          "type": "changed",
-          "text": "Lesson 5 (LDA and QDA) now follows the same five steps as every lesson: problem, model, loss, solution, test. The model is stated as an assumption about how each class's data is generated, the loss and the solution follow from it, and Bayes' rule is introduced from the general form P(A | B)."
-        },
-        {
-          "type": "changed",
-          "text": "Lesson 5's real-data example for shrinkage now uses the breast lumps of Lessons 4 and 5 instead of handwritten digits, which are kept for later lessons."
-        },
-        {
-          "type": "changed",
-          "text": "The Lesson 5 lab uses a new dataset (wines from three grape varieties) and a short data block that will stay the same in every lab from now on, so more of the session goes into changing a value, running again and comparing."
-        },
-        {
-          "type": "added",
-          "text": "The Lesson 5 notes have two new optional studies: why the fitted parameters are simply the class means, covariances and proportions, and Fisher's projection, which reaches the same straight boundary as LDA without assuming bell curves."
+          "type": "improvement",
+          "text": "Lesson 5 (LDA and QDA) follows the same five steps as the other lessons. Its lab uses a new wine dataset and a data block that stays the same in every later lab."
         }
       ]
     },
@@ -105,12 +68,12 @@
       "title": "Help with writing the Assignment 1 report",
       "items": [
         {
-          "type": "feedback",
-          "text": "In response to student questions (“Do we need to write introduction and conclusion in the report?”), the Assignment 1 page now offers optional help with writing the report: a short guide, ten do-and-don't examples, a whole example report on the Lab 2 car data, and a LaTeX template. They are suggestions; the brief and the marking standard are unchanged."
+          "type": "new",
+          "text": "Optional help with the Assignment 1 report: a short guide, do-and-don't examples, a sample report and a LaTeX template. The brief and the marking are unchanged."
         },
         {
-          "type": "added",
-          "text": "The live classroom can run the two optional assessment workshops, with two-way votes on where the session goes next and a quick A-or-B vote for any class."
+          "type": "new",
+          "text": "The live classroom can run the two optional assessment workshops."
         }
       ]
     },
@@ -120,19 +83,11 @@
       "title": "Find this week faster",
       "items": [
         {
-          "type": "added",
-          "text": "The home page marks this week's lecture and lab on their lessons, and shows the next assignment deadline at the top."
+          "type": "improvement",
+          "text": "The home page marks this week's lecture and lab and the next deadline, and each material has one name across the site."
         },
         {
-          "type": "changed",
-          "text": "One name for each material across the site (Slides, Notes, Video, Lab, Colab, Solution), with a plain sentence on what each is for."
-        },
-        {
-          "type": "changed",
-          "text": "Lesson pages list the slides, notes and lab first; last year's files are folded away at the bottom."
-        },
-        {
-          "type": "added",
+          "type": "new",
           "text": "This changelog."
         }
       ]
@@ -140,22 +95,18 @@
     {
       "version": "0.3.7",
       "date": "2026-10-27",
-      "title": "Labs 4–10 rebuilt",
+      "title": "Labs 4–10 in Colab",
       "items": [
         {
-          "type": "feedback",
-          "text": "In response to student feedback (“I preferred Lab1 where a google collab workbook was already made”), every lab from Lesson 4 now comes with a Colab notebook with the setup code already in place."
+          "type": "improvement",
+          "text": "Following feedback on Lab 3, every lab from Lesson 4 comes with a ready-made Colab notebook, and the key modelling decisions are left for you to make."
         },
         {
-          "type": "feedback",
-          "text": "Another student felt the Lab 3 worksheet left no room for their own thinking (“it is all either ‘copy and paste this’ or ‘ask chatgpt that’”). The notebooks therefore still leave the key modelling decisions blank, some tasks ask for your answer before you run the code, and the optional “Try with AI” prompts are folded by default."
+          "type": "improvement",
+          "text": "Lab 4 now includes a task on ROC curves and AUC, and Labs 5–10 are matched to the learning outcomes and a 50-minute session."
         },
         {
-          "type": "fixed",
-          "text": "Lab 4 had no task on ROC curves and AUC, although they are a learning outcome of Lesson 4. Labs 5–10 were checked against every listed learning outcome and resized to fit a 50-minute session."
-        },
-        {
-          "type": "added",
+          "type": "new",
           "text": "The feedback form asks whether the latest change helped."
         }
       ]
@@ -166,7 +117,7 @@
       "title": "Kaggle competition",
       "items": [
         {
-          "type": "added",
+          "type": "new",
           "text": "An optional Kaggle competition for Assignment 1, with an anonymous leaderboard."
         }
       ]
@@ -174,15 +125,15 @@
     {
       "version": "0.3.5",
       "date": "2026-10-19",
-      "title": "Live classroom and lesson videos",
+      "title": "Live classroom",
       "items": [
         {
-          "type": "added",
-          "text": "One QR code for the whole course: in-class polls, a question board, “Got it” and “Lost” buttons, and anonymous feedback that can also be given after class."
+          "type": "new",
+          "text": "One QR code for the live classroom: polls, a question board, “Got it” and “Lost” buttons, and feedback."
         },
         {
-          "type": "added",
-          "text": "A short video for every lesson, with subtitles and chapters, on the lesson page and on YouTube."
+          "type": "new",
+          "text": "A short recap video for each lesson, for revision."
         }
       ]
     },
@@ -192,16 +143,12 @@
       "title": "Lessons 3–10 redesigned",
       "items": [
         {
-          "type": "changed",
-          "text": "Every lesson follows the same questions: what is the problem, how do we represent it, what counts as a good answer, how do we find it, and what evidence supports it."
+          "type": "improvement",
+          "text": "Lessons 3–10 follow the same five steps (problem, model, loss, solution, test), with the mathematics inside each lesson and optional Advanced sections."
         },
         {
-          "type": "changed",
-          "text": "The mathematics is part of each lesson rather than an aside, with optional Advanced sections for those who want more depth."
-        },
-        {
-          "type": "fixed",
-          "text": "Figures in the Lesson 3 notes did not show on the website."
+          "type": "fix",
+          "text": "Figures in the Lesson 3 Notes now show on the website."
         }
       ]
     },
@@ -211,16 +158,16 @@
       "title": "Lesson 2 and the assignments",
       "items": [
         {
-          "type": "changed",
-          "text": "Lesson 2 redesigned around one clear problem, loss and solution, and its slides reworked so that each step builds on the one before."
+          "type": "improvement",
+          "text": "Lesson 2 redesigned around one problem, one loss and one solution, each slide building on the one before."
         },
         {
-          "type": "added",
-          "text": "Pages for Assignments 1 and 2 with deadlines, a countdown and submission guidance."
+          "type": "new",
+          "text": "Pages for Assignments 1 and 2 with deadlines and submission guidance."
         },
         {
-          "type": "fixed",
-          "text": "Formulas in Lesson 2 did not display correctly."
+          "type": "fix",
+          "text": "Formulas in Lesson 2 now display correctly."
         }
       ]
     },
@@ -230,11 +177,11 @@
       "title": "Lesson 1 after the first class",
       "items": [
         {
-          "type": "feedback",
-          "text": "In response to feedback on the first class, repeated explanations in Lesson 1 were combined and new examples added so the modelling questions can be applied to other situations. The version taught in class is kept in the archive."
+          "type": "improvement",
+          "text": "Following feedback after the first class, the Lesson 1 materials are more focused and include new examples. The version taught in class is in the archive."
         },
         {
-          "type": "added",
+          "type": "new",
           "text": "Advanced investigations and reference solutions in Lab 1."
         }
       ]
@@ -245,12 +192,8 @@
       "title": "Open materials",
       "items": [
         {
-          "type": "added",
-          "text": "One-click Colab demos and a public repository of the course materials."
-        },
-        {
-          "type": "added",
-          "text": "A question board for each class."
+          "type": "new",
+          "text": "One-click Colab demos, a public repository of the course materials, and a question board for each class."
         }
       ]
     },
@@ -260,12 +203,8 @@
       "title": "New course website",
       "items": [
         {
-          "type": "added",
-          "text": "One site for every lesson's slides, notes and labs."
-        },
-        {
-          "type": "added",
-          "text": "Anonymous feedback after each class."
+          "type": "new",
+          "text": "One site for every lesson's slides, notes and labs, with anonymous feedback after each class."
         }
       ]
     },
@@ -273,15 +212,15 @@
       "version": "0.2",
       "date": "2025-09-01",
       "dateLabel": "2025–26",
-      "title": "Responding to the first year",
+      "title": "After the first year",
       "items": [
         {
-          "type": "feedback",
-          "text": "In response to student feedback in 2024–25, the module added feedback by QR code during the semester with changes made while it ran, Q&A sessions before each deadline, more detailed assignment feedback, and lectures combined with computer classes."
+          "type": "improvement",
+          "text": "Changes after the first year: feedback by QR code during the semester, Q&A before each deadline, more detailed assignment feedback, and lectures combined with computer classes."
         },
         {
-          "type": "feedback",
-          "text": "Carried into v0.3 from 2025–26 student feedback: more mathematical depth in lectures, access for students not in the room to what is written on the board, and more independent work in the labs."
+          "type": "improvement",
+          "text": "This year's redesign adds more mathematics in the lectures and more independent work in the labs."
         }
       ]
     },
@@ -292,7 +231,7 @@
       "title": "First version",
       "items": [
         {
-          "type": "added",
+          "type": "new",
           "text": "First run as MAS369 and MAS61007: lectures opening with recent developments in AI, AI-assisted coding in the labs, and assessment by coursework."
         }
       ]

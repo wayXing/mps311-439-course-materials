@@ -42,6 +42,8 @@ export interface CourseData {
   instructor: string;
   description: string;
   videoPlaylist?: string;
+  // false hides the lesson recap videos on the site; the video data stays in course.json.
+  showVideos?: boolean;
   colab?: {
     repository: string;
     branch?: string;

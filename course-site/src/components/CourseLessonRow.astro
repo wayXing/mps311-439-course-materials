@@ -9,6 +9,7 @@ interface Props {
 }
 
 const { lesson } = Astro.props;
+const video = course.showVideos === false ? undefined : lesson.video;
 
 const resource = (kind: ResourceKind) => lesson.resources.find((item) => item.kind === kind);
 const lectureResources = [resource('guide'), resource('slides'), resource('notes'), resource('notebook')].filter(Boolean);
@@ -66,10 +67,10 @@ const lessonPage = withBase(`course/${lesson.slug}/`);
         ><ResourceIcon kind={item.kind} size={13} />{resourceLabel(item.kind)}</a>
       ))
       : <span class="resource-empty">—</span>}
-    {lesson.video && (
+    {video && (
       <a
         class="resource-link resource-video"
-        href={`https://www.youtube.com/watch?v=${lesson.video.youtubeId}${course.videoPlaylist ? `&list=${course.videoPlaylist}` : ''}`}
+        href={`https://www.youtube.com/watch?v=${video.youtubeId}${course.videoPlaylist ? `&list=${course.videoPlaylist}` : ''}`}
         target="_blank"
         rel="noopener"
       ><ResourceIcon kind="video" size={13} />Video</a>
