@@ -14,23 +14,29 @@ format:
 ---
 
 
+::: {.callout-tip title="How to read this lesson"}
+These Notes are the full text; you do not need to read them from start to end. To follow the lecture, the lab and the assignment, Sections 1 to 7 and Section 11 (the one-page review) are enough. Sections 8 and 9 use the same tree for more than two classes and for predicting a number; Assignment 2 has ten classes, so they are worth reading. Section 10 is the code. The Advanced Studies are derivations, and they show how many trees are combined (bagging, boosting).
+:::
+
 ## 1. Problem: One Cut Is Not Enough
 
 Logistic regression classifies with a straight line: one side of the line is predicted as label 1, the other side as label 0. Put another way, a line makes **one cut** through the plane and separates a "yes" side from a "no" side.
 
-Below is a hand-made data set with four clusters of points. The lower-left and upper-right clusters have label 0, and the upper-left and lower-right clusters have label 1. First drag the first cut (a vertical line). Each side predicts its majority label.
+Below is a hand-made data set with four clusters of points. The lower-left and upper-right clusters have label 0, and the upper-left and lower-right clusters have label 1. Drag the first cut: you can move it and turn its angle. Each side predicts its majority label.
 
-{{< include figures/note_en/I1x.html >}}
+{{< include figures/note_en/I1one.html >}}
 
 Try it yourself first: how well can one cut do? What about a sloping line?
 
 ::: {.callout-note collapse="true" title="Show answer"}
-Wherever you put the vertical line, the accuracy on these 160 points stays around 0.5 (the best is 0.544). Each side contains one cluster of label 0 and one cluster of label 1, so a majority vote always gets one cluster wrong. A sloping line does no better: the best line that logistic regression finds reaches only 0.51. One cut cannot separate this data.
+With a vertical cut, wherever you put it, the accuracy on these 160 points stays around 0.5 (the best is 0.544). Each side contains one cluster of label 0 and one cluster of label 1, so a majority vote always gets one cluster wrong. A sloping cut does better, at best 0.744: it cuts off the cluster in one corner, and the other side keeps three clusters, two of them with the same label, so the majority vote gets the third cluster wrong. However you place it, one cut cannot separate this data.
 :::
 
 ## 2. Inspiration: If One Cut Is Not Enough, Cut Again
 
-One cut divides the plane into two parts, and each part still contains both labels. A natural idea is to cut each part again. Tick "one more cut on each side" in the figure, then drag one horizontal line in the left part and one in the right part.
+One cut divides the plane into two parts, and each part still contains both labels. A natural idea is to cut each part again. In the figure below, drag the vertical line, then drag one horizontal line in the left part and one in the right part.
+
+{{< include figures/note_en/I1three.html >}}
 
 ::: {.callout-note collapse="true" title="Show answer"}
 The first cut is near $x_1 = 2.5$. The left part is cut again near $x_2 = 2.5$, and so is the right part. Each of the four pieces now holds one cluster, and the accuracy is 0.988. Three cuts separate this data, and each cut looks at only one feature.
@@ -73,45 +79,58 @@ With the model fixed, two things remain: which feature and which number each cut
 
 ## 4. Loss: How Good Is One Cut?
 
-Consider one cut first. We choose a feature and a cut point, and split the points into two sides. By the second assumption of the model, each side gives one proportion. Let $p$ be the proportion of label 1 on one side. A good cut makes both sides as "pure" as possible: one side almost all label 1, the other almost all label 0.
+Consider one cut first: we choose a feature and a cut point, and split the passengers into two sides. For example, cut on sex: of 333 men, 70 survived; of 202 women, 147 survived. Is this a good cut? If you had to give it a score, how would you score it?
 
-We need one number that measures how wrong a side is when its points are given the proportion $p$. The squared error of linear regression and the cross-entropy of logistic regression can both be used. On one side, every point has a true label of 0 or 1, and the model gives all of them the same $p$:
+Think about it for a moment before you read on.
 
-- The squared error of linear regression. A point with label 1 has error $(1-p)^2$, and a point with label 0 has error $p^2$. Label 1 makes up $p$ of the points and label 0 makes up $1-p$, so the average is
-  $$
-  p\,(1-p)^2 + (1-p)\,p^2 = p\,(1-p)\,\big[(1-p) + p\big] = p\,(1-p).
-  $$
-- The cross-entropy of logistic regression. A point with label 1 has loss $-\log p$, and a point with label 0 has loss $-\log(1-p)$, so the average is $-p\log p-(1-p)\log(1-p)$. This expression is called **entropy**.
-- The most direct idea: the error rate. If this side predicts its majority label, the proportion of wrong predictions is $\min(p,\ 1-p)$.
+The two ideas people usually reach first are: count how many are predicted wrongly; or see whether each side is "pure", with almost only one class left.
 
-Twice the squared error has a name of its own:
-$$
-\text{Gini} = 2p(1-p) = 1 - p^2 - (1-p)^2,
-$$
-called **Gini impurity**. Multiplying by 2 does not change which cut is better. The maximum value, reached when the two labels are half and half, becomes 0.5. All three candidates are 0 when $p = 0$ or $1$ (a pure side) and are largest at $p = 0.5$.
-
-After a cut, the two sides have different numbers of points, so we take a weighted average by the number of points. With $n_L$ points on the left and $n_R$ on the right, the score of the cut is $\frac{n_L}{n}\,\text{(left value)} + \frac{n_R}{n}\,\text{(right value)}$, and smaller is better.
-
-The three candidates look similar, so next we check whether they choose different cut points. Here is one node: 100 points, with 20 blue points packed into a middle stretch and 80 grey points spread everywhere. Drag the cut line and watch the two curves.
+**First idea: count the mistakes.** Each side predicts its majority, and the share predicted wrongly is called the **error rate**. Below is one node: 100 points, with 20 blue points packed into a middle stretch and 80 grey points spread everywhere. Drag the cut and watch the two curves.
 
 {{< include figures/note_en/I2.html >}}
 
-Try dragging first: where is the error rate lowest? What about Gini?
+Drag it first: where is the error rate lowest? And Gini (the green line, explained next)?
 
 ::: {.callout-note collapse="true" title="Show answer"}
-The error rate is 0.200 everywhere and never moves. Wherever you cut, grey points are the majority on both sides, so both sides predict grey, and the wrong predictions are always the same 20 blue points. Gini does change: it is lowest when the cut is at 5.75 (0.271, compared with 0.320 before the cut). Then the right side has 38 points that are all grey, and the left side keeps 20 blue and 42 grey points for the next cut to separate. Only Gini registers that the right side became pure.
+The error rate is 0.200 everywhere; it does not move. Wherever the cut is, grey points are the majority on both sides, so both sides predict grey, and the mistakes are always the same 20 blue points. Take the cut at 5.75: on the left, 20 blue and 42 grey, predicted grey, 20 wrong; on the right, 38 points, all grey, predicted grey, 0 wrong; together still 20/100.
+
+Yet the cut at 5.75 is useful: the 38 points on the right are all grey, and every blue point is left on the left, so the next cut only has to work there. This cut does not make any point's prediction right, so counting mistakes cannot see its value. The green line (Gini) is lowest at 5.75 (0.271, against 0.320 before the cut): it sees it.
 :::
 
-We choose Gini, which is also the default in scikit-learn's decision tree. If you switch to entropy (`criterion="entropy"`), the curve has a very similar shape to Gini, and the chosen cut point is usually the same.
+**Second idea: measure how mixed each side is.** One easy measure: pick two people from one side at random (pick one, put them back, pick again). What is the chance that one survived and the other died? If a side holds only one class, the chance is 0; it is largest when the two classes are half and half.
 
-Let us compute it once on the passengers. Before any cut, 217 of 535 people survived, so $p = 0.406$ and the Gini is $2 \times 0.406 \times 0.594 = 0.482$. The machine tries every possible cut point of each of the 6 features, and the best cut is by sex:
+Let $p$ be the share who survived on this side. The chance of a survivor first and then a death is $p(1-p)$; a death first and then a survivor is also $(1-p)p$. Together,
+$$
+\text{Gini} = 2p(1-p),
+$$
+called the **Gini impurity**. It is 0 when the side holds one class only ($p = 0$ or $1$) and largest, 0.5, when the classes are half and half ($p = 0.5$). Smaller means purer.
 
-| | Survived | Died | Proportion survived $p$ | Gini |
+![The Gini of one side against $p$, the share who survived on that side. The two points are the male and female sides of the cut on sex.](figures/note_v4_en/F3.svg){fig-alt="A downward-opening parabola, 0 at both ends and 0.5 at the middle; males p = 0.210, Gini 0.332; females p = 0.728, Gini 0.396"}
+
+A cut has two sides of different sizes, so we take a weighted average by the number of points. With $n_L$ points on the left, $n_R$ on the right and $n$ in all, the score of the cut is
+$$
+\frac{n_L}{n}\,\text{Gini}_\text{left} + \frac{n_R}{n}\,\text{Gini}_\text{right},
+$$
+and smaller is better. scikit-learn's decision tree uses Gini by default.
+
+Let us compute it on the passengers. Before any cut, 217 of the 535 passengers survived, $p = 0.406$, and the Gini is $2 \times 0.406 \times 0.594 = 0.482$. Cut on sex:
+
+| | Survived | Died | Share survived $p$ | Gini |
 |---|---:|---:|---:|---:|
 | Male | 70 | 263 | 0.210 | 0.332 |
 | Female | 147 | 55 | 0.728 | 0.396 |
 
-The male row lets us check the link made above: at $p = 0.210$, the average squared error $p(1-p) = 0.166$ is half of the Gini 0.332. The weighted average is $\frac{333}{535} \times 0.332 + \frac{202}{535} \times 0.396 = 0.356$, which is lower than 0.482 before the cut. Among all candidate cuts, this one has the smallest weighted Gini.
+The weighted average is $\frac{333}{535} \times 0.332 + \frac{202}{535} \times 0.396 = 0.356$, lower than the 0.482 before the cut. The machine works this out for every possible cut point of all 6 features, and the cut on sex has the smallest weighted Gini, so it asks about sex first.
+
+::: {.callout-note collapse="true" title="More: Gini, the squared error of linear regression and the cross-entropy of logistic regression"}
+On one side, every point has a true label of 0 or 1, and the tree gives all of them the same share $p$. Measured with the squared error of linear regression, a point of class 1 is off by $(1-p)^2$ and a point of class 0 by $p^2$; on average,
+$$
+p\,(1-p)^2 + (1-p)\,p^2 = p\,(1-p)\,\big[(1-p) + p\big] = p\,(1-p),
+$$
+which is exactly half the Gini. Check: for the men, $p = 0.210$ and $p(1-p) = 0.166$, half of the Gini 0.332. Multiplying by 2 does not change which cut is better.
+
+Measured with the cross-entropy of logistic regression, a point of class 1 has loss $-\log p$ and a point of class 0 has $-\log(1-p)$; on average, $-p\log p-(1-p)\log(1-p)$, called the **entropy**. `DecisionTreeClassifier(criterion="entropy")` uses it; its curve has almost the same shape as Gini's, and it usually picks the same cuts.
+:::
 
 ## 5. Solving: Find the Cuts One at a Time
 
@@ -189,33 +208,13 @@ In the first row, 258.0 is $535 \times 0.482$ and 110.6 is $333 \times 0.332$. T
 
 The depth-4 tree uses more features: sex 0.482, class 0.248, age 0.146, number of siblings and spouses 0.071, fare 0.045, and number of parents and children 0.008.
 
+![Feature importance of two trees. Left: the depth-2 tree of Section 3. Right: the depth-4 tree chosen by cross-validation.](figures/note_v4_en/F7.svg){fig-alt="Left: sex 0.641, class 0.257, age 0.102, the others 0. Right: sex 0.482, class 0.248, age 0.146, siblings/spouse 0.071, fare 0.045, parents/children 0.008"}
+
 Importance has a size but no sign, unlike the coefficients of logistic regression. A value of 0.482 only says that the cut on sex is very useful. Whether being female makes survival more likely or less likely has to be read from the paths in the tree. The leaves on the female side have a higher survival rate.
 
-## 8. A Small Investigation: Can We Trust Importance
+A low importance does not mean a feature is useless. In the depth-4 tree the fare scores only 0.045, yet fare and class say much the same thing: among the training passengers, the median first-class fare is 66.6 and the median third-class fare only 8.1. Class is picked first and takes the credit the two share, so little is left for the fare. Remove class and grow a new depth-4 tree, and the importance of the fare rises to 0.155. So when you read importance, first ask whether another feature says the same thing.
 
-Suppose we read off these importances and then say: "The fare has an importance of only 0.045, so it has almost no effect on survival." Below we check this claim using the six steps of the assignment marking scheme: observe, idea, action, test, explain, limits. The analysis you do in the assignment is this kind of investigation.
-
-**Observe.** In the depth-4 tree, the importance of the fare is only 0.045, lower than that of the number of siblings. Yet the fares of the three classes are very different. Among training passengers, the median fare is 66.6 in first class, 19.5 in second class and 8.1 in third class. The importance of class is 0.248.
-
-**Idea.** The fare and the class may be saying almost the same thing. Their correlation coefficient is −0.58. If so, once the tree has used class, there is not much left for the fare to add. A low importance then does not mean the fare carries no information. We can check this as follows: remove class and see whether the fare takes over part of its role. Then remove sex as a comparison, because no feature is similar to it.
-
-**Action.** Change one thing at a time: remove one of the 6 features and keep everything else the same, still with a depth-4 tree. First remove the fare, then the class, then sex.
-
-**Test.** Use the same 5 folds (the same `kf`). With all 6 features, the accuracy is 0.822, and the five folds lie between 0.794 and 0.869.
-
-- Remove the fare: 0.809. Four folds go down and one goes up, with changes between −0.028 and +0.009, which is smaller than the differences between folds. This time we cannot say the accuracy changed.
-- Remove the class: 0.783, and all five folds go down (−0.009 to −0.075). The importance of the fare rises from 0.045 to 0.155.
-- Remove sex: 0.699, and all five folds go down, by 0.056 to 0.187. The importances of class and fare rise to 0.407 and 0.317, but the accuracy is still not recovered.
-
-![Feature importance of the depth-4 tree: with all features, with class removed, and with sex removed. The numbers in brackets are 5-fold cross-validation accuracy. The fare is shown in green.](figures/note_v4_en/F6.svg){fig-alt="Three groups of horizontal bars. With all features, the fare is 0.045. With class removed, the fare rises to 0.155 and the accuracy is 0.783. With sex removed, the fare is 0.317, class is 0.407 and the accuracy is 0.699"}
-
-**Explain.** At each cut the tree picks only the best feature at that moment. Class and fare both describe how wealthy a passenger is. Class is picked first and takes the credit the two share, so the fare keeps only a little. When class is removed, the fare steps in, and the accuracy drops only partly. No other feature can stand in for sex. After it is removed, the importances of the other features all rise, yet the accuracy still drops the most.
-
-**Limits.** What this investigation can say is limited to this data and a tree of this depth. Here the importance of the fare is low because class has already taken most of its information, and removing the fare alone leaves the accuracy almost unchanged. It cannot say that the fare has "no effect", and it cannot say that sex "caused" survival. The data records only who survived, and says nothing about what happened at the lifeboats. Evidence still missing: we tried only depth 4 and one split of the data. There is another way to measure how much one feature affects accuracy, described in Advanced Study 5.
-
-When you read importances, first look for features that say the same thing, because importance only reflects what this one tree used.
-
-## 9. More Than Two Categories: Iris
+## 8. More Than Two Classes: Iris
 
 The Titanic data has only two outcomes. Many problems have more categories. For example, Assignment 2 asks you to recognise the ten digits 0 to 9.
 
@@ -233,9 +232,9 @@ The first cut produces a completely pure part, and the Gini falls from 0.667 to 
 
 Cross-validation accuracy is highest at depth 2 (0.955). It is 0.947 for deeper trees. Under the same cross-validation, logistic regression also gives 0.947. After choosing depth 2, reading the test set once gives 0.947. The three species are well separated, so two cuts are enough, and we see no clear overfitting on this data.
 
-This tree uses only the petal width, and the importance of the petal length is 0. The correlation coefficient between petal length and petal width is 0.964. With only the petal length and the same depth 2, cross-validation accuracy is still 0.902. This is the same situation as in Section 8: two features say almost the same thing, and the one picked first takes the credit.
+This tree uses only the petal width, and the importance of the petal length is 0. The correlation coefficient between the two is 0.964, so the petal width, picked first, takes the credit, just like the fare in Section 7.2.
 
-## 10. A Number in the Leaf: Regression Tree
+## 9. A Number in the Leaf: Regression Tree
 
 So far, the leaf has held the proportion of each category. Suppose we want to predict a number, such as the fuel consumption of a car. We walk the same road again and change only one thing:
 
@@ -261,27 +260,9 @@ Let us read a regression tree of depth 2:
 
 > Displacement ≤ 198.5? Yes: horsepower ≤ 84.5? Yes: predict 32.2 mpg (101 cars). No: 24.6 mpg (75 cars). No: horsepower ≤ 127? Yes: 19.4 mpg (59 cars). No: 14.6 mpg (78 cars).
 
-The four leaves are four kinds of car. Cars with a small engine and low horsepower use the least fuel, and cars with a big engine and high horsepower use the most. In the depth-5 tree, the importance of displacement is 0.667, horsepower 0.178, year 0.096 and weight only 0.049. The correlation coefficient between displacement and weight is 0.93. Displacement was picked first and took the credit the two share, as in Section 8.
+The four leaves are four kinds of car. Cars with a small engine and low horsepower use the least fuel, and cars with a big engine and high horsepower use the most.
 
-## 11. Comparing with the Straight Line
-
-In this lesson we compare the tree with the straight line (logistic regression or linear regression) on five datasets. All of them use the same 5-fold cross-validation:
-
-| Data | Straight line | Tree |
-|---|---:|---:|
-| Four clusters (60, 30, 30, 40 points), accuracy | 0.487 | 0.975 (depth 3) |
-| Titanic, 6 features, accuracy | 0.783 | 0.822 (depth 4) |
-| Iris, 4 features, accuracy | 0.947 | 0.955 (depth 2) |
-| Breast lumps, 30 features, accuracy | 0.979 | 0.927 (depth 5) |
-| Fuel consumption, 6 features, RMSE (smaller is better) | 3.56 | 3.22 (depth 5) |
-
-In the four clusters, the class depends on how two features combine. When $x_1$ is small, a large $x_2$ means class 1, and when $x_1$ is large, it is the other way round. A straight line cannot say "look at one feature first, then at the other", but a tree asks exactly this kind of question. The Titanic has the same kind of combination: among women, the share who survived differs by more than a factor of two between classes. Fuel consumption falls along a curve as horsepower rises, and the steps of a tree can follow the curve. In the breast lumps, the tree is 0.05 behind the straight line. One possible reason is that the two classes are separated along a tilted direction, which a tree can only approximate with horizontal and vertical steps; this lesson does not test that. In the iris data the three species are far apart, so the two methods perform about the same.
-
-Before choosing a tree, check two things. One is whether the relationship is curved or the features combine. The other is whether you need a rule that you can hand to someone else to carry out. A tree does not need standardisation, because each question compares one feature with one number, and the scale does not change where the cut falls.
-
-A single tree is not very stable, and its accuracy is often lower than that of other methods. Combining many trees is a common and strong choice for tabular data. **Bagging** grows many trees, each from a slightly different sample of the data, and then takes a vote or an average. **Gradient boosting** grows trees one after another, and each new tree is built to fix what the previous trees together still get wrong. Common implementations are XGBoost and LightGBM. The combined model is more accurate. The way of reading a reason in a few sentences, as in Section 7, no longer works for it. Advanced Studies 3 and 4 explain why these methods work.
-
-## 12. Implementation: Using scikit-learn
+## 10. Implementation: Using scikit-learn
 
 The ideas are in the earlier sections, so this section only shows how to call the code. Assume the training data are already in `X_train` and `y_train`, and `kf` is the same 5-fold split. The Titanic loading and the two lines of preparation are in the data block of Lab 6.
 
@@ -303,30 +284,34 @@ On the Titanic, the cross-validated accuracy is 0.822. The importances, in the c
 - To predict a number, replace `DecisionTreeClassifier` with `DecisionTreeRegressor` and add `scoring="neg_root_mean_squared_error"` to the cross-validation. Put a minus sign in front of the result to read off the RMSE.
 - To see the shape of the tree, use `sklearn.tree.plot_tree(tree)`. To read the probability for one sample, use `tree.predict_proba`.
 
-## 13. One-Page Review
+## 11. One-Page Review
 
-If you read only one page, read this one. The last column shows the matching step in the assignment marking criteria. The path of this lesson is the same path the assignment asks you to follow.
+If you read only one page, read this one.
 
-| Step | What this lesson did | Evidence used to judge | Assignment step |
-|---|---|---|---|
-| Problem | A straight line is one cut, and one cut cannot separate the four clusters | The accuracy of one cut is about 0.5 | observe |
-| Inspiration, model | If one cut is not enough, cut again; a series of yes/no questions that each look at one feature, with the share in each leaf as the probability | After three cuts, 0.988; the passenger tree reads out "women and children first" | idea |
-| Loss, solving | Squared error → Gini, cross-entropy → entropy; we cannot try everything and there is no slope, so we use greedy search | First cut 0.482 → 0.356 | action |
-| Testing | A deep tree memorises the training set; use cross-validation when data are few and a validation set when data are many; do not land at either end; read the test set once | Training 0.994 against cross-validation 0.779; depth 4 is best | test |
-| Explaining | Read the path of one passenger; importance is computed from the drop in Gini | Three questions give the reason; 0.641, 0.257, 0.102 | explain |
-| Limits | Importance shows what this one tree used; features that say the same thing take each other's place | Remove class, and fare rises from 0.045 to 0.155 | limits |
-| Many classes, regression | For many classes, Gini is only generalised to $1-\sum p_k^2$; putting the mean in a leaf predicts a number | Iris 0.955; fuel consumption RMSE 3.22 against 3.56 | the same path once more |
+![The whole chain of this lesson.](figures/note_v4_en/F9.svg){fig-alt="A vertical flow chart of six steps: one cut is not enough; a chain of yes/no questions; pick a cut with Gini; cut one level at a time; choose the depth; read the tree"}
 
-## 14. Summary and Limits
+| Step | What this lesson did | Evidence |
+|---|---|---|
+| Problem | A straight line is one cut, and one cut cannot separate the four clusters | Best single cut 0.744 (a sloping cut) |
+| Model | If one cut is not enough, cut again; a chain of yes/no questions that each look at one feature, with the share in each leaf as the probability | After three cuts, 0.988; the passenger tree reads out "women and children first" |
+| Loss | Counting mistakes cannot see a pure block; measure how mixed each side is instead: Gini $= 2p(1-p)$, weighted by size | Cut on sex: 0.482 → 0.356 |
+| Solving | We cannot try every tree and there is no slope, so greedy: the best cut at each step | |
+| Test | A deep tree memorises the training set; little data: cross-validation, many data: a validation set; not at either end; read the test set once | Training 0.994 against cross-validation 0.779; depth 4 is best, test 0.810 |
+| Reading it | Read the path of one passenger; importance comes from the drop in Gini, and a low value does not mean useless | Three questions give the reason; 0.641, 0.257, 0.102; remove class, fare 0.045 → 0.155 |
+| Extending it | Many classes only generalise Gini to $1-\sum p_k^2$; a mean in each leaf makes a regression tree | iris 0.955; Auto MPG RMSE 3.22 against 3.56 |
+
+## 12. Summary and Limits
 
 Back to the opening question: if one cut cannot separate the classes, we keep cutting, and each cut looks at only one feature. Treat this kind of judgement as a model. The share in each leaf gives the probability, and Gini gives the loss. Greedy search gives the solution, and data that took no part in the fitting decide how many levels to cut. The grown tree can also be read: why one sample was judged this way, and what the whole tree mainly relies on. With more classes, only the way of writing Gini changes, and putting the mean in a leaf predicts a number.
 
 **After this lesson you can:** switch to the assumption "a series of yes/no questions that each look at one feature". Use it on a classification or regression problem when you do not want to assume in advance what shape the boundary has. Use it also when you need to give someone a rule that they can follow and that has a stated reason. You let the machine search for the rules one cut at a time. You use data that took no part in the fitting to decide how many levels to ask. You read out why it judged this way and which features it mainly relied on. You can also say where this way of reading, and this assumption, can go wrong.
 
+**When to use a tree.** Try a tree first when the relationship is curved, when features combine (among women, the share who survived differs by more than a factor of two between classes), or when you need a rule that someone else can carry out and that gives its reasons. A tree does not need standardisation: each question compares one feature with one number, so the scale does not change where the cut falls.
+
 **Transfer question.** A bank uses two features to decide whether a loan will default: annual income and existing debt. The approver's rule of thumb is "if income is below 20,000, or debt is more than half of income, the risk is high". Answer without calculating: of the two conditions in this rule, which one can be written directly as one question in a tree, and which cannot? What do you do about the one that cannot? The bank has 2 million historical records. Would you use a validation set or cross-validation to choose the depth? In the grown tree, the importance of "existing debt" is close to 0. Can you tell the bank that "debt does not need to be looked at"?
 
 ::: {.callout-note collapse="true" title="Suggested answer"}
-The first condition, "income < 20,000?", can be the question at the root node. The second condition, "debt > half of income?", uses two features at once (the ratio of debt to income), but a tree question looks at only one feature. So there are two options. You can first build a new feature, "debt / income", and then a depth of 2 is enough. Or you can use only the two original features. Then the tree needs many horizontal and vertical small steps to approximate this tilted line, so it must be much deeper. With 2 million records, use a validation set: it is cheap, and the validation set itself is large, so the result is stable. The importance of debt is close to 0, but you cannot say directly that it need not be looked at. First check whether it says the same thing as a feature the tree already used (for example the "debt / income" you built). Then, as in Section 8, remove one feature and test again.
+The first condition, "income < 20,000?", can be the question at the root node. The second condition, "debt > half of income?", uses two features at once (the ratio of debt to income), but a tree question looks at only one feature. So there are two options. You can first build a new feature, "debt / income", and then a depth of 2 is enough. Or you can use only the two original features. Then the tree needs many horizontal and vertical small steps to approximate this tilted line, so it must be much deeper. With 2 million records, use a validation set: it is cheap, and the validation set itself is large, so the result is stable. The importance of debt is close to 0, but you cannot say directly that it need not be looked at. First check whether it says the same thing as a feature the tree already used (for example the "debt / income" you built). Then, as in Section 7.2, remove one feature, grow a new tree and look again.
 :::
 
 **Where this method cannot be trusted.**
@@ -334,7 +319,7 @@ The first condition, "income < 20,000?", can be the question at the root node. T
 1. The boundary can only be horizontal and vertical. Each question looks at one feature, so when two classes are separated along a tilted line, the tree needs many small steps to approximate it. This makes it deep and prone to overfitting. On the 30 features of the breast lumps, it is 0.05 lower than logistic regression, and a tilted boundary may be one reason.
 2. Greedy search looks only one step ahead. When two cuts are useful only together, as in the four clusters when all four have the same number of points, greedy search cannot find the first cut (Section 5).
 3. A tree is sensitive to the training samples. With a different set of training samples, the cut points in the lower levels change (you will see this in the Advanced part of Lab 6). When you read a tree, do not treat every cut point as a firm conclusion.
-4. Feature importance shows only what this one tree used. Features that say the same thing take each other's place, so a low importance does not mean no information (Section 8).
+4. Feature importance shows only what this one tree used. Features that say the same thing take each other's place, so a low importance does not mean no information (Section 7.2).
 
 **30-second feedback.** After reading this lesson, please scan the code and leave anonymous feedback or a question. Tell us what you did not understand and where we went too fast. All of it helps us improve.
 
@@ -372,7 +357,7 @@ Now try it yourself:
 
 ## Advanced Study 2: Where Multi-Class Gini Comes From
 
-Section 4 derived the two-class Gini from squared error, and Section 9 wrote the multi-class $1-\sum_k p_k^2$ directly. Here we connect the two.
+Section 4 derived the two-class Gini from squared error, and Section 8 wrote the multi-class $1-\sum_k p_k^2$ directly. Here we connect the two.
 
 With $K$ classes, write the class of each sample as $K$ numbers, each 0 or 1. Put 1 in the $k$-th position if the sample belongs to class $k$, and 0 in the others. The leaf gives each position a predicted value, which is the share of each class, $p_1, \dots, p_K$. The squared error of one sample is the sum of the squared errors in these $K$ positions.
 
@@ -386,12 +371,14 @@ Entropy works the same way: the cross-entropy of logistic regression, extended t
 
 Now try it yourself:
 
-1. Compute the Gini of the middle leaf in Section 9 (36 versicolor irises and 3 virginica irises), and compare it with 0.142.
+1. Compute the Gini of the middle leaf in Section 8 (36 versicolor irises and 3 virginica irises), and compare it with 0.142.
 2. With three classes at one third each, Gini is 0.667. What is it with ten classes at one tenth each? As the number of classes grows, does the Gini of the most mixed case get larger or smaller?
 
 ## Advanced Study 3: Why Voting by Many Trees Is More Stable
 
-Section 11 mentioned bagging: draw many samples with replacement from the training set, grow one tree on each, and then take the average or the vote.
+A single tree is not very stable, and its accuracy is often lower than that of other methods. Combining many trees is a common and strong choice for tabular data. **Bagging** grows many trees, each from a slightly different sample of the data, and then takes a vote or an average. **Gradient boosting** grows trees one after another, and each new tree is built to fix what the previous trees together still get wrong. Common implementations are XGBoost and LightGBM. The combined model is more accurate. The way of reading a reason in a few sentences, as in Section 7, no longer works for it. This Study and the next explain why they work.
+
+Start with bagging: draw many samples with replacement from the training set, grow one tree on each, and then take the average or the vote.
 
 Look at one passenger. With a different set of training samples, the survival probability that the tree gives her changes (you will see in the Advanced part of Lab 6 that the cut points in the lower levels really do change). Treat this probability as a random number with variance $\sigma^2$. Each of $n$ trees gives one, and we take the average. If the $n$ numbers were unrelated to each other, the variance of the average would be $\sigma^2/n$. But the trees are all drawn from the same training set, so they are related. Let the correlation coefficient between any two trees be $\rho$. The variance of the average is
 $$
@@ -401,7 +388,7 @@ $$
 $$
 As trees are added, the second term gets smaller, but the first term $\rho\sigma^2$ does not shrink with $n$. Beyond a certain number of trees, adding more does not help. To be more stable, the trees must be less alike.
 
-A **random forest** is designed for this: at each cut, the best cut is chosen only among a few randomly picked features. Recall Section 8: class and fare say almost the same thing, class is always picked first, and every tree looks very similar. In a random forest, some nodes cannot pick class and must use fare. The trees are then less alike, and $\rho$ becomes smaller.
+A **random forest** is designed for this: at each cut, the best cut is chosen only among a few randomly picked features. Recall Section 7.2: class and fare say almost the same thing, class is always picked first, and every tree looks very similar. In a random forest, some nodes cannot pick class and must use fare. The trees are then less alike, and $\rho$ becomes smaller.
 
 Averaging can only reduce the wobble. It cannot correct a systematic error that every tree shares. This is why bagging uses trees with no depth limit: a single deep tree has a small systematic error and a large wobble, and the wobble is exactly what averaging handles. On the passengers, a single tree with no depth limit scores 0.779 in cross-validation, and bagging with 25 trees scores 0.800.
 
@@ -412,7 +399,7 @@ Now try it yourself:
 
 ## Advanced Study 4: Why Fitting Residuals Is Gradient Descent
 
-Section 11 mentioned gradient boosting. The first shallow tree makes a prediction, and the second tree fits how much the first one is still off (the residual: the true value minus the prediction). The two are added together, and then the third tree fits the remaining gap. Now let us see where the word gradient in the name comes from.
+Now gradient boosting. The first shallow tree makes a prediction, and the second tree fits how much the first one is still off (the residual: the true value minus the prediction). The two are added together, and then the third tree fits the remaining gap. Now let us see where the word gradient in the name comes from.
 
 Treat the predicted value of every training sample, $f_1, \dots, f_n$, as the parameters to adjust, with the squared error loss $L = \sum_i \frac12 (y_i-f_i)^2$. Take the derivative with respect to the $i$-th predicted value:
 $$
@@ -433,7 +420,7 @@ Now try it yourself:
 
 ## Advanced Study 5: What the Two Kinds of Importance Measure
 
-The limits part of Section 8 said that "how much one feature affects accuracy" can be measured in another way. Keep the model fixed, shuffle the values of one feature in the validation set at random, and see how much the accuracy drops. This is called **permutation importance**. The code is in the Advanced part of Lab 6, and here we cover only the idea.
+"How much one feature affects accuracy" can also be measured in another way. Keep the model fixed, shuffle the values of one feature in the validation set at random, and see how much the accuracy drops. This is called **permutation importance**. The code is in the Advanced part of Lab 6, and here we cover only the idea.
 
 Gini importance records credit at fitting time: each time the tree cuts on this feature, it makes one entry. Permutation importance is measured at judging time. All the other features are still there and only this one is scrambled, and we see how much worse the judgement becomes.
 
@@ -443,7 +430,7 @@ Now try it yourself:
 
 1. If class and fare are shuffled together, does the accuracy drop by more or by less than the sum of shuffling them one at a time? Why?
 2. Why does permutation importance use the validation set, and not the 401 people used for fitting?
-3. Section 8 "removes a feature and grows a new tree", while permutation importance "keeps the tree and shuffles one feature". How do the questions that the two methods answer differ?
+3. Section 7.2 "removes a feature and grows a new tree", while permutation importance "keeps the tree and shuffles one feature". How do the questions that the two methods answer differ?
 
 ## Advanced Study 6: Open Questions
 

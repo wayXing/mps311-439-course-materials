@@ -38,3 +38,5 @@
 .reveal .six > p{display:grid;grid-template-columns:repeat(3,auto);justify-content:center;gap:8px 12px;margin:0}
 .reveal .six span{text-align:center}
 .reveal #w-i5 svg{width:640px;max-width:640px!important}
+.reveal .fig-v3-gini{width:820px}
+.reveal .answer-box{margin:.5em auto 0;max-width:1000px;padding:.45em .9em;border-left:5px solid #C84B00;background:#fff6ef;font-size:.95em;line-height:1.4;text-align:left}

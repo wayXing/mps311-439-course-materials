@@ -40,6 +40,7 @@ title-slide-attributes:
 
 ::: {.stage .top}
 {{< include ../figures/note_en/I1x.html >}}
+
 :::
 
 ::: {.scan}
@@ -49,14 +50,14 @@ votes, questions, feedback
 :::
 
 ::: {.notes}
-约 4 分钟。先请大家扫码，页面整节课开着。logistic regression 用一条直线分类：直线的一边判 1、另一边判 0，就是在平面上切一刀。请一位学生指挥拖竖线：不管放在哪里都在 0.5 左右（最好 0.544），logistic 找到的最好斜线 0.51。问：一刀不够怎么办？等学生说“再切”，再勾选 “one more cut on each side”，左右各拖一条横线到 2.5 附近：0.988。
+约 4 分钟。先请大家扫码，页面整节课开着。logistic regression 用一条直线分类：直线的一边判 1、另一边判 0，就是在平面上切一刀。请一位学生指挥拖竖线：不管放在哪里都在 0.5 左右（最好 0.544）。再转角度斜着切：最好 0.744，只能把一个角上的那团切下来，另一边还混着三团。问：一刀不够怎么办？等学生说“再切”，再勾选 “switch to a chain of yes-or-no questions”，竖线拖到 2.5，左右各拖一条横线到 2.5 附近：0.988。
 :::
 
 ## What you will be able to do
 
 ::: {.stage .tight}
 ::: {.say .xl}
-Grow a tree of yes-or-no questions, choose how deep it goes, and **read why** it decides.
+Grow a tree of yes-or-no questions, choose how deep it goes, and **read** it.
 :::
 
 ::: {.flow}
@@ -69,7 +70,7 @@ Grow a tree of yes-or-no questions, choose how deep it goes, and **read why** it
 :::
 
 ::: {.notes}
-约 1 分钟。能力承诺：不想先猜边界的形状，或者要一份别人能照着执行、说得出理由的规则时，换成一串是非题这个假设。念五步路线。今天的检验多问两件事：它为什么这样判（解释），这个读法能不能信（边界），就是作业评分标准里的“解释”和“边界”。
+约 1 分钟。能力承诺：不想先猜边界的形状，或者要一份别人能照着执行的规则时，用一串是非题。念五步路线。
 :::
 
 ## [Problem:]{.stg} Three cuts, one feature each
@@ -106,52 +107,52 @@ Grow a tree of yes-or-no questions, choose how deep it goes, and **read why** it
 <small>Your turn</small>
 What did the machine ask first? Follow a 40-year-old man.
 :::
+
 :::
 
 ::: {.notes}
 约 3.5 分钟。数据：891 人的名单里 714 人有年龄，6 个特征（舱位、性别、年龄、兄弟姐妹/配偶、父母/子女、票价），分层 3:1，535 训练。两条假设（指着红字说）：每个问题只看一个特征和一个数；落在同一片叶子里的人，各类比例固定，按多数判，这个比例就是概率（predict_proba）。点名 decision tree、root、node、leaf、depth。40 岁男人：男性？是；≤ 13？否；304 人里 52 人生还，判遇难。机器自己选了性别做第一问，几乎就是“妇女和儿童先上”；三等舱女性 79 人只有 32 人生还，它多看出了舱位。
 :::
 
-## [Loss:]{.stg} A leaf predicts a share $p$. How wrong is it?
+## [Loss:]{.stg} Cut on sex: how good is this cut?
 
 ::: {.stage}
-![](../figures/slides_v2/S2.svg){.fig .fig-v2-s2b fig-alt="Three curves against the share p: the error rate is a tent, Gini 2p(1-p) and halved entropy are smooth hills; all zero at p = 0 and 1, largest at 0.5"}
+::: {.say .xl .center}
+Males: **70** survived, **263** died<br>Females: **147** survived, **55** died
+:::
 
-::: {.one}
-Linear regression's squared error: $p(1-p)^2 + (1-p)\,p^2 = p(1-p)$. Twice that: **Gini** $2p(1-p)$.
+::: {.ask}
+<small>Your turn</small>
+Give this cut a score. How would you score it?
 :::
 :::
 
 ::: {.notes}
-约 2.5 分钟。一边里每个点的标签是 0 或 1，模型都给 p。先让学生写：类 1 的点错多少？类 0 的呢？再按比例平均，就是这一行推导。乘 2 叫 Gini impurity，不改变哪一刀更好。logistic regression 的交叉熵平均下来是熵（图里除以 2 画在一起）。最直接的想法是错分率 min(p, 1−p)，图里的折线。一刀的得分：两边按点数加权平均，越小越好。
+约 1.5 分钟。不投票，邻座讨论 30 秒，请两三位说。常见的两种想法：数一数判错了几个；看两边是不是“纯”，各自几乎只剩一类。两种都写在白板上，下面两页各试一种。
 :::
 
-## [Loss:]{.stg} Error rate or Gini: does it matter?
-
-::: {.stage}
-::: {.ask .vote}
-<small>Vote on your phone</small>
-Error rate and Gini: will they always rank the cuts the same?
-
-::: {.opts}
-<span><b>A</b>yes, same ranking</span>
-<span><b>B</b>no, they can differ</span>
-:::
-:::
-:::
-
-::: {.notes}
-约 1 分钟。投票（右屏 Loss: Error rate or Gini → Open，30 秒，先不显示结果）；分歧大时邻座讨论一分钟再 Vote again，再 Reveal。请选 A 的同学说理由。答案在下一页拖动揭晓。
-:::
-
-## [Loss:]{.stg} Drag the cut: which score notices?
+## [Loss:]{.stg} Idea 1: count the mistakes
 
 ::: {.stage .top}
 {{< include ../figures/note_en/I2.html >}}
 :::
 
 ::: {.notes}
-约 2 分钟。100 个点，20 个蓝点挤在中间。错分率处处 0.200 不动：两边都是灰点多，错的总是那 20 个蓝点。Gini 在 5.75 最低（0.271，切之前 0.320）：右边 38 个全灰。错分率看不出切出了一块纯的，所以选 Gini；sklearn 默认也是它。
+约 2 分钟。错分率：每边按多数判，判错的比例。100 个点，20 个蓝点挤在中间。请一位学生拖：错分率处处 0.200 不动，因为两边都是灰点多、都判灰，错的总是那 20 个蓝点。可是切在 5.75，右边 38 个全是灰的，这一刀其实很有用，下一刀只要在左边接着切。数错几个看不出来。绿线是下一页的量法，它在 5.75 最低。
+:::
+
+## [Loss:]{.stg} Idea 2: how mixed is each side?
+
+::: {.stage}
+![](../figures/note_v4_en/F3.svg){.fig .fig-v3-gini fig-alt="Gini against p, the share who survived on one side: a hill, 0 at both ends, 0.5 at the middle; males p = 0.210 with Gini 0.332, females p = 0.728 with Gini 0.396"}
+
+::: {.one}
+Pick two people from one side at random: chance that one survived and one died $= p(1-p)+(1-p)p =$ **Gini** $2p(1-p)$.
+:::
+:::
+
+::: {.notes}
+约 2 分钟。从一边随手抽两个人（抽一个、放回去、再抽一个），一个生还一个遇难的机会有多大？先让学生说：全是一类时是 0，各半时最大。设这一边生还的占 p：先生还后遇难 p(1−p)，反过来 (1−p)p，加起来 2p(1−p)，叫 Gini impurity，越小越纯。一刀有两边，按点数加权平均，越小越好。sklearn 默认用它。和平方误差、熵的关系在 Note 第 4 节的展开框里，不在课上讲。
 :::
 
 ## [Loss:]{.stg} The passengers' best first cut
@@ -161,7 +162,7 @@ Error rate and Gini: will they always rank the cuts the same?
 :::
 
 ::: {.notes}
-约 1.5 分钟。机器把 6 个特征的每个切点都试一遍，按性别这一刀加权 Gini 最小：(333×0.332 + 202×0.396)/535 = 0.356。可以让学生核对桥：男性 p = 0.210，p(1−p) = 0.166，正好是 Gini 的一半。
+约 1.5 分钟。切之前 535 人生还 217，p = 0.406，Gini 0.482。按性别切开：男 p = 0.210，Gini 0.332；女 p = 0.728，Gini 0.396；加权 (333×0.332 + 202×0.396)/535 = 0.356。机器把 6 个特征的每个切点都这样算一遍，性别这一刀最小，所以先问性别。
 :::
 
 ## [Solution:]{.stg} How do we find the best tree?
@@ -169,24 +170,20 @@ Error rate and Gini: will they always rank the cuts the same?
 ::: {.stage}
 ![](../figures/slides_v2/S3.svg){.fig .fig-v2-s3 fig-alt="Weighted Gini of a cut on age for 30 men as the cut moves from 0 to 75: a staircase, flat between two ages and jumping when the cut passes a person"}
 
-::: {.ask}
-<small>Your turn</small>
-Linear regression had a formula; logistic regression walked downhill. Why do both fail here?
-:::
-
 ::: {.one}
-Flat, then a jump: **no slope**. 291 cuts, about $10^{17}$ trees of depth 3 → **greedy**: the best cut for this node, then the same on each side.
+291 cuts, about $10^{17}$ trees of depth 3: too many to try. **Greedy**: the best cut for this node, then the same on each side.
 :::
 :::
 
 ::: {.notes}
-约 3 分钟。让学生看图说：挪切点只要没越过一个人，两边不变，损失不变；越过时突然跳，没有坡度，梯度下降不知道往哪走。全试也不行：291 个候选切点，深度 3 有 7 个问题，约 1.8×10¹⁷ 种树。办法是贪心：只找这个节点最好的一刀，再在两边各做一遍。代价一句：只看一步，对称的四团点上找不到第一刀（Note 第 5 节）。
+约 2 分钟。全试不行：291 个候选切点，深度 3 有 7 个问题，约 1.8×10¹⁷ 种树。也没有坡可走：图里挪切点只要没越过一个人，损失不变，越过时突然跳。办法是贪心：只找这个节点最好的一刀，再在两边各做一遍。
 :::
 
 ## [Test:]{.stg} The tree can keep cutting. Should it?
 
 ::: {.stage .top}
 {{< include ../figures/note_en/I5.html >}}
+
 :::
 
 ::: {.notes}
@@ -234,13 +231,14 @@ With 50,000 data points, choose `max_depth` using…
 ![](../figures/slides_v2/S4.svg){.fig .fig-v2-s4 fig-alt="A depth-3 tree. One path is highlighted: not male, not first or second class, fare at most 20.8, ending in a leaf with 31 survived and 30 died"}
 
 ::: {.ask}
-<small>Your turn</small>
+<small>Think about it</small>
 Third-class women with a dearer ticket: 1 of 18 survived. Why would a dear ticket be bad news?
 :::
+
 :::
 
 ::: {.notes}
-约 3 分钟。深度 3 的树（交叉验证 0.806，为了读得短）。测试集里一位三等舱女性，24 岁，带两个父母或子女，票价 16.7：三问后落进 61 人、31 人生还的叶子，概率 0.508，判生还，离 0.5 很近。讨论第三问：三等舱票价高，多半是一张票上一大家子（平均同行 4.8 个亲属，票价低的 0.9 个），一大家子很难一起挤上救生艇。树没有“家庭人数”这个特征，它从票价里读出来了。logistic regression 是 6 个系数乘 6 个数再相加，读不出这几句话。
+约 2.5 分钟。深度 3 的树。测试集里一位三等舱女性，24 岁，票价 16.7：男性？否；头等或二等舱？否；票价 ≤ 20.8？是；落进 61 人、31 人生还的叶子，概率 0.508，判生还，离 0.5 很近。思考题（讨论 1 分钟，不必讲完）：三等舱票价高，多半是一张票上一大家子（平均同行 4.8 个亲属，票价低的 0.9 个），一大家子很难一起挤上救生艇。树从票价里读出了家庭大小。细节在 Note 第 7.1 节。
 :::
 
 ## [Test:]{.stg} Which features does the whole tree rely on?
@@ -254,10 +252,10 @@ Third-class women with a dearer ticket: 1 of 18 survived. Why would a dear ticke
 :::
 
 ::: {.notes}
-约 2.5 分钟。每一刀拿走的量 = 切之前的“样本数 × Gini”减去两边的：根 258.0 → 110.6 + 80.1，拿走 67.3；男性按年龄 10.7；女性按舱位 27.0。同一特征加起来，再除以总和 105.0，就是 feature_importances_，加起来为 1。它只有大小，没有方向：女性更容易生还，要回到树的路上读；logistic regression 的系数有正负号。
+约 2 分钟。每一刀让 Gini 降一些：根按性别拿走 67.3，男性按年龄 10.7，女性按舱位 27.0，一共 105.0。同一特征加起来除以总和，就是 feature_importances_：0.641、0.257、0.102，加起来为 1。它只有大小，没有方向。
 :::
 
-## [Test:]{.stg} Fare scores only 0.045. Is it useless?
+## [Think about it:]{.stg} Fare scores only 0.045. Is it useless?
 
 ::: {.stage}
 ::: {.ask .vote}
@@ -269,34 +267,15 @@ In the depth-4 tree, fare has importance 0.045. Remove fare and grow the tree ag
 <span><b>B</b>drop clearly</span>
 :::
 :::
-:::
 
-::: {.notes}
-约 1 分钟。深度 4 的树里票价的重要性只有 0.045。投票（右屏 Test: Fare scores only 0.045 → Open，30 秒，先不显示结果，再 Reveal）。请两边各说一个理由：选 B 的常说“票价和贫富有关”；选 A 的常说“重要性小就是没用”。答案在下一页。
-:::
-
-## [Test:]{.stg} Remove fare: what happens?
-
-::: {.stage}
-![](../figures/slides_v2/S12.svg){.fig .fig-v2-s12 fig-alt="Accuracy in each of the five folds with fare and without fare: means 0.822 and 0.809; four folds a little lower without fare, one a little higher; the folds themselves range from 0.794 to 0.869"}
-:::
-
-::: {.notes}
-约 1.5 分钟。揭晓投票：平均从 0.822 到 0.809，差 0.013。五折里四折略低、一折略高，每折变化在 −0.028 到 +0.009 之间；可五折本身就从 0.794 到 0.869，相差 0.075。所以几乎不变，答案 A。再问：可票价在三个舱位之间差那么多，它的重要性为什么这么低？
-:::
-
-## [Test:]{.stg} Why does fare score so low?
-
-::: {.stage}
-![](../figures/slides_v2/S13.svg){.fig .fig-v2-s13 fig-alt="Left: median fare by class, 66.6, 19.5 and 8.1. Right: the importance of fare is 0.045 with class in the data and 0.155 without class"}
-
-::: {.six}
-<span>observe: fare 0.045</span><span>idea: class says the same</span><span>action: remove one feature</span><span>test: same 5 folds</span><span>explain: class was picked first</span><span>limits: this tree only</span>
+::: {.fragment .answer-box}
+**A, barely changes** (0.822 → 0.809). **But not useless:** class was picked first and took the credit; remove class, and fare rises to 0.155.<br>
+Importance shows what this tree used, not what the data contains.
 :::
 :::
 
 ::: {.notes}
-约 2.5 分钟。先看左图：票价和舱位几乎是同一件事（相关 −0.58）。请学生猜：如果把舱位拿掉，票价会怎样？右图：票价的重要性从 0.045 升到 0.155，准确率 0.783。树每一刀只挑当前最好的特征，舱位先被挑中，拿走了两者共有的功劳。所以重要性说明的是这一棵树用了什么；读它之前，先看有没有说同一件事的特征。最后指着六个词：刚才三页就是一次调查，观察（票价 0.045）、想法（它和舱位说同一件事）、行动（拿掉一个特征）、检验（同样的 5 折）、解释、边界。作业要的就是这样一次调查。
+约 2 分钟，思考题，可以跳过。投票（右屏 Think about it: Fare scores only 0.045 → Open，30 秒，再 Reveal）。投票揭晓后点一下出答案框。答案 A：拿掉票价，交叉验证从 0.822 到 0.809，五折本身就从 0.794 到 0.869，几乎不变。可票价在三个舱位之间差很多（中位数 66.6、19.5、8.1），重要性为什么这么低？舱位先被挑中，拿走了两者共有的功劳；拿掉舱位，票价的重要性升到 0.155。所以重要性只说明这一棵树用了什么。Note 第 7.2 节有这一段；想在作业里写深一点的同学，Lab 6 课后有一次泰坦尼克号的小调查。
 :::
 
 ## [Model:]{.stg} Three classes: what changes?
@@ -313,44 +292,17 @@ $$1-\sum_k p_k^2$$
 :::
 
 ::: {.notes}
-约 2 分钟。先问：三类时树要改什么？叶子照样放各类比例、按多数判；只有 Gini 要推广，两类时 1 − p² − (1−p)² 就是 2p(1−p)。鸢尾花 112 朵训练花（37、37、38），Gini 0.667；第一刀花瓣宽度 ≤ 0.80 切出全纯的山鸢尾，第二刀 ≤ 1.75 再分；交叉验证深度 2 最高 0.955。作业 2 的十个数字：代码一行不改。花瓣长度重要性 0，但和宽度相关 0.964：和票价同一件事。
+约 2 分钟，不投票。先问：三类时树要改什么？叶子照样放各类的比例、按多数判；只有 Gini 要推广，两类时 1 − p² − (1−p)² 就是 2p(1−p)。鸢尾花 112 朵训练花（37、37、38），Gini 0.667；第一刀花瓣宽度 ≤ 0.80 切出全纯的山鸢尾，第二刀 ≤ 1.75 再分开另两种；交叉验证深度 2 最高 0.955。作业 2 的十个数字也是这样，代码一行不改（下一页）。细节在 Note 第 8 节。
 :::
 
-## [Model:]{.stg} Regression tree: a mean in each leaf (horsepower only)
+## [Model:]{.stg} A number in each leaf: regression tree
 
 ::: {.stage .top}
 {{< include ../figures/note_en/I4.html >}}
 :::
 
 ::: {.notes}
-约 2.5 分钟。要预测一个数（汽车的油耗，线性回归用过的那份数据）：叶子放落进来的车的平均值，损失是平方误差，求解仍是贪心，DecisionTreeRegressor。拖深度：深度 1 两级台阶 5.63，比直线 4.98 还差；深度 5 最低 4.23；再深台阶上下乱跳，训练 RMSE 降到 3.36，交叉验证升到 4.35：和乘客平面上的小矩形是同一种过拟合。
-:::
-
-## [Test:]{.stg} Where is a tree better than a straight line?
-
-::: {.stage}
-![](../figures/slides_v2/S10.svg){.fig .fig-v2-s10 fig-alt="Dot plot of 5-fold cross-validated accuracy, straight line against tree: four clusters 0.487 and 0.975, Titanic 0.783 and 0.822, iris 0.947 and 0.955, breast lumps 0.979 and 0.927. Auto MPG RMSE: straight line 3.56, tree 3.22"}
-
-::: {.ask}
-<small>Your turn</small>
-On which data is the tree better, and on which is it worse? What do those data have in common?
-:::
-:::
-
-::: {.notes}
-约 2 分钟。让学生说：四团点、乘客上要“先看一个、再看另一个”（同样是女性，舱位不同，生还比例差一倍多）；油耗随马力弯着下降；乳腺肿块大致沿一个斜面分开，直线一次切对，树要用很多台阶，差 0.05。所以关系弯、特征有组合，或者要一份能执行的规则时，考虑树；树只能横平竖直地切，两类沿斜面分开时就吃亏。树不需要标准化。很多棵树合起来：bagging（每棵用一批略不同的数据，再投票）、gradient boosting（一棵接一棵修误差，XGBoost、LightGBM），准确率高了，但读不出理由了。为什么有效见 Note 的 Advanced 3、4。
-:::
-
-## [Test:]{.stg} What these datasets have in common
-
-::: {.stage}
-::: {.say .center}
-**Tree better** where features combine (four clusters; "woman **and** third class") or the relation bends (Auto MPG).<br>**About the same** on iris: 0.955 against 0.947 is within the fold-to-fold wobble.<br>**Line better** on the breast lumps (0.05). A tree cuts only horizontally and vertically; a tilted boundary may be why.
-:::
-:::
-
-::: {.notes}
-约 1 分钟。揭晓上一页的问题。鸢尾花上的差别在折与折之间的波动以内，不说哪个更好。乳腺肿块那一条是可能的原因，这一讲没有检验，口头说清楚。很多棵树合起来（bagging、gradient boosting、XGBoost）放在这里一句带过。
+约 2 分钟，不投票，时间紧可以跳过；Lab 和作业都不考。要预测一个数（汽车的油耗，线性回归用过的那份数据）：叶子放落进来的车的平均油耗，损失是平方误差，求解仍是贪心，代码换成 DecisionTreeRegressor。拖深度：深度 1 只有两级台阶，交叉验证 RMSE 5.63，比直线 4.98 还差；深度 5 最低 4.23；再深台阶上下乱跳，训练 RMSE 降到 3.36，交叉验证升到 4.35，和乘客那里切太深是同一种过拟合。细节在 Note 第 9 节。
 :::
 
 ## Today in code
@@ -362,10 +314,12 @@ print(cross_val_score(tree, X_train, y_train, cv=kf).mean())  # CV accuracy
 tree.fit(X_train, y_train)                                    # grow the tree
 print(tree.feature_importances_)                              # Gini taken by each feature
 ```
+
+Ten classes (Assignment 2): **the same code**.
 :::
 
 ::: {.notes}
-约 1 分钟。四行，每行对应今天一段。三类不用改；预测一个数换成 DecisionTreeRegressor；树不需要标准化。Lab 6 在鸢尾花上动手：长树、看它在哪里出问题、怎么修。
+约 1 分钟。四行，每行对应今天一段。不止两类时代码一行不用改，作业 2 的十个数字也是。树不需要标准化。Lab 6 在鸢尾花上动手。
 :::
 
 ## What you can do now {.final-slide}
@@ -374,11 +328,10 @@ print(tree.feature_importances_)                              # Gini taken by ea
 ::: {.rows .tiny .chain}
 <div><span class="n">problem</span><div><b>One cut is not enough</b><p>cut again, one feature at a time</p></div></div>
 <div><span class="n">model</span><div><b>A decision tree</b><p>leaf shares are probabilities</p></div></div>
-<div><span class="n">loss</span><div><b>Gini, not error rate</b><p>it notices a pure block</p></div></div>
+<div><span class="n">loss</span><div><b>Gini</b><p>the purer both sides, the better</p></div></div>
 <div><span class="n">solution</span><div><b>Greedy</b><p>the best cut for this node, then each side</p></div></div>
 <div><span class="n">test</span><div><b>Choose max_depth on unseen data</b><p>little data: CV; much data: a validation set; never at an end</p></div></div>
 <div><span class="n">test</span><div><b>Read a path and the importance</b><p>why one case, which features overall</p></div></div>
-<div><span class="n">test</span><div><b>Check importance before you trust it</b><p>remove a feature and test again</p></div></div>
 :::
 
 ::: {.qr}
@@ -389,5 +342,5 @@ print(tree.feature_importances_)                              # Gini taken by ea
 :::
 
 ::: {.notes}
-约 0.5 分钟，课堂停在这一页。沿五步把整条路念一遍；检验的后两行就是作业要的解释和边界。课后 Lab 6，不预告下一讲。
+约 0.5 分钟，课堂停在这一页。沿五步把整条路念一遍。课后 Lab 6。多类（鸢尾花）和回归树在 Note 第 8、9 节；很多棵树（bagging、boosting）在 Advanced Study 3、4。
 :::

@@ -18,7 +18,7 @@ TR = {"方框里的数：生还 : 遇难（535 名训练乘客）": "numbers: su
       "全部 6 个特征": "all 6 features", "拿掉舱位": "without class", "拿掉性别": "without sex", "特征重要性": "feature importance",
       "头等或二等舱？": "1st or 2nd class?", "年龄 ≤ 13？": "Age ≤ 13?", "男性？": "Male?", "判为生还": "survived", "判为遇难": "died",
       "最下面一行是叶": "bottom row: the leaves", "根 →": "root →", "兄弟姐妹/配偶": "siblings/spouse", "父母/子女": "parents/children",
-      "性别": "sex", "舱位": "class", "年龄": "age", "票价": "fare", "（": " (", "）": ")", "是": "yes", "否": "no"}
+      "这一边生还的比例 p": "share who survived on this side, p", "两端全纯：Gini = 0": "pure at both ends: Gini = 0", "各半：Gini = 0.5（最大）": "half and half: Gini = 0.5 (largest)", "男性：p = 0.210": "males: p = 0.210", "女性：p = 0.728": "females: p = 0.728", "深度 2 的树": "the depth-2 tree", "深度 4 的树": "the depth-4 tree", "一刀不够": "One cut is not enough", "四团点：一刀最好 0.744（斜着切），三刀 0.988": "four clusters: best single cut 0.744 (sloping), three cuts 0.988", "一串是非题": "A chain of yes/no questions", "每问只看一个特征；叶子里的比例就是概率": "each question looks at one feature; the share in a leaf is the probability", "用 Gini 挑一刀": "Pick a cut with Gini", "两边越纯越好：按性别切，0.482 → 0.356": "the purer both sides, the better: cutting on sex, 0.482 → 0.356", "一层一层地切": "Cut one level at a time", "试不完所有树，就每一步挑最好的一刀（贪心）": "too many trees to try, so take the best cut at each step (greedy)", "选深度": "Choose the depth", "切太深会背训练集：深度 4 最好（0.822），测试集读一次 0.810": "too deep memorises the training set: depth 4 is best (0.822); test set once, 0.810", "读懂这棵树": "Read the tree", "一条路给出理由；重要性：性别 0.641、舱位 0.257、年龄 0.102": "a path gives the reason; importance: sex 0.641, class 0.257, age 0.102", "Gini 不纯度": "Gini impurity", "性别": "sex", "舱位": "class", "年龄": "age", "票价": "fare", "（": " (", "）": ")", "是": "yes", "否": "no"}
 if EN:
     import re as _re
     _set = matplotlib.text.Text.set_text
@@ -92,3 +92,48 @@ for ax, (imp, title) in zip(axes, panels):
     ax.set(xlim=(0, 0.75), title=title, xlabel="特征重要性")
     ax.invert_yaxis()
 save(fig, "F6")
+
+# F3: Gini against p, the share of class 1 on one side
+import numpy as _np
+pp = _np.linspace(0, 1, 201)
+fig, ax = plt.subplots(figsize=(6.4, 3.4))
+ax.plot(pp, 2 * pp * (1 - pp), color=G, lw=3)
+for xv, lab, dy in [(0.210, "男性：p = 0.210", 0.03), (0.728, "女性：p = 0.728", 0.03)]:
+    yv = 2 * xv * (1 - xv); ax.scatter([xv], [yv], color=B, s=40, zorder=5)
+    ax.text(xv, 0.14, f"{lab}\nGini = {yv:.3f}", ha="center", va="bottom", fontsize=10, color="#333")
+    ax.plot([xv, xv], [0.24, yv - 0.015], color="#999", lw=0.8)
+ax.text(0.5, 0.03, "两端全纯：Gini = 0", ha="center", fontsize=10, color="#555")
+ax.text(0.5, 0.535, "各半：Gini = 0.5（最大）", ha="center", fontsize=10, color="#555")
+ax.set(xlabel="这一边生还的比例 p", ylabel="Gini 不纯度", xlim=(0, 1), ylim=(0, 0.62))
+save(fig, "F3")
+
+# F7: importance of the depth-2 tree (0.641, 0.257, 0.102) and of the depth-4 tree
+imp2 = N["t2"]["imp"]
+fig, axes = plt.subplots(1, 2, figsize=(10.2, 3.0), sharex=True, gridspec_kw=dict(wspace=0.6))
+for ax, (imp, title) in zip(axes, [(imp2, "深度 2 的树"), (full, "深度 4 的树")]):
+    keys = [k for k in order if k in imp]
+    ax.barh([names[k] for k in keys], [imp[k] for k in keys], color=G, height=0.55)
+    for j, k in enumerate(keys):
+        ax.text(imp[k] + 0.01, j, f"{imp[k]:.3f}", va="center", fontsize=10)
+    ax.set(xlim=(0, 0.8), title=title, xlabel="特征重要性"); ax.invert_yaxis()
+save(fig, "F7")
+
+# F9: the whole chain in one picture (one-page review)
+from matplotlib.patches import Rectangle
+steps = [("一刀不够", "四团点：一刀最好 0.744（斜着切），三刀 0.988", B), ("一串是非题", "每问只看一个特征；叶子里的比例就是概率", G),
+         ("用 Gini 挑一刀", "两边越纯越好：按性别切，0.482 → 0.356", G), ("一层一层地切", "试不完所有树，就每一步挑最好的一刀（贪心）", G),
+         ("选深度", "切太深会背训练集：深度 4 最好（0.822），测试集读一次 0.810", "#C84B00"),
+         ("读懂这棵树", "一条路给出理由；重要性：性别 0.641、舱位 0.257、年龄 0.102", B)]
+fig, ax = plt.subplots(figsize=(12.6 if EN else 9.4, 4.2)); ax.axis("off"); ax.set_xlim(0, 10); ax.set_ylim(0, len(steps))
+heads = [ax.text(0, 0, h, ha="center", va="center", weight="bold", color=c, fontsize=13) for h, _, c in steps]
+fig.canvas.draw(); inv_t = ax.transData.inverted()
+BW = max(_np.ptp(inv_t.transform(t.get_window_extent())[:, 0]) for t in heads) + 0.5
+for k, (h, sub, col) in enumerate(steps):
+    yy = len(steps) - 1 - k
+    ax.add_patch(Rectangle((0.2, yy + 0.12), BW, 0.76, facecolor=col, alpha=0.14, edgecolor=col, lw=1.4))
+    heads[k].set_position((0.2 + BW / 2, yy + 0.5))
+    ax.text(0.5 + BW, yy + 0.5, sub, va="center", fontsize=12, color="#333")
+    if k < len(steps) - 1:
+        ax.annotate("", xy=(0.2 + BW / 2, yy - 0.12), xytext=(0.2 + BW / 2, yy + 0.12),
+                    arrowprops=dict(arrowstyle="->", color="#666", lw=1.2))
+save(fig, "F9")

@@ -241,23 +241,12 @@
       "sections": [
         "One cut is not enough: cutting again",
         "A tree of yes-or-no questions on the Titanic passengers",
-        "Scoring a cut: Gini, entropy and the error rate",
-        "Growing the tree greedily, and choosing its depth",
-        "Reading a tree: one passenger, and feature importance",
-        "Three classes, regression trees, and the code"
+        "Picking a cut with Gini, and growing the tree",
+        "Choosing the depth",
+        "Reading a tree: one passenger, and feature importance", "Three classes, and a number in each leaf",
+        "The code"
       ],
       "polls": [
-        {
-          "key": "error-vs-gini",
-          "slide": "Loss: Error rate or Gini: does it matter?",
-          "prompt": "Error rate and Gini: will they always rank the cuts the same?",
-          "options": [
-            "yes, same ranking",
-            "no, they can differ"
-          ],
-          "showLive": false,
-          "answer": 1
-        },
         {
           "key": "choose-depth-how",
           "slide": "Test: How do we choose max_depth?",
@@ -272,7 +261,7 @@
         },
         {
           "key": "fare-importance",
-          "slide": "Test: Fare scores only 0.045. Is it useless?",
+          "slide": "Think about it: Fare scores only 0.045. Is it useless?",
           "prompt": "Fare has importance 0.045. Remove it: the accuracy will…",
           "options": [
             "barely change",

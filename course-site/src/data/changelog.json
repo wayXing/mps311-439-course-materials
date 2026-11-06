@@ -5,6 +5,29 @@
   ],
   "releases": [
     {
+      "version": "0.3.14",
+      "date": "2026-11-06",
+      "title": "Lesson 6 made lighter: the core for everyone, the analysis optional",
+      "items": [
+        {
+          "type": "changed",
+          "text": "The Lesson 6 Notes now open with a short guide: Sections 1 to 7 and the one-page review are enough to follow the lecture, the lab and the assignment. Trees for more than two classes (iris) and regression trees stay in the Notes as Sections 8 and 9, as reading beyond the core; the worked investigation of feature importance is now a short paragraph, and averaging many trees (bagging, boosting) has moved into the Advanced Studies. The loss is now built from intuition: first count the mistakes a cut makes, then measure how mixed each side is, which gives the Gini."
+        },
+        {
+          "type": "fixed",
+          "text": "The first interactive figure now lets you tilt the cut as well as move it. A sloping cut does better than an upright one (0.744 against 0.544) but still cannot separate the four clusters; the Notes said otherwise. The three-cut version now has its own figure in Section 2."
+        },
+        {
+          "type": "changed",
+          "text": "The Lesson 6 slides are shorter (20 slides), with a slide each for three classes and for regression trees. The fare question now shows its answer after the vote."
+        },
+        {
+          "type": "changed",
+          "text": "Lab 6 is shorter: four tasks of about 40 minutes, in each of which you write down one number and one sentence. The deeper checks (does importance hold when you remove a feature, can the tree's probabilities be trusted) are optional challenges, and the Titanic investigation is an optional after-class task."
+        }
+      ]
+    },
+    {
       "version": "0.3.13",
       "date": "2026-11-06",
       "title": "Lesson 4: where cross-entropy comes from",
