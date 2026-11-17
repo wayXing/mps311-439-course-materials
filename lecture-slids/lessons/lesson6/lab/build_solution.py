@@ -6,6 +6,7 @@ Run: export IPYTHONDIR="$TMPDIR/course-ipython"; uv run --no-project --python 3.
 """
 from pathlib import Path
 import re
+import textwrap
 import nbformat
 from nbclient import NotebookClient
 ROOT = Path(__file__).resolve().parent
@@ -13,23 +14,25 @@ qmd = (ROOT / "lab_worksheet.qmd").read_text()
 body = qmd.split("# Advanced Study\n")[0]
 EXPECT = ["(112, 4) [37 37 38]", "0.955", "37 0.946", "0.696", "1 0.625", "3 0.839 0.795", "4 0.848 0.795",
           "4 0.714", "petal width     0.968", "petal length    0.032", "0.964",
-          "0.892", "petal length    0.986", "not sure (top probability below 0.95): 32", "wrong: 5", "0.947", "(535, 6) [318 217]", "0.822"]
+          "0.892", "petal length    0.986", "not sure (top probability below 0.95): 32", "wrong: 5", "0.84", "0.947", "(535, 6) [318 217]", "0.822"]
 FILLS = []   # this lab has no blanks
 cells = [nbformat.v4.new_markdown_cell("# Lab 6 solution: Grow a Tree, Choose Its Depth, Read It\nAll code as in the worksheet, run from top to bottom, with one possible answer after each Part.")]
 pos = 0
-pat = re.compile(r"(^#{1,3} [^\n]+$)|```python\n(.*?)```|::: \{\.callout-note collapse=\"true\" title=\"One possible answer\"\}\n(.*?)\n:::", re.S | re.M)
+pat = re.compile(r"(^#{1,3} [^\n]+$)|```python\n(.*?)```|::: \{\.callout-note collapse=\"true\" title=\"One possible answer\"\}\n(.*?)\n:::|::: \{\.content-hidden\}\n(.*?)\n:::", re.S | re.M)
 for m in pat.finditer(body):
     if m.group(1):
         cells.append(nbformat.v4.new_markdown_cell(m.group(1)))
     elif m.group(2) is not None:
-        code = m.group(2).rstrip()
+        code = textwrap.dedent(m.group(2)).rstrip()
         if "____" in code:                                # fill the blanks with the answers, in order
             for value in FILLS.pop(0):
                 code = code.replace("____", value, 1)
             assert "____" not in code
         cells.append(nbformat.v4.new_code_cell(code))
-    else:
+    elif m.group(3) is not None:
         cells.append(nbformat.v4.new_markdown_cell("**One possible answer.** " + m.group(3)))
+    else:
+        cells.append(nbformat.v4.new_markdown_cell(m.group(4)))   # Going further: one possible answer
 nb = nbformat.v4.new_notebook(cells=cells)
 nb.metadata["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}
 NotebookClient(nb, timeout=600, kernel_name="python3").execute()

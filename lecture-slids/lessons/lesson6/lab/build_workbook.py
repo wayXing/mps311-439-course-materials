@@ -6,6 +6,7 @@ Run: export IPYTHONDIR="$TMPDIR/course-ipython"; uv run --no-project --python 3.
 """
 from pathlib import Path
 import copy
+import textwrap
 import re
 import nbformat
 from nbclient import NotebookClient
@@ -15,6 +16,7 @@ body = qmd.split("# Lab 6:", 1)[1].split("# Advanced Study\n")[0]
 body = "# Lab 6:" + body
 # drop the folded possible answers; keep Challenge and Try with AI boxes as plain text
 body = re.sub(r'::: \{\.callout-note collapse="true" title="One possible answer"\}\n.*?\n:::\n', "", body, flags=re.S)
+body = re.sub(r'::: \{\.content-hidden\}\n.*?\n:::\n', "", body, flags=re.S)   # Going further answers: solution only
 def quote(m):                                      # quote the box text; leave its code blocks as code cells
     pieces = re.split(r"(```python\n.*?```)", m.group(2), flags=re.S)
     out = [f"> **{m.group(1)}**\n>"]
@@ -28,7 +30,7 @@ cells = [nbformat.v4.new_markdown_cell("The same lab as a web page, with the fol
 parts = re.split(r"```python\n(.*?)```", body, flags=re.S)
 for k, part in enumerate(parts):
     if k % 2 == 1:
-        cells.append(nbformat.v4.new_code_cell(part.rstrip()))
+        cells.append(nbformat.v4.new_code_cell(textwrap.dedent(part).rstrip()))   # code inside a list item is indented
         continue
     text = part.strip()
     if not text:

@@ -77,7 +77,7 @@
         "Derive cross-entropy loss function",
         "Implement logistic regression using gradient descent"
       ],
-      "assessment": "Exercise 1  (optional)\nRelease\n10/23/2026",
+      "assessment": "",
       "lectureDate": "2026-10-23",
       "labDate": "2026-10-27"
     },
@@ -116,7 +116,7 @@
         "Explore using other classification method in sklearn (eg, SVM)",
         "Explore advanced ensemble methods (XGBoost)"
       ],
-      "assessment": "Assessment 1 submission deadline\n11/6/2026",
+      "assessment": "Assessment 1 submission deadline\n11/6/2026\n\nExercise 1 (optional) release\n11/17/2026",
       "lectureDate": "2026-11-06",
       "labDate": "2026-11-17"
     },
@@ -135,7 +135,7 @@
         "Derive PCA from eigenvalue decomposition",
         "Implement PCA using SVD from scratch"
       ],
-      "assessment": "Exercise 1 (optional) submission deadline\n11/20/2026",
+      "assessment": "",
       "lectureDate": "2026-11-20",
       "labDate": "2026-11-24"
     },
@@ -188,7 +188,7 @@
         "Describe what convolutions detect in images",
         "Load pre-built CNN (eg, vgg-16) or other architecture to a classification problem"
       ],
-      "assessment": "Optional workshop on assessment 2\n12/9/2026\n\nExercise 1  (optional) feedback to student \n12/11/2026",
+      "assessment": "Optional workshop on assessment 2\n12/9/2026\n\nExercise 1 (optional) submission deadline\n12/11/2026, 2 pm",
       "lectureDate": "2026-12-11",
       "labDate": "2026-12-15"
     },

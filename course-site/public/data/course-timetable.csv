@@ -23,9 +23,7 @@ Programming: Python basics and visualization","Basic","• Set up Google Colab a
 • Explain why we use sigmoid function for probabilities
 • Describe when linear classification fails
 • Interpret confusion matrices and classification metrics, ROC curve, AUC","• Derive cross-entropy loss function
-• Implement logistic regression using gradient descent","Exercise 1  (optional)
-Release
-10/23/2026","2026-10-23","2026-10-27"
+• Implement logistic regression using gradient descent","","2026-10-23","2026-10-27"
 "5","Lecture + Lab","Discriminative analysis","classification","• Use sklearn's LinearDiscriminantAnalysis and QuadraticDiscriminantAnalysis
 • Explain why LDA assumes equal covariances
 • Describe when LDA vs QDA is appropriate
@@ -38,13 +36,15 @@ Release
 • Interpret tree structure and feature importance","• Calculate Gini impurity by hand
 • Explore using other classification method in sklearn (eg, SVM)
 • Explore advanced ensemble methods (XGBoost)","Assessment 1 submission deadline
-11/6/2026","2026-11-06","2026-11-17"
+11/6/2026
+
+Exercise 1 (optional) release
+11/17/2026","2026-11-06","2026-11-17"
 "7","Lecture + Lab","Principal component analysis (PCA)","Dimension reduction (non-supervise learning)","• Use sklearn's PCA for dimensionality reduction
 • Explain why PCA finds directions of maximum variance
 • Describe what eigenvalues represent
 • Determine optimal number of components","• Derive PCA from eigenvalue decomposition
-• Implement PCA using SVD from scratch","Exercise 1 (optional) submission deadline
-11/20/2026","2026-11-20","2026-11-24"
+• Implement PCA using SVD from scratch","","2026-11-20","2026-11-24"
 "8","Lecture + Lab","k-means and Hierarchical Clustering","Clustering (non-supervise learning)","• Apply K-means clustering using sklearn
 • Explain why K-means finds spherical clusters
 • Describe when hierarchical vs K-means is better
@@ -59,8 +59,8 @@ Release
 • Load pre-built CNN (eg, vgg-16) or other architecture to a classification problem","Optional workshop on assessment 2
 12/9/2026
 
-Exercise 1  (optional) feedback to student 
-12/11/2026","2026-12-11","2026-12-15"
+Exercise 1 (optional) submission deadline
+12/11/2026, 2 pm","2026-12-11","2026-12-15"
 "","Assessment","Assessment 2 submission deadline
 1/20/2027","","","","Assessment 2 submission deadline
 1/20/2027","",""

@@ -17,7 +17,9 @@ format:
 
 ## What this lab is for
 
-All the code is given. You run it, change the value marked `← change`, and look at what happens. After each Part, **write down** one number from your output and one sentence. The folded **Challenge** and **Try with AI** boxes are for when you finish early; the **Advanced Study** is for after class.
+All the code is given. You run it, change the value marked `← change`, and look at what happens. After each Part, **write down** one number from your output and one sentence.
+
+Each Part ends with a folded **Going further** box, like the ones in the assignments: open questions with no single answer. If you finish early, pick one that interests you and go deep; you do not have to do them all. The folded **Try with AI** box is also for when you finish early; the **Advanced Study** is for after class.
 
 ## How to work
 
@@ -83,8 +85,13 @@ Each box shows its question (leaves have none), its Gini, `samples` (how many tr
 The first question is petal width ≤ 0.8: yes gives a leaf of setosa only, `value = [37, 0, 0]`. The mixed leaf has `value = [0, 36, 3]`, so the tree gives 36/39 = 0.923 for versicolor.
 :::
 
-::: {.callout-tip collapse="true" title="Challenge (if you finish early)"}
-Add `criterion="entropy"` inside `DecisionTreeClassifier(...)` and draw the tree again. Is the first question the same? Does the cross-validated accuracy of Part 0 change?
+::: {.callout-tip collapse="true" title="Going further (optional)"}
+- Add `criterion="entropy"` inside `DecisionTreeClassifier(...)` and draw the tree again. Is the first question the same? Does the cross-validated accuracy of Part 0 change?
+- The mixed leaf holds 3 virginica among the versicolor. Draw the tree again with `max_depth=3`. Does the third question separate them? How many flowers are still in mixed leaves, and what does that tell you about these flowers?
+:::
+
+::: {.content-hidden}
+**Going further, Part 1.** Entropy gives the same first question (petal width ≤ 0.8) and the same cross-validated accuracy here: the two scores usually agree on the best cut. With depth 3 the mixed leaf is cut on petal length ≤ 4.95 into `[0, 34, 1]` and `[0, 2, 2]`, so the third question only half works: a few versicolor and virginica have almost the same petals, and no cut on one measurement can separate them.
 :::
 
 ## Part 2: How deep should the tree go? (15 minutes)
@@ -136,8 +143,33 @@ Depths 3 and 4 both give 0.795; I take 3, in the middle of the range, so the ran
 4. **Check:** the deep tree's picture has many small boxes, some around one or two flowers; the depth-3 tree has a few large boxes, all with straight horizontal and vertical edges.
 :::
 
-::: {.callout-tip collapse="true" title="Challenge (if you finish early)"}
-`max_depth` is one way to stop a tree. Another is `min_samples_leaf`: every leaf must keep at least that many flowers. In the first cell of this Part, replace `max_depth=None` with `min_samples_leaf=5`, then try `10`, `20` and `30`. Which value is best, and why does `30` suddenly fall so low? (Count the flowers of each species.)
+::: {.callout-tip collapse="true" title="Going further (optional)"}
+- Depths 2 to 5 all average between 0.77 and 0.80. Look at the five folds one by one instead of their mean:
+
+  ```python
+  for depth in [2, 3, 4, 5]:                                # ← change: the depths to compare
+      tree = DecisionTreeClassifier(max_depth=depth, random_state=0)
+      print(depth, cross_val_score(tree, X_sepal, y_train, cv=kf).round(2))   # the 5 fold scores, not their mean
+  ```
+
+  Is depth 3 really better than depth 5? How large would a difference have to be before you believe it?
+- `max_depth` is one way to stop a tree. Another is `min_samples_leaf`: every leaf must keep at least that many flowers. In the first cell of this Part, replace `max_depth=None` with `min_samples_leaf=5`, then try `10`, `20` and `30`. Which value is best, and why does `30` suddenly fall so low? (Count the flowers of each species.)
+- On the same two sepal measurements, a straight line does better than the best tree:
+
+  ```python
+  line = LogisticRegression(max_iter=1000)                  # a straight-line classifier, on the standardised columns
+  print(cross_val_score(line, X_train_s[:, :2], y_train, cv=kf).mean())   # the same 5 folds as the trees
+  ```
+
+  Why might one straight line beat many boxes here? (The picture from **Try with AI** helps.)
+:::
+
+::: {.content-hidden}
+**Going further, Part 2.** Fold scores (depth: folds): 2: 0.70 0.70 0.68 0.86 0.91; 3: 0.78 0.74 0.73 0.82 0.91; 4: 0.78 0.78 0.73 0.73 0.95; 5: 0.78 0.78 0.68 0.73 0.86. One fold has about 22 flowers, so one flower is about 0.045 of a fold's accuracy. Depth 3 beats depth 5 in three folds, ties in one and loses in one, each time by one to four flowers, while the folds of one depth range from 0.68 to 0.95: the evidence is weak, and depths 3 to 5 are about equally good. A difference should at least go the same way in most folds and be larger than the spread between folds before you believe it.
+
+`min_samples_leaf`: 5 gives 0.733, 10 gives 0.715, 20 gives 0.742, 30 gives 0.563. Each fold fits on about 90 flowers, about 30 of each species. With at least 30 flowers per leaf the tree can make only two or three leaves, so the two overlapping species cannot get their own leaves.
+
+Logistic regression scores 0.840 against 0.795 for the best tree. On the sepal plane the border between versicolor and virginica runs at a slant. A tree can only cut horizontally or vertically, so it has to build a slanted border out of many small steps, and each step is fitted on a few flowers. One slanted line matches that border directly.
 :::
 
 ## Part 3: Which measurements does the tree use? (8 minutes)
@@ -158,40 +190,58 @@ print(pd.Series(tree.feature_importances_, index=names).round(3))   # importance
 Petal width, 0.968: almost every cut that lowers the Gini is a cut on petal width.
 :::
 
-::: {.callout-tip collapse="true" title="Challenge: is petal length useless? (if you finish early)"}
-Petal length scores only 0.032. Take petal width away and grow the same tree again:
+::: {.callout-tip collapse="true" title="Going further (optional)"}
+- **Is petal length useless?** It scores only 0.032. Take petal width away and grow the same tree again:
 
-```python
-keep = [0, 1, 2]                                          # ← change: the columns to keep (here: all but petal width, column 3)
-X_less = X_train[:, keep]                                 # the training flowers with only these columns
-tree_less = DecisionTreeClassifier(max_depth=3, random_state=0)   # the same kind of tree as above
-print(cross_val_score(tree_less, X_less, y_train, cv=kf).mean())   # the same 5 folds as before
-tree_less.fit(X_less, y_train)                            # fit without the removed column
-print(pd.Series(tree_less.feature_importances_, index=np.array(names)[keep]).round(3))
-print(np.corrcoef(X_train[:, 2], X_train[:, 3])[0, 1])    # correlation of petal length and petal width
-```
+  ```python
+  keep = [0, 1, 2]                                          # ← change: the columns to keep (here: all but petal width, column 3)
+  X_less = X_train[:, keep]                                 # the training flowers with only these columns
+  tree_less = DecisionTreeClassifier(max_depth=3, random_state=0)   # the same kind of tree as above
+  print(cross_val_score(tree_less, X_less, y_train, cv=kf).mean())   # the same 5 folds as before
+  tree_less.fit(X_less, y_train)                            # fit without the removed column
+  print(pd.Series(tree_less.feature_importances_, index=np.array(names)[keep]).round(3))
+  print(np.corrcoef(X_train[:, 2], X_train[:, 3])[0, 1])    # correlation of petal length and petal width
+  ```
 
-What happens to the accuracy and to petal length's importance? The two petal measurements have correlation 0.964. Does an importance near 0 mean a measurement is useless?
+  What happens to the accuracy and to petal length's importance? Does an importance near 0 mean a measurement is useless? What would you write in a report about a feature with importance 0?
+- **How sure is the tree?** A leaf's shares are the tree's probabilities. This cell gives every training flower the probabilities from a tree that did not see it, and counts the flowers whose highest probability is below 0.95 (our own choice of "not sure"):
 
-*One possible answer:* without petal width, petal length takes over (0.986) and the accuracy is still 0.892. The two petal measurements say almost the same thing, so the tree picks one and the other gets little credit. An importance near 0 says only that this tree did not need the column, given the others.
+  ```python
+  tree = DecisionTreeClassifier(max_depth=2, random_state=0)   # ← change: try None
+  proba = cross_val_predict(tree, X_train, y_train, cv=kf, method="predict_proba")   # 3 probabilities per flower
+  print("not sure (top probability below 0.95):", (proba.max(axis=1) < 0.95).sum())
+  print("wrong:", (proba.argmax(axis=1) != y_train).sum())
+  ```
+
+  Run it at depth 2, then with `max_depth=None`. With no limit every flower looks sure, yet the tree is wrong more often. Why can you not trust a deep tree's probabilities?
 :::
 
-::: {.callout-tip collapse="true" title="Challenge: how sure is the tree? (if you finish early)"}
-A leaf's shares are the tree's probabilities. This cell gives every training flower the probabilities from a tree that did not see it, and counts the flowers whose highest probability is below 0.95 (our own choice of "not sure"):
+::: {.content-hidden}
+**Going further, Part 3.** Without petal width, petal length takes over (importance 0.986) and the cross-validated accuracy is still 0.892. The two petal measurements have correlation 0.964: they say almost the same thing, so the tree uses one and the other gets little credit. An importance near 0 says only that this tree did not need the column, given the others; a report should say "not used by this tree", not "useless".
 
-```python
-tree = DecisionTreeClassifier(max_depth=2, random_state=0)   # ← change: try None
-proba = cross_val_predict(tree, X_train, y_train, cv=kf, method="predict_proba")   # 3 probabilities per flower
-print("not sure (top probability below 0.95):", (proba.max(axis=1) < 0.95).sum())
-print("wrong:", (proba.argmax(axis=1) != y_train).sum())
-```
-
-Run it at depth 2, then with `max_depth=None`. With no limit every flower looks sure, yet the tree is wrong more often. Why can you not trust a deep tree's probabilities?
+At depth 2, 32 flowers are "not sure" and 5 are wrong. With no depth limit, no flower is "not sure" and 6 are wrong. A deep tree grows leaves of one or two flowers, and each such leaf gives a probability of 1.0, however few flowers it rests on. The probability then says how small the leaf is, not how often the tree is right.
 :::
 
 ## Part 4: The test set, once (3 minutes)
 
 Choose the depth you would use for all four measurements (Part 0 gave 0.955 at depth 2). Then read the test set once.
+
+::: {.callout-tip collapse="true" title="Going further (optional): before you read the test set"}
+With all four measurements, compare the tree with a straight line on the same folds:
+
+```python
+line = LogisticRegression(max_iter=1000)                  # a straight-line classifier, on the standardised columns
+print(cross_val_score(line, X_train_s, y_train, cv=kf).round(3))   # the 5 fold scores
+tree = DecisionTreeClassifier(max_depth=2, random_state=0)   # ← change: the depth you choose
+print(cross_val_score(tree, X_train, y_train, cv=kf).round(3))
+```
+
+Which would you choose, and why? What evidence would make you change your mind? Part 2 found the opposite on the sepal measurements: what is different about the two cases?
+:::
+
+::: {.content-hidden}
+**Going further, Part 4.** Logistic regression: 0.913 0.957 0.909 0.955 1.0 (mean 0.947). Tree at depth 2: 0.957 0.957 0.909 0.955 1.0 (mean 0.955). They differ in one fold, by one flower: on these folds the two are equally good. One could choose the tree because it can be read (two questions on petal width), or the line because it gives smoother probabilities. With all four measurements, petal width alone separates the species almost along one horizontal cut, which suits a tree; on the sepal plane the border is slanted, which suits a line. Which method is better depends on the shape of the border in the data, not on the method alone.
+:::
 
 ```python
 tree = DecisionTreeClassifier(max_depth=2, random_state=0)   # ← change: the depth you choose
