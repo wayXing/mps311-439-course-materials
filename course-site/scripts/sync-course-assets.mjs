@@ -138,3 +138,13 @@ if (await stat(assignmentTwoRoot).then(() => true).catch(() => false)) {
   await removePublicPdfLinks(assignmentTwoOutput);
   console.log('Synced Assignment 2 student brief and MNIST backup.');
 }
+
+// Exercise 1 (optional, not marked): only the student sheet; the teacher notes with answers stay out.
+const exerciseOneBrief = resolve(projectRoot, '../assessment/2026/exercise1/v20/exercise_1_derivations_en_v20.html');
+const exerciseOneOutput = join(projectRoot, 'public/assignments/exercise-one');
+if (await stat(exerciseOneBrief).then(() => true).catch(() => false)) {
+  await mkdir(exerciseOneOutput, { recursive: true });
+  await cp(exerciseOneBrief, join(exerciseOneOutput, 'brief.html'));
+  await removePublicPdfLinks(exerciseOneOutput);
+  console.log('Synced Exercise 1 student sheet.');
+}

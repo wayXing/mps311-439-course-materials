@@ -26,6 +26,8 @@ const expected = [
   'dist/index.html',
   'dist/assignment/index.html',
   'dist/assignment/2/index.html',
+  'dist/assignment/exercise-1/index.html',
+  'dist/assignments/exercise-one/brief.html',
   'dist/assignments/assignment-two/brief.html',
   'dist/assignments/assignment-two/mnist.npz',
   'dist/assignments/assignment-one/brief.html',

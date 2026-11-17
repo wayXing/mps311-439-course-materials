@@ -1,21 +1,25 @@
 ---
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { course } from '../data/course';
-import { assignmentOne, assignmentTwo } from '../data/assignment';
+import { assignmentOne, assignmentTwo, exerciseOne } from '../data/assignment';
 import { assignmentOneCompetition } from '../data/competition';
-interface Props { number: 1 | 2; }
+// 3 is Exercise 1: optional, not marked, handed in by email.
+interface Props { number: 1 | 2 | 3; }
 const { number } = Astro.props;
-const assignment = number === 1 ? assignmentOne : assignmentTwo;
+const isExercise = number === 3;
+const assignment = number === 1 ? assignmentOne : number === 2 ? assignmentTwo : exerciseOne;
+const name = isExercise ? 'Exercise 1' : `Assignment ${number}`;
 import { withBase } from '../lib/urls';
-const resources = withBase(`assignments/${number === 1 ? 'assignment-one' : 'assignment-two'}/`);
+const resources = withBase(`assignments/${number === 1 ? 'assignment-one' : number === 2 ? 'assignment-two' : 'exercise-one'}/`);
 ---
-<SiteLayout title={`Assignment ${number} · ${course.code}`} description={`Assignment ${number} brief, data, deadline and Blackboard submission information.`}>
+<SiteLayout title={`${name} · ${course.code}`} description={isExercise ? 'Exercise 1 (optional): derivation questions, deadline and how to hand in by email.' : `${name} brief, data, deadline and Blackboard submission information.`}>
   <section class="assignment-page shell">
     <header class="assignment-heading">
       <span class="eyebrow">{course.academicYear} · MPS311 / MPS439</span>
-      <nav class="assignment-tabs" aria-label="Choose assignment"><a href={withBase('assignment/')} aria-current={number === 1 ? 'page' : undefined}>Assignment 1</a><a href={withBase('assignment/2/')} aria-current={number === 2 ? 'page' : undefined}>Assignment 2</a></nav>
-      <h1>Assignment {number}</h1>
-      <p>{number === 1 ? 'California Housing Prices' : 'Handwritten Digit Recognition'}</p>
+      <nav class="assignment-tabs" aria-label="Choose assignment"><a href={withBase('assignment/')} aria-current={number === 1 ? 'page' : undefined}>Assignment 1</a><a href={withBase('assignment/2/')} aria-current={number === 2 ? 'page' : undefined}>Assignment 2</a><a href={withBase('assignment/exercise-1/')} aria-current={isExercise ? 'page' : undefined}>Exercise 1 <span class="optional">(optional)</span></a></nav>
+      <h1>{name}{isExercise && <span class="optional-tag">Optional</span>}</h1>
+      <p>{number === 1 ? 'California Housing Prices' : number === 2 ? 'Handwritten Digit Recognition' : 'Derivations: from assumption to loss, from loss to solution'}</p>
+      {isExercise && <p class="optional-note"><strong>This exercise is optional and not marked.</strong> It does not count towards your module grade. Hand it in if you would like written feedback on your derivations; it is also good practice for the derivation questions in the exam.</p>}
     </header>
     {number === 1 && <details class="competition-callout">
       <summary>
@@ -62,11 +66,11 @@ const resources = withBase(`assignments/${number === 1 ? 'assignment-one' : 'ass
     <div class="assignment-grid">
       <article class="assignment-card brief-card">
         <span class="step">01 · Start here</span>
-        <h2>Read the brief</h2>
-        <p>{number === 1 ? 'Build and improve a model to predict California housing prices.' : 'Compare classifiers, explore PCA and train a neural network to recognise handwritten digits.'} Read the tasks and marking standard before you begin.</p>
-        <a class="button button-primary" href={`${resources}brief.html`}>Open assignment brief <span aria-hidden="true">↗</span></a>
+        <h2>{isExercise ? 'Read the questions' : 'Read the brief'}</h2>
+        {isExercise ? <p>Derivation questions on Lessons 2 to 6: linear regression, Ridge and Lasso, logistic regression, LDA and decision trees. About 2 to 3 hours.</p> : <p>{number === 1 ? 'Build and improve a model to predict California housing prices.' : 'Compare classifiers, explore PCA and train a neural network to recognise handwritten digits.'} Read the tasks and marking standard before you begin.</p>}
+        <a class="button button-primary" href={`${resources}brief.html`}>{isExercise ? 'Open the exercise' : 'Open assignment brief'} <span aria-hidden="true">↗</span></a>
       </article>
-      <article class="assignment-card data-card">
+      {!isExercise && <article class="assignment-card data-card">
         <span class="step">02 · Get the files</span>
         <h2>Download the data</h2>
         {number === 1 ? <div class="data-links">
@@ -77,7 +81,7 @@ const resources = withBase(`assignments/${number === 1 ? 'assignment-one' : 'ass
           <p>Load MNIST with the code in the brief. If the download fails, use this backup file.</p>
           <div class="data-links"><a href={`${resources}mnist.npz`} download><span>mnist.npz <small>60,000 training + 10,000 test images · 11 MB</small></span><span aria-hidden="true">↓</span></a></div>
         </>}
-      </article>
+      </article>}
       {number === 1 && <article class="assignment-card writing-card">
         <span class="step">03 · Write the report <span class="optional">(optional help)</span></span>
         <h2>Writing the report</h2>
@@ -89,14 +93,21 @@ const resources = withBase(`assignments/${number === 1 ? 'assignment-one' : 'ass
           <a href={`${resources}report-guide/report_template.tex`} download><span>LaTeX template <small>11 pt, A4, 2 cm margins, compact headings</small></span><span aria-hidden="true">↓</span></a>
         </div>
       </article>}
-      <article class="assignment-card submission-card">
+      {isExercise ? <article class="assignment-card email-card">
+        <span class="step">02 · Hand in</span>
+        <h2>Send it by email</h2>
+        <p>Email your work to <a href="mailto:w.xing@sheffield.ac.uk">w.xing@sheffield.ac.uk</a>.</p>
+        <div class="filename-note"><strong>Subject: <code>MPS311 Exercise 1</code> or <code>MPS439 Exercise 1</code></strong><p>Use the module you take.</p></div>
+        <ul class="email-list"><li>Typed: one PDF.</li><li>Handwritten: clear photos or a scan, in question order.</li><li>Registration number at the top of the first page, not your name.</li></ul>
+        <p class="submission-footer">You will get short written feedback by email.</p>
+      </article> : <article class="assignment-card submission-card">
         <span class="step">{number === 1 ? '04' : '03'} · Hand in</span>
         <h2>Submit on Blackboard</h2>
         <p>Upload these two files to the <strong>Assignment {number} submission area</strong> in Blackboard:</p>
         <ul><li>One PDF report</li><li>One notebook (.ipynb or .py)</li></ul>
         <div class="filename-note"><strong>Use your registration number only.</strong><p>For example: <code>123456789.pdf</code> and <code>123456789.ipynb</code>. No name, version number or “final”.</p></div>
         <p class="submission-footer">All submissions are made on Blackboard.</p>
-      </article>
+      </article>}
     </div>
   </section>
   <script>
@@ -168,7 +179,11 @@ const resources = withBase(`assignments/${number === 1 ? 'assignment-one' : 'ass
   .writing-card .step .optional { font-weight: 400; text-transform: none; letter-spacing: 0; }
   .submission-card ul { display: flex; flex-wrap: wrap; gap: 12px 32px; padding-left: 20px; font-size: 14px; }
   .filename-note strong, .filename-note p { color: #b00020; font-weight: 750; }
-  .assignment-tabs { display: flex; gap: 8px; margin: 22px 0; }
+  .assignment-tabs { display: flex; flex-wrap: wrap; gap: 8px; margin: 22px 0; }
+  .assignment-tabs .optional { font-weight: 400; }
+  .optional-tag { display: inline-block; margin-left: 14px; padding: 4px 10px; vertical-align: middle; border: 1px solid #13745e; border-radius: 999px; color: #13745e; font-family: var(--font-sans); font-size: 14px; font-weight: 650; letter-spacing: .04em; text-transform: uppercase; }
+  .assignment-heading .optional-note { max-width: 760px; margin-top: 16px; padding: 14px 18px; border-left: 4px solid #13745e; border-radius: 8px; background: #eef8f4; color: #155b4b; font-size: 15px; line-height: 1.6; }
+  .email-list { padding-left: 20px; font-size: 14px; line-height: 1.7; }
   .assignment-tabs a { padding: 10px 16px; font-size: 13px; border: 1px solid var(--line); border-radius: 8px; }
   .assignment-tabs a[aria-current="page"] { color: white; background: var(--ink); }
   .assignment-tabs a:hover { border-color: var(--ink); }
