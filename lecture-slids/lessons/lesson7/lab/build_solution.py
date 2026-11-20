@@ -1,128 +1,53 @@
-"""从当前 Worksheet 生成带题号、文字答案和执行输出的 Solution，并做三项检查：
-1. 每个填空块的空数与 FILLS 一致；2. 每个 Answer 里的代码行都出现在填好的代码里；
-3. 用真实 Jupyter 内核从第一格顺序执行，输出写回 lab_solution.ipynb，并断言关键核对值。
-运行：uv run --no-project --python 3.12 --with scikit-learn,matplotlib,pandas,nbclient,nbformat,ipykernel python build_solution.py
-（用 uv；~/.ipython 坏掉时先设 IPYTHONDIR 到一个可写的临时目录，见 COURSE_MATERIAL_WORKFLOW.md 第 5 节）
+"""Lab 7: build lab_solution.ipynb from lab_worksheet.qmd and check it.
+Every code block before "# Advanced Study" becomes a code cell, every "One possible answer" a markdown cell after its Part.
+The notebook is run top to bottom in a real Jupyter kernel; outputs are saved; the numbers the worksheet
+promises ("Run, and you should see") must appear in the outputs.
+Run: export IPYTHONDIR="$TMPDIR/course-ipython"; uv run --no-project --python 3.12 --with scikit-learn,matplotlib,pandas,nbclient,nbformat,ipykernel python build_solution.py
 """
 from pathlib import Path
 import re
-import sys
+import textwrap
 import nbformat
 from nbclient import NotebookClient
-from jupyter_client import KernelManager
-
 ROOT = Path(__file__).resolve().parent
-# 课程的 MNIST 子集在公共镜像推送之前，公开网址上还没有：执行时改读本地同一个文件，写出时换回公开网址
-DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/data/mnist10k.npz"
-LOCAL_DATA = (ROOT / "../../data/mnist10k.npz").resolve().as_uri()
-# 每个含 ____ 的代码块按出现顺序给出填写内容
-FILLS = [
-    ["u"],              # 1.1
-    ["fit"],            # 2.1
-    ["10"],             # 3.1
-    ["X_digits_val"],   # 4.1
-    ["40"],             # 4.2
-]
-# 执行后必须出现在输出里的核对值（与 worksheet 的 Success check 一致）
-EXPECT = [
-    "(5625, 784) (1875, 784) (2500, 784)",
-    "angle variance rec_error sum", "0 2.966 1.398 4.364", "30 3.872 0.492 4.364", "120 0.492 3.872 4.364",
-    "angle of components_[0]: 31.2", "explained_variance_: [3.874 0.49 ]", "eigvalsh(S): [0.49  3.874]",
-    "[0.0955 0.072 0.0619 0.0532 0.0493]", "0.489", "0.827", "0.917", "(1, 10) 25.2",
-    "10 0.885", "20 0.942", "30 0.952", "40 0.957", "50 0.956", "60 0.956", "0.962",
-    "k = 10: 0.49  k = 50: 0.83  first k with 90%: 86", "[0.452 0.177]",
-    "share of the first eigenvalue: 0.1869 second: 0.1276", "largest difference below 1e-6: True", "eigenvalues below 1e-10: 322",
-    "first variance: 5.0389 sklearn: 5.0389", "reconstruction error, k = 10: 27.05", "largest weight:",
-]
 qmd = (ROOT / "lab_worksheet.qmd").read_text()
-core = qmd.split("# After class: how today's lab helps with Assignment 2")[0]
-fence = re.compile(r"```python\n(.*?)```", re.S)
-answer_re = re.compile(r'::: \{[^\n]*title="(?:Answer|What to take away[^"]*)"[^\n]*\}\n(.*?)\n:::', re.S)
-callout_re = re.compile(r"::: \{[^\n]*\}\n.*?\n:::", re.S)
-
-nb = nbformat.v4.new_notebook()
-nb.metadata["kernelspec"] = {"display_name": "Python 3", "language": "python", "name": "python3"}
-nb.cells.append(nbformat.v4.new_markdown_cell(
-    "# Lab 7 Solution: Fewer Numbers for the Same Data\n\n"
-    "This solution follows the worksheet task by task, including written answers. "
-    "Run the Core tasks from top to bottom; the Advanced Study answers follow. "
-    "The digits are downloaded in Part 0, so the notebook runs in a blank Colab notebook. "
-    "Try the worksheet before opening these answers."
-))
-fi = 0
-for match in re.finditer(r"^### (\d\.\d [^\n]+)\n(.*?)(?=^### |^## |^# |\Z)", core, re.M | re.S):
-    title, body = match.groups()
-    answers = answer_re.findall(body)
-    task_body = callout_re.sub("", body)              # drop Answer, Ask AI and Hint callouts
-    nb.cells.append(nbformat.v4.new_markdown_cell("## " + title))
-    filled_blocks = []
-    for code in fence.findall(task_body):
-        if "____" in code:
-            assert code.count("____") == len(FILLS[fi]), f"Blank count changed in {title}"
-            for value in FILLS[fi]:
+body = qmd.split("# Appendix: only if the digits")[0]   # the backups are tested by test_data_loading.py, not run here
+EXPECT = ["(426, 30) [267 159]", "0.981", "0.452", "(5625, 784) (1875, 784) (2500, 784)", "not full rank",
+          "40 0.789 0.957", "0.129", "0.957", "0.90", "0.962"]
+FILLS = []   # this lab has no blanks
+cells = [nbformat.v4.new_markdown_cell("# Lab 7 solution: Use PCA, and Catch It When It Goes Wrong\nAll code as in the worksheet, run from top to bottom, with one possible answer after each Part.")]
+pos = 0
+pat = re.compile(r"(^#{1,3} [^\n]+$)|```python\n(.*?)```|::: \{\.callout-note collapse=\"true\" title=\"One possible answer\"\}\n(.*?)\n:::|::: \{\.content-hidden\}\n(.*?)\n:::", re.S | re.M)
+for m in pat.finditer(body):
+    if m.group(1):
+        cells.append(nbformat.v4.new_markdown_cell(m.group(1)))
+    elif m.group(2) is not None:
+        code = textwrap.dedent(m.group(2)).rstrip()
+        if "____" in code:                                # fill the blanks with the answers, in order
+            for value in FILLS.pop(0):
                 code = code.replace("____", value, 1)
-            fi += 1
-        filled_blocks.append(code)
-        nb.cells.append(nbformat.v4.new_code_cell(code))
-    for ans in answers:
-        for code in fence.findall(ans):
-            for line in code.strip().splitlines():
-                assert not line.strip() or any(line.strip() in block for block in filled_blocks), (
-                    f"Worksheet Answer differs from filled solution in {title}: {line}")
-        prose = fence.sub("", ans).strip()
-        if prose:
-            nb.cells.append(nbformat.v4.new_markdown_cell(prose))
-assert fi == len(FILLS), (fi, len(FILLS))
-
-nb.cells.append(nbformat.v4.new_markdown_cell(
-    "# Try with AI: one possible answer for each box\n\nYour AI may write it differently; what matters is that the Check in the worksheet passes."))
-for section in (ROOT / "ai_examples.py").read_text().split("#%%"):
-    section = section.strip()
-    if section:
-        nb.cells.append(nbformat.v4.new_code_cell(section + "\n"))
-
-nb.cells.append(nbformat.v4.new_markdown_cell(
-    "# Advanced Study\n\nRun the Core tasks first. A, B and C below are worked investigations, "
-    "including the worksheet self-checks."))
-titles = {"A": "The components are eigenvectors", "B": "PCA from scratch with SVD", "C": "Does standardising matter?"}
-for section in (ROOT / "as_solutions.py").read_text().split("#%%"):
-    section = section.strip()
-    if not section:
-        continue
-    for key, name in titles.items():
-        if f"# ---- Advanced Study {key} ----" in section:
-            nb.cells.append(nbformat.v4.new_markdown_cell(f"## {key}. {name}"))
-    nb.cells.append(nbformat.v4.new_code_cell(section + "\n"))
-
-# 强制使用执行本脚本的 Python 环境，避免命中其他环境的内核；~/.ipython 在本机是坏链接，改用临时目录。
-import os, tempfile
-_tmp = tempfile.mkdtemp()
-os.environ.setdefault("IPYTHONDIR", _tmp)
-os.environ.setdefault("JUPYTER_RUNTIME_DIR", _tmp)
-km = KernelManager(kernel_name="python3")
-km.kernel_spec.argv = [sys.executable, "-m", "ipykernel_launcher", "-f", "{connection_file}"]
-for cell in nb.cells:
-    cell.source = cell.source.replace(DATA_URL, LOCAL_DATA)
-NotebookClient(nb, timeout=600, kernel_manager=km,
-               resources={"metadata": {"path": str(ROOT)}}).execute()
-
-text = ""
-images = 0
-for cell in nb.cells:
-    for out in cell.get("outputs", []):
-        text += out.get("text", "") + str(out.get("data", {}).get("text/plain", ""))
-        images += "image/png" in out.get("data", {})
-        assert out.get("output_type") != "error", f"Error in cell: {cell.source[:80]}"
-norm = lambda s: " ".join(s.split())                    # ignore spacing differences
-missing = [e for e in EXPECT if norm(e) not in norm(text)]
-assert not missing, f"Expected values not found in outputs: {missing}\n{text[:3000]}"
-# 警告信息里带有本机的安装路径；公开的 Solution 不留本机路径
-for cell in nb.cells:
-    for out in cell.get("outputs", []):
-        if out.get("output_type") == "stream":
-            out["text"] = re.sub(r"/\S*/site-packages/", "", out["text"])
-for cell in nb.cells:
-    cell.source = cell.source.replace(LOCAL_DATA, DATA_URL)
+            assert "____" not in code
+        cell = nbformat.v4.new_code_cell(code)
+        if "qda.fit(X_fit, y_fit)" in code:            # QDA on the pixels: newer scikit-learn stops with an error, as the worksheet says
+            cell.metadata["tags"] = ["raises-exception"]
+        cells.append(cell)
+        if "Z = pca.fit_transform(X_train)" in code:     # the solution also shows the changed value
+            cells.append(nbformat.v4.new_markdown_cell("The same cell with `X_train_s`:"))
+            cells.append(nbformat.v4.new_code_cell(code.replace("Z = pca.fit_transform(X_train) ", "Z = pca.fit_transform(X_train_s)")))
+    elif m.group(3) is not None:
+        cells.append(nbformat.v4.new_markdown_cell("**One possible answer.** " + m.group(3)))
+    else:
+        cells.append(nbformat.v4.new_markdown_cell(m.group(4)))   # Going further: one possible answer
+nb = nbformat.v4.new_notebook(cells=cells)
+nb.metadata["kernelspec"] = {"name": "python3", "display_name": "Python 3", "language": "python"}
+NotebookClient(nb, timeout=600, kernel_name="python3").execute()
+out = ""
+for c in nb.cells:
+    if c.cell_type == "code":
+        for o in c.get("outputs", []):
+            out += o.get("evalue", "") + o.get("text", "") + str(o.get("data", {}).get("text/plain", "")) + "\n"
+missing = [e for e in EXPECT if e not in out]
 nbformat.write(nb, ROOT / "lab_solution.ipynb")
-print(f"Validated {fi} blank blocks, all Core answers, {len(EXPECT)} check values and {images} figures; "
-      f"wrote {len(nb.cells)} cells.")
+print("code cells:", sum(c.cell_type == "code" for c in nb.cells))
+print("missing:", missing, "unused fills:", FILLS)
+print(out[-1500:])

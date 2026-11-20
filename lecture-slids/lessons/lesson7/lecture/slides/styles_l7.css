@@ -1,44 +1,6 @@
-/* extras for Lesson 7 only; base look comes from styles.css (copied from Lesson 2 via Lessons 4 to 6) */
-.reveal .flow.four{grid-template-columns:repeat(4,1fr)}
-.reveal .two.side{grid-template-columns:840px 1fr;gap:50px;align-items:center}
+/* Lesson 7 Slides V7 (2026-11-19); base look from styles.css. Generic pieces copied from Lesson 6. */
+.reveal .two.side{grid-template-columns:760px 1fr;gap:56px;align-items:center}
 .reveal .two.side .fig{width:100%}
-.reveal table{font-size:1.0em;margin:0 auto;border-collapse:collapse}
-.reveal table th,.reveal table td{padding:8px 22px;border-bottom:1px solid var(--rule)}
-.reveal table td:first-child,.reveal table th:first-child{text-align:left}
-.reveal pre,.reveal pre code{max-height:none!important;overflow:visible!important}
-.reveal pre{font-size:.74em}
-.reveal .rows.tiny{gap:6px}
-.reveal .rows.tiny>div{padding-top:8px;grid-template-columns:170px 1fr}
-.reveal .rows.tiny b{font-size:1.15em}
-.reveal .final-slide .takeaway{grid-template-columns:minmax(0,1fr) 380px;gap:50px}
-.reveal .final-slide .chain p{display:inline;margin-left:14px}
-.reveal .final-slide .chain b{display:inline}
-.reveal .formula.m3 mjx-container[display="true"]{font-size:1.0em!important}
-.reveal .tile{border:2px solid var(--rule);border-radius:14px;padding:30px 36px;background:var(--panel);font-size:1.3em;line-height:1.4}
-.reveal .tile span.math{display:inline;text-transform:none;font-size:1em;letter-spacing:0;color:inherit;font-weight:inherit}
-.reveal .wbox .cap{display:none}
-.reveal .wbox{zoom:1.18}
-.reveal #w-i1 #i1s{width:470px;max-width:470px!important}
-.reveal #w-i1 #i1b{width:300px;max-width:300px!important}
-.reveal #w-i1 .wrow,.reveal #w-i2 .wrow{justify-content:center}
-.reveal #w-i2 svg{width:230px!important}
-.reveal .fig-s1{width:1150px}
-.reveal .fig-s2{width:1250px}
-.reveal .fig-f4{width:1450px}
-.reveal .fig-f1{width:1300px}
-.reveal .fig-s1{width:1250px}
-.reveal .fig-s2{width:1400px}
-.reveal .formula.big mjx-container[display="true"]{font-size:2.2em!important}
-.reveal table.big,.reveal .bigtab table{font-size:1.35em}
-.reveal .two.side{grid-template-columns:900px 1fr}
-.reveal .fig-f4{width:1500px}
-.reveal #w-i3 #i3s{width:480px;max-width:480px!important}
-.reveal #w-i4 svg{width:200px!important}
-.reveal #w-i2 .wrow{flex-wrap:nowrap}
-.reveal .stage small{font-size:.75em;color:var(--muted);display:block;text-align:center}
-.reveal .fig-s1{width:1000px}
-.reveal .fig-s4{width:640px!important}
-/* live classroom: the QR on the opening slide and the vote boxes */
 .reveal .scan{position:absolute;right:40px;bottom:30px;width:200px;text-align:center;font-size:.6em;color:var(--muted);line-height:1.25}
 .reveal .scan img{width:180px;height:180px;display:block;margin:0 auto 6px}
 .reveal .scan b{display:block;font-size:1.3em;color:var(--ink)}
@@ -46,5 +8,60 @@
 .reveal .ask.vote .opts span{display:inline-flex;align-items:center;gap:12px}
 .reveal .ask.vote .opts b{display:inline-grid;place-items:center;width:44px;height:44px;border-radius:50%;background:var(--slate);color:#fff;font-size:.8em}
 .reveal .two.side .ask.vote .opts{flex-direction:column;gap:10px}
-.reveal .stage:has(.scan) .ask{margin-right:230px}
-.reveal .ask.vote small{font-size:24px;text-align:left;white-space:nowrap}
+.reveal .one{font-size:1.4em;text-align:left;line-height:1.35}
+.reveal .deriv{font-size:1.05em;line-height:1.25}
+.reveal .deriv p{margin:.25em 0}
+.reveal .props{font-size:1.15em;line-height:1.4}
+.reveal .props p{margin:.3em 0}
+.reveal table.corr{font-size:.82em;border-collapse:collapse;margin:0 auto}
+.reveal table.corr td,.reveal table.corr th{padding:6px 16px;text-align:right;border-bottom:1px solid var(--rule)}
+.reveal table.corr td.hi{color:#0072B2;font-weight:700}
+.reveal .fig-s1{width:600px}
+.reveal .fig-f6{width:1150px}
+.reveal .fig-f11{width:720px}
+.reveal .fig-f13{width:560px}
+.reveal .fig-f4{width:520px}
+.reveal .fig-f5{width:1480px}
+.reveal .fig-f67{width:1450px}
+.reveal .fig-f8{width:760px}
+.reveal .fig-f9{width:820px}
+.reveal #w-i1 svg{max-width:none!important}
+.reveal #w-i1 #i1s{width:560px}
+.reveal #w-i1 #i1b{width:330px}
+.reveal #w-i1 .cap{display:none}
+.reveal #w-i2 .cap{display:none}
+.reveal #w-i2 svg{width:220px!important}
+.reveal .wbox{font-size:.62em}
+/* fixes after the first screenshot pass */
+.reveal .fig-s1{width:auto;height:620px;max-width:100%}
+.reveal .two.side .fig.fig-s1{width:auto}
+.reveal .fig-f4{width:auto;height:600px}
+.reveal .two.side .fig.fig-f4{width:auto}
+.reveal .props{font-size:1.45em}
+.reveal .deriv{font-size:1.3em}
+.reveal .fig-f6top{width:1500px}
+.reveal .p2row{display:grid;grid-template-columns:auto 1fr;gap:60px;align-items:center;margin-right:240px}
+.reveal #w-i1 #i1s{width:500px}
+.reveal #w-i1 #i1b{width:300px}
+.reveal .wbox{font-size:.72em;padding:8px 12px;margin:0}
+.reveal #w-i2 svg{width:250px!important}
+.reveal .fig-f8{width:100%}
+.reveal .final-slide .rows>div{grid-template-columns:130px 1fr}
+.reveal pre{font-size:.72em}
+.reveal .props{font-size:1.3em}
+.reveal .deriv{font-size:1.15em}
+.reveal .fig-f5{width:1420px}
+.reveal #w-i2 svg{width:225px!important}
+.reveal .say.xl mjx-container{font-size:.95em!important}
+.reveal .wbox .cap{display:none!important}
+.reveal table.corr.big{font-size:1.05em}
+.reveal .flow.seven{grid-template-columns:repeat(7,1fr);gap:12px}
+.reveal .flow.seven div{font-size:1.0em;padding:26px 6px}
+.reveal .fig-f16{width:1000px}
+.reveal .one small{font-size:.75em;color:var(--muted)}
+.reveal .fig-f16{width:auto;height:560px}
+.reveal .say small{display:block;font-size:.65em;color:var(--muted);margin-top:.6em}
+.reveal .fig-s2{width:1420px}
+.reveal .fig-s4{width:1380px}
+.reveal .fig-s5{width:1300px}
+.reveal .two.side .fig.fig-s3{width:560px}

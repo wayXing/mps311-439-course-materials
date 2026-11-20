@@ -1,5 +1,5 @@
 ---
-title: "Lesson 7: Fewer Numbers for the Same Data"
+title: "Lesson 7: Many Numbers That Say One Thing"
 subtitle: "Principal component analysis (PCA)"
 author: "Dr Wei Xing"
 institute: "MPS311/439 Machine Learning<br>2026–27"
@@ -36,14 +36,23 @@ title-slide-attributes:
   data-background-opacity: "0.58"
 ---
 
-## One image of a digit is 784 numbers
+## [Problem:]{.stg} Do we need to store every number?
 
-::: {.stage}
-![](../figures/slides/S1.svg){.fig .fig-s1 fig-alt="A handwritten 6 as a 28 by 28 image with a green box in the middle, and the 49 numbers inside the box, between 0 and 1"}
+::: {.stage .top}
+![](../figures/note_en_v2/F6.svg){.fig .fig-f6top fig-alt="A handwritten 6 as a 28 by 28 grid of pixels; three rows are pulled out into long strips of numbers"}
 
-::: {.ask}
-<small>Your turn</small>
-How would you draw 5625 of these on one page? And QDA on all 784 numbers scores only **0.725** (validation, Lessons 5–6): why?
+::: {.p2row}
+<table class="corr">
+<tr><th>correlation</th><th>displ.</th><th>hp</th><th>weight</th></tr>
+<tr><td>cylinders</td><td class="hi">0.95</td><td class="hi">0.84</td><td class="hi">0.90</td></tr>
+<tr><td>displacement</td><td></td><td class="hi">0.90</td><td class="hi">0.93</td></tr>
+<tr><td>horsepower</td><td></td><td></td><td class="hi">0.86</td></tr>
+</table>
+
+::: {.say}
+Many numbers **repeat**. Can we store fewer and still rebuild the data?
+:::
+:::
 :::
 
 ::: {.scan}
@@ -51,345 +60,393 @@ How would you draw 5625 of these on one page? And QDA on all 784 numbers scores 
 <b>Scan now</b>
 votes, questions, feedback
 :::
-:::
 
 ::: {.notes}
-约 1.5 分钟。先请大家扫右下角（或右屏）的二维码，页面整节课开着。MNIST 子集一张图 28×28 = 784 个数。画不出来：两个特征才能画在平面上。QDA：Lesson 6 的拟合／验证划分上，不收缩只有 0.725，因为 784×784 的散布估不出来（每类约 560 张图）。今天不预测任何东西，只看像素，不看标签。
-:::
-
-## [Problem:]{.stg} What we want
-
-::: {.stage}
-::: {.say .xl .center}
-**Fewer numbers** per image, **little information lost**.
-:::
-
-::: {.ask}
-<small>Your turn</small>
-How could we measure "information" in a column of numbers? Hint: a pixel that is the same in every image tells us nothing.
-:::
-:::
-
-::: {.notes}
-约 1.5 分钟。期待：看它散得多开，也就是方差。点名 dimensionality reduction（降维），无监督学习：不用标签。
+约 3 分钟。先请大家扫码，页面整节课开着。一张手写的 6 是 28×28 = 784 个数；一辆车量了五个数：缸数、排量、马力、车重、加速时间。表里是 392 辆车前四个量两两的相关系数，0.84 到 0.95：大车缸多、排量大、马力大、也重，知道车重就大概知道排量。图里一笔写过去，相邻的像素一起变黑，四角总是白的。数在重复，就应该能少存一些。今天的问题：每个样本只存几个数，还能还原吗？存哪几个？这叫降维，不用标签。用处有三：压缩、把几百个量画出来、降维后再分类（作业 2 要用）。
 :::
 
 ## What you will be able to do
 
 ::: {.stage .tight}
 ::: {.say .xl}
-**Compress** many features into a few, **choose** how many to keep, and **draw** the data in two dimensions, without peeking at the validation set.
+Use **PCA** to compress data: say what it keeps and why the answer is an **eigenvector**, read what a component means, and choose how many to keep.
 :::
 
-::: {.flow .four}
-<div><span>1</span>Pick pixels?</div>
-<div><span>2</span>Combine pixels</div>
-<div><span>3</span>Choose how many</div>
-<div><span>4</span>The rule, and a picture</div>
+::: {.flow .seven}
+<div><span>1</span>Problem</div>
+<div><span>2</span>Model</div>
+<div><span>3</span>Loss</div>
+<div><span>4</span>Solution</div>
+<div><span>5</span>Test</div>
+<div><span>6</span>Application</div>
+<div><span>7</span>Extension and limits</div>
 :::
 :::
 
 ::: {.notes}
-约 1 分钟。能力承诺，念出四段路线。
+约 0.5 分钟。能力承诺。念路线：问题、模型、损失、求解、检验、应用，最后是扩展和局限。推导不在课上做，每一步给主干和结论。先在只有两个数的时候把道理想清楚。
 :::
 
-## [Pick pixels:]{.stg} Keep the pixels that vary most
+## [Problem:]{.stg} Two numbers per person. Keep only one?
+
+::: {.stage}
+::: {.two .side}
+![](../figures/slides_v7/S1.svg){.fig .fig-s1 fig-alt="Scatter plot of height against arm span for 200 people; the points lie along a rising diagonal band"}
+
+::: {.ask .vote}
+<small>Vote on your phone</small>
+Draw a line and drop each person onto it. Which line keeps the most?
+
+::: {.opts}
+<span><b>A</b>horizontal (height only)</span>
+<span><b>B</b>vertical (arm span only)</span>
+<span><b>C</b>along the cloud</span>
+<span><b>D</b>all the same</span>
+:::
+:::
+:::
+:::
+
+::: {.notes}
+约 1.5 分钟。200 个人的身高和臂展（手造），相关 0.94，点沿一条斜线挤着：两个数主要在一个方向上一起变。只许用一个数描述每个人：画一条线，每个点垂直落到线上，每人只剩他在线上的位置。投票（右屏 Problem: Two numbers per person → Open，30 秒，再 Reveal），下一页揭晓。
+:::
+
+## [Problem:]{.stg} Turn the line
 
 ::: {.stage .top}
-{{< include ../figures/note_en/I4.html >}}
+{{< include ../figures/note_en_v2/I1.html >}}
+:::
+
+::: {.notes}
+约 5 分钟。揭晓投票：答案 C。教师转线。0°：每人只留身高，散布 46.52，丢掉 51.15，只留住 48%，身高一样、臂展不同的人分不出来。90°：只留臂展，反过来。转到 46° 左右（或按 Direction of widest spread）：散布 94.71，丢掉 2.97，留住 97%。请学生看两根柱子：一个高另一个就低，和始终 97.68。学生得出：画一条线就是投影；沿点最长的方向，投影散得最开，丢掉的最少。剩下和它垂直的方向是“臂展减身高”，只占 3%。为什么垂直落下、不竖直或水平，两条最小二乘线不一样，在 Note 第 2 节的折叠框，课上不讲。转出来的，784 个数时方向多得转不完：下面按模型、损失、求解写下来，直接算。
+:::
+
+## [Model:]{.stg} Each point is a column of $d$ numbers
+
+::: {.stage}
+![](../figures/slides_v7/S2.svg){.fig .fig-s2 fig-alt="Left: the 200 centred people as grey points with one person marked by an orange arrow from 0. Right: that person as a column of two numbers, 9.4 and 6.8, labelled 2 by 1; one car as a column of five numbers, labelled 5 by 1; one handwritten 6 as a thin column of 784 grey pixels, labelled 784 by 1"}
+
+::: {.one}
+First **centre**: subtract the mean, so the cloud sits at 0. From here on $\mathbf x$ is the centred point, a column of $d$ numbers: $\mathbf x\in\mathbb R^{d\times 1}$.
+:::
+:::
+
+::: {.notes}
+约 2 分钟。先把“一个点”写成数学对象。左图：先中心化，每个量减去它的平均，点云的中心移到 0；从这里起 x 指中心化后的点。圈出的这个人：身高比平均高 9.4，臂展比平均长 6.8，他就是一列两个数，2×1。一辆车是一列五个数，5×1；一张手写的 6，把 28 行一行接一行排成一列，是 784×1。所以 x 是 d×1 的列向量，d 是每个样本有几个数：2、5、784。后面的式子对任何 d 都一样，图只能画 d = 2。
+:::
+
+## [Model:]{.stg} A direction is a column of length 1
+
+::: {.stage}
+::: {.two .side}
+![](../figures/slides_v7/S3.svg){.fig .fig-s3 fig-alt="A unit circle with a green arrow u of length 1 pointing up and to the right at about 46 degrees; grey dashed arrows 2u and minus u lie on the same dotted line"}
+
+::: {.props}
+A line through 0 is given by a direction $\mathbf u\in\mathbb R^{d\times 1}$.
+
+$\mathbf u$, $2\mathbf u$ and $-\mathbf u$ draw the **same line**: only the direction matters.
+
+So we fix its length:
+$$\mathbf u^\top\mathbf u = u_1^2+\dots+u_d^2 = 1$$
+:::
+:::
+:::
+
+::: {.notes}
+约 1.5 分钟。线要过 0（数据已经中心化），一条过 0 的线由一个方向决定，方向也是一个 d×1 的列：u。u、2u、−u 画出来是同一条线，长度不影响线，所以规定长度为 1：uᵀu = u₁² + … + u_d² = 1。转线组件里转到 46.4° 时，u = (0.689, 0.725)，0.689² + 0.725² = 1。规定长度的另一个原因下一页就用到：这样 z 才是点沿线走了多远。
+:::
+
+## [Model:]{.stg} Keep one number: $z = \mathbf u^\top\mathbf x$
+
+::: {.stage}
+![](../figures/slides_v7/S4.svg){.fig .fig-s4 fig-alt="Left: a green row of two numbers, 0.689 and 0.725, labelled u transpose, 1 by 2, times an orange column 9.4 and 6.8, labelled x, 2 by 1, equals a blue box 11.4, labelled z, 1 by 1. Right: the centred cloud, the green line along u, the orange point x, and the blue point z u on the line where a red segment from x meets the line at a right angle; z = 11.4 is marked along the line"}
+
+::: {.one}
+$z$ is how far $\mathbf x$ lies along $\mathbf u$. We rebuild $\mathbf x\approx z\mathbf u$: the **closest point on the line**, and the part we drop (red) is at a right angle.
+:::
+:::
+
+::: {.notes}
+约 2.5 分钟。每个点只存一个数 z。左边是算法：一行（uᵀ，1×2）乘一列（x，2×1）得一个数（1×1）：0.689×9.4 + 0.725×6.8 = 11.4。d 个数进去，一个数出来；d = 784 时也是一行乘一列。右边是几何：z 是 x 沿 u 走了多远；还原成线上的 zu。这个点正是 x 垂直落到线上的点，红线和线成直角，所以它是线上离 x 最近的点，丢掉的就是红线。这就是转线时的灰色短线。为什么取 z = uᵀx 就是最近点：对 z 求导一行就出来，在 Note 第 3 节和 Advanced Study 1 第 1 步。
+:::
+
+## [Model:]{.stg} Rebuild from $K$ directions
+
+::: {.stage}
+![](../figures/slides_v7/S5.svg){.fig .fig-s5 fig-alt="A tall orange column x, d by 1, is approximately z1 times a green column u1, plus z2 times u2, plus up to zK times uK, each d by 1; this equals a d by K green matrix U times a blue K by 1 column z"}
+
+::: {.one}
+**Model:** $\mathbf x \approx z_1\mathbf u_1+\dots+z_K\mathbf u_K = U\mathbf z$, with $z_k=\mathbf u_k^\top\mathbf x$ and the directions at right angles.<br>Store $K$ numbers instead of $d$. **Which directions?** The loss decides.
+:::
+:::
+
+::: {.notes}
+约 1.5 分钟。一个数不够时，用 K 个两两垂直、长度为 1 的方向，各算各的 z_k = u_kᵀx，还原是这些分量加起来。把 K 个方向并排放成一个 d×K 的矩阵 U，K 个得分是一列 z（K×1），还原就是 Uz。每个样本从存 d 个数变成存 K 个数；方向 U 所有样本共用，只存一次。模型到这里定了：剩下的问题是哪些方向最好，下一页用还原误差来量。
+:::
+
+## [Loss:]{.stg} How well does a direction rebuild the data?
+
+::: {.stage}
+::: {.say}
+**Reconstruction error** (the red bar):
+$$L(\mathbf u) = \sum_{i=1}^n\lVert\mathbf x_i - z_i\mathbf u\rVert^2 \;=\; (n-1)\big(\operatorname{tr}S - \mathbf u^\top S\,\mathbf u\big)$$
+$S = \frac{1}{n-1}\sum_i\mathbf x_i\mathbf x_i^\top$: the **covariance matrix**. $\;\mathbf u^\top S\mathbf u$: the spread along $\mathbf u$ (the blue bar).
+:::
+
+::: {.one}
+$\operatorname{tr}S$ is fixed, so **smallest error = widest spread**: the two bars.
+:::
+:::
+
+::: {.notes}
+约 2.5 分钟。损失就是还原误差：每个点和它的还原值之间的距离平方，加起来，就是组件里的红柱。给结论，不推：它等于 (n−1) 乘（tr S 减 uᵀSu）。S 是协方差矩阵，对角线是各个量的方差，非对角线是协方差；tr S 是对角线之和，点云的总散布，和方向无关；uᵀSu 是投影的方差，就是蓝柱。问一句：哪一项和方向有关？所以误差最小等于方差最大，两根柱子之和不变就是这个式子。展开的过程在 Note 第 5.1 节。
+:::
+
+## [Solution:]{.stg} The direction of widest spread
+
+::: {.stage}
+::: {.two .side}
+![](../figures/note_en_v2/F13.svg){.fig fig-alt="The height and arm span cloud with two arrows from the centre: a green arrow along the band, first direction, lambda 94.71, 97 percent; a short orange arrow at right angles, second direction, lambda 2.96, 3 percent"}
+
+::: {.say}
+Widest spread with $\mathbf u^\top\mathbf u = 1$:
+$$S\mathbf u = \lambda\mathbf u$$
+
+**Eigenvectors** of $S$; spread $= \lambda$, take the largest. Top $K$: error $=$ the dropped $\lambda$'s.
+
+Here **46.4°**, $\lambda = 94.71,\ 2.96$.
+
+<small>Advanced: derive it yourself (Note, Advanced Study 1).</small>
+:::
+:::
+:::
+
+::: {.notes}
+约 4 分钟。这一步最难，给结论，不推。问题：在 uᵀu = 1 下让 uᵀSu 最大。结论：最好的方向满足 Su = λu，也就是 S 的特征向量；左乘 uᵀ 得 uᵀSu = λ，沿它的散布就是特征值，所以取最大的那个。第二个方向和第一个垂直，在剩下的方向里散得最开，就是第二个特征向量；前 K 个特征向量最好，还原误差就是丢掉的特征值之和，留住的比例 λ/Σλ 叫解释方差比例。核对：46.4°，和转线一样；λ = 94.71、2.96，97% 和 3%。点名：主成分、得分、PCA。怎么推（拉格朗日乘子、为什么是全局最大、一个一个挑等于一次挑一组）留给 Advanced，请有兴趣的同学自己推一遍，Note 的 Advanced Study 1 有提示。
+:::
+
+## [Test:]{.stg} When does it fail?
+
+::: {.stage}
+::: {.two .side}
+![](../figures/note_en_v2/F4.svg){.fig .fig-f4 fig-alt="200 points in a ring with two perpendicular principal directions, keeping 55 percent and 45 percent"}
 
 ::: {.ask}
 <small>Your turn</small>
-10 of 784 pixels keep only **3.7%** of the variance. Why so little?
+A ring of points. Keep one direction: how much does it keep?
+:::
 :::
 :::
 
 ::: {.notes}
-约 3 分钟。现场拖：10、20、100、200 个像素各保住多少（10 个 3.7%，20 个 7.4%）。候选一：挑散得最开的像素（绿框），其余用平均值填，所以图大部分是一团模糊的平均数字。QDA 在这 10 个像素上 0.543。期待：像素太多，每个只占一小份；相邻像素一起变，挑出来的 10 个彼此重复；丢掉的 774 个里有它们没有的信息。毛病：每个新数只用上一个像素。想要：每个新数用上所有像素。
+约 2 分钟，口头。先让学生猜，再揭晓：55% 和 45%，留一个就丢一半。点不挤在任何一条线附近，就没有线可找；PCA 只找直线方向。两个特征值接近时第一主成分也不稳，不要读它的意思。真实数据里点挤在线附近吗？回到开头那张车的表。
 :::
 
-## [Combine pixels:]{.stg} A weighted sum is a projection
+## [Application:]{.stg} Back to the cars
 
 ::: {.stage}
 ::: {.two .side}
-![](../figures/slides/S3.svg){.fig fig-alt="A 2-D cloud of 200 points; each point drops straight down onto the horizontal axis; keeping x1 alone keeps 68% of the spread"}
+::: {.say}
+392 cars, five quantities. Standard deviations:
 
-::: {}
-::: {.formula .m3}
-$$
-z = u_1x_1 + u_2x_2,\qquad u_1^2+u_2^2=1
-$$
-:::
-
-::: {.muted .center}
-$x_1, x_2$: means subtracted. $\mathbf u=(u_1,u_2)$: a direction.
+<table class="corr">
+<tr><td>cylinders</td><td>1.7</td></tr>
+<tr><td>displacement</td><td>104.6</td></tr>
+<tr><td>horsepower</td><td>38.5</td></tr>
+<tr><td>weight (lb)</td><td class="hi">849.4</td></tr>
+<tr><td>acceleration (s)</td><td>2.8</td></tr>
+</table>
 :::
 
 ::: {.ask .vote}
 <small>Vote on your phone</small>
-Widest spread along the line, or smallest distance to it: same line?
+PCA on the raw car data: the first component is…
 
 ::: {.opts}
-<span><b>A</b>the same line</span>
-<span><b>B</b>different lines</span>
-<span><b>C</b>it depends</span>
-:::
+<span><b>A</b>about all five</span>
+<span><b>B</b>mostly weight</span>
+<span><b>C</b>mostly horsepower</span>
+<span><b>D</b>not sure</span>
 :::
 :::
 :::
 :::
 
 ::: {.notes}
-约 3 分钟。先问：只留 x₁ 之外，你会选哪个方向、用什么标准？等学生说出两个标准（散得开、丢得少）再投票（右屏 Combine pixels: A weighted sum is a projection → Open，30 秒，先不显示结果）。分歧大时让邻座讨论一分钟再 Vote again（本讲只在这一题这样做），再 Reveal；请选 B 的人说理由。答案 A，下一页转线看到两者都在约 31°，再下一页用勾股定理说明为什么。先在两个特征上想清楚。像素的组合 = 每个像素一个权重，乘起来加。二维时就是把点投影到一条线上，z 是点在线上的位置。只留 x₁（候选一的二维版）= 投影到横轴，保住 68%。两个合理的标准：投影后散得开；丢掉的少（点到线的距离平方，还原误差）。
+约 1.5 分钟。392 辆车，五个量。另有一列油耗（每加仑跑几英里），先放在一边，PCA 不用它。投票（右屏 Application: Back to the cars → Open，30 秒，再 Reveal），下一页揭晓。
 :::
 
-## [Combine pixels:]{.stg} Turn the line: spread against error
-
-::: {.stage .top}
-{{< include ../figures/note_en/I1.html >}}
-:::
-
-::: {.notes}
-约 4 分钟。现场转。先请学生猜哪个方向最好，再点“散得最开的方向”：约 31°，散布 3.85，保住 89%；还原误差此时最小，0.49。两根柱子加起来总是 4.34。只看 x₂（90°）只有 32%。
-:::
-
-## [Combine pixels:]{.stg} Widest spread = smallest error
+## [Application:]{.stg} Standardise first
 
 ::: {.stage}
-::: {.two .side}
-![](../figures/slides/S4.svg){.fig .fig-s4 fig-alt="One point, the centre and the green line: the distance to the centre is the hypotenuse (fixed); the part along the line is the spread; the part to the line is the error"}
+![](../figures/note_en_v2/F5.svg){.fig .fig-f5 fig-alt="Three panels. Left: without standardising, the first component is almost only weight, 0.99, keeping 99.8 percent. Middle: after standardising, cylinders 0.47, displacement 0.48, horsepower 0.47, weight 0.46, acceleration minus 0.33, keeping 81 percent. Right: each car's score on the first component against its fuel economy, falling, correlation minus 0.82"}
 
-::: {.say}
-Pythagoras, point by point: spread + error is fixed. So the widest-spread direction is also the smallest-error one: the **first principal component**.
-:::
+::: {.one}
+Units should not decide the answer. PC1 = **how big the car is** (81%), and it tracks fuel economy ($r = -0.82$) without ever seeing it.
 :::
 :::
 
 ::: {.notes}
-约 2 分钟。每个点到中心的距离平方 = 在线上那段的平方 + 到线的距离平方；加起来是固定的总散布，所以“散得最开”和“丢得最少”是同一件事。点名 first principal component。
+约 4.5 分钟。揭晓：答案 B，车重权重 0.993，一个主成分留住 99.8%。车重以磅计，标准差 849，数大散布就大，压过了其余所有量；99.8% 只反映车重的数大。单位不该决定答案：先标准化（减平均、除以标准差）。中图：前四个权重几乎相等，加速时间 −0.33：“车有多大、多猛”，留住 81%；第二主成分主要是加速时间，14%；两个 95%，五个数换两个基本不丢。右图：拿出放在一边的油耗，相关 −0.82，和单看车重 −0.83 差不多。PCA 没看油耗，找出的是五个量共同在说的那件事。单位相同（身高臂展、像素）可以不标准化。
 :::
 
-## [Combine pixels:]{.stg} A second number: what should it do?
+## [Application:]{.stg} An image is a row of 784 numbers
 
 ::: {.stage}
-::: {.say .xl .center}
-The first direction keeps 89%. We want a second number.
+![](../figures/note_en_v2/F7.svg){.fig .fig-f67 fig-alt="The mean training image, and the first six principal components as red and blue 28 by 28 weight images, with explained variance ratios 9.6, 7.2, 6.2, 5.3, 4.9 and 4.4 percent"}
+
+::: {.one}
+Each image is one row, each pixel one column: the same table as the cars. **Each principal component is itself an image**: red where it adds ink to the mean image, blue where it takes ink away.
+:::
+:::
+
+::: {.notes}
+约 2 分钟。28×28 一行一行接起来是 784 个数；每张图一行、每个像素一列，和车的表一样，只是 5 列变 784 列。像素同单位，不标准化；中心化就是减去平均图。数字标签先放一边。5,625 张训练图。S 是 784×784，每个特征向量 784 个数，排回 28×28 就是一张图：红正蓝负。第一主成分像一个圈，得分大像 0，得分小像 1。它只留住 9.6%，远不如身高臂展的 97%：要多留几个。
+:::
+
+## [Application:]{.stg} How many to read the 6?
+
+::: {.stage}
+::: {.say .xl}
+$$\hat{\mathbf x} = \bar{\mathbf x} + z_1\mathbf u_1 + z_2\mathbf u_2 + \dots + z_K\mathbf u_K$$
 :::
 
 ::: {.ask .vote}
 <small>Vote on your phone</small>
-Which line should give the second number?
+How many components until you can read the 6?
 
 ::: {.opts}
-<span><b>A</b>the next-widest line</span>
-<span><b>B</b>the x2 axis</span>
-<span><b>C</b>the line uncorrelated with the first</span>
+<span><b>A</b>2</span>
+<span><b>B</b>10</span>
+<span><b>C</b>50</span>
+<span><b>D</b>200</span>
 :::
 :::
 :::
 
 ::: {.notes}
-约 2 分钟。投票（右屏 Combine pixels: A second number → Open，30 秒，再 Reveal）；请选 A 的人说理由，再问选 C 的人：怎么检查“不重复”？答案在下一页揭晓（C）。期待：不要重复第一个；检查办法：两个数的相关系数，接近 ±1 就是在重复。下一页转第二条线。
+约 1 分钟。还原公式：平均图，加上每个主成分乘这张图在它上面的得分，只加前 K 个。存一张图只要存 K 个得分，平均图和主成分大家共用。投票（右屏 Application: How many to read the 6? → Open，30 秒，再 Reveal），没有唯一答案，下一页拖 K 看。
 :::
 
-## [Combine pixels:]{.stg} Turn a second line: does it repeat the first?
+## [Application:]{.stg} Drag $K$
 
 ::: {.stage .top}
-{{< include ../figures/note_en/I3.html >}}
+{{< include ../figures/note_en_v2/I2.html >}}
 :::
 
 ::: {.notes}
-约 3 分钟。起点 76°：散布 2.18 最大，但与第一个数相关 0.94，几乎在说同一件事；转到 90°（x₂）：0.86；转到 121°（约垂直）：相关约为 0（0.01），说的几乎全是新的，散布 0.49 正是没保住的 11%。
+约 3 分钟。先 K = 0：只有平均图，误差 58.4。K = 2：还是一团，57.7。K = 10：25.2，大致看出 6。K = 20：17.6。K = 50：10.9，和原图差不多。K = 100：6.2。右边误差图，K 越大红蓝越淡，剩下笔画边缘。换一张图看看。“认得出”以说出是几为准。
 :::
 
-## [Combine pixels:]{.stg} Perpendicular, one after another: PCA
-
-::: {.stage}
-![](../figures/slides/F4.svg){.fig .fig-f4 fig-alt="The mean image and the first six principal components of the MNIST subset as 28 by 28 red-blue weight images, keeping 9.6%, 7.2%, 6.2%, 5.3%, 4.9% and 4.4% of the variance"}
-
-::: {.say .center}
-Each **principal component** is 784 pixel weights. The share it keeps: the **explained variance ratio**. (On 784 pixels the first keeps 9.6%, not 89%: the variance is spread over many directions.)
-:::
-:::
-
-::: {.notes}
-约 2.5 分钟。点名 principal components、PCA。每个方向与前面的都垂直，在剩下的方向里找散得最开的；784 个像素最多 784 个。第 3 节“保住 89%”就是解释方差比例（那是两个特征的点云；这里第一个主成分只有 9.6%）；前 k 个加起来是累计比例。PC1 像一个红圈、中间蓝：得分大像 0，得分小像 1。还原：平均图 + 每个主成分乘以这张图的得分，只加前 k 个。只用 5625 张拟合图学。
-:::
-
-## [Choose how many:]{.stg} When can you read the digit?
-
-::: {.stage .top}
-{{< include ../figures/note_en/I2.html >}}
-:::
-
-::: {.notes}
-约 4 分钟。拖 k：1、2、5、10、20、50。请学生说从几个开始认得出是 6。右边的误差图：红 = 还原得太白，蓝 = 还原得太黑；k 越大，误差图越淡，这张图的重建误差（784 个差的平方和）从 k = 10 的 25.2 降到 k = 50 的 11.0。换几张图试。对照：10 个像素保住 3.7%，10 个主成分保住 48.9%。
-:::
-
-## [Choose how many:]{.stg} The cumulative share gives a starting point
+## [Application:]{.stg} So how many?
 
 ::: {.stage}
 ::: {.two .side}
-![](../figures/slides/F2.svg){.fig fig-alt="Cumulative explained variance of the MNIST subset against k, drawn up to k = 200: 48.9% at k = 10, 82.7% at 50, 90.1% at 86"}
+![](../figures/note_en_v2/F8.svg){.fig .fig-f8 fig-alt="Cumulative explained variance ratio of the training images against K, up to 300: 48.9 percent at 10, 82.7 percent at 50, 90.1 percent at 86"}
 
 ::: {.say}
-90% needs 86 components. But **90%** is a threshold we chose. The task should decide.
+1. The cumulative share gives a range (90% needs 86).
+2. Try a few $K$ in it on the task that follows.
+3. Pick the best on the **validation set**, not at an end.
 :::
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。95% 要 150 个。留 86 个还是 150 个，累计比例回答不了；要看降维之后拿来做什么。
+约 2 分钟。10 个 48.9%，50 个 82.7%，100 个 91.7%，90% 要 86 个。90% 是人定的门槛，留 50 还是 86 好，累计比例回答不了，要看拿来做什么：存图看还原的图，分类看验证集准确率。分类的例子在后面一页。
 :::
 
-## [Choose how many:]{.stg} Let the classifier decide, on the validation set
+## [Application:]{.stg} Two numbers per image
 
 ::: {.stage}
 ::: {.two .side}
-![](../figures/slides/F5.svg){.fig fig-alt="Validation accuracy against k for QDA, logistic regression, LDA and a depth-15 tree; QDA reaches 0.957 at k = 40; with all 784 pixels it scores 0.725; red crosses show QDA on 10 and 20 pixels"}
-
-::: {.ask}
-<small>Your turn</small>
-QDA scores 0.725 with all 784 numbers but **0.885** with only 10 components, and 0.957 with 40. How can losing information help?
-:::
+![](../figures/note_en_v2/F9.svg){.fig fig-alt="5,625 training images on the first two principal components, coloured by their true digit after the fit: 1 on the far left, 0 on the right, 7, 9 and 4 at the top, the rest in the middle"}
 
 ::: {.say}
-<small>Red crosses: QDA on the 10 or 20 most spread-out pixels. Choose k by validation accuracy; the chosen k must not sit at either end of the range.</small>
+PCA never saw the labels: colours are added **after**. 1 and 0 already separate.
+
+`pca.fit` on the **training images only**; validation and test only `transform`.
 :::
 :::
 :::
 
 ::: {.notes}
-约 3 分钟。期待：主成分按“散得开”排，前几十个方向都有厚度，QDA 估得稳；丢掉的是几乎不变、只会添乱的方向。这和 Lesson 5 的收缩是两种办法；在这份数据上降维好得多：Lesson 5 收缩后的 QDA 用全部 784 维，测试 0.861；先降到 40 维再用 QDA，测试 0.962。累计比例与验证准确率要一起看；作业 2 用 k = 10、50、100 比较。
+约 1.5 分钟，超时先压这一页。两个数只留 16.7%，但看得出结构。先不上色讲一句，再说颜色是画完才按真实数字上的：1 最左，0 右边，7、9、4 上方。规矩：平均图和主成分是从数据学的，只能用训练图学，验证和测试只转换，和标准化同一条规矩。想看更多画图方法（t-SNE、UMAP）在 Note 第 11 节，选读。
 :::
 
-## [The rule:]{.stg} Learn the directions from which data?
+## [Application:]{.stg} Does PCA help a classifier?
 
 ::: {.stage}
-::: {.say .xl .center}
-`pca.fit(...)` learns the directions **from data**.
-:::
+<table class="corr big">
+<tr><th>components K</th><th>2</th><th>10</th><th>20</th><th>40</th><th>100</th><th>784 (all pixels)</th></tr>
+<tr><td>logistic regression</td><td>0.427</td><td>0.810</td><td>0.880</td><td>0.897</td><td>0.897</td><td>0.891</td></tr>
+<tr><td>QDA</td><td>0.445</td><td>0.885</td><td>0.942</td><td class="hi">0.957</td><td>error</td><td>error</td></tr>
+</table>
 
-::: {.ask .vote}
-<small>Vote on your phone</small>
-`pca.fit` should learn the directions from…
-
-::: {.opts}
-<span><b>A</b>the fitting images only</span>
-<span><b>B</b>fitting + validation images</span>
-<span><b>C</b>all images, test included</span>
-:::
+::: {.one}
+Fewer numbers, **better** QDA: the dropped directions barely vary and only add noise.<br><small>error: about 560 images per digit are too few to estimate QDA's covariance matrix.</small><br>Choose $K$ on the **validation set**; read the test set once (0.962). Assignment 2 does this.
 :::
 :::
 
 ::: {.notes}
-约 2 分钟。投票（右屏 The rule: Learn the directions from which data? → Open，30 秒，先不显示结果，再 Reveal）；请选 B 或 C 的人说理由，再问：如果在拟合加验证上 fit，会出什么问题？答案 A，下一页给出代码。期待：方向“见过”验证集，验证准确率不再是没见过的数据上的准确率。
+约 3.5 分钟。作业 2 第 3 节要先 PCA，再把分类器用在 K 个得分上。表里是验证集准确率。logistic regression 到 40 个主成分以后不再变好。QDA 在 784 个像素上跑不出来：要为每类估一个 784×784 的协方差矩阵并求逆，128 个像素在所有训练图上都是 0，矩阵不可逆，直接报错。降到 40 个，留下的都是散得开的方向，QDA 估得稳，0.957，比 logistic regression 高 0.06：丢掉信息反而更好。K = 100 又报错：每类只有约 560 张训练图，估不了 100×100 的协方差矩阵（5,000 多个数）；作业 2 有 5 万张训练图，没有这个问题。K 在验证集上选，不在范围两端；测试集只读一次，0.962。
 :::
 
-## [The rule:]{.stg} Fit on the fitting part, only transform the rest
+## [Extension:]{.stg} Other ways to find a representation
 
 ::: {.stage}
-```python
-pca = PCA(n_components=40, random_state=0)   # 40 directions
-pca.fit(X_digits_fit)                      # learn them from the fitting images only
-Z_fit = pca.transform(X_digits_fit)        # 40 numbers per fitting image
-Z_val = pca.transform(X_digits_val)        # the same directions for validation
-Z_test = pca.transform(X_digits_test)      # and for the test set, once
-```
+![](../figures/note_en_v2/F16.svg){.fig .fig-f16 fig-alt="Six scatter plots of 2,000 training images reduced to two numbers by PCA, Kernel PCA, Isomap, Spectral embedding, t-SNE and UMAP, coloured by digit; in t-SNE and UMAP most digits form their own cluster"}
 
-::: {.say .center}
-Same rule as standardising (Lesson 3) and the validation set (Lesson 6). Test set, once (QDA, k = 40): **0.962**.
+::: {.one}
+Nonlinear methods keep neighbours together, for **plotting**: `KernelPCA`, `Isomap`, `TSNE`, `umap.UMAP`. One line each.
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。本例偷看（在拟合加验证上 fit）没有带来虚高（0.885 → 0.883），差别可以忽略；但这是原则：数据越少、维数越多，虚高越大，事先也不知道有多大。作业 2 第 3 节要求的就是这一行：PCA 只在训练集上 fit。
+约 2 分钟，选读，超时先压这一页。PCA 给每张图换了一组新的数，也就是一种表示。理解了这一点，就可以换别的方法：同样 2,000 张训练图，PCA 的二维图里大多数数字混在一起；t-SNE 和 UMAP 里大多数数字各成一团。它们不要求点挤在平面附近，而是让原来挨得近的点仍然挨得近，主要用来画图看结构。scikit-learn 里一行就能调用（UMAP 要 pip install umap-learn）。它们大多不能还原，t-SNE 不能把新图放进已经画好的图里，团之间的距离不一定有意义。Note 第 11 节有一张三维卷的例子和调用表。
 :::
 
-## [A picture:]{.stg} MNIST on two numbers
+## [Limitations:]{.stg} Where PCA cannot be trusted
 
 ::: {.stage}
-::: {.two .side}
-![](../figures/slides/F6.svg){.fig fig-alt="The 5625 fitting images on the first two components, coloured by digit; 1 sits tightly on the left, 0 on the right, 7, 9 and 4 at the top, 2, 3, 5, 6 and 8 crowd in the middle"}
-
-::: {.say}
-Two components keep only **17%**, yet 1 and 0 already sit apart, and 7, 9, 4 group together.
-:::
-:::
-:::
-
-::: {.notes}
-约 2 分钟。上色只为了看，PCA 没用标签。1 在最左（PC1 得分小），0 在最右；7、9、4 挤在上方，2、3、5、6、8 挤在中间：哪些数字容易混一眼可见。作业 2 选做题就是这张图（MNIST）。
-:::
-
-## [A picture:]{.stg} Breast lumps: 30 measurements on two numbers
-
-::: {.stage}
-::: {.two .side}
-![](../figures/slides/F7.svg){.fig fig-alt="426 training lumps on the first two components: benign grey points on the left, malignant blue points spread to the right; the two components keep 63% of the variance"}
-
-::: {.say}
-63% kept. Logistic regression on these **2** numbers: 0.953 (all 30: 0.979).
-:::
+::: {.rows}
+<div><span class="n">1</span><div><b>Straight directions only</b><p>a ring keeps 55% with one direction</p></div></div>
+<div><span class="n">2</span><div><b>Scale decides the answer</b><p>raw car data: weight alone takes 99.8%</p></div></div>
+<div><span class="n">3</span><div><b>It ignores the labels</b><p>the widest direction is not always the one a classifier needs</p></div></div>
+<div><span class="n">4</span><div><b>Not always readable</b><p>“how big the car is” reads well; pixel components 5 and 6 do not</p></div></div>
 :::
 :::
 
 ::: {.notes}
-约 1.5 分钟。先标准化（面积几百到两千多，不标准化会独占第一主成分）。第一主成分 30 个权重全为正、大小相近：差不多是“整体有多大、多不规则”。
+约 1.5 分钟。四条局限：环（检验那页）；车重独占（应用一）；不看标签，一个和类别无关但变化很大的量会被排在前面（今天没有例子，口头说）；主成分不一定好解释。
 :::
 
 ## Today in code
 
 ::: {.stage}
 ```python
-pca = PCA()                                  # all 784 components
-pca.fit(X_digits_fit)                        # fitting images only
-print(pca.explained_variance_ratio_[:5])     # share kept by each of the first five
-
-for k in [10, 20, 30, 40, 50, 100]:          # candidate numbers of components
-    pca = PCA(n_components=k, random_state=0)
-    pca.fit(X_digits_fit)
-    Z_fit = pca.transform(X_digits_fit)      # k numbers per image
-    Z_val = pca.transform(X_digits_val)
-    qda = QuadraticDiscriminantAnalysis()
-    qda.fit(Z_fit, y_digits_fit)
-    print(k, qda.score(Z_val, y_digits_val)) # validation accuracy
+Xs = StandardScaler().fit_transform(cars[cols])          # different units
+pca = PCA(n_components=50, random_state=0).fit(X_train)  # training images only
+print(pca.explained_variance_ratio_.sum())               # share kept: 0.827
+Z_val = pca.transform(X_val)                             # 50 scores per image
+X_back = pca.inverse_transform(Z_val)                    # rebuild the images
 ```
+Then fit any classifier on `Z` instead of the 784 pixels.
 :::
 
 ::: {.notes}
-约 1 分钟。不讲语法。Lab 7 会一步步做：看比例、还原一张图、在验证集上选 k、测试集读一次。
-:::
-
-## Back to the opening question
-
-::: {.stage .bigtab}
-| | numbers | variance kept | QDA |
-|---|---:|---:|---:|
-| all pixels | 784 | 100% | 0.725 |
-| 10 pixels | 10 | 3.7% | 0.543 |
-| 10 components | 10 | 48.9% | 0.885 |
-| 40 components | 40 | 78.9% | **0.957** |
-
-::: {.say .center}
-Fewer numbers, little lost: combine, don't pick.
-:::
-:::
-
-::: {.notes}
-约 1 分钟。局限（口头）：方差大不等于对分类有用（PCA 不看标签）；只找直线方向；尺度会改变结果，要先标准化；主成分不一定好解释。
+约 0.5 分钟。四行，每行对应今天一段。Lab 7 在手写数字上动手。
 :::
 
 ## What you can do now {.final-slide}
 
 ::: {.takeaway}
 ::: {.rows .tiny .chain}
-<div><span class="n">see it</span><div><b>Too many numbers</b><p>cannot be drawn; QDA cannot estimate</p></div></div>
-<div><span class="n">pick?</span><div><b>Pixels repeat each other</b><p>10 pixels keep 3.7%</p></div></div>
-<div><span class="n">combine</span><div><b>Project onto a direction</b><p>widest spread = smallest error</p></div></div>
-<div><span class="n">PCA</span><div><b>Principal components</b><p>perpendicular, one after another</p></div></div>
-<div><span class="n">how many</span><div><b>Cumulative share, then validation</b><p>the chosen k must not be at either end of the range</p></div></div>
-<div><span class="n">rule</span><div><b>Fit on the fitting part</b><p>only transform validation and test</p></div></div>
+<div><span class="n">model</span><div><b>x ≈ z u, z = uᵀx</b><p>keep each point's position on a line</p></div></div>
+<div><span class="n">loss</span><div><b>Reconstruction error</b><p>smallest error = widest spread</p></div></div>
+<div><span class="n">solution</span><div><b>Eigenvectors of S</b><p>spread = λ; keep the top K, lose the rest of λ</p></div></div>
+<div><span class="n">test</span><div><b>Fails on curved shapes</b><p>standardise when units differ</p></div></div>
+<div><span class="n">apply</span><div><b>Choose K on the task</b><p>rebuild, plot or classify; learn from training data only</p></div></div>
 :::
 
 ::: {.qr}
@@ -400,5 +457,5 @@ Fewer numbers, little lost: combine, don't pick.
 :::
 
 ::: {.notes}
-约 1.5 分钟，课堂最终停在这一页。沿六行把整条链念一遍。答疑和扫码都在这里。课后 Lab 7，不预告下一讲。
+约 0.5 分钟，课堂停在这一页。沿五行念一遍：模型是投影；损失是还原误差，最小就是散得最开；解是协方差矩阵的特征向量；弯的形状不行、单位不同先标准化；K 按任务在验证集上选，只从训练数据学。完整推导在 Advanced，请自己推。课后 Lab 7。一张图自己做 PCA、别的画图方法、完整推导都在 Note 里。
 :::

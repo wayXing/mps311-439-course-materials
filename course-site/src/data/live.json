@@ -274,49 +274,52 @@
     },
     "lesson-07": {
       "sections": [
-        "Why 784 numbers per image are too many",
-        "Keeping only the pixels that vary most",
-        "Mixing all pixels into one new number (a line through the cloud)",
-        "Adding more lines that do not repeat the first: PCA",
-        "Choosing how many numbers to keep",
-        "Which data to learn the directions from, and drawing the data on two numbers"
+        "Keeping one number: turning a line through the points",
+        "The model: projection onto a line",
+        "The loss: reconstruction error and spread",
+        "The solution: eigenvectors of the covariance matrix",
+        "Cars: standardising, and reading a component",
+        "Digits: rebuilding, choosing K, PCA before a classifier",
+        "Other methods, limitations and the code"
       ],
       "polls": [
         {
-          "key": "spread-vs-error",
-          "slide": "Combine pixels: A weighted sum is a projection",
-          "prompt": "Widest spread along the line, or smallest distance to it: same line?",
+          "key": "keep-one-number",
+          "slide": "Problem: Two numbers per person. Keep only one?",
+          "prompt": "Keep one number per person: which line keeps the most?",
           "options": [
-            "the same line",
-            "different lines",
-            "it depends"
-          ],
-          "showLive": false,
-          "answer": 0
-        },
-        {
-          "key": "second-line",
-          "slide": "Combine pixels: A second number: what should it do?",
-          "prompt": "Which line should give the second number?",
-          "options": [
-            "the next-widest line",
-            "the x2 axis",
-            "the line uncorrelated with the first"
+            "horizontal (height only)",
+            "vertical (arm span only)",
+            "along the cloud",
+            "all the same"
           ],
           "showLive": false,
           "answer": 2
         },
         {
-          "key": "fit-on-which",
-          "slide": "The rule: Learn the directions from which data?",
-          "prompt": "pca.fit should learn the directions from…",
+          "key": "cars-raw-pc1",
+          "slide": "Application: Back to the cars",
+          "prompt": "PCA on the raw car data: the first component is…",
           "options": [
-            "the fitting images only",
-            "fitting + validation images",
-            "all images, test included"
+            "about all five",
+            "mostly weight",
+            "mostly horsepower",
+            "not sure"
           ],
           "showLive": false,
-          "answer": 0
+          "answer": 1
+        },
+        {
+          "key": "digits-how-many",
+          "slide": "Application: How many to read the 6?",
+          "prompt": "How many components until you can read the 6?",
+          "options": [
+            "2",
+            "10",
+            "50",
+            "200"
+          ],
+          "showLive": true
         }
       ]
     },

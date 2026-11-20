@@ -4,6 +4,25 @@
   ],
   "releases": [
     {
+      "version": "0.3.17",
+      "date": "2026-11-20",
+      "title": "Lesson 7: PCA, new lecture, notes and lab",
+      "items": [
+        {
+          "type": "new",
+          "text": "Lesson 7 follows one line from the problem to the answer: why many numbers repeat, what a projection keeps, the reconstruction error it loses, and why the best directions are eigenvectors of the covariance matrix. Interactive figures let you turn the line and drag K."
+        },
+        {
+          "type": "new",
+          "text": "The Lesson 7 notes end with three Advanced Studies: derive the result yourself step by step, remove noise from images with PCA, and how a computer finds the components."
+        },
+        {
+          "type": "new",
+          "text": "The Lesson 7 lab is about using PCA: look at data with 30 measurements, make QDA work on 784 pixels, and check three versions of code an AI wrote. A backup way to load the digits is in its appendix."
+        }
+      ]
+    },
+    {
       "version": "0.3.16",
       "date": "2026-11-17",
       "title": "Lab 6: Going further questions",

@@ -1,5 +1,5 @@
 ---
-title: "Lesson 7：用更少的数描述数据"
+title: "Lesson 7：很多数其实在说一件事"
 subtitle: "Machine Learning（2026/27）｜主成分分析（PCA）"
 author:
   - name: "Dr Wei Xing"
@@ -13,337 +13,536 @@ format:
     embed-resources: true
 ---
 
-## 1. 动机：784 个数太多了
-
-前几讲的手写数字（MNIST 子集，Lesson 4 第 8 节），每张图 28×28 = 784 个像素，也就是 784 个数。这带来两件麻烦事。
-
-第一，画不出来。一个肿块有两个特征时，可以画在平面上看；784 个特征，人没法看。
-
-第二，有的方法吃不消。Lesson 5 的 QDA 要为每一类估一个 784×784 的散布，每类只有约 560 张图，散布估不出来。在 Lesson 6 的拟合／验证划分上（5625 张拟合、1875 张验证），不收缩的 QDA 验证准确率只有 0.725。
-
-这一讲第一次不预测任何东西。我们只看像素，不看标签，问一个新问题：**能不能用少几个数，留住每张图的大部分信息？**这叫**降维**（dimensionality reduction）。它不需要标签，所以属于**无监督学习**（unsupervised learning）。
-
-我们想要的有两条：新的数要少；丢掉的信息要少。“信息”先用一个具体的量来衡量：数据散得多开，也就是方差。一个特征在所有图上都差不多，它几乎不带信息；散得开，才能把不同的图区分开。
-
-**本讲之后你能做到：**遇到维数很多的数据时，说明为什么用特征的组合而不是挑几个特征；找出散得最开的方向，并说明它也是还原误差最小的方向；读懂解释方差比例，并结合验证集准确率选出要留几个数；只在拟合用的数据上学 PCA；把数据画在两个主成分上。
-
-## 2. 候选一：只留几个像素
-
-最直接的办法：784 个像素里，挑最有用的几个留下，其余丢掉。哪几个最有用？按上面的标准，挑在所有图上散得最开的。
-
-留下散得最开的 10 个像素，算一算。下面的组件可以改留下的个数：
-
-{{< include figures/note/I4.html >}}
-
-它们的方差加起来，只占 784 个像素总方差的 3.7%。用它们还原一张图：留下的 10 个像素照抄，丢掉的 774 个像素用各自在拟合图像里的平均值填上，所以还原出的图大部分是一团模糊的“平均数字”。拿这 10 个数去训练 QDA，验证准确率是 0.543。
-
-请先想：留了 10 个数，为什么只保住不到 4%？
-
-::: {.callout-note collapse="true" title="展开答案"}
-一是像素太多：每个像素只占总方差的一小份，10 个加起来也不多。二是相邻的像素一起变：一笔写过去，旁边几个像素同时变黑。挑出来的 10 个像素彼此有很多重复的信息；而丢掉的 774 个像素里，有不少带着这 10 个没有的信息，却一个也没留下。
+::: {.callout-tip title="怎样读这一讲"}
+做 Lab 和作业，读第 1 到 4 节、第 5 节开头的结论，以及第 6 到 10 节；第 11 节是拓展，想多看几种方法时读。第 5 节的两步推导说明答案为什么是那样，建议读。想自己把每一步推出来，做 Advanced Study 1；想看 PCA 的另一个用处（给图去噪），读 Advanced Study 2。第 8.8 节讲降维之后再分类，作业 2 第 3 节要用。
 :::
 
-挑像素的毛病在于：每个新的数只能用上一个像素。我们想要每个新的数都能用上所有像素。
+## 1. 问题：少存几个数，还能还原吗
 
-## 3. 候选二：像素的组合
+一张手写数字图是 28×28 个像素，也就是 784 个数。一辆车量了五个数：缸数、排量、马力、车重、加速时间。
 
-一个能用上所有像素的数，是像素的**组合**：给每个像素一个权重，乘起来再加。例如所有权重都是 1/784，得到的就是“这张图平均有多黑”，它用上了全部 784 个像素。
+这些数并不各说各的。一笔写过去，相邻的几个像素一起变黑；图的四角在每张图上几乎都是白的。车也一样，下表是 392 辆车（UCI 的 Auto MPG 数据）五个量两两的相关系数：
 
-权重有无数种取法，哪一种最好？先在两个特征上想清楚。下面是 200 个点，两个特征。两个特征的一个组合 $z = u_1x_1 + u_2x_2$（取 $u_1^2+u_2^2=1$），在图上就是把每个点**投影**到方向 $\mathbf u = (u_1, u_2)$ 的一条线上：$z$ 是点落在线上的位置。用一个数 $z$ 代替两个数，就是把点换成它在线上的投影。（本讲的 $z$ 是投影得到的**得分**，不是 Lesson 4 的线性部分 $\mathbf w^\top\mathbf x + b$；各讲记号见 Lesson 4 第 2 节的对照表。）
+| | 缸数 | 排量 | 马力 | 车重 | 加速时间 |
+|---|---:|---:|---:|---:|---:|
+| 缸数 | 1 | 0.95 | 0.84 | 0.90 | −0.50 |
+| 排量 | 0.95 | 1 | 0.90 | 0.93 | −0.54 |
+| 马力 | 0.84 | 0.90 | 1 | 0.86 | −0.69 |
+| 车重 | 0.90 | 0.93 | 0.86 | 1 | −0.42 |
+| 加速时间 | −0.50 | −0.54 | −0.69 | −0.42 | 1 |
 
-怎样评价一个方向？两个说法都合理：投影之后点在线上**散得越开越好**（留住的方差多）；或者，把点换成投影后**丢掉的越少越好**（每个点到线的距离平方，平均起来叫**还原误差**）。下面的组件里转动这条线，同时看两个数。
+前四个两两在 0.84 到 0.95 之间：大车缸多、排量大、马力大、也重。数在重复，就应该能少存一些。
 
-{{< include figures/note/I1.html >}}
+这一讲的问题是：**每个样本只存几个数，还能把它还原出来吗？存哪几个？**这叫**降维**（dimensionality reduction）。它只看数据本身，不用标签，属于**无监督学习**（unsupervised learning）。
 
-请先转一转：散布最大在什么方向？还原误差最小在什么方向？只用 $x_1$（方向 0°），也就是候选一，能保住多少？
+学会以后，它能拿来做三件事：
+
+- **压缩：**一张 784 个数的图，存 50 个数就能还原得认得出来（第 8.3 节）。
+- **看数据：**几百个量画不出来，降到两个数就能画在平面上（第 8.6 节）。
+- **降维后再分类：**先降到几十个数，再用分类器，有时比直接用全部像素更准（第 8.8 节，作业 2 要用）。
+
+784 个数太多，先在只有两个数的时候把道理想清楚。
+
+## 2. 启发：只许留一个数
+
+下面是 200 个人的身高和臂展（手造的数据，单位都是厘米），相关系数 0.94。点沿一条斜线挤着：这两个数主要在一个方向上一起变。
+
+只许用**一个数**描述每个人，怎么留？画一条线，把每个点垂直落到线上（灰色短线），每个人就只剩他在线上的位置。转动这条线，看两根柱子：
+
+- 蓝柱：落到线上的点沿线散得多开，叫**散布**（投影的方差）。散得开，才分得清不同的人。
+- 红柱：把每个点换成线上那一点，丢掉的距离平方的平均，叫**还原误差**（reconstruction error）。
+
+{{< include figures/note_v2/I1.html >}}
+
+请先转一转：蓝柱最高在什么方向？红柱最低在什么方向？
 
 ::: {.callout-note collapse="true" title="展开答案"}
-两者在同一个方向：约 31°，散布 3.85，保住 89%；还原误差最小，0.49。只用 $x_1$（0°）保住 68%，只用 $x_2$（90°）只有 32%。
-
-而且无论转到哪里，两根柱子加起来都是 4.34。原因是勾股定理：每个点到中心的距离平方，等于它在线上的那一段的平方，加上它到线的距离平方。左边加起来是固定的总散布，所以“散得最开”和“丢得最少”是同一件事。
+两者在同一个方向，约 46°：散布 94.71，留住 97%，还原误差 2.97。0° 时只留下身高，只留住 48%，身高一样、臂展不同的人分不出来了。无论转到哪里，两根柱子加起来都是 97.68：一根变高，另一根就变低。
 :::
 
-散得最开的那个方向，叫**第一主成分**（first principal component）。
+从这里看出两件事：
 
-## 4. 第二个方向，以及主成分分析
+1. **画一条线，就是把点投影到线上**，每个点只留它在线上的位置。
+2. **投影散得最开的方向，丢掉的也最少。**剩下和它垂直的方向是“臂展减身高”，只占 3%。
 
-一个方向保住 89%，还剩 11%。要第二个数，第二个方向怎么选？
+背后的假设是：点挤在一条线附近。下面把这两件事写成式子，不用转线就直接算出最好的方向。784 个数时方向多得转不完，非算不可。
 
-我们想要它不重复第一个已经说过的。候选有很多，拿三个在点云上比一比：第一个方向是 31°，第二个取 76°（与第一个方向相差 45°）、90°（就是 $x_2$）或 121°（与第一个垂直）。把每个点在第一个方向上的位置 $z_1$ 和在第二个方向上的位置 $z_2$ 放在一起看，算它们的相关系数：
+::: {.callout-note collapse="true" title="为什么垂直落下去，而不是竖直或水平"}
+![同样的点，三种落到线上的办法。三条线的角度只差一两度，区别在红色短线的方向：竖直、水平、垂直。](figures/note_v2/F12.svg){fig-alt="三张身高对臂展的散点图，各有一条绿线和红色短线。左图红线竖直，标题竖直落下用身高拟合臂展，线的角度 44.6 度。中图红线水平，标题水平移过去用臂展拟合身高，48.1 度。右图红线和绿线垂直，标题垂直落下离点最近，46.4 度"}
 
-| 第二个方向 | 76° | 90° | 121°（约垂直） |
-|---|---:|---:|---:|
-| 与 $z_1$ 的相关系数 | 0.94 | 0.86 | 0.01 |
-| 沿它的散布 | 2.18 | 1.39 | 0.49 |
-
-请先想：76° 的散布最大，为什么不选它？
-
-下面的组件里可以自己转第二条线，看相关系数怎样变：
-
-{{< include figures/note/I3.html >}}
-
-::: {.callout-note collapse="true" title="展开答案"}
-它和第一个方向几乎说的是同一件事：相关系数 0.94，知道了 $z_1$，就差不多知道了 $z_2$。它的散布大，是因为它大部分沿着第一个方向，那部分信息第一个数已经说过了。垂直的方向与 $z_1$ 几乎不相关（0.01），说的全是新东西：剩下的散布 0.49，正好是第一个方向没保住的那 11%。
+竖直落下，就是拿身高去拟合臂展的最小二乘线（44.6°）；水平移过去，就是拿臂展去拟合身高（48.1°）。两条线都先认定了谁是“答案”。这里没有答案要预测，两个量地位一样，所以取离点最近的那一点。这样得到的线在 46.4°，在两条拟合线之间。
 :::
 
-所以第二个方向选与第一个垂直的。维数多时照此类推：第二个方向在所有与第一个垂直的方向里找散得最开的；第三个与前两个都垂直，再找散得最开的；一直找下去，784 个像素最多找出 784 个方向。这些方向叫**主成分**（principal components），整个做法叫**主成分分析**（principal component analysis，**PCA**）。
+## 3. 模型：投影和它的性质
 
-第 3 节的组件里，第一个方向“保住 89%”（那是两个特征的点云；在 784 个像素上，第一个主成分只保住 9.6%，因为方差分散在很多方向上）。这个比例有一个名字：一个主成分保住的方差占总方差的比例，叫**解释方差比例**（explained variance ratio）；前 $k$ 个加起来，叫**累计比例**。
+先中心化。每个量减去它的平均 $\bar{\mathbf x}$，点云的中心挪到原点，要画的线也就过原点，后面的式子会简单很多。**从这里起，$\mathbf x$ 就指中心化以后的数据**，只在还原时把平均加回来。每个点 $\mathbf x\in\mathbb R^{d\times 1}$ 有 $d$ 个数（身高臂展 $d = 2$，汽车 5，手写数字 784）。
 
-每个主成分是 784 个权重，正好可以排回 28×28 的图，看它在“看”哪里：
-
-![MNIST 子集的平均图和前 6 个主成分。每个主成分是 784 个像素的权重，红为正、蓝为负；上面写着它的解释方差比例。](figures/note/F4.svg){fig-alt="一张平均的数字图，和六张红蓝相间的 28 乘 28 权重图，比例依次是 9.6%、7.2%、6.2%、5.3%、4.9%、4.4%；第一个主成分像一个红色的 0，中间是蓝的"}
-
-一张图在第一个主成分上的得分大，说明它在红色的位置墨水多、蓝色的位置墨水少。第一个主成分像一个红色的圈、中间是蓝的：得分大的图像 0，得分小（负）的图在圈外墨水少、中间墨水多，像 1。还原一张图的式子是
-
+模型是：取一个方向 $\mathbf u\in\mathbb R^{d\times 1}$，每个点只存一个数 $z$，用线上的点 $z\mathbf u$ 还原：
 $$
-\hat{\mathbf x} = \bar{\mathbf x} + z_1\mathbf u_1 + z_2\mathbf u_2 + \dots + z_k\mathbf u_k ,
+\mathbf x \approx z\,\mathbf u .
+$$
+假设是点挤在一条线附近，$d$ 个数只存 1 个。这个模型有下面几条性质。
+
+**① $\mathbf u$ 的长度定为 1。**$z\mathbf u = (z/2)(2\mathbf u)$：$\mathbf u$ 拉长一倍、$z$ 缩小一半，还原出的点一样。$\mathbf u$ 只管方向，所以规定
+$$
+\mathbf u^\top\mathbf u = 1 .
 $$
 
-平均图 $\bar{\mathbf x}$，加上每个主成分 $\mathbf u_j$ 乘以这张图在它上面的得分 $z_j$。只加前 $k$ 个，就是用 $k$ 个数还原。
+**② 投影：$z = \mathbf u^\top\mathbf x$。**每个点存的数取 $z = \mathbf u^\top\mathbf x$，就是点沿 $\mathbf u$ 方向的长度（二维里是 $\lVert\mathbf x\rVert\cos\alpha$，$\alpha$ 是点和线的夹角）。
 
-scikit-learn 里是这样写的：
+**③ 这样取 $z$，丢掉的最少。**用 $\mathbf u^\top\mathbf u = 1$ 验证，丢掉的部分和线垂直：
+$$
+\mathbf u^\top(\mathbf x - z\mathbf u) = \mathbf u^\top\mathbf x - z\,\mathbf u^\top\mathbf u = z - z = 0 .
+$$
+所以 $z\mathbf u$ 正是从点垂直落到线上的那个脚，也就是线上离点最近的点。（换个角度看：$\mathbf u$ 定了，用 $z$ 去拟合 $\mathbf x$，最小二乘的解也是 $z = \mathbf u^\top\mathbf x$。）
+
+![一个点 $\mathbf x$ 和一条过原点的线。线上每个 $z$ 是一个候选，垂直落下的那一点最近。](figures/note_v2/F11.svg){fig-alt="一条过原点的绿线，原点处一个黑色短箭头标着 u 长度 1。线外一个蓝点。线上有两个灰色候选点 z 等于 1.6 和 4.9，各用灰色虚线连到蓝点。还有一个绿色点，用红色实线连到蓝点，红线和绿线成直角，标着最好的一点 z 等于 u 转置 x 等于 3.4" width="65%"}
+
+**④ 还原：**$\hat{\mathbf x} = \bar{\mathbf x} + z\mathbf u$（把平均加回来）。例：一个人身高 180、臂展 183，中心化后 $\mathbf x = (10.0,\ 12.9)^\top$。取 $\mathbf u = (0.689,\ 0.725)^\top$，$z = 0.689\times10.0 + 0.725\times12.9 = 16.2$，还原成身高 181.2、臂展 181.9。
+
+**⑤ 多个方向：分量的叠加。**一个数不够时，用 $K$ 个方向 $\mathbf u_1,\dots,\mathbf u_K$，每个长度为 1、两两垂直（$\mathbf u_j^\top\mathbf u_k = 0$）。每个点存 $K$ 个数，各算各的：$z_k = \mathbf u_k^\top\mathbf x$。还原是 $K$ 个分量加起来：
+$$
+\mathbf x \approx z_1\mathbf u_1 + z_2\mathbf u_2 + \dots + z_K\mathbf u_K .
+$$
+同 ③，丢掉的部分和每个方向都垂直。要求垂直，是因为每个方向应该说一件别的方向没说过的事；而且还原只取决于这些方向张成的平面，在同一个平面里换成一组垂直的方向，能还原的一样多，不吃亏。
+
+## 4. 损失：还原误差
+
+方向 $\mathbf u$ 定了，$z$ 就定了，还原得好不好只取决于 $\mathbf u$。用每个点和它的还原值之间的距离平方，加起来：
+$$
+L(\mathbf u) = \sum_{i=1}^n\lVert\mathbf x_i - z_i\mathbf u\rVert^2,\qquad z_i = \mathbf u^\top\mathbf x_i,\qquad \text{约束 } \mathbf u^\top\mathbf u = 1 .
+$$
+组件里每个角度就是一个 $\mathbf u$，红柱就是 $L/(n-1)$。要找让 $L$ 最小的 $\mathbf u$。
+
+## 5. 求解：误差最小，就是散得最开
+
+::: {.callout-important title="这一节的结论"}
+最好的方向是协方差矩阵 $S$ 的特征向量里，特征值最大的那个；沿它投影，留下的散布就是这个特征值。留 $K$ 个方向时，取特征值最大的 $K$ 个特征向量，还原误差就是丢掉的那些特征值之和。后面的应用只用到这几句。
+:::
+
+### 5.1 第一步：误差 = 总散布 − 投影的方差
+
+先看一个点。由性质 ③，展开平方（用 $\mathbf u^\top\mathbf x = z$、$\mathbf u^\top\mathbf u = 1$）：
+$$
+\lVert\mathbf x - z\mathbf u\rVert^2 = \mathbf x^\top\mathbf x - 2z\,\mathbf u^\top\mathbf x + z^2\,\mathbf u^\top\mathbf u = \lVert\mathbf x\rVert^2 - z^2 .
+$$
+点离原点的远近是固定的，落到线上的那段越长，丢掉的就越短。
+
+再对所有点加起来。两项都可以写成同一个矩阵，**协方差矩阵**（covariance matrix）
+$$
+S = \frac{1}{n-1}\sum_{i=1}^n\mathbf x_i\mathbf x_i^\top ,
+$$
+它是 $d\times d$ 的，对角线是各个量的方差，非对角线是两两的协方差。用迹 $\operatorname{tr}$（矩阵对角线之和，见附录）：
+$$
+\begin{aligned}
+\sum_i z_i^2 &= \sum_i(\mathbf u^\top\mathbf x_i)(\mathbf x_i^\top\mathbf u) = \mathbf u^\top\Big(\sum_i\mathbf x_i\mathbf x_i^\top\Big)\mathbf u = (n-1)\,\mathbf u^\top S\,\mathbf u ,\\
+\sum_i\lVert\mathbf x_i\rVert^2 &= \sum_i\operatorname{tr}\big(\mathbf x_i\mathbf x_i^\top\big) = \operatorname{tr}\Big(\sum_i\mathbf x_i\mathbf x_i^\top\Big) = (n-1)\operatorname{tr}S .
+\end{aligned}
+$$
+所以
+$$
+L(\mathbf u) = (n-1)\big(\operatorname{tr}S - \mathbf u^\top S\,\mathbf u\big).
+$$
+这就是组件里的两根柱子：$\mathbf u^\top S\mathbf u$ 是投影 $z$ 的方差（蓝柱），$\operatorname{tr}S$ 是各个量的方差之和，叫**总散布**，和方向无关。总散布不变，所以**还原误差最小，就是投影的方差最大**。
+
+身高和臂展：$S = \begin{pmatrix} 46.52 & 45.82 \\ 45.82 & 51.15 \end{pmatrix}$，$\operatorname{tr}S = 46.52 + 51.15 = 97.68$，正是组件里两根柱子之和。
+
+### 5.2 第二步：约束下求最大，得到特征向量
+
+问题变成：在 $\mathbf u^\top\mathbf u = 1$ 下，让 $\mathbf u^\top S\mathbf u$ 最大。约束不能丢：没有它，$\mathbf u$ 乘 2，$\mathbf u^\top S\mathbf u$ 就乘 4，可以无限大。
+
+带等式约束求最大，用**拉格朗日乘子法**（Lagrange multipliers）：把约束乘一个数 $\lambda$ 减进目标，再对 $\mathbf u$ 求导令它为 0：
+$$
+\mathcal L(\mathbf u,\lambda) = \mathbf u^\top S\mathbf u - \lambda(\mathbf u^\top\mathbf u - 1),
+\qquad
+\frac{\partial\mathcal L}{\partial\mathbf u} = 2S\mathbf u - 2\lambda\mathbf u = \mathbf 0
+\quad\Longrightarrow\quad
+S\mathbf u = \lambda\mathbf u .
+$$
+为什么这样写就对，Advanced Study 1 请你自己推；只记结论也可以。
+
+两边左乘 $\mathbf u^\top$，得 $\mathbf u^\top S\mathbf u = \lambda$：沿这个方向投影，方差就是 $\lambda$。满足 $S\mathbf u = \lambda\mathbf u$ 的方向有 $d$ 个，要散得最开，就挑 $\lambda$ 最大的那个。这样的 $\mathbf u$ 叫 $S$ 的**特征向量**（eigenvector），$\lambda$ 叫**特征值**（eigenvalue）：$S$ 乘它，方向不变，只伸缩 $\lambda$ 倍。
+
+身高和臂展：$S$ 的两个特征值是 94.71 和 2.96，最大的特征向量是 $(0.689,\ 0.725)^\top$，方向 46.4°，和转线看到的一样；平均每人的还原误差是 $97.68-94.71 = 2.97$。
+
+### 5.3 多个方向
+
+用第一个方向还原后，剩下的部分全都和它垂直（性质 ③），所以第二个方向到垂直的方向里找。结果是第二个特征向量：在所有和第一个垂直的方向里，它散得最开。依此类推，**前 $K$ 个特征向量就是最好的 $K$ 个方向**（Advanced Study 1 证明一个一个挑和一次挑一组结果相同）。
+
+由性质 ⑤，$K$ 个方向的还原误差是总散布减去各方向的散布之和：
+$$
+L = (n-1)\Big(\operatorname{tr}S - \sum_{k=1}^K\lambda_k\Big) = (n-1)\big(\lambda_{K+1} + \dots + \lambda_d\big).
+$$
+后一步用了 $\operatorname{tr}S = \lambda_1 + \dots + \lambda_d$：$K = d$ 时什么都不丢，误差为 0。所以**还原误差就是丢掉的那些特征值之和**，留住的比例是 $(\lambda_1 + \dots + \lambda_K)/(\lambda_1 + \dots + \lambda_d)$。不同特征向量上的得分还互不相关：第二个数说的全是第一个数没说过的事。
+
+![身高和臂展的两个特征向量。](figures/note_v2/F13.svg){fig-alt="身高对臂展的散点图，从中心画出两个箭头。绿色箭头沿点的长带指向右上，标第一个方向 λ 等于 94.71，97%。橙色短箭头指向左上，和绿箭头垂直，标第二个方向 λ 等于 2.96，3%" width="50%"}
+
+三个量时，“点挤在一个平面附近”是这样的：前两个方向留住 77% 和 22%，垂直于平面的第三个方向只占 1%。
+
+![150 个点，三个量。红色短线是每个点到平面的距离。](figures/note_v2/F14.svg){fig-alt="三维散点图，蓝点分布在一块浅绿色倾斜平面附近，每个点有一条红色短线连到平面。平面上画了绿色和橙色两个箭头。标题第一个方向 77%，第二个 22%，垂直于平面的只占 1%" width="62%"}
+
+这些方向叫**主成分**（principal components），第一个特征向量是**第一主成分**。点在主成分上的位置 $z_k$ 叫**得分**（score）。整个做法叫**主成分分析**（principal component analysis，**PCA**）。第 $k$ 个主成分留住的比例叫**解释方差比例**（explained variance ratio），前 $K$ 个加起来叫**累计比例**。
+
+整个方法就是：减去平均；算协方差矩阵 $S$；取特征值最大的 $K$ 个特征向量；把点投影上去，得到得分。
+
+## 6. 检验：降得好不好，什么时候不行
+
+降得好不好，看留住的比例和还原误差。身高和臂展留一个主成分，留住 97%，平均每人丢掉约 2.97 cm²，开方约 1.7 cm，大约就是“手臂相对长不长”那部分。
+
+PCA 的假设是点挤在一条线（或一个低维平面）附近。看一份不满足这个假设的数据：
+
+![200 个点排成一个环。两个主成分的方向，各留住 55% 和 45%。](figures/note_v2/F4.svg){fig-alt="一个由蓝点组成的圆环，中间画了互相垂直的绿线和橙线，标题两个方向 55%、45%" width="45%"}
+
+请先想：只留第一个主成分，能留住多少？
+
+::: {.callout-note collapse="true" title="展开答案"}
+55%。环在各个方向上散得差不多，两个特征值接近，留一个就丢掉近一半。点挤在一个弯的形状上，PCA 只能找直线方向，帮不上忙。两个特征值接近时，第一主成分也不稳：数据稍变一点，方向就可能转走，不要去读它的意思。
+:::
+
+还有一种情况：量的单位不一样。下一节的汽车就会撞上。
+
+## 7. 应用一：汽车，五个量在说一件事
+
+回到第 1 节的 392 辆车，五个量，$d = 5$。另有一列油耗（每加仑跑几英里），先放在一边，PCA 不用它。
+
+直接做 PCA，请先猜：第一主成分会是什么样？
+
+::: {.callout-note collapse="true" title="展开答案"}
+几乎全是车重：权重 0.993，其余都接近 0，一个主成分就留住 99.8%。车重以磅计，标准差 849；缸数的标准差只有 1.7，加速时间 2.8。车重的数大，散布就大，压过了其余所有量。这个 99.8% 只反映车重的数大。
+:::
+
+单位不该决定答案。**先标准化**（每一列减去平均、除以标准差），再做 PCA：
+
+![左：不标准化，第一主成分几乎只有车重。中：先标准化，第一主成分里前四个量权重几乎相等，加速时间为负。右：每辆车在第一主成分上的得分和它的油耗。](figures/note_v2/F5.svg){fig-alt="三张图。左边条形图车重 0.99、其余接近 0，标题 99.8%。中间条形图缸数 0.47、排量 0.48、马力 0.47、车重 0.46、加速时间负 0.33，标题 81%。右边散点图横轴第一主成分得分、纵轴油耗，向右下降，相关负 0.82"}
+
+- **第一主成分留住 81%。**前四个量的权重几乎相等（0.46 到 0.48），加速时间是 −0.33（大车加速用的时间短）：“这辆车有多大、多猛”。
+- **第二主成分留住 14%**，主要是加速时间（0.89），其次车重（0.35）：同样大小的车，加速慢不慢。它和第一主成分垂直，说的是第一个没说的事。
+- **两个加起来 95%。**五个数换成两个，基本不丢。
+
+现在拿出放在一边的油耗：“车有多大”这个得分和油耗的相关系数是 −0.82，和单看车重（−0.83）差不多，比单看马力（−0.78）强。PCA 没看过油耗，找出的是五个量共同在说的那件事，而它正好和油耗关系最紧。
+
+单位不同的量，先标准化再做 PCA；单位相同、大小可比的量（身高和臂展，下一节的像素），可以不标准化。
+
+## 8. 应用二：手写数字
+
+### 8.1 一张图变成一行数
+
+![一张 28×28 的图，一行一行接起来，就是 784 个数。彩色框是其中三行像素。](figures/note_v2/F6.svg){fig-alt="左边是手写数字 6 的像素图，三行用彩色框标出；右边把这三行拉成长条，标出第 8 行是第 197 到 224 个数，第 14 行是第 365 到 392 个数，第 20 行是第 533 到 560 个数"}
+
+把 28×28 的图一行接一行排开，一张图就是 784 个数。每张图一行、每个像素一列，就是一张表，和汽车那张表一样，只是从 5 列变成 784 列。像素都在 0 到 1 之间，不用标准化；中心化就是减去平均图。数字标签先放在一边。
+
+这里用课程的手写数字子集：10,000 张图，留出 2,500 张作测试集，其余按 3:1 分成 5,625 张训练图和 1,875 张验证图。主成分只从训练图里学。
+
+### 8.2 主成分长什么样
+
+$S$ 现在是 784×784，每个特征向量有 784 个数，正好排回 28×28：**每个主成分本身就是一张图**。
+
+![训练图的平均图，和前 6 个主成分。红为正、蓝为负；上面是解释方差比例。](figures/note_v2/F7.svg){fig-alt="第一张是灰色模糊的平均数字图，后面六张红蓝相间的 28 乘 28 权重图，比例依次是 9.6%、7.2%、6.2%、5.3%、4.9%、4.4%"}
+
+一张图在第一主成分上的得分大，说明它在红色的地方墨水多、蓝色的地方墨水少。第一主成分像一个红色的圈：得分大的图像 0，得分小的图墨水竖在中间，像 1。第一主成分只留住 9.6%，远不如身高臂展的 97%：784 个像素的变化分散在很多方向上，要多留几个。
+
+### 8.3 用 K 个数还原一张图
+
+$$
+\hat{\mathbf x} = \bar{\mathbf x} + z_1\mathbf u_1 + z_2\mathbf u_2 + \dots + z_K\mathbf u_K,
+\qquad z_k = \mathbf u_k^\top(\mathbf x - \bar{\mathbf x}).
+$$
+平均图，加上每个主成分乘这张图在它上面的得分。存一张图只要存 $K$ 个得分；平均图和主成分所有图共用。
+
+拖动 $K$，看一张验证图（数字 6）从几个数开始认得出来；组件里还可以换另外三张验证图：
+
+{{< include figures/note_v2/I2.html >}}
+
+请先猜：要几个数，你才认得出是 6？
+
+::: {.callout-note collapse="true" title="展开答案"}
+1 到 2 个数时，还原出来还是一团平均图，还原误差 57.7（784 个像素上差的平方和；只用平均图时 58.4）。10 个数时 25.2，能看出 6 的大致形状；50 个 10.9，和原图看起来差不多；100 个 6.2。“认得出”以你能不能说出它是几为准。对 1,875 张验证图平均，$K = 10$、50、100 时还原误差是 27.0、9.3、4.6。
+:::
+
+用训练图核对第 5.3 节的结论：总散布 52.77，前 50 个特征值之和 43.64（82.7%），丢掉的 9.13；用 50 个主成分还原训练图，误差平方和除以 $n-1$，也是 9.13。
+
+### 8.4 换个方式压缩：一张图自己做 PCA
+
+这一节是个对比，后面的画图和分类用不上它。8.3 里的样本是图：5,625 张训练图各占一行，每行 784 个数，主成分从所有训练图里学，所有图共用。
+
+也可以只看一张图。把它的 28 行当作 28 个样本，每行 28 个数，做同样的事：减去这张图的平均行，算 28×28 的协方差矩阵，取前 $K$ 个特征向量，每一行用 $K$ 个得分还原。下面是同样的四张图：
+
+{{< include figures/note_v2/I3.html >}}
+
+请先拖一拖：每行留几个数，这张 6 就认得出来？
+
+::: {.callout-note collapse="true" title="展开答案"}
+$K = 0$ 时每一行都换成平均行，看不出是什么，还原误差 71.3。$K = 1$ 时 36.5，$K = 3$ 时 13.2，已经认得出是 6；$K = 5$ 时 3.8，和原图几乎一样。这张图的 28 行很像：第一个方向就留住 49%，前三个 82%。
+:::
+
+两种做法的区别：
+
+| | 8.3：很多张图一起做 | 8.4：一张图自己做 |
+|---|---|---|
+| 一个样本是 | 一张图（784 个数） | 图里的一行（28 个数） |
+| 主成分从哪里学 | 5,625 张训练图，所有图共用一套 | 只用这一张图，每张图各有一套 |
+| 每张图要存的数 | $K$ 个得分（主成分存一次，大家共用） | $28 + 56K$ 个：平均行、$K$ 个主成分、28 行的得分 |
+| 用到的重复 | 不同的图很像：都是手写数字 | 同一张图里，行和行很像 |
+| 来了一张新图 | 用学好的主成分直接算得分 | 要对它重新做一次 PCA |
+| 得分能拿来做什么 | 所有图的得分在同一套方向上，可以比较、画图、分类（8.6、8.8 节） | 每张图的方向不同，得分不能拿来比，只能用来压缩这张图 |
+
+同一张 6：很多张图一起做，存 50 个数，还原误差 10.9；一张图自己做，$K = 3$ 要存 196 个数，误差 13.2，$K = 5$ 要存 308 个数，误差 3.8。一张图自己做不需要别的图，但每张图都得把自己的主成分一起存下来，所以存的数多。很多张图一起做，主成分只存一次，平摊到每张图上几乎不占地方，而且得到的得分可以拿来比较。
+
+### 8.5 留几个
+
+![训练图的累计解释方差比例，横轴画到 300。](figures/note_v2/F8.svg){fig-alt="一条先快速上升后变平的曲线，标出 K 等于 10 时 48.9%，50 时 82.7%，86 时 90.1%"}
+
+10 个主成分留住 48.9%，50 个 82.7%，100 个 91.7%；留住 90% 要 86 个。选 $K$ 的做法：
+
+1. 用累计比例定一个范围，比如 80% 到 95%，这里是几十到一百多；
+2. 在这个范围里取几个 $K$，接上后面要做的事（存图就看还原的图，分类就看验证集准确率）；
+3. 取在验证集上最好、又不在范围两端的那个，测试集只用一次（第 8.8 节）。
+
+### 8.6 画出来
+
+只留两个主成分，每张图就是平面上的一个点：
+
+![5,625 张训练图在前两个主成分上的位置，按真实数字上色。](figures/note_v2/F9.svg){fig-alt="很多彩色小点的散点图，数字 1 的橙色点挤在最左边，0 的蓝色点在右边，7、9、4 挤在上方，2、3、5、6、8 挤在中间"}
+
+两个数只留住 16.7%，但已经看得出结构。PCA 没用标签，颜色是画完才按真实数字上的：1 挤在最左，0 在右边；7、9、4 在上方，2、3、5、6、8 挤在中间。没看标签，1 和 0 已经分开；哪些数字容易混，也一眼可见。
+
+### 8.7 规矩：只从训练图学主成分
+
+平均图和协方差矩阵都由图算出来，学的时候只能用训练图；验证图和测试图只用学到的方向去转换。这和标准化的规矩一样。
 
 ```python
-from sklearn.decomposition import PCA
-
-pca = PCA(n_components=10, random_state=0)   # keep 10 components; random_state=0: same result every run
-pca.fit(X_digits_fit)                        # learn the directions from the fitting images only
-Z_fit = pca.transform(X_digits_fit)          # each image becomes 10 numbers
-Z_val = pca.transform(X_digits_val)          # the validation images, with the same directions
-print(pca.explained_variance_ratio_)         # share of the total variance kept by each component
+pca = PCA(n_components=50)
+pca.fit(X_train)              # learn the mean image and the components from training images only
+Z_train = pca.transform(X_train)
+Z_val = pca.transform(X_val)  # the same directions, no learning
 ```
 
-`X_digits_fit`、`X_digits_val` 与 Lesson 6 第 6 节相同。784 维时 scikit-learn 用一个带随机性的快速算法找主成分，`random_state=0` 让每次结果一样。
+### 8.8 降维之后再分类（作业 2 要用）
 
-回到第 2 节的比较：10 个像素保住 3.7%，10 个主成分保住 48.9%。
+作业 2 第 3 节要先 PCA，再把分类器用在 $K$ 个得分上。这里用 logistic regression 和 QDA 看一次，$K$ 在验证集上选：
 
-![左上：一张验证图（数字 6），用 10 个像素还原，与用 10 个主成分还原。左下：原图减去还原的误差图，红是还原得太白（原图有墨水、还原没有），蓝是还原得太黑；标题里是这张图的重建误差。右：两种做法保住的总方差，是所有验证图的平均。](figures/note/F1.svg){fig-alt="上排三张 28 乘 28 的数字图：原图 6、10 个像素还原的（几乎是一团灰）、10 个主成分还原的（看得出是 6）；下排两张红蓝误差图，误差 56.9 对 25.2；右边柱状图 3.7% 对 48.9%"}
+| $K$ | 2 | 10 | 20 | 40 | 50 | 100 | 784（不降维） |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| logistic regression | 0.427 | 0.810 | 0.880 | 0.897 | 0.895 | 0.897 | 0.891 |
+| QDA | 0.445 | 0.885 | 0.942 | **0.957** | 0.956 | 报错 | 报错 |
 
-同样是 10 个数，主成分留住的多十几倍，还原的图也认得出是 6。下排的误差图把丢掉的部分画了出来：只留 10 个像素时，整个 6 的笔画都是红的，几乎全丢了；用 10 个主成分时，大部分笔画只剩边缘一圈浅红浅蓝，只有顶上那一笔还是深红：这一笔没还原出来。**重建误差**就是误差图上 784 个数的平方和：这张图从 56.9 降到 25.2。第 3 节说的“还原误差”，就是把它对所有图平均。
+- logistic regression 在 $K = 40$ 以后不再变好。
+- QDA 在 784 个像素上跑不出来：它要为每一类估一个 784×784 的协方差矩阵并求逆，而有 128 个像素在所有训练图上都是 0，矩阵不可逆，scikit-learn 1.9 直接报错。
+- 降到 40 个主成分，QDA 估得稳，验证准确率 0.957，比 logistic regression 高 0.06。**丢掉信息，反而更好**：丢掉的是几乎不变、只会添乱的方向。
+- $K = 100$ 时又报错：QDA 要为每类估一个 100×100 的协方差矩阵（5,000 多个数），每类却只有约 560 张训练图，估不稳。作业 2 有 50,000 张训练图，没有这个问题。
 
-## 5. 留几个：看图像和累计比例
-
-留几个才够？先从两个角度看：还原出来的图，和累计比例。
-
-**看图像。**拖动 $k$，看一张验证图从几个主成分开始认得出来：
-
-{{< include figures/note/I2.html >}}
-
-**看累计比例。**
-
-![MNIST 子集的累计解释方差比例。只在 5625 张拟合图上计算，横轴只画到 200。](figures/note/F2.svg){fig-alt="一条上升后变平的曲线，k = 10 时 48.9%，50 时 82.7%，86 时 90.1%"}
-
-10 个保住 48.9%，50 个 82.7%，100 个 91.7%；要保住 90% 需要 86 个，95% 需要 150 个。可是 90% 和 95% 都是人定的门槛：留 86 个还是 150 个更好，累计比例回答不了。要看降维之后拿来做什么。
-
-## 6. 留几个：看后面要做的事
-
-降维之后，把 $k$ 个数交给 Lesson 4 到 6 的分类器，在验证集上比：
-
-![四种方法在 k 个主成分上的验证准确率。红叉是 QDA 只用散得最开的 10 个、20 个像素。右下角是全部 784 个像素、不收缩的 QDA。](figures/note/F5.svg){fig-alt="QDA 的曲线最高，k = 40 时 0.957；logistic 约 0.89，LDA 约 0.85，决策树约 0.77；全部 784 个像素时 QDA 只有 0.725"}
-
-请先看图：QDA 在 784 维时只有 0.725，降到 10 维却有 0.885，40 维 0.957。为什么丢掉信息反而更好？
-
-::: {.callout-note collapse="true" title="展开答案"}
-QDA 的麻烦（Lesson 5）是某些方向上散布几乎为 0，椭圆被压扁。主成分是按“散得开”的顺序排的，留下的前几十个方向都散得开、有厚度，QDA 就估得稳。丢掉的，正是那些几乎不变、只会添乱的方向。这和 Lesson 5 的收缩是两种解决同一问题的办法。在这份数据上，PCA 好得多：Lesson 5 收缩后的 QDA 用全部 784 维，测试准确率 0.861；先降到 40 维再用 QDA，测试准确率 0.962（第 7 节）。PCA 还有别的好处：每张图要存的数少了，还能画出来。
-:::
-
-三个角度合起来，k 的取舍是：
-
-- **k 小**：存得少、能画出来（k = 2），但丢掉的多，准确率低；
-- **k 大**：接近原数据，但 QDA 这类要估散布的方法又会估不稳；
-- **怎样选**：累计比例给一个起点（例如 90%），最终用验证集准确率决定，并像 Lesson 5、6 一样检查不落在两端。
-
-本例 QDA 在 k = 40 时最好（0.957），在 10 到 100 的中间；30、50 也只差 0.001 到 0.005。作业 2 用全部 MNIST，比较 k = 10、50、100，做法相同。
-
-## 7. 规矩：只在拟合用的数据上学 PCA
-
-第 4 节的代码里，`fit` 只用了 `X_digits_fit`，验证集只用 `transform`。为什么？
-
-请先想：PCA 的方向是从数据里学出来的。如果在拟合加验证的全部数据上 fit，会怎样？
-
-::: {.callout-note collapse="true" title="展开答案"}
-主成分的方向就“见过”验证集了。验证集本该代表没见过的数据，现在它参与了学习，验证准确率就不再是“没见过的数据上”的准确率。本例中，在拟合加验证上 fit PCA（k = 10），QDA 的验证准确率从 0.885 变成 0.883，1875 张图里反而少对了 4 张：这一次偷看没有带来虚高，差别可以忽略。但这是一条原则，不是一个看数字决定的选择：数据越少、维数越多，偷看带来的虚高越大，而且我们事先不知道它有多大。
-:::
-
-这和 Lesson 3 的标准化、Lesson 6 的验证集是同一条规矩：**任何从数据里学出来的东西，都只从拟合用的数据里学。**验证集、测试集一律只用 `transform`。
-
-所有选择做完后，测试集读一次：在拟合用的 5625 张图上学 40 个主成分、训练 QDA，测试准确率 0.962。
-
-## 8. 画出来
-
-降到 2 维，就能画。MNIST 子集投到前两个主成分上，按真实数字上色（上色只为了看，PCA 本身没用标签）：
-
-![MNIST 子集的 5625 张拟合图在前两个主成分上的位置，按数字上色，方框标出每个数字的平均位置。两个主成分一共保住 17% 的方差。](figures/note/F6.svg){fig-alt="一团彩色的点，1 在最左边挤成一小团，0 在右边，7、9、4 挤在上方，2、3、5、6、8 挤在中间"}
-
-1 在最左边挤成很紧的一团，0 在右边，7、9、4 挤在上方，2、3、5、6、8 挤在中间。只用两个数（保住 17%），已经能看出哪些数字容易混。
-
-**延展：乳腺肿块。**30 个测量值先标准化（Lesson 3），再降到 2 维：
-
-![乳腺肿块 426 个训练样本在前两个主成分上的位置。两个主成分保住 63% 的方差。](figures/note/F7.svg){fig-alt="灰色的良性点集中在左边，蓝色的恶性点散在右边"}
-
-两类大致左右分开。第一个主成分的 30 个权重全是正的、大小相近（最大的是平均凹点数和平均凹度，各 0.26）：它差不多是“各项测量的总和”，即肿块的细胞核整体有多大、多不规则。只用这 2 个数，logistic regression 的交叉验证准确率是 0.953；用全部 30 个是 0.979。
+选出 $K = 40$，测试集只读一次：0.962。
 
 ## 9. 实现：用 scikit-learn 完成
 
-划分与 Lesson 6 第 6 节相同（`X_digits_fit`、`X_digits_val`、`X_digits_test`，MNIST 子集）。
-
-**第一步，学 PCA、看比例（Section 4、5）：**
+汽车（`cars` 是装着 392 辆车的 pandas 表；单位不同，先标准化）：
 
 ```python
-import numpy as np
+from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 
-pca = PCA()                                  # keep all 784 components for now
-pca.fit(X_digits_fit)                        # learn the directions from the fitting images only
-ratios = pca.explained_variance_ratio_       # share of the variance kept by each component
-print(ratios[:5])                            # the first five
-cum = np.cumsum(ratios)                      # cumulative share: cum[0] is k = 1, cum[9] is k = 10
-print(cum[9])                                # k = 10
-print(cum[19])                               # k = 20
-print(cum[49])                               # k = 50
+Xs = StandardScaler().fit_transform(cars[["cylinders", "displacement", "horsepower", "weight", "acceleration"]])
+pca = PCA().fit(Xs)                       # all five components
+print(pca.explained_variance_ratio_)      # share kept by each component
+print(pca.components_[0])                 # the five weights of the first component
 ```
 
-**第二步，在验证集上选 k（Section 6）：**
+输出的比例是 0.814、0.139、0.027、0.013、0.007。`components_` 的每一行是一个主成分。特征向量反过来也是特征向量，所以权重可能整行变号，读意思时不受影响。
+
+手写数字（`X_train` 每行 784 个数）：
 
 ```python
-from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
-
-for k in [10, 20, 30, 40, 50, 100]:          # candidate numbers of components
-    pca = PCA(n_components=k, random_state=0)   # keep k components
-    pca.fit(X_digits_fit)                    # fitting images only
-    Z_fit = pca.transform(X_digits_fit)      # k numbers per fitting image
-    Z_val = pca.transform(X_digits_val)      # k numbers per validation image
-    qda = QuadraticDiscriminantAnalysis()    # one spread per class
-    qda.fit(Z_fit, y_digits_fit)             # train on the reduced fitting images
-    print(k, qda.score(Z_val, y_digits_val)) # validation accuracy
+pca = PCA(n_components=50, random_state=0).fit(X_train)   # learn from training images only
+Z_val = pca.transform(X_val)              # 50 scores per validation image
+X_back = pca.inverse_transform(Z_val)     # rebuild: mean image + scores times components
+print(pca.explained_variance_ratio_.sum())
 ```
 
-**第三步，还原一张图（Section 4）：**
-
-```python
-pca = PCA(n_components=10, random_state=0)   # 10 components
-pca.fit(X_digits_fit)                        # fitting images only
-one_image = X_digits_val[5:6]                # one validation image (a 6); [5:6] keeps one row
-z = pca.transform(one_image)                 # its 10 numbers
-back = pca.inverse_transform(z)              # mean image plus the 10 components times their scores
-error = one_image - back                     # what the 10 numbers could not keep
-print((error ** 2).sum())                    # reconstruction error of this image: 25.2
-image = back.reshape(28, 28)                 # the 784 numbers back as a 28 x 28 image
-```
+`transform` 算的是得分 $z_k$，`inverse_transform` 算的是还原 $\hat{\mathbf x}$。最后一行打印 0.827。784 维时 scikit-learn 用了带随机性的快速算法，所以加 `random_state=0`，每次结果才一样。
 
 ## 10. 一页回顾
 
 如果只读一页，读这里。
 
-![本讲的整条链。](figures/note/F8.svg){fig-alt="六个步骤的竖向流程图"}
+![这一讲的整条链。](figures/note_v2/F10.svg){fig-alt="七个步骤的竖向流程图：少存几个数；画线就是投影；投影的性质；还原误差；特征向量；什么时候不行；两个应用。每步右边一行要点和数字"}
 
-| 你看到的问题 | 可以做什么 | 用什么证据判断 |
+| 步骤 | 这一讲做了什么 | 证据 |
 |---|---|---|
-| 维数太多：画不出来，方法吃不消 | 降维：用少几个数代替 | 留住的方差；后续任务的验证准确率 |
-| 挑几个特征丢得太多 | 用特征的组合：投影到一个方向 | 投影的散布；还原误差 |
-| 哪个方向最好 | 散得最开 = 还原误差最小：主成分，依次垂直 | 解释方差比例 |
-| 留几个 | 累计比例给起点，验证集准确率定 k | 不落在搜索范围两端 |
-| 怎样不偷看 | 只在拟合部分 `fit`，验证集、测试集只 `transform` | 测试集只读一次 |
+| 问题 | 很多数在重复：每个样本少存几个数，还能还原吗 | 车的前四个量相关 0.84–0.95 |
+| 启发 | 画线就是投影；散得最开的方向，丢得最少 | 46° 时留住 97%；两柱之和始终 97.68 |
+| 模型 | 中心化后 $\mathbf x\approx z\mathbf u$，$\mathbf u^\top\mathbf u = 1$；投影 $z = \mathbf u^\top\mathbf x$，丢掉的部分和线垂直；多个方向是分量的叠加 | |
+| 损失 | 还原误差 $\sum_i\lVert\mathbf x_i-z_i\mathbf u\rVert^2$ | |
+| 求解 | 误差 $= (n-1)(\operatorname{tr}S-\mathbf u^\top S\mathbf u)$；约束下求最大得 $S\mathbf u = \lambda\mathbf u$；取前 $K$ 个特征向量，误差是丢掉的特征值之和 | 46.4°，$\lambda$ = 94.71、2.96 |
+| 检验 | 看比例、看还原误差；点不在线附近（环）时不行 | 环：55%、45% |
+| 应用 | 单位不同先标准化；图变成一行数，用 $K$ 个得分还原；只从训练图学 | 车：81%，和油耗相关 −0.82；数字：$K$ = 50 留住 82.7% |
 
-## 11. 总结与局限
+## 11. 拓展：别的表示方法（选读）
 
-开场的问题“能不能用少几个数留住大部分信息”，答案是能：MNIST 的 784 个数压到 86 个主成分，留住 90% 的方差，压到 40 个也认得出数字；QDA 反而从 0.725 升到 0.957（测试集 0.962，比 Lesson 5 收缩的 0.861 好得多）；压到 2 个，就能画出来。办法是用像素的组合，组合的方向选“投影后散得最开”的那个，它同时也是还原误差最小的。
+PCA 给每个样本换了一组新的数，也就是一种**表示**（representation）：新的数是原来各个量的加权和，方向都是直线。明白了这一点，就可以换别的方法来找表示，很多在 scikit-learn 里一行就能调用。下面几种都是非线性的：点不必挤在一个平面附近，目标是让原来挨得近的点，在新的图里仍然挨得近。它们最常用来把高维数据画成二维图，看数据里有什么结构。
 
-**迁移题。**一家超市有 5000 位顾客、每人 200 种商品的月购买量，想看看顾客分成哪几类。请不做计算回答：直接画图有什么困难？用 PCA 画成二维图时，标签从哪里来？如果后面还要预测“下个月会不会流失”，PCA 应该在哪份数据上 fit？k 怎么选？
+先看一个 PCA 做不好的例子：三维空间里卷成一卷的点。PCA 只能把它压扁，卷还卷着；Isomap 沿着卷一步步量距离，把它摊平成一张纸。
+
+![三维的卷，以及三种方法画出的二维图。颜色是点沿卷的位置。](figures/note_v2/F15.svg){fig-alt="四张图。第一张是三维的卷状点云，颜色从紫到黄沿卷变化。第二张 PCA 的二维图仍是一个卷，内外两圈颜色挨在一起。第三张 Isomap 的二维图是一块长方形，颜色从左到右连续变化。第四张 t-SNE 的二维图分成几段，每段里颜色连续"}
+
+再看手写数字。同样 2,000 张训练图，用六种方法各画一张二维图，颜色是真实数字，方法本身都没用标签：
+
+![2,000 张训练图，用六种方法降到两个数。PCA 直接用 784 个像素；后四种先用 PCA 降到 50 个数再做。](figures/note_v2/F16.svg){fig-alt="六张散点图，每个点按真实数字上色并在每类中间标出数字。PCA 和 Kernel PCA 里大多数数字混在一起，只有 0 和 1 分开。Isomap 和 Spectral embedding 分开得多一些。t-SNE 和 UMAP 里大多数数字各成一团，4、7、9 挨在一起，3、5、8 挨在一起"}
+
+PCA 的二维图里，大多数数字混在一起；t-SNE 和 UMAP 里，大多数数字各成一团，容易混的 4、7、9 和 3、5、8 挨在一起。
+
+| 方法 | 调用 | 一句话 |
+|---|---|---|
+| Kernel PCA | `KernelPCA(n_components=2, kernel="rbf")` | 先把点换到一个更大的空间里，再做 PCA |
+| Isomap | `Isomap(n_components=2, n_neighbors=10)` | 沿着邻居一步步走过去量距离，再摊平 |
+| Spectral embedding | `SpectralEmbedding(n_components=2)` | 把邻居关系连成一张网，按网的形状摆点 |
+| t-SNE | `TSNE(n_components=2, perplexity=30)` | 让邻居在图上还是邻居，最常用的画图方法 |
+| UMAP | `umap.UMAP(n_components=2)`（先 `pip install umap-learn`） | 想法和 t-SNE 相近，数据大时更快 |
+
+前四种都在 `sklearn.decomposition` 或 `sklearn.manifold` 里。在 784 个像素上，常先用 PCA 降到 50 个数，再交给它们：
+
+```python
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+
+Z50 = PCA(n_components=50).fit_transform(X)                 # first 50 PCA scores
+Z2 = TSNE(n_components=2, random_state=0).fit_transform(Z50)  # then a 2-D map for plotting
+```
+
+这几种方法主要用来看图。和 PCA 比，它们大多不能像第 8.3 节那样把图还原回来；t-SNE 还不能把一张新图放进已经画好的图里；图上团和团之间的距离、团的大小不一定有意义，换一个随机种子，图也会变。2,000 张图在笔记本电脑上，t-SNE 约 6 秒，UMAP 约 9 秒。
+
+## 12. 总结与局限
+
+回到开头：784 个数里大部分在重复，留 50 个就留住 82.7%，还原出来认得出。办法是把点投影到散得最开的方向，那里丢的最少；这些方向是协方差矩阵的特征向量。
+
+本讲之后，你能说出 PCA 假设数据长什么样（挤在一个低维平面附近）、它在最小化什么（还原误差，也就是让投影的方差最大）、答案为什么是特征向量；单位不同时先标准化，读出主成分的意思；用累计比例和后面的任务选 $K$；只从训练部分学主成分。
+
+迁移题：一家超市记录了 1,000 位顾客一年里在 20 类商品上各花了多少钱（单位都是英镑）。要不要先标准化？如果第一主成分的 20 个权重全是正的、大小差不多，它在说什么？
 
 ::: {.callout-note collapse="true" title="参考回答"}
-200 个特征画不出来。PCA 不需要标签：只用购买量学方向，画出来再看有没有自然的几群（图上能看出有没有几群，但“到底分几类”，PCA 自己回答不了）。要预测流失时，先分出训练、验证、测试，PCA 只在拟合用的那部分上 fit，其余只 transform；k 先看累计比例（例如 90%）定一个起点，再按流失预测在验证集上的准确率选，并检查不在搜索范围两端。另外，各商品的购买量尺度不同（大米按袋、口香糖按条），PCA 之前要先标准化，否则方差大的商品会主导主成分。
+单位相同，可以不标准化，但花钱多、散布大的几类（比如生鲜）会主导第一主成分；想让每类商品同样重要，就先标准化。权重全正、大小差不多的第一主成分，说的是“这位顾客总共花多少钱”，和身高臂展的“个子多大”、汽车的“车有多大”是同一种东西。
 :::
 
-**这个方法在哪里不可信。**
+这个方法在哪里不可信：
 
-1. **方差大不等于有用。**PCA 不看标签，留下的是散得开的方向，不一定是区分类别的方向。如果两类恰好沿一个方差很小的方向分开，PCA 会把它丢掉。
-2. **只找直线方向。**主成分是像素的加权和。数据如果沿一条弯曲的“带子”分布，直线方向描述不好。
-3. **尺度会改变结果。**乳腺肿块要先标准化，否则面积（几百到两千多）会独占第一主成分。MNIST 的像素尺度相同，可以不标准化。
-4. **主成分不一定好解释。**第一主成分在乳腺肿块上是“整体大小”，在 MNIST 上大致是“像 0 还是像 1”；后面的主成分是一团红蓝相间的权重，说不清是什么意思。
+1. 只找直线方向。点挤在一个弯的形状上（第 6 节的环），PCA 帮不上忙。
+2. 尺度决定结果。单位不同的量不标准化，散布大的量会独占第一主成分（第 7 节的车重）。
+3. 它不看标签。散得开的方向不一定对分类有用。
+4. 主成分不一定好解释。汽车的前两个读得出意思；784 个像素的第 5、6 个，就很难说它在看什么。
 
-**回到开头的承诺。**现在，面对维数很多的数据，你可以：说明为什么用组合而不是挑特征；找出散得最开的方向，并说明它也是还原误差最小的方向；读懂解释方差比例，结合验证集准确率选 k；只在拟合用的数据上 fit PCA；把数据画在两个主成分上。
-
-**30 秒反馈。**读完这一讲，请扫码留下匿名反馈或问题：哪里没看懂、哪里讲得太快，都对改进有用。
+30 秒反馈：读完这一讲，请扫码留下匿名反馈或问题：哪里没看懂、哪里讲得太快，都对改进有用。
 
 ![本讲的反馈二维码](./feedback-qr.svg){fig-align="center" width="160px" fig-alt="反馈二维码"}
 
-*以下是 Advanced Study，不影响主线，每个 Study 可以单独阅读。MPS311 鼓励选读。MPS439 的必做是一项深度主任务：Lab 7 的 Advanced A，它以本页 Study 1 为基础，但换了数据（只用数字 0 的图），自检值与这里不同；其余 Study 选读。*
+*以下是 Advanced Study，不影响主线，每个 Study 可以单独阅读。MPS311 鼓励选读。MPS439 的必做项见 Lab 7 的 Advanced；其余 Study 选读。*
 
 ---
 
-## Advanced Study 1：主成分为什么是协方差矩阵的特征向量
+## Advanced Study 1：自己推一遍
 
-设数据已减去平均值，$n$ 行、$d$ 列的矩阵记为 $X$，协方差矩阵 $S = \frac{1}{n-1}X^\top X$（$d \times d$，Lesson 5 见过二维的）。方向 $\mathbf u$（$\|\mathbf u\| = 1$）上的投影是 $\mathbf z = X\mathbf u$，它的方差是
+正文第 5 节给了结论和两步主干。这里请你自己把它推出来。每一步先给提示，答案折叠在后面，做完再看。
 
-$$
-\frac{1}{n-1}\mathbf z^\top\mathbf z = \frac{1}{n-1}\mathbf u^\top X^\top X\mathbf u = \mathbf u^\top S\mathbf u .
-$$
+**第 1 步：$z$ 为什么是 $\mathbf u^\top\mathbf x$。** 固定方向 $\mathbf u$（$\mathbf u^\top\mathbf u = 1$），一个点只存一个数 $z$。请找出让 $\lVert\mathbf x-z\mathbf u\rVert^2$ 最小的 $z$。
 
-所以第一主成分是：在 $\|\mathbf u\| = 1$ 的条件下，让 $\mathbf u^\top S\mathbf u$ 最大的 $\mathbf u$。
+提示：把平方展开成 $z$ 的二次函数，对 $z$ 求导。
 
-**拉格朗日乘子。**令
+::: {.callout-note collapse="true" title="答案"}
+$\lVert\mathbf x-z\mathbf u\rVert^2 = \mathbf x^\top\mathbf x-2z\,\mathbf u^\top\mathbf x + z^2$，对 $z$ 求导得 $-2\mathbf u^\top\mathbf x + 2z = 0$，所以 $z = \mathbf u^\top\mathbf x$。这正是第 3 节的性质 ③：最好的 $z$ 让丢掉的部分和线垂直。
+:::
 
-$$
-\mathcal L = \mathbf u^\top S\mathbf u - \lambda(\mathbf u^\top\mathbf u - 1),
-$$
+**第 2 步：把总误差写成 $S$。** 用第 1 步的 $z_i$，证明 $L(\mathbf u) = (n-1)(\operatorname{tr}S-\mathbf u^\top S\mathbf u)$。
 
-对 $\mathbf u$ 求导并令其为 0：
+提示：先证一个点的误差是 $\lVert\mathbf x\rVert^2-z^2$；再用 $z^2 = \mathbf u^\top\mathbf x\mathbf x^\top\mathbf u$ 和 $\lVert\mathbf x\rVert^2 = \operatorname{tr}(\mathbf x\mathbf x^\top)$（附录）。
 
-$$
-2S\mathbf u - 2\lambda\mathbf u = 0 \quad\Longrightarrow\quad S\mathbf u = \lambda\mathbf u .
-$$
+::: {.callout-note collapse="true" title="答案"}
+见正文第 5.1 节。
+:::
 
-$\mathbf u$ 必须是 $S$ 的**特征向量**，$\lambda$ 是对应的**特征值**。这时投影的方差 $\mathbf u^\top S\mathbf u = \lambda\mathbf u^\top\mathbf u = \lambda$。要方差最大，就取最大的特征值对应的特征向量。
+**第 3 步：为什么拉格朗日乘子这样写。** 在 $\mathbf u^\top\mathbf u = 1$ 下让 $\mathbf u^\top S\mathbf u$ 最大。请说明：在最好的那个 $\mathbf u$ 上，$S\mathbf u$ 一定和 $\mathbf u$ 同向。
 
-**后面的主成分。**再要求与 $\mathbf u_1$ 垂直，同样的推导得到第二大的特征值对应的特征向量；对称矩阵不同特征值的特征向量自动互相垂直。所以：主成分就是 $S$ 的特征向量，按特征值从大到小排；第 $j$ 个的解释方差比例是 $\lambda_j / \sum_i \lambda_i$。
+提示：满足约束的 $\mathbf u$ 都在单位圆上。在最好的那一点，沿着圆往哪边挪一点，目标都不能再变大。目标的梯度是 $2S\mathbf u$，沿着圆的方向和 $\mathbf u$ 垂直。
 
-**与 scikit-learn 对照：**
+::: {.callout-note collapse="true" title="答案"}
+沿着圆挪一小步 $\boldsymbol\delta$（$\boldsymbol\delta$ 和 $\mathbf u$ 垂直），目标变化约 $2(S\mathbf u)^\top\boldsymbol\delta$。最好的点上，它对每个垂直于 $\mathbf u$ 的 $\boldsymbol\delta$ 都是 0，所以 $S\mathbf u$ 在垂直方向上没有分量，只剩和 $\mathbf u$ 同向的部分：$S\mathbf u = \lambda\mathbf u$。这正是 $\partial\mathcal L/\partial\mathbf u = \mathbf 0$。
+
+二维时也可以令 $\mathbf u = (\cos\theta, \sin\theta)^\top$，直接对 θ 求导，得 $\tan 2\theta = 2S_{12}/(S_{11}-S_{22}) = -19.8$，θ = 46.4° 或 136.4°：
+
+![投影的方差和还原误差随方向 θ 的变化。](figures/note_v2/F3.svg){fig-alt="两条正弦形状的曲线，蓝色实线是投影方差，在 46.4 度最大 94.71、在 136.4 度最小 2.96；红色虚线是还原误差，形状相反"}
+:::
+
+**第 4 步：最大的特征值就是全局最大。** 满足 $S\mathbf u = \lambda\mathbf u$ 的方向有 $d$ 个。请证明 $\lambda$ 最大的那个就是所有单位向量里最好的。
+
+提示：对称矩阵 $S$ 有 $d$ 个互相垂直、长度为 1 的特征向量 $\mathbf v_1,\dots,\mathbf v_d$，特征值 $\lambda_1\ge\dots\ge\lambda_d$（附录）。把任意单位向量写成 $\mathbf u = \sum_j c_j\mathbf v_j$。
+
+::: {.callout-note collapse="true" title="答案"}
+$\sum_j c_j^2 = 1$，于是 $\mathbf u^\top S\mathbf u = \sum_j\lambda_jc_j^2 \le \lambda_1$，$\mathbf u = \mathbf v_1$ 时取等号。和 $\mathbf v_1$ 垂直的方向 $c_1 = 0$，最大是 $\lambda_2$，所以第二个方向是 $\mathbf v_2$。
+:::
+
+**第 5 步：一个一个挑，等于一次挑一组。** 证明任意 $K$ 个两两垂直的单位向量，$\sum_{k=1}^K\mathbf u_k^\top S\mathbf u_k \le \lambda_1 + \dots + \lambda_K$。
+
+提示：写成 $\sum_j\lambda_jw_j$，$w_j = \sum_k(\mathbf v_j^\top\mathbf u_k)^2$。看 $w_j$ 有哪两个限制。
+
+::: {.callout-note collapse="true" title="答案"}
+$w_j$ 是 $\mathbf v_j$ 落到这 $K$ 个方向张成的平面上那部分的长度平方，所以 $0\le w_j\le 1$；交换求和次序，$\sum_jw_j = \sum_k\lVert\mathbf u_k\rVert^2 = K$。总共 $K$ 份权重，每个特征值最多拿一份，加权和最大就是全给最大的 $K$ 个，取 $\mathbf u_k = \mathbf v_k$ 时等号成立。
+
+决策树每一步也挑当前最好的一刀，却不能保证整棵树最好。PCA 可以，靠的就是 $w_j$ 的这两个限制：前面挑走的方向不会让后面的选择变差。
+:::
+
+还可以想一想：不同特征向量上的得分为什么不相关（$z_j$ 和 $z_k$ 的协方差是 $\mathbf v_j^\top S\mathbf v_k$）？如果 $\lambda_1 = \lambda_2$，第一主成分还唯一吗？
+
+## Advanced Study 2：用 PCA 给图去噪
+
+扫描的图、拍糊的照片，都带噪声。PCA 可以去掉一大部分，而且不用知道原图是什么样。
+
+做法和第 8.3 节一样：主成分只从干净的训练图学；拿到一张有噪声的图，算它在前 $K$ 个主成分上的得分，再还原。下面给 1,875 张验证图每个像素都加上标准差 0.3 的随机噪声，再用不同的 $K$ 还原，和原图比：
+
+![左：三张验证图的原图、加噪声后的图，和用 K 个主成分还原的图。右：还原图和原图差多少，对 1,875 张验证图平均。](figures/note_v2/F17.svg){fig-alt="左边三行手写数字 6、7、4，每行五张：原图干净；加噪声后满是灰点；K 等于 10 时模糊；K 等于 80 时笔画清楚、背景干净，用蓝框标出；K 等于 400 时又出现灰点。右边是一条先降后升的曲线，横轴 K 从 0 到 784，纵轴是和原图的差，K 等于 80 时最低 13.1，K 等于 784 时回到不处理的 70.5，用红色虚线标出"}
+
+不处理时，有噪声的图和原图差 70.5。留 80 个主成分还原，只差 13.1，噪声去掉了八成多。$K$ 太小，像第 8.3 节那样，数字本身还原不出来（$K = 10$ 时 28.0）；$K$ 太大，噪声又回来了（$K = 400$ 时 36.3，$K = 784$ 时回到 70.5）。
+
+为什么能去噪：数字的变化挤在前几十个方向上，噪声却平均摊在全部 784 个方向上，每个方向分到 $0.3^2 = 0.09$。留 $K$ 个方向，就只留下 $K$ 份噪声，$784-K$ 份都丢掉了。右图曲线后半段是一条直线，斜率正好约 0.09；右端 784 × 0.09 = 70.6，就是不处理时的 70.5。
 
 ```python
-import numpy as np
-
-S = np.cov(X_digits_fit.T)                   # 784 x 784 covariance matrix of the fitting images
-values, vectors = np.linalg.eigh(S)          # eigenvalues (ascending) and eigenvectors (as columns)
-order = np.argsort(values)[::-1]             # largest first
-values = values[order]
-vectors = vectors[:, order]
-print(values[0] / values.sum())              # share of the first component
+pca = PCA(n_components=80).fit(X_train)            # learn the components from clean training images only
+rng = np.random.default_rng(0)                     # random numbers for the noise
+noisy = X_val + rng.normal(0, 0.3, X_val.shape)    # add noise with standard deviation 0.3 to every pixel
+denoised = pca.inverse_transform(pca.transform(noisy))   # scores on the first 80 components, then rebuild
 ```
-
-输出 0.0955，与 `pca.explained_variance_ratio_[0]` 相同。`vectors[:, 0]` 与 `pca.components_[0]` 也相同，只是可能差一个负号：$\mathbf u$ 和 $-\mathbf u$ 是同一条线。
-
-**练习。**用第 3 节的二维点云验证勾股定理：对任意方向，投影的方差加还原误差等于两个特征的方差之和。（提示：总和等于 $S$ 的迹，即两个特征值之和。）
-
-## Advanced Study 2：用 SVD 从零实现 PCA
-
-算协方差矩阵再分解，要先形成 $d \times d$ 的矩阵。另一种办法是直接对减去平均后的数据做**奇异值分解**（SVD）：$X = U\Sigma V^\top$。代入 $S = \frac{1}{n-1}X^\top X = V\frac{\Sigma^2}{n-1}V^\top$，所以 $V$ 的列就是主成分，奇异值的平方除以 $n-1$ 就是特征值。
-
-```python
-mean = X_digits_fit.mean(axis=0)             # the mean image
-Xc = X_digits_fit - mean                     # centre the fitting images
-U, s, Vt = np.linalg.svd(Xc, full_matrices=False)   # rows of Vt are the components
-var = s ** 2 / (len(Xc) - 1)                 # variance along each component
-print(var[0])                                # compare with pca.explained_variance_[0]
-k = 10
-Z = (X_digits_val - mean) @ Vt[:k].T         # scores of the validation images on k components
-back = mean + Z @ Vt[:k]                     # rebuild them from k numbers
-print(((X_digits_val - back) ** 2).sum(axis=1).mean())   # average reconstruction error
-```
-
-第一行输出 5.0389，与 scikit-learn 相同；还原误差 27.05，与 `inverse_transform` 算出的相同。
 
 接下来请自己做：
 
-1. 把 `k` 从 1 改到 200，画出还原误差随 $k$ 的变化。它和 1 减累计比例的曲线是什么关系？
-2. 注意减平均值用的是 `X_digits_fit` 的平均，验证图也减这个平均。如果给验证图减它自己的平均，会违反第 7 节的哪条规矩？
+1. 把噪声加到标准差 0.5，最好的 $K$ 变大还是变小？先猜，再算。提示：每个方向分到的噪声变成多少？
+2. 实际去噪时没有原图可比，怎样选 $K$？
+3. 把验证图上下翻转，用 $K = 50$ 算每张图的还原误差。翻转后的图误差大吗？这个误差能不能用来发现“不像手写数字”的图？哪些数字翻转后还像自己？
 
-## Advanced Study 3：开放问题
+::: {.callout-note collapse="true" title="第 1 题答案"}
+变小。每个方向分到 0.25 份噪声，多留一个方向代价更大，最好的 $K$ 约 40，误差 21.3（不处理时 196）。噪声越大，越要少留。
+:::
 
-下面四个问题本讲没有展开，每个给出一个起点。
+## Advanced Study 3：电脑怎样算出主成分
 
-1. **标准化与否。**乳腺肿块不标准化直接做 PCA，第一主成分由哪个特征主导？起点：`PCA(2).fit(X_train)`，看 `components_[0]` 里最大的权重对应哪个特征。
-2. **只看方差会丢掉有用的方向吗？**起点：手造两类沿一个方差很小的方向分开的二维数据，比较只留第一主成分后 logistic regression 的准确率。查阅 `LinearDiscriminantAnalysis(n_components=...)`：它找的是“分开两类”的方向，不是“散得开”的方向。
-3. **弯曲的数据。**起点：`sklearn.manifold.TSNE` 把 MNIST 子集画成二维，与第 8 节的图比较。t-SNE 的图上，距离还有意义吗？
-4. **压缩图像。**一张 28×28 的图存 784 个数；用 10 个主成分只存 10 个数，但还要存平均图和 10 个主成分。一共要存多少张图，才划算？
+**轮流求 $z$ 和 $\mathbf u$。** 固定 $\mathbf u$，$z_i = \mathbf u^\top\mathbf x_i$；固定 $z_i$，$\sum_i\lVert\mathbf x_i-z_i\mathbf u\rVert^2$ 对 $\mathbf u$ 是最小二乘，解是 $\mathbf u = \sum_i z_i\mathbf x_i/\sum_i z_i^2$，再缩放成长度 1。身高臂展上从 $\mathbf u = (1,\ 0)^\top$ 出发，每轮后的方向是 44.56°、46.39°、46.44°、46.45°，三轮就到了第一主成分。第一轮的 44.56° 正是“拿身高拟合臂展”那条线。
+
+**numpy 和 SVD。** 在 5,625 张训练图上，`np.linalg.eigh(np.cov(X_train.T))` 算出的前 5 个特征向量和 scikit-learn 的 `components_` 相同（可能整体变号），最大差 $2\times10^{-15}$。scikit-learn 实际用的是奇异值分解：中心化后的数据矩阵 $X = U_s\Sigma V^\top$，$S = \frac{1}{n-1}X^\top X = V\frac{\Sigma^2}{n-1}V^\top$，$V$ 的列就是主成分。训练图里有 128 个像素在所有图上都是 0，$S$ 的特征值里比 $10^{-10}$ 还小的有 135 个。
+
+接下来请自己做：
+
+1. 说明轮流求的每一轮就是 $\mathbf u\leftarrow S\mathbf u$ 再缩放；用 $\mathbf u = \sum_j c_j\mathbf v_j$ 说明为什么反复乘 $S$ 会转到 $\mathbf v_1$，$\lambda_2/\lambda_1$ 越小转得越快还是越慢？
+2. 用 `np.linalg.svd(..., full_matrices=False)` 写出 PCA 的 `fit` 和 `transform`，和 scikit-learn 对照。
+3. 用 $\mathbf u^\top S\mathbf u = \lambda$ 说明恒为 0 的像素为什么对应特征值 0，以及第 8.8 节的 QDA 为什么在 784 个像素上报错。
+
+## 附录：这一讲用到的数学
+
+方阵 $A$ 的**迹**是对角线上的数之和，$\operatorname{tr}A = \sum_k A_{kk}$。两条性质：
+
+- 和的迹等于迹的和：$\operatorname{tr}(A + B) = \operatorname{tr}A + \operatorname{tr}B$，所以求和和取迹可以交换次序。
+- 列向量的长度平方是它和自己外积的迹：$\mathbf x^\top\mathbf x = \operatorname{tr}(\mathbf x\mathbf x^\top)$。二维时 $\mathbf x = (h,\ a)^\top$，$\mathbf x\mathbf x^\top = \begin{pmatrix}h^2 & ha\\ ha & a^2\end{pmatrix}$，对角线之和 $h^2 + a^2$ 正是 $\mathbf x^\top\mathbf x$。
+
+中心化后的数据，**协方差矩阵**为 $S = \frac{1}{n-1}\sum_i\mathbf x_i\mathbf x_i^\top$。二维时
+$$
+S = \frac{1}{n-1}\begin{pmatrix}\sum_i h_i^2 & \sum_i h_ia_i \\ \sum_i h_ia_i & \sum_i a_i^2\end{pmatrix}:
+$$
+对角线是身高、臂展各自的方差，非对角线是两者的协方差。$S$ 是对称矩阵。$\operatorname{tr}S$ 是各个量的方差之和。
+
+若 $S\mathbf v = \lambda\mathbf v$（$\mathbf v\ne\mathbf 0$），$\mathbf v$ 叫 $S$ 的**特征向量**，$\lambda$ 叫**特征值**：$S$ 乘 $\mathbf v$，方向不变，只伸缩 $\lambda$ 倍。$d\times d$ 的对称矩阵有 $d$ 个互相垂直、长度为 1 的特征向量，特征值都是实数；协方差矩阵的特征值都不小于 0，因为 $\lambda = \mathbf v^\top S\mathbf v$ 是一个方差。numpy 里用 `np.linalg.eigh(S)` 算。
+
+**拉格朗日乘子**是带等式约束求最大或最小的固定做法，为什么这样写见 Advanced Study 1。

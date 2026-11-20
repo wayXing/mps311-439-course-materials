@@ -745,15 +745,15 @@
       "slug": "lesson-07",
       "number": "07",
       "label": "Lesson 7",
-      "title": "Fewer numbers for the same data",
+      "title": "Many numbers that say one thing",
       "shortTitle": "PCA",
-      "summary": "Replace many features by a few combinations of them: the directions of widest spread, chosen on the fitting data only, with how many to keep decided on the validation set.",
+      "summary": "Keep a few numbers per sample instead of many: project onto the directions of widest spread, which lose the least. In the lab, use PCA to look at data, to make QDA work on pixels, and to catch common mistakes.",
       "accent": "blue",
       "type": "teaching",
       "topics": [
-        "Combinations, not single pixels",
-        "Principal components and explained variance",
-        "Choosing k without peeking"
+        "Projection and reconstruction error",
+        "Eigenvectors of the covariance matrix",
+        "Using PCA, and catching mistakes"
       ],
       "video": {
         "youtubeId": "_t0xPW0ZB6w",
