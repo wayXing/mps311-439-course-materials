@@ -133,7 +133,7 @@ const assignmentTwoRoot = resolve(projectRoot, '../assessment/2026/assignment2')
 const assignmentTwoOutput = join(projectRoot, 'public/assignments/assignment-two');
 if (await stat(assignmentTwoRoot).then(() => true).catch(() => false)) {
   await mkdir(assignmentTwoOutput, { recursive: true });
-  await cp(join(assignmentTwoRoot, 'assignment_2_mnist_en_v6.html'), join(assignmentTwoOutput, 'brief.html'));
+  await cp(join(assignmentTwoRoot, 'assignment_2_mnist_en_v7.html'), join(assignmentTwoOutput, 'brief.html'));
   await cp(join(assignmentTwoRoot, 'data/mnist.npz'), join(assignmentTwoOutput, 'mnist.npz'));
   await removePublicPdfLinks(assignmentTwoOutput);
   console.log('Synced Assignment 2 student brief and MNIST backup.');

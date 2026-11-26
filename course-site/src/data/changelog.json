@@ -4,6 +4,25 @@
   ],
   "releases": [
     {
+      "version": "0.3.19",
+      "date": "2026-11-26",
+      "title": "Assignment 2 brief, version 7",
+      "items": [
+        {
+          "type": "fix",
+          "text": "The Assignment 2 data-loading code is updated for current library versions, and the backup download options now show where to continue."
+        },
+        {
+          "type": "improvement",
+          "text": "The Assignment 2 brief adds a six-item checklist for handing in and lists the basic path that reaches a Pass."
+        },
+        {
+          "type": "improvement",
+          "text": "The Assignment 2 brief now says which models to use on the test data and how to judge small differences in accuracy."
+        }
+      ]
+    },
+    {
       "version": "0.3.18",
       "date": "2026-11-26",
       "title": "Lesson 8: clustering, new lecture, notes and lab",
