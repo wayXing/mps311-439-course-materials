@@ -256,7 +256,7 @@ Drag $K$ and see from how many numbers a validation image (the digit 6) becomes 
 Guess first: how many numbers do you need before you can tell it is a 6?
 
 ::: {.callout-note collapse="true" title="Show answer"}
-With 1 or 2 numbers, the reconstruction is still a blur that looks like the mean image. The reconstruction error is 57.7 (the sum of squared differences over the 784 pixels; with the mean image alone it is 58.4). With 10 numbers the error is 25.2, and you can see the rough shape of a 6. With 50 it is 10.9, and the image looks about the same as the original. With 100 it is 6.2. "Recognisable" means that you can say which digit it is. Averaged over the 1,875 validation images, the reconstruction error at $K = 10$, 50 and 100 is 27.0, 9.3 and 4.6.
+With 1 or 2 numbers, the reconstruction is still a blur that looks like the mean image. The reconstruction error is 57.7 (the sum of squared differences over the 784 pixels; with the mean image alone it is 58.5). With 10 numbers the error is 25.2, and you can see the rough shape of a 6. With 50 it is 10.9, and the image looks about the same as the original. With 100 it is 6.2. "Recognisable" means that you can say which digit it is. Averaged over the 1,875 validation images, the reconstruction error at $K = 10$, 50 and 100 is 27.0, 9.3 and 4.6.
 :::
 
 We can use the training images to check the result of Section 5.3. The total spread is 52.77. The sum of the first 50 eigenvalues is 43.64 (82.7%), so 9.13 is dropped. If we rebuild the training images from 50 principal components, the sum of squared errors divided by $n-1$ is also 9.13.

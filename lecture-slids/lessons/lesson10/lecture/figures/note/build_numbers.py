@@ -1,5 +1,5 @@
 """Lesson 10 Note: every number in the note, the figures, the widgets and the lab checks.
-Run with a Python that has TensorFlow (on this Mac: the arm64 venv, see COURSE_MATERIAL_WORKFLOW §5):
+Run with a Python that has TensorFlow (for example: uv run --no-project --python 3.12 --with tensorflow python build_numbers.py):
     python build_numbers.py   -> numbers.json (and prints what the note quotes)
 Rules fixed in the design card before writing the note:
   MNIST   keras.datasets file; first 50,000 training images fit, the next 10,000 are the validation set (Assignment 2)

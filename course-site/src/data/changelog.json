@@ -4,6 +4,33 @@
   ],
   "releases": [
     {
+      "version": "0.3.21",
+      "date": "2026-11-26",
+      "title": "Lesson 10: convolutional networks, new lecture, notes and lab",
+      "items": [
+        {
+          "type": "new",
+          "text": "Lesson 10 follows one line from the problem to the answer: why a fully connected network ignores neighbouring pixels, the CNN as a model, its loss, and how its filters are learned."
+        },
+        {
+          "type": "new",
+          "text": "The Lesson 10 notes add sections on the loss and on training, a table of one-line changes to the network, and a guide to which sections to read."
+        },
+        {
+          "type": "new",
+          "text": "The Lesson 10 lab is about using a CNN: give it images in the right shape, compare it fairly with the fully connected network, check one layer by hand, and check code an AI wrote."
+        },
+        {
+          "type": "new",
+          "text": "The MPS439 task of Lesson 10 trains both networks on moved images and weighs what this gains against what it costs."
+        },
+        {
+          "type": "improvement",
+          "text": "The Lesson 10 lab gives two backup downloads for MNIST, so the lab still runs when one source is down."
+        }
+      ]
+    },
+    {
       "version": "0.3.20",
       "date": "2026-11-26",
       "title": "Lesson 9: neural networks, new lecture, notes and lab",

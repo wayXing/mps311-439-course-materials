@@ -1,5 +1,5 @@
 """Lesson 9 Note: every number in the note, the figures, the widgets and the lab checks.
-Run with a Python that has TensorFlow (on this Mac: the arm64 venv, see lesson-rules/reference/BUILD_AND_CHECK.md):
+Run with a Python that has TensorFlow (for example: uv run --no-project --python 3.12 --with tensorflow python build_numbers.py):
     python build_numbers.py   -> numbers.json (and prints what the note quotes)
 Rules fixed in the design card before writing the note:
   rings   the Lesson 4 ring: default_rng(0), radius N(1, 0.25) inner (class 1) and N(2.4, 0.3) outer, 150 each

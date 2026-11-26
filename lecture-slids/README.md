@@ -7,7 +7,7 @@ All ten lessons are Quarto: Notes (`.qmd`, Chinese and English), RevealJS slides
 - `lessons/lessonN/lab/` — `lab_worksheet.qmd`, `build_solution.py` (fills the blanks, runs the notebook, asserts every check value).
 - `lessons/shared/tools/` — `note_lint.py`, `deck_review.py` (slide screenshots and overflow), `note_shots.py` (Note screenshots for the student reviewer).
 
-The production workflow is `lessons/COURSE_MATERIAL_WORKFLOW.md`; the reviewers are in `../.claude/agents/`.
+The production rules (`lesson-rules/`) and reviewers (`.claude/agents/`) live in the private workspace and are not part of this mirror.
 
 ## UoS 2025 versions (Slidev)
 

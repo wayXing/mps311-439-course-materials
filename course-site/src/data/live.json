@@ -424,14 +424,16 @@
         "Shuffling and moving the digits",
         "Looking at a small patch, the same filter everywhere",
         "Keeping one number per block",
-        "Testing the new network against the old one",
-        "Reading its mistakes"
+        "How the filters are learned (loss and training)",
+        "Testing whether it uses neighbours",
+        "Comparing it and reading its mistakes",
+        "Other structures and limitations"
       ],
       "polls": [
         {
           "key": "shuffle-dense",
-          "slide": "Opening: Shuffle every image's pixels, the same way",
-          "prompt": "All images shuffled the same way; Lesson 9 network (0.970) retrained. Accuracy?",
+          "slide": "Problem: Shuffle every image's pixels, the same way",
+          "prompt": "All images shuffled the same way; the fully connected network (0.970) retrained. Accuracy?",
           "options": [
             "about 0.1",
             "about 0.5",
@@ -442,7 +444,7 @@
         },
         {
           "key": "pooling",
-          "slide": "One number per block: The feature map still moves",
+          "slide": "Model: The feature map still moves",
           "prompt": "Digits moved 2 pixels. Which keeps accuracy highest?",
           "options": [
             "keep every position",
@@ -454,7 +456,7 @@
         },
         {
           "key": "shuffle-cnn",
-          "slide": "The new network, tested: Does it really use neighbours?",
+          "slide": "Test: Does it really use neighbours?",
           "prompt": "Same shuffle, CNN (0.987) retrained. Its accuracy?",
           "options": [
             "still about 0.987",

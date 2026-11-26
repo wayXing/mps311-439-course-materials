@@ -7,7 +7,7 @@
 写出的 workbook 不含输出。
 运行：uv run --no-project --python 3.12 --with "scikit-learn==1.6.1",matplotlib,pandas,scipy,nbclient,nbformat,ipykernel python build_workbook.py
 （scikit-learn 固定 1.6.1：1.8 起 QDA 遇到不满秩的协方差直接报 LinAlgError，不再只是警告，2.2、3.1、3.2、3.3 会停下）
-（用 uv；~/.ipython 坏掉时先设 IPYTHONDIR 到一个可写的临时目录，见 COURSE_MATERIAL_WORKFLOW.md 第 5 节）
+（用 uv；~/.ipython 坏掉时先设 IPYTHONDIR 到一个可写的临时目录）
 """
 from pathlib import Path
 import re
