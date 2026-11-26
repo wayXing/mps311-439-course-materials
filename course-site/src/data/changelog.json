@@ -4,6 +4,25 @@
   ],
   "releases": [
     {
+      "version": "0.3.18",
+      "date": "2026-11-26",
+      "title": "Lesson 8: clustering, new lecture, notes and lab",
+      "items": [
+        {
+          "type": "new",
+          "text": "Lesson 8 follows one line from the problem to the answer: what one centre per group means, the within-cluster sum of squares it makes smaller, and why K-means always stops but can stop badly."
+        },
+        {
+          "type": "new",
+          "text": "The Lesson 8 notes add a page on other clustering methods and three Advanced Studies: derive the results yourself, reduce the colours of a photo with K-means, and how a computer does it."
+        },
+        {
+          "type": "new",
+          "text": "The Lesson 8 lab is about using clustering: find groups in a table of wines, sort the digits as Assignment 2 asks, cope with too many images, and check three versions of code an AI wrote."
+        }
+      ]
+    },
+    {
       "version": "0.3.17",
       "date": "2026-11-20",
       "title": "Lesson 7: PCA, new lecture, notes and lab",

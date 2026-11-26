@@ -1,0 +1,10 @@
+/* v2 extras for Lesson 8 (on top of styles.css and styles_l8.css) */
+.reveal .flow.seven{grid-template-columns:repeat(7,1fr);gap:12px}
+.reveal .flow.seven div{font-size:1.0em;padding:26px 6px}
+.reveal .fig-f0{width:1150px}
+.reveal .fig-f8{width:auto;height:660px}
+.reveal .fig-s1{width:640px}
+.reveal .two.side .formula mjx-container[display="true"]{font-size:1.25em!important}
+.reveal .say .eq{margin:10px 0 16px}
+.reveal .say.narrow{max-width:1250px}
+.reveal .fig-f0{width:960px}

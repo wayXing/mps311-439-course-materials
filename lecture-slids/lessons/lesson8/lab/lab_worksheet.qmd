@@ -1,5 +1,5 @@
 ---
-pagetitle: "Lab 8: Finding Groups Without Labels"
+pagetitle: "Lab 8: Find Groups, and Catch It When It Goes Wrong"
 format:
   html:
     toc: true
@@ -11,454 +11,411 @@ format:
     theme: default
 ---
 
-# Lab 8: Finding Groups Without Labels
+# Lab 8: Find Groups, and Catch It When It Goes Wrong
 ## MPS311/439 Machine Learning
-**Lesson 8 Lab Session | Core duration: 50 minutes**
+**Lesson 8 Lab Session | Core: about 43 minutes**
 
 ## What this lab is for
 
-In the lecture we grouped points without looking at any labels, first with K-means and then with hierarchical clustering. Today you do it on the digits:
+The lecture explained why K-means and hierarchical clustering work. Today you use them as tools, on four jobs: find groups in a table of wines, sort the handwritten digits as Assignment 2 asks, cope when there are too many images for hierarchical clustering, and check code that an AI wrote. All the code is given. You run it, change the value marked `← change`, and decide what the numbers tell you. After each Part, **write down** one number from your output and one sentence.
 
-1. split the digits into 10 groups with K-means, without labels, and look for a bend to choose the number of groups;
-2. use the labels afterwards, only to check: a count table and a majority vote;
-3. see how much the starting point matters;
-4. compare K-means and hierarchical clustering on the two rings of the lecture, then try hierarchical clustering on the digits.
-
-Before each step you will see a question. **Write down your own answer first**, then run the code and compare.
-
-Most code is provided. Your job is to fill the blanks `____`, run the cell, and check your result against the **Success check**. At the end there is a short section on how today's lab helps with **Assignment 2**.
+Each Part ends with a folded **Going further** box: open questions with no single answer, for when you finish early. The folded **Try with AI** boxes are also for when you finish early; the **Advanced Study** is for after class.
 
 ## How to work
 
-1. Open the **Lab workbook** from the course website: it opens in Colab with all the code of this page already in place, so there is nothing to copy (**File → Save a copy in Drive** first). Prefer to build your own? Open a **blank** Colab notebook (**File → New notebook in Drive**) and copy each code block into a cell.
-2. Fill in the blanks and run each cell. Cells depend on the cells above, so run them from top to bottom.
-3. Write your answers to the **Questions** in a text cell below the code (**+ Text**).
-4. Each task has a one-line **Hint** and a folded **Answer**. Try first. Open the Answer only to check your work. If you fall behind, copy the Answer of a task and carry on: every later task still works.
-5. Running every cell and matching the Success checks is a complete lab.
-6. The **Try with AI** boxes are folded: open one when you finish early, or after class. They follow the four steps below.
+1. Open a blank Colab notebook (**File → New notebook in Drive**) and copy each code block into its own cell. Run the cells from top to bottom: later cells use names made by earlier ones.
+2. Write your answers in a text cell (**+ Text**) under the code.
+3. **Run, and you should see** tells you what your output should show, so you know you are on track.
 
-### Using AI
+## Part 0: Set up (3 minutes)
 
-The **Try with AI** boxes use an AI assistant for the Python you do not know yet, while you stay in charge of the machine learning. Every box has the same four steps:
-
-1. **You want:** say what you want in machine-learning words (for example, "the within-cluster sum of squares against k").
-2. **Tell the AI:** the names of the variables it should use.
-3. **Ask:** the request.
-4. **Check:** compare the AI's result with a number or shape given on this page. If it does not match, the AI or your question is wrong. Find out which.
-
-## Part 0: Load the digits and reduce them (6 minutes)
-
-**Goal:** the fitting images of Labs 6 and 7, reduced to 50 numbers each with PCA.
-
-### 0.1 Load, split, reduce
-
-Run the cell without changing it.
+Run this cell without reading it closely. It is the same at the start of every lab, with today's new tools at the end.
 
 ```python
 import numpy as np                                        # numbers and arrays
+import pandas as pd                                       # tables
 import matplotlib.pyplot as plt                           # plots
+import time                                               # a clock, to time the fitting
 import urllib.request                                     # to download a file
-from sklearn.model_selection import train_test_split     # splitting the data
-from sklearn.decomposition import PCA                     # Lesson 7
-from sklearn.cluster import KMeans, AgglomerativeClustering   # today's methods
+from sklearn.datasets import load_wine                    # the first dataset
+from sklearn.model_selection import train_test_split, KFold   # splitting the data
+from sklearn.preprocessing import StandardScaler          # puts every column on one scale
+from sklearn.decomposition import PCA                     # fewer numbers per image
+from sklearn.cluster import KMeans, AgglomerativeClustering   # today's tools
+```
 
+## Part 1: Find groups in a table of wines (9 minutes)
+
+**The job.** 178 wines from one region of Italy (the wine data that comes with scikit-learn, a teaching dataset), each with 13 chemical measurements: alcohol, acidity, colour, proline and so on. You want to know whether the wines fall into a few natural groups. The data also say which of three grape varieties each wine comes from; K-means never sees that, and we use it only afterwards, to check. Run the data block as it is: the two `← change` marks only show which lines you would change for another dataset.
+
+```python
+data = load_wine()                                        # ← change: which dataset
+X = data.data                                             # the 13 measurements (features)
+y = data.target                                           # ← change: the labels (here the grape variety, 0, 1 or 2)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=0, stratify=y)     # 3:1 split, the same mix of labels in both parts
+scaler = StandardScaler()                                 # one scale for every column
+X_train_s = scaler.fit_transform(X_train)                 # learn the scale from the training data only
+X_test_s = scaler.transform(X_test)                       # apply the same scale to the test data
+kf = KFold(5, shuffle=True, random_state=0)               # the same 5 folds every time
+print(X_train.shape, np.bincount(y_train))                # training rows and columns; how many of each label
+```
+
+**Run, and you should see:** `(133, 13) [44 53 36]`.
+
+Split the training wines into 3 groups, then count how the groups match the varieties:
+
+```python
+km = KMeans(n_clusters=3, n_init=10, random_state=0)      # 3 groups, the best of 10 starting points
+groups = km.fit_predict(X_train)                          # ← change: X_train or X_train_s; no labels are passed in
+table = np.zeros((3, 3), dtype=int)                       # rows: groups, columns: grape varieties
+for i in range(len(groups)):                              # every training wine
+    table[groups[i], y_train[i]] += 1                     # add one to its group and its variety
+print(table)                                              # the count table
+print(round(table.max(axis=1).sum() / len(groups), 3))    # majority vote: each group guesses its most common variety
+spread = pd.Series(X_train.std(axis=0), index=data.feature_names)   # the spread of each column
+print(spread.sort_values(ascending=False).head(3).round(1))          # the three columns with the largest spread
+```
+
+Run it as it is, then change `X_train` to `X_train_s` (the standardised columns) and run again.
+
+**Write down:** the majority vote of each run. In one sentence: why does the first run do worse? (Look at the three spreads: which column decides the distance between two wines?)
+
+::: {.callout-note collapse="true" title="One possible answer"}
+`X_train`: 0.729. `X_train_s`: 0.955. Proline is measured in hundreds to over a thousand, with a spread of 323.6; the next largest spreads are 13.8 (magnesium) and 3.5. A distance between two wines is almost only the difference in proline, so K-means groups the wines by proline alone and ignores the other 12 measurements. After standardising, every column has spread 1 and all 13 count. Distances depend on the units.
+:::
+
+**Think about** (with your neighbour, no writing): the majority vote used the varieties. Without them, how would you know the second grouping is better?
+
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
+1. **You want:** the 3 group centres before and after standardising, as bar charts over the 13 columns.
+2. **Tell the AI:** `km.cluster_centers_` has 3 rows of 13 numbers; `data.feature_names` holds the column names.
+3. **Ask:** "Write simple Python, one step per line, that draws the 3 rows of `km.cluster_centers_` as grouped horizontal bars, one group of bars per column name."
+4. **Check:** for `X_train`, only the proline bars are visible; for `X_train_s`, the centres differ on many columns.
+:::
+
+::: {.callout-tip collapse="true" title="Going further (optional)"}
+- With `X_train_s`, try 1 to 8 groups and print `km.inertia_` for each. Is there a clear bend at 3?
+- Give the 45 test wines to their nearest centre with `km.predict(X_test_s)`, and let each take its group's guess (`table.argmax(axis=1)`). What share is right?
+:::
+
+::: {.content-hidden}
+**Going further, Part 1.** Within-cluster sums of squares for 1 to 8 groups: 1729.0, 1237.5, 960.1, 877.3, 822.0, 763.5, 730.2, 691.3. The falls are 491.5, 277.4, then 82.8: the curve bends at 3, but not sharply. On the test wines the guesses are right for 0.978 (44 of 45).
+:::
+
+## Part 2: Sort the digits, as Assignment 2 asks (11 minutes)
+
+**The job.** Assignment 2 asks you to run K-means with 10 groups on the digits reduced to 50 components, make a count table and compute the majority vote. Load the digits with the same data block, then split off a validation set (the same three parts as the assignment).
+
+```python
 DATA_URL = "https://raw.githubusercontent.com/wayXing/mps311-439-course-materials/main/lecture-slids/lessons/data/mnist10k.npz"
-urllib.request.urlretrieve(DATA_URL, "mnist10k.npz")      # 10,000 MNIST images, about 1.6 MB
-mnist = np.load("mnist10k.npz")                           # the file holds two arrays, X and y
-X_digits = mnist["X"] / 255                               # 784 pixels per image (28 x 28), scaled to 0 to 1
-y_digits = mnist["y"]                                     # the digit, 0 to 9 (used only to check)
-X_digits_train, X_digits_test, y_digits_train, y_digits_test = train_test_split(
-    X_digits, y_digits, test_size=0.25, random_state=0, stratify=y_digits)   # the test set of Labs 4 to 7
-X_digits_fit, X_digits_val, y_digits_fit, y_digits_val = train_test_split(
-    X_digits_train, y_digits_train, test_size=0.25, random_state=0, stratify=y_digits_train)   # the split of Labs 6 and 7
+urllib.request.urlretrieve(DATA_URL, "mnist10k.npz")      # 10,000 handwritten digits, about 1.6 MB (if this fails, see the Appendix)
+data = np.load("mnist10k.npz")                            # ← change: which dataset
+X = data["X"] / 255                                       # the 784 pixels of each 28 x 28 image, scaled to 0 to 1
+y = data["y"]                                             # ← change: the labels (the digit, 0 to 9)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=0, stratify=y)     # 3:1 split, the same mix of labels in both parts
+scaler = StandardScaler()                                 # one scale for every column (not used for the digits today)
+X_train_s = scaler.fit_transform(X_train)                 # learn the scale from the training data only
+X_test_s = scaler.transform(X_test)                       # apply the same scale to the test data
+kf = KFold(5, shuffle=True, random_state=0)               # the same 5 folds every time
+print(X_train.shape, np.bincount(y_train))                # training rows and columns; how many of each label
+```
+
+```python
+X_fit, X_val, y_fit, y_val = train_test_split(
+    X_train, y_train, test_size=0.25, random_state=0, stratify=y_train)   # fit on 3/4, check on 1/4
+print(X_fit.shape, X_val.shape, X_test.shape)             # fitting, validation, test
+```
+
+**Run, and you should see:** `(7500, 784)` with between 680 and 851 of each digit, then `(5625, 784) (1875, 784) (2500, 784)`.
+
+Learn 50 components from the fitting images only, and split the fitting images into k groups:
+
+```python
+k = 10                                                    # ← change: the number of groups
 pca = PCA(n_components=50, random_state=0)                # 50 components, as in Assignment 2
-pca.fit(X_digits_fit)                                     # fitting images only
-Z_fit = pca.transform(X_digits_fit)                       # 50 numbers per fitting image
-print(Z_fit.shape)                                        # images, numbers per image
-```
-
-**Success check:** `(5625, 50)`.
-
-## Part 1: K-means with 10 groups (15 minutes)
-
-**Goal:** split the 5625 images into 10 groups without using any label, then ask whether the data themselves point to 10.
-
-### 1.1 Fit K-means
-
-**Question first:** K-means needs the number of groups before it starts. How many should we ask for here, and why?
-
-Fill in the number of groups.
-
-```python
-km = KMeans(n_clusters=____, n_init=10, random_state=0)  # 10 starting points, keep the best
+pca.fit(X_fit)                                            # learn the components from the fitting images only
+Z_fit = pca.transform(X_fit)                              # 50 numbers for each fitting image
+Z_val = pca.transform(X_val)                              # the same directions for the validation images
+km = KMeans(n_clusters=k, n_init=10, random_state=0)      # k groups, the best of 10 starting points
 km.fit(Z_fit)                                             # no labels are passed in
+groups = km.labels_                                       # the group of every fitting image
 print(round(km.inertia_, 1))                              # within-cluster sum of squares
-groups = km.labels_                                       # the group number of every image
-print(groups[:10])                                        # the first ten group numbers
 ```
 
-**Hint:** how many different digits are there?
+**Run, and you should see:** `169025.6`.
 
-**Success check:** `169025.6`, then ten group numbers between 0 and 9.
-
-**Question:** in one sentence, what does `km.inertia_` measure?
-
-::: {.callout-note collapse="true" title="Answer"}
-```python
-km = KMeans(n_clusters=10, n_init=10, random_state=0)
-```
-
-10, because there are ten digits. `inertia_` is the within-cluster sum of squares: the squared distance from every image to the centre of its own group, added up.
-:::
-
-### 1.2 How many groups?
-
-In the lecture (Note Section 3, end) we chose k by trying several values and plotting the within-cluster sum of squares against k. A larger k always gives a smaller sum, so we look for the **bend (the elbow method)**: the k after which the sum falls much more slowly. The cell below does this twice, side by side: on the three blobs of the lecture (180 points, the same random numbers) and on the digits. The blobs start at k = 1, as in the lecture's plot; the digits start at k = 2, because one group for all 5625 images tells us nothing, and the larger k are slower. The two vertical axes have very different scales (hundreds against hundreds of thousands): what matters is the shape of each curve, not its height.
-
-**Question first:** at which k do you expect the bend of the digits' curve to be?
-
-Run the cell without changing it. It fits K-means 21 times, so it takes about half a minute on Colab.
+Now use the labels, only to check. Each group guesses its most common digit; each validation image goes to its nearest centre and takes that group's guess:
 
 ```python
-rng = np.random.default_rng(0)                            # the same random numbers as the lecture
-X_points = np.vstack([rng.normal([0, 0], 0.6, (60, 2)),   # blob 1: 60 points around (0, 0)
-                      rng.normal([4, 0.5], 0.6, (60, 2)), # blob 2: 60 points around (4, 0.5)
-                      rng.normal([2, 3.5], 0.6, (60, 2))])   # blob 3: 60 points around (2, 3.5)
-ks_blobs = range(1, 8)                                    # k = 1, 2, ..., 7 for the blobs
-inertias_blobs = []                                       # within-cluster sum of squares for each k
-for k in ks_blobs:
-    km_k = KMeans(n_clusters=k, n_init=10, random_state=0)   # the same settings as 1.1, only k changes
-    km_k.fit(X_points)                                    # no labels
-    inertias_blobs.append(round(km_k.inertia_, 1))        # keep its within-cluster sum of squares
-print("blobs:", inertias_blobs)                           # one number for each k from 1 to 7
-
-ks = range(2, 16)                                         # k = 2, 3, ..., 15 for the digits
-inertias = []                                             # within-cluster sum of squares for each k
-for k in ks:
-    km_k = KMeans(n_clusters=k, n_init=10, random_state=0)   # the same settings as 1.1, only k changes
-    km_k.fit(Z_fit)                                       # still no labels
-    inertias.append(km_k.inertia_)                        # keep its within-cluster sum of squares
-    print(k, round(km_k.inertia_, 1))                     # k, within-cluster sum of squares
-
-fig, axes = plt.subplots(1, 2, figsize=(10, 4))           # two plots side by side
-axes[0].plot(ks_blobs, inertias_blobs, marker="o")        # one dot for each k
-axes[0].set_title("three blobs (lecture)")
-axes[1].plot(ks, inertias, marker="o")                    # one dot for each k
-axes[1].set_title("digits")
-for ax in axes:
-    ax.set_xlabel("number of groups k")
-    ax.set_ylabel("within-cluster sum of squares")
-plt.show()
+table = np.zeros((k, 10), dtype=int)                      # rows: groups, columns: true digits
+for i in range(len(groups)):                              # every fitting image
+    table[groups[i], y_fit[i]] += 1                       # add one to its group and its digit
+guess = table.argmax(axis=1)                              # each group guesses its most common digit
+print(table)                                              # the count table
+print("guesses:", guess)                                  # one guess per group
+print("fitting:", round(table.max(axis=1).sum() / len(groups), 3))   # majority vote on the fitting images
+groups_val = km.predict(Z_val)                            # each validation image goes to its nearest centre
+print("validation:", round((guess[groups_val] == y_val).mean(), 3))  # share whose digit is their group's guess
 ```
 
-**Success check:** `blobs: [968.4, 486.2, 127.0, 108.5, 93.0, 77.8, 67.2]`; then 14 lines for the digits, from `2 226671.5` down to `15 155577.4`, with `10 169025.6`, the same as in 1.1; and two falling curves.
+**Run, and you should see:** a 10 × 10 table, ten guesses, `fitting: 0.576` and `validation: 0.577`.
 
-**Questions:**
+**Write down:** the two majority votes, and the digits that are no group's guess (look for the digits 0 to 9 missing from `guesses`). In one sentence: why are there digits that no group guesses?
 
-1. At which k is the bend for the three blobs? Is there a clear bend in the digits' curve, like the blobs at k = 3: from that k on, each fall is suddenly much smaller? If so, at which k? (For the digits, compare the fall from k = 9 to 10 with the fall from k = 10 to 11.)
-2. Then why do we still use k = 10 for the digits in this lab?
-
-::: {.callout-note collapse="true" title="Answer"}
-1. The blobs: at k = 3. The sum falls from 968.4 to 127.0 by k = 3, then only to 108.5 at k = 4, so the elbow method picks 3, the number of blobs. The digits: no clear bend at 10, nor anywhere else. The falls do get smaller (after about k = 5 or 6 the curve is less steep), but slowly, never suddenly, so this does not count as a clear bend. From 9 to 10 it falls by about 3700 (172732.9 to 169025.6), from 10 to 11 by about 3400 (to 165612.4): almost the same.
-2. Not because of a bend: because we know the digits have 10 classes (Note Section 3, end), and Assignment 2 uses k = 10. The bend is often hard to see (Note Section 10); then k has to come from what we know about the data or from what we want to do with the groups.
+::: {.callout-note collapse="true" title="One possible answer"}
+0.576 on the fitting images and 0.577 on the validation images: the guesses work as well on images K-means has not seen. The guesses contain 0 twice and 1 twice, and no 5 or 9. With only 10 groups, 0 and 1 each took two (written slanted or upright), so there were no groups left for 5 and 9: most 5s sit in the groups that guess 3 and 8, and most 9s in the groups that guess 4 and 7. K-means makes compact groups; it does not know there should be one group per digit.
 :::
 
-## Part 2: Check the groups with the labels (8 minutes)
+**Think about** (with your neighbour, no writing): the validation images were never used to make the groups. Why do we still check on them?
 
-**Goal:** use the labels only after clustering, to see how well the groups match the digits.
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
+1. **You want:** the centre of each group as a 28 × 28 image.
+2. **Tell the AI:** `km.cluster_centers_` has k rows of 50 numbers; `pca.inverse_transform` turns them back into 784 pixels; `guess` holds each group's guess.
+3. **Ask:** "Write simple Python that turns `km.cluster_centers_` back into pixels with `pca.inverse_transform` and shows the rows as 28 × 28 grey images in one row, titled with the group's value of `guess`."
+4. **Check:** 10 blurred digits; two 0s and two 1s, and the group that guesses 4 looks more like a 9, because it mixes 4s, 7s and 9s.
+:::
 
-### 2.1 The count table
+::: {.callout-tip collapse="true" title="Going further (optional)"}
+- Change `k = 10` to `k = 15` and run both cells again. Does every digit now get a group? The majority vote goes up: does that mean 15 groups are better? (What is the majority vote with 5625 groups?)
+- Run K-means from single starting points and compare:
 
-**Question first:** the group numbers are arbitrary. Why can we not compare `groups` with `y_digits_fit` directly?
+  ```python
+  for seed in range(5):                                     # five different starting points
+      km1 = KMeans(n_clusters=10, n_init=1, random_state=seed)   # only one start
+      km1.fit(Z_fit)                                        # run K-means from that start
+      t = np.zeros((10, 10), dtype=int)                     # count table for this run
+      for i in range(len(Z_fit)):                           # every fitting image
+          t[km1.labels_[i], y_fit[i]] += 1                  # add one to its group and its digit
+      print(seed, round(km1.inertia_, 1), round(t.max(axis=1).sum() / len(Z_fit), 3))   # seed, within-cluster sum of squares, majority vote
+  ```
 
-Fill the blank so that each image is counted in its group's row and its **true digit's** column.
+  Does the run with the smallest sum also have the highest majority vote?
+:::
+
+::: {.content-hidden}
+**Going further, Part 2.** With 15 groups the votes are 0.673 (fitting) and 0.674 (validation), and every digit is some group's guess. More groups always give a higher vote: with 5625 groups, one image each, it would be 1.0. The vote rewards small pure groups, so it cannot choose k; k = 10 comes from knowing there are ten digits. Single starts: `0 169033.3 0.586`, `1 169714.5 0.599`, `2 169349.4 0.594`, `3 169025.8 0.576`, `4 169026.9 0.581` (the last digits may differ on another computer). The smallest sum has the lowest vote: K-means makes the groups compact, which is not the same as matching the digits.
+:::
+
+## Part 3: Too many images for hierarchical clustering (7 minutes)
+
+**The job.** Assignment 2 has 50,000 training images. Hierarchical clustering keeps the distance between every pair of images, 8 bytes each. Try it on a random part of the fitting images and see what it costs.
+
+```python
+n = 2000                                                  # ← change: how many fitting images to use
+rng = np.random.default_rng(0)                            # fixed random numbers, so everyone picks the same rows
+rows = rng.choice(len(Z_fit), n, replace=False)           # n different rows, picked at random
+Z_part = Z_fit[rows]                                      # their 50 numbers
+y_part = y_fit[rows]                                      # their digits (only to check)
+print("memory for every pair:", round(n * (n - 1) / 2 * 8 / 1e9, 3), "GB")   # n(n-1)/2 pairs, 8 bytes each
+start = time.time()                                       # the clock before fitting
+hc = AgglomerativeClustering(n_clusters=10, linkage="ward")   # 10 groups; Ward: merge where the spread grows least
+groups_hc = hc.fit_predict(Z_part)                        # one group per image
+print("seconds:", round(time.time() - start, 1))          # how long it took
+table_hc = np.zeros((10, 10), dtype=int)                  # rows: groups, columns: true digits
+for i in range(n):                                        # every image in the part
+    table_hc[groups_hc[i], y_part[i]] += 1                # add one to its group and its digit
+print("majority vote:", round(table_hc.max(axis=1).sum() / n, 3))   # each group guesses its most common digit
+```
+
+**Run, and you should see:** `memory for every pair: 0.016 GB`, a time of about a second or less, and `majority vote: 0.62`. Then try `n = 500` and `n = 4000`.
+
+**Write down:** the majority vote for each `n`, and the memory 50,000 images would need (use the formula in the cell; do not run it with 50,000). In one sentence: how would you run hierarchical clustering in Assignment 2?
+
+::: {.callout-note collapse="true" title="One possible answer"}
+Majority votes: 0.592 (500), 0.620 (2000), 0.664 (4000), all at least as good as K-means on all 5625 images (0.576). Memory: 0.001, 0.016 and 0.064 GB; for 50,000 images 50,000 × 49,999 / 2 × 8 bytes ≈ 10 GB, more than Colab gives you. Doubling the images makes the memory four times larger. The votes differ because each `n` picks different images, and a few hundredths either way is no evidence that fewer or more images are better. In the assignment I would run hierarchical clustering on a random 5,000 images (about 0.1 GB) and K-means, which only needs the distance from each image to k centres, on all of them.
+:::
+
+**Think about** (with your neighbour, no writing): the vote changes with `n` (and would change with the random rows too). How much of a difference between two methods would you trust?
+
+::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
+1. **You want:** a dendrogram of 40 random fitting images, with their digits as leaf labels.
+2. **Tell the AI:** `Z_fit` holds 50 numbers per fitting image; `y_fit` their digits.
+3. **Ask:** "Write simple Python that picks 40 rows of `Z_fit` with `np.random.default_rng(0)`, computes `scipy.cluster.hierarchy.linkage` with `method='ward'`, and draws the dendrogram with the digits as leaf labels."
+4. **Check:** 40 leaves; leaves with the same digit often sit next to each other, and the last few merges are much higher than the rest.
+:::
+
+::: {.callout-tip collapse="true" title="Going further (optional)"}
+- Change `linkage="ward"` to `linkage="single"` with `n = 2000`. Print `np.bincount(groups_hc)`: how large is the largest group?
+:::
+
+::: {.content-hidden}
+**Going further, Part 3.** Single: majority vote 0.119, and one group holds 1991 of the 2000 images. Images of different digits are linked through a chain of unclear images, as in the lecture.
+:::
+
+## Part 4: Check the code an AI wrote (12 minutes)
+
+**The job.** You asked an AI for "K-means with 10 groups on the 50 components, the count table and the majority vote on the validation images". It gave three versions. Each differs from Part 2 in one line (named above each version), and each runs without an error. First run this correct version once more, so you have it next to the three. It fits K-means with 10 groups again, in case you changed `k` in Going further:
+
+```python
+km = KMeans(n_clusters=10, n_init=10, random_state=0)     # 10 groups, as in Part 2
+km.fit(Z_fit)                                             # no labels are passed in
+groups = km.labels_                                       # the group of every fitting image
+table = np.zeros((10, 10), dtype=int)                     # rows: groups, columns: true digits
+for i in range(len(groups)):                              # every fitting image
+    table[groups[i], y_fit[i]] += 1                       # add one to its group and its digit
+guess = table.argmax(axis=1)                              # each group guesses its most common digit
+print("fitting:", round(table.max(axis=1).sum() / len(groups), 3))   # majority vote on the fitting images
+groups_val = km.predict(Z_val)                            # each validation image goes to its nearest centre
+print("validation:", round((guess[groups_val] == y_val).mean(), 3))  # share whose digit is their group's guess
+```
+
+**Run, and you should see:** `fitting: 0.576` and `validation: 0.577`.
+
+**Version A** (the last line is different)
 
 ```python
 table = np.zeros((10, 10), dtype=int)                     # rows: groups, columns: true digits
 for i in range(len(groups)):                              # every fitting image
-    table[groups[i], ____[i]] += 1                        # add one to its group and its digit
-print(table)                                              # the count table
-print(table.sum())                                        # every image is counted once
+    table[groups[i], y_fit[i]] += 1                       # add one to its group and its digit
+guess = table.argmax(axis=1)                              # each group guesses its most common digit
+print("fitting:", round(table.max(axis=1).sum() / len(groups), 3))   # majority vote on the fitting images
+groups_val = km.predict(Z_val)                            # each validation image goes to its nearest centre
+print("validation:", round((groups_val == y_val).mean(), 3))         # share whose group is their digit
 ```
 
-**Hint:** write only the variable name that holds the true digits of the fitting images; the `[i]` is already there.
-
-**Success check:** a 10 × 10 table, and `5625`. Its largest number is `443`.
-
-::: {.callout-note collapse="true" title="Answer"}
-```python
-    table[groups[i], y_digits_fit[i]] += 1
-```
-
-K-means might call the group of zeros "group 7"; its numbers carry no meaning, so we count instead.
-:::
-
-### 2.2 Majority vote
-
-Run the cell without changing it. Each group guesses its most common digit.
+**Version B** (the line that makes `groups_val` is different)
 
 ```python
-guess = table.argmax(axis=1)                              # the most common digit in each group
-correct = table.max(axis=1).sum()                         # images whose digit is their group's guess
-order = np.argsort(guess)                                 # list the groups by their guess, to read the table easily
-print(guess[order])                                       # the guesses, in that order
-print(table[order])                                       # the count table, one row per group, in the same order
-print(round(correct / len(groups), 3))                    # majority-vote accuracy
+table = np.zeros((10, 10), dtype=int)                     # rows: groups, columns: true digits
+for i in range(len(groups)):                              # every fitting image
+    table[groups[i], y_fit[i]] += 1                       # add one to its group and its digit
+guess = table.argmax(axis=1)                              # each group guesses its most common digit
+print("fitting:", round(table.max(axis=1).sum() / len(groups), 3))   # majority vote on the fitting images
+groups_val = KMeans(n_clusters=10, n_init=10, random_state=0).fit_predict(Z_val)   # groups for the validation images
+print("validation:", round((guess[groups_val] == y_val).mean(), 3))  # share whose digit is their group's guess
 ```
 
-**Success check:** the guesses `[0 0 1 1 2 3 4 6 7 8]`, the table with its rows in that order, then `0.576`.
-
-**Question:** (If you are short of time, answer this one after class.) Two digits are not the guess of any group. Which two?
-
-::: {.callout-note collapse="true" title="Answer"}
-5 and 9. The digits 0 and 1 each took two groups, so there were not enough groups left: most 5s sit in the groups that guess 3 and 8, and most 9s in the groups that guess 4 and 7.
-:::
-
-::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
-**You want:** to see the centre of each group as an image.
-
-**Tell the AI:** `km.cluster_centers_` has 10 rows of 50 numbers (in PCA space); `pca.inverse_transform` turns them back into 784 pixels; `guess` holds each group's most common digit.
-
-**Ask:** *"Turn km.cluster_centers_ back into pixels with pca.inverse_transform, and show the 10 rows as 28 × 28 grey images in one row, with 'guess ' plus the group's value of guess as the title."*
-
-**Check:** 10 blurred digits: the average image of each group. There are two 0s and two 1s, and the group whose guess is 4 looks more like a 9, because it mixes 4s, 7s and 9s.
-:::
-
-## Part 3: Does the starting point matter? (6 minutes)
-
-**Goal:** run K-means from single starting points and compare.
-
-### 3.1 Five single starts
-
-**Question first:** with only one starting point, will every run stop at the same place?
-
-Run the cell without changing it.
+**Version C** (the line inside the loop is different)
 
 ```python
-for seed in range(5):                                     # five different starting points
-    km1 = KMeans(n_clusters=10, n_init=1, random_state=seed)   # only one start
-    km1.fit(Z_fit)                                        # run K-means from that start
-    t = np.zeros((10, 10), dtype=int)                     # count table for this run
-    for i in range(len(Z_fit)):                           # every fitting image
-        t[km1.labels_[i], y_digits_fit[i]] += 1           # add one to its group and its digit
-    correct = t.max(axis=1).sum()                         # images whose digit is their group's guess
-    print(seed, round(km1.inertia_, 1), round(correct / len(Z_fit), 3))   # seed, within-cluster sum of squares, majority vote
+table = np.zeros((10, 10), dtype=int)                     # a count table
+for i in range(len(groups)):                              # every fitting image
+    table[y_fit[i], groups[i]] += 1                       # add one to its digit and its group
+guess = table.argmax(axis=1)                              # the most common entry of each row
+print("fitting:", round(table.max(axis=1).sum() / len(groups), 3))   # majority vote on the fitting images
+groups_val = km.predict(Z_val)                            # each validation image goes to its nearest centre
+print("validation:", round((guess[groups_val] == y_val).mean(), 3))  # share whose digit is their group's guess
 ```
 
-**Success check:**
+**Write down:** one line per version: its two scores, and a few words on why the changed line is wrong. Very low scores here are real results, not copying mistakes. For each version ask: **what does a group number mean, and which groups does a validation image get?**
 
-```
-0 169033.3 0.586
-1 169714.5 0.599
-2 169349.4 0.594
-3 169025.8 0.576
-4 169026.9 0.581
-```
-
-On another computer the last digits may differ slightly; compare the five runs with each other, not digit by digit with this table.
-
-**Question:** does the run with the smallest sum also have the highest majority vote?
-
-::: {.callout-note collapse="true" title="Answer"}
-No. The run with the smallest sum (169025.8) has the lowest majority vote (0.576), while the run with the largest sum (169714.5) has the highest vote (0.599). K-means makes the groups compact; it does not know about digits, so the most compact grouping is not always the one that matches the digits best.
+::: {.callout-note collapse="true" title="One possible answer"}
+- **A, validation 0.117: wrong.** It compares the group number with the digit. Group numbers are arbitrary: K-means might call the group of zeros "group 7". A group number only means something through the count table, as `guess[groups_val]`.
+- **B, validation 0.192: wrong.** It runs K-means again on the validation images. That makes a new set of groups with new numbers, which have nothing to do with the guesses learned on the fitting images. Validation images must go to the centres learned from the fitting images: `km.predict`.
+- **C, fitting 0.561, validation 0.106: wrong, although the fitting score looks normal.** The table has rows and columns swapped: each row is now a digit, and `max(axis=1)` counts, for each digit, its most common group. Two digits can claim the same group, so 0.561 is not the share of images guessed right. The guesses are now groups, not digits, so the validation score falls apart. Only the validation score gave it away.
 :::
 
-## Part 4: Hierarchical clustering (15 minutes)
+**Think about** (with your neighbour, no writing): in Version C, the fitting score alone looked fine. What habit would catch this kind of mistake?
 
-**Goal:** compare K-means and hierarchical clustering on the two rings of the lecture; then try hierarchical clustering on the digits, with two ways of measuring how near two groups are.
+::: {.callout-tip collapse="true" title="Going further (optional)"}
+- Write your own version D that differs from Part 2 in one line, runs without an error and is wrong (for example, fitting PCA on `X_train`, which contains the validation images). Give it to your neighbour. Can they find the line from the code alone? From the scores alone?
+:::
 
-### 4.1 Two rings
+::: {.content-hidden}
+**Going further, Part 4.** Typical one-line mistakes: PCA fitted on `X_train` or on all images (the scores hardly change, but the validation and test images are no longer unseen), `pca.fit_transform(X_val)` (new directions: the validation images land far from the centres), or the guesses taken from the validation labels. Several give normal-looking scores, which is why reading the code matters.
+:::
 
-These are the two rings of the lecture (Note Section 4): 120 points on an inner ring and 200 on an outer ring, made with the same random numbers. The first lines of the cell only make these two rings; then the cell runs K-means and hierarchical clustering, each asked for 2 groups, colours the points by the group each method gives them, and prints the **share recovered**: the majority vote of 2.2, now with 2 groups and 2 rings.
-
-**Question first:** K-means is asked for 2 groups. Will it split the points into the inner and the outer ring, or into a left half and a right half?
-
-Fill the blank with the way of measuring "near" that can follow a ring (write it inside the quotation marks), then run.
+## Part 5: The test set, once (1 minute)
 
 ```python
-# The first lines only make the two rings of the lecture
-rng = np.random.default_rng(0)                            # the same random numbers as the lecture
-a1 = rng.uniform(0, 2 * np.pi, 120)                       # angles on the inner ring
-a2 = rng.uniform(0, 2 * np.pi, 200)                       # angles on the outer ring
-r1 = rng.normal(1, 0.12, 120)                             # inner ring: radius about 1
-r2 = rng.normal(3, 0.15, 200)                             # outer ring: radius about 3
-inner = np.column_stack([r1 * np.cos(a1), r1 * np.sin(a1)])   # (x, y) of each inner point, from its angle and radius
-outer = np.column_stack([r2 * np.cos(a2), r2 * np.sin(a2)])   # (x, y) of each outer point
-X_rings = np.vstack([inner, outer])                       # 320 points
-y_rings = np.r_[np.zeros(120, dtype=int), np.ones(200, dtype=int)]   # 0 = inner ring, 1 = outer ring (only to check)
-
-# K-means
-km_rings = KMeans(n_clusters=2, n_init=10, random_state=0)   # 2 groups
-g_km = km_rings.fit_predict(X_rings)                      # one group per point, no labels used
-t_km = np.zeros((2, 2), dtype=int)                        # count table: rows groups, columns rings
-for i in range(len(X_rings)):                             # every point
-    t_km[g_km[i], y_rings[i]] += 1                        # add one to its group and its ring
-share_km = t_km.max(axis=1).sum() / len(X_rings)          # majority vote, as in 2.2
-print("K-means", round(share_km, 3))
-
-# hierarchical clustering
-hc_rings = AgglomerativeClustering(n_clusters=2, linkage="____")   # 2 groups; how near two groups are
-g_hc = hc_rings.fit_predict(X_rings)                      # one group per point, no labels used
-t_hc = np.zeros((2, 2), dtype=int)                        # count table: rows groups, columns rings
-for i in range(len(X_rings)):                             # every point
-    t_hc[g_hc[i], y_rings[i]] += 1                        # add one to its group and its ring
-share_hc = t_hc.max(axis=1).sum() / len(X_rings)          # majority vote, as in 2.2
-print("hierarchical", round(share_hc, 3))
-
-fig, axes = plt.subplots(1, 2, figsize=(9, 4.5))          # two plots side by side
-axes[0].scatter(X_rings[:, 0], X_rings[:, 1], c=g_km, cmap="coolwarm", s=10)   # colour = K-means group
-axes[0].set_title("K-means: " + str(round(100 * share_km, 1)) + "% recovered")
-axes[1].scatter(X_rings[:, 0], X_rings[:, 1], c=g_hc, cmap="coolwarm", s=10)   # colour = hierarchical group
-axes[1].set_title("hierarchical: " + str(round(100 * share_hc, 1)) + "% recovered")
-for ax in axes:
-    ax.set_aspect("equal")                                # circles look like circles
-plt.show()
+table = np.zeros((10, 10), dtype=int)                     # the correct count table again (Part 4 may have changed it)
+for i in range(len(groups)):                              # every fitting image
+    table[groups[i], y_fit[i]] += 1                       # add one to its group and its digit
+guess = table.argmax(axis=1)                              # each group guesses its most common digit
+groups_test = km.predict(pca.transform(X_test))           # the test images: transform and predict only
+print(round((guess[groups_test] == y_test).mean(), 3))    # the 2,500 test images, read once
 ```
 
-**Hint:** in scikit-learn, `linkage` is one of `"ward"`, `"complete"`, `"average"` or `"single"`; choose the one the lecture called "nearest points" (Note Section 5).
+**Run, and you should see:** `0.577`.
 
-**Success check:** `K-means 0.625` and `hierarchical 1.0`, the two numbers of the lecture; on the right, each ring has one colour. Note that 0.625 = 200 / 320 is exactly what you would get by calling every point "outer ring": this is why the lecture calls it not much better than guessing.
+# After class
 
-**Questions:**
-
-1. Look at the left plot. Where is the boundary between the two K-means groups, and what shape is it?
-2. Where is the middle of each ring? K-means gives each point to its nearest centre (the centre K-means moves, not the middle of a ring). Use this to explain, in one or two sentences, what kind of group K-means can find, and why it cannot find the two rings.
-
-::: {.callout-note collapse="true" title="Answer"}
-```python
-hc_rings = AgglomerativeClustering(n_clusters=2, linkage="single")
-```
-
-Two halves, not the two rings: K-means recovers only 62.5%, single 100%.
-
-1. A straight line through the middle (here it is tilted, from the upper right to the lower left): each group is half of the inner ring plus half of the outer ring. The points equally far from two centres form a straight line, so K-means can only cut the plane with straight edges.
-2. The middle of each ring is the same point, (0, 0). Two groups around the same middle cannot be told apart by "nearest centre": K-means puts its two centres apart and cuts between them. A K-means group is all the points nearer to its own centre than to any other, so it is a lump around one centre. The points on a ring are linked one to the next, not gathered around a centre; single follows that chain.
-:::
-
-### 4.2 The digits: Ward and nearest points
-
-**Question first:** will the linkage you chose in 4.1 also do best on the digits?
-
-Run the cell without changing it. It runs hierarchical clustering twice on all 5625 images, once with Ward and once with single; together this takes about half a minute on Colab: it is working, not stuck.
-
-```python
-for link in ["ward", "single"]:                           # two ways of measuring how near two groups are
-    hc = AgglomerativeClustering(n_clusters=10, linkage=link)
-    groups_hc = hc.fit_predict(Z_fit)                     # one group per image
-    t = np.zeros((10, 10), dtype=int)                     # count table
-    for i in range(len(Z_fit)):                           # every fitting image
-        t[groups_hc[i], y_digits_fit[i]] += 1             # add one to its group and its digit
-    correct = t.max(axis=1).sum()                         # images whose digit is their group's guess
-    print(link, round(correct / len(Z_fit), 3))           # majority-vote accuracy
-    print(np.bincount(groups_hc))                         # how many images in each group
-```
-
-**Success check:** `ward 0.597`, then `single 0.115` with one group of `5616` images.
-
-**Question:** single found both rings in 4.1 but puts almost every image into one group here. In one or two sentences: what do the two rings have between them that the digits do not?
-
-::: {.callout-note collapse="true" title="Answer"}
-No: Ward (0.597) is a little above K-means (0.576 in 2.2), and single is the worst (0.115).
-
-The rings had a clear gap between them, so the chain along each ring never jumped across. The digits have no clear gaps: a few unclear images sit between two digits, and one near pair of points is enough to merge two groups, so the merges chain almost everything together. Single suits groups that are linked one to the next with gaps between them; for lumps without clear gaps, K-means or Ward does better.
-:::
-
-::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
-**You want:** a dendrogram of a small random sample of the fitting images.
-
-**Tell the AI:** `Z_fit` holds the fitting images; `y_digits_fit` their digits.
-
-**Ask:** *"Pick 40 rows of Z_fit at random with np.random.default_rng(0), compute scipy.cluster.hierarchy.linkage with method='ward', and draw the dendrogram with the true digits as the leaf labels."*
-
-**Check:** 40 leaves; leaves with the same digit tend to sit next to each other, and the last few merges are much higher than the rest.
-:::
-
-::: {.callout-tip collapse="true" title="Try with AI (if you finish early, or after class)"}
-**You want:** to check that hierarchical clustering still works on a random part of the data, as Assignment 2 needs.
-
-**Tell the AI:** `Z_fit` and `y_digits_fit` are the fitting images and digits.
-
-**Ask:** *"Pick 500 rows at random with np.random.default_rng(0).choice(5625, 500, replace=False), run AgglomerativeClustering(n_clusters=10, linkage='ward') on them, and compute the majority-vote accuracy on those 500 images."*
-
-**Check:** about `0.592`, close to the `0.597` of all 5625 images.
-:::
-
-# After class: how today's lab helps with Assignment 2
-
-Assignment 2 (handwritten digits, MNIST) asks about clustering in Section 3 (optional) and in the MPS439 extension task B. **From today you can do both;** for the last question of task B, see also Advanced Study 2 of the Note.
+## How today's lab helps with Assignment 2
 
 | What you did today | Where it appears in Assignment 2 |
 |---|---|
-| Part 0 and 1.1: K-means with k = 10 on the data reduced to 50 components (the assignment calls this "k = 50"; here k is the number of groups) | Section 3, Going further: "Run K-means (k = 10, Lesson 8) on the k = 50 data. What digits does each cluster contain?" |
-| 2.1: the count table | Extension task B, Table B: "a count table of the 10 K-means clusters against the 10 digits" |
-| 2.2: majority vote | Extension task B, Table B: "the accuracy you get if every cluster predicts its most common digit" |
-| 4.2: hierarchical clustering on the digits | Extension task B: "run K-means and hierarchical clustering with 10 clusters" |
-| The last Try with AI box after 4.2: a random part of the data | Extension task B: "run the hierarchical clustering on only a part of the training set (for example the first 5,000 images)" |
-| Not in today's lab: Advanced Study 2, question 4 of the Note (clusters as features) | Extension task B: "Can the cluster result be used as a feature for a classifier? Try it once and write down the result." |
+| Part 2: K-means with 10 groups on 50 components, fitted on the fitting images only | Section 3, Going further: run K-means (k = 10) on the data reduced to 50 components; which digits does each group contain? (The assignment calls the 50 components "k = 50"; here k is the number of groups.) |
+| Part 2: the count table and the majority vote | Extension task B, Table B: the count table of the 10 groups against the 10 digits, and the accuracy when every group predicts its most common digit |
+| Part 3: hierarchical clustering on a random part | Extension task B: run hierarchical clustering on only a part of the training set (for example 5,000 images); K-means can use all of it |
+| Part 4: the three versions | Check your own Assignment 2 code for these three mistakes |
+| Advanced B: groups as features | Extension task B: can the cluster result be used as a feature for a classifier? |
 
-**One thing that is different in the assignment.** With 50,000 images, hierarchical clustering needs about 10 GB of memory, so you must use a part of the training set; K-means can use all of it.
+## Reflection
 
-**Reflection** (after class, one or two sentences each):
+One or two sentences each.
 
-1. Why does K-means always stop?
-2. Why can we not compare the group numbers with the digits directly?
-3. When would you choose hierarchical clustering with nearest points over K-means?
-4. Why does hierarchical clustering need so much memory?
+1. Why can we not compare group numbers with digits directly?
+2. Why must validation and test images go to the centres learned from the fitting images, instead of being clustered again?
+3. When should you standardise before clustering, and when not? Use Part 1 and the digits as your examples.
+
+# Appendix: only if the digits did not download
+
+Use this only if the first cell of Part 2 stopped with a download error. Each cell below gives exactly the same 10,000 images; run one, then go on with the rest of the data block (from `X = data["X"] / 255`).
+
+**Backup 1: a second copy of the course file**, on another server.
+
+```python
+BACKUP_URL = "https://cdn.jsdelivr.net/gh/wayXing/mps311-439-course-materials@main/lecture-slids/lessons/data/mnist10k.npz"
+urllib.request.urlretrieve(BACKUP_URL, "mnist10k.npz")    # the same file, from a different server
+data = np.load("mnist10k.npz")                            # the file holds two arrays, X and y
+print(data["X"].shape)                                    # images and pixels
+```
+
+**Backup 2: the official MNIST file** (the one Keras uses), from which the course picked its 10,000 images.
+
+```python
+MNIST_URL = "https://storage.googleapis.com/tensorflow/tf-keras-datasets/mnist.npz"
+urllib.request.urlretrieve(MNIST_URL, "mnist.npz")        # all 70,000 MNIST images, about 11 MB
+full = np.load("mnist.npz")                               # x_train holds the 60,000 training images
+rng = np.random.default_rng(0)                            # the random numbers the course used
+pick = rng.choice(60000, 10000, replace=False)            # 10,000 of the 60,000 training images
+pick = np.sort(pick)                                      # in their original order
+images = full["x_train"][pick]                            # the chosen images, 28 x 28 each
+X_course = images.reshape(10000, 784)                     # one row of 784 pixels per image
+y_course = full["y_train"][pick]                          # their labels
+data = {"X": X_course, "y": y_course}                     # the same two arrays as the course file
+print(data["X"].shape)                                    # images and pixels
+```
+
+**Run, and you should see:** `(10000, 784)` from either cell.
 
 # Advanced Study
 
-MPS311 students are encouraged to try one. **MPS439 students complete A**, the main task, and record it in the log at the end. Allow about 30 minutes. B and C are extras for everyone.
+For after class. MPS311 students are encouraged to try one. **MPS439 students complete A** and record it in the log at the end. Allow about 30 minutes for A. The others are extras. Hints only, no answers.
 
-## A. K-means in numpy, from ten starts
+## A. Write K-means yourself, and use it (MPS439)
 
-Advanced Study 1 of the Note uses k = 10. Here you use k = 12, so its numbers will not match yours.
+Replace scikit-learn's `KMeans` in Part 2 by your own, with a better way to choose the starting centres.
 
 **Tasks**
 
-1. Using only numpy, write K-means for `Z_fit` with k = 12: start from 12 images picked at random, then alternate "assign to the nearest centre" and "move each centre to its group's mean" until the centres stop moving. If a group becomes empty, keep its old centre.
-2. Run it from 10 starts (`np.random.default_rng(seed)` for seed 0 to 9) and record the within-cluster sum of squares of each.
-3. For the best and the worst run, make the count table (12 groups against 10 digits). Which digits get two groups, and which are merged in the worst run? (Inside your loop, append each run's group of every image to a list as well, so you can make the tables afterwards.)
+1. Using only numpy, write K-means for `Z_fit` with 10 groups: give every image to its nearest centre, move every centre to the mean of its group, and repeat until the centres stop moving. Keep the old centre if a group becomes empty.
+2. Start it with **k-means++**: pick the first centre at random from the images; then pick each next centre at random, giving every image a chance proportional to the squared distance to its nearest centre chosen so far.
+3. Put your groups and centres into the count table and the validation check of Part 2. You should get a validation majority vote of about 0.58.
+4. Run 10 random starts (centres picked uniformly from the images) and 10 k-means++ starts, one start each time. Compare the mean and the worst within-cluster sum of squares. For reference, scikit-learn with `n_init=1` and seeds 0 to 9 gives a mean of 169814.7 and a worst of 172208.1 with random starts, and 169528.6 and 170636.1 with k-means++.
 
-::: {.callout-tip title="Ask AI"}
-Ask: *"Why is the mean the point that makes the sum of squared distances to a set of points smallest?"* Check its argument against Advanced Study 1 of the Note.
-:::
+**Hint:** `((Z_fit[:, None, :] - centres[None, :, :]) ** 2).sum(axis=2)` gives the squared distance from every image to every centre at once; `.argmin(axis=1)` picks the nearest. `rng.choice(len(Z_fit), p=weights / weights.sum())` picks one image with the chances you give it.
 
-::: {.callout-note collapse="true" title="Hint"}
-`((Z_fit[:, None, :] - centres[None, :, :]) ** 2).sum(axis=2)` gives the squared distance of every image to every centre at once; `.argmin(axis=1)` picks the nearest. `np.allclose(new, centres)` tells you when nothing moves.
-:::
+## B. Can the groups be features?
 
-**Self-check:** the ten runs stop between about `162656.2` and `164594.3`; `KMeans(n_clusters=12, n_init=10, random_state=0)` gives `162836.0`. Your best start can even beat scikit-learn's: both stop at a local minimum.
+Turn each fitting image's group into 10 columns of 0s and 1s (`np.eye(10)[groups]`), put them next to the 50 components, and fit `LogisticRegression(max_iter=3000)`. Do the same for the validation images with `km.predict(Z_val)`. Does the validation accuracy go up? Try 50 groups as well, and the group columns on their own. For reference: the 50 components alone give 0.895.
 
-## B. How many groups?
+## C. Soft groups
 
-Compute `sklearn.metrics.silhouette_score(Z_fit, labels)` for K-means with k from 2 to 15. Which k scores highest? Compare it with the bend (or lack of one) in 1.2.
+`sklearn.mixture.GaussianMixture(n_components=10, random_state=0)` gives every image a share in every group. Fit it on `Z_fit` and compute the majority vote with `.predict(Z_fit)`. Is it higher or lower than K-means? Why might an ellipse per group fit the digits better than a centre per group?
 
-**Self-check:** k = 2 gives about `0.098`, k = 8 about `0.097` and k = 10 about `0.085`; every score is below `0.1`.
+## D. Groups by density
 
-## C. Groups by density
-
-Run `sklearn.cluster.DBSCAN(eps=0.5, min_samples=5)` on `X_rings` from 4.1. How many groups does it find? Try two other values of `eps`.
-
-**Self-check:** write the number of groups and of noise points (label `-1`) for each `eps`.
+Run `sklearn.cluster.DBSCAN` on the standardised wines `X_train_s`. How do the groups and the noise points (label `-1`) change as you change `eps`? Can you find an `eps` that gives three groups?
 
 ## Advanced Study log
 
-Copy this into a text cell at the end of your notebook.
-
-> **Investigations done (A, B or C):**
->
-> **What I found:**
->
-> **How AI helped, and what I had to correct:**
->
-> **Self-check result (passed or not):**
-
-<!-- COURSE_FEEDBACK_QR:START -->
----
+| Study | What I did | One thing I learned |
+|---|---|---|
+| | | |
 
 ## 30-second feedback
 
-Scan the code to share anonymous feedback or post a question for this lab. It opens the correct **Lesson 8 lab** record automatically.
-
-![Feedback QR code for Lesson 8 lab](./feedback-qr.svg){fig-align="center" width="180px"}
-<!-- COURSE_FEEDBACK_QR:END -->
+Scan the code on the course page after the lab: what was unclear, what took too long, what you would like more of.

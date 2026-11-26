@@ -13,9 +13,31 @@ format:
     embed-resources: true
 ---
 
-## 1. Motivation: Points but No Labels
+::: {.callout-tip title="How to read this lesson"}
+To follow the lecture, read Sections 1 to 8, then the one-page recap in Section 11. For the clustering part of Assignment 2, also read Sections 9 and 10. Section 12 and the Advanced Studies at the end are optional.
+:::
 
-In Lesson 7 we ignored the labels for the first time, and we squeezed each digit image into a few numbers. In this lesson we still ignore the labels, but we ask a different question: **does the data fall into a few natural groups, and which group does each point belong to?**
+## 1. Problem: No Labels. Are There Natural Groups?
+
+Here are 40 handwritten digits. There are 5625 of them, but nobody wrote down which digit each one is:
+
+![The first 40 fitting images, each 28×28 pixels, with no labels.](figures/note_en_v2/F0.svg){fig-alt="Four rows of ten grey handwritten digits, with no labels"}
+
+Could you sort them into a few piles, so that the images in one pile look like the same digit? A shop has the same problem: it has only the purchase records of its customers, with no label saying "which type of customer", yet it wants to put similar customers together and send each group different offers. Both ask the same question: **does the data fall into a few natural groups, and which group does each sample belong to?**
+
+This is called **clustering**. Like PCA, it uses no labels, so it is a form of unsupervised learning. Each image has 784 numbers, so we cannot draw the images and look; the machine has to do the sorting.
+
+**By the end of this lesson, you should be able to:**
+
+- explain what the two alternating steps of K-means do, which quantity they make smaller, why the method always stops, and why it may stop in a poor place;
+- say which shapes make K-means fail, and switch to hierarchical clustering for them;
+- explain how the way we measure "how close two groups are" changes the result of hierarchical clustering;
+- use a count table and a majority vote to check how many known classes a clustering recovers;
+- explain why hierarchical clustering on large data needs a subsample first.
+
+## 2. Insight: How People Circle Groups in Two Features
+
+First make the problem as small as possible: two features, so we can draw them.
 
 ![180 points with two features and no labels at all.](figures/note_en/F1.svg){fig-alt="Grey points that gather into three lumps: one at the bottom left, one at the bottom right and one at the top"}
 
@@ -24,18 +46,6 @@ Look at the plot first. How many groups do you see? If you circled them with a p
 ::: {.callout-note collapse="true" title="Show answer"}
 There are three groups: one lump at the bottom left, one at the bottom right and one at the top. You decide because some points sit close together, and there is empty space between them and the other points.
 :::
-
-A person can circle the groups at a glance, but only when there are two features and we can draw them. Each handwritten digit image (MNIST) has 784 numbers, so we cannot draw it. A shop's customers may each have hundreds of purchase records, and we cannot draw those either. What we want is this: **a machine that circles groups in the same way, and that still works in many dimensions.** This is called **clustering**. Like the method in Lesson 7, it uses no labels, so it is a form of unsupervised learning.
-
-**By the end of this lesson, you should be able to:**
-
-- explain what the two alternating steps of K-means do, why the method always stops, and why it may stop in a poor place;
-- say which shapes make K-means fail, and switch to hierarchical clustering for them;
-- explain how the way we measure "how close two groups are" changes the result of hierarchical clustering;
-- use a count table and a majority vote to check how many known classes a clustering recovers;
-- explain why hierarchical clustering on large data needs a subsample first.
-
-## 2. What Counts as a Group
 
 Before a machine can circle groups, we must say what "a group" means. Think about these two descriptions first:
 
@@ -47,32 +57,77 @@ Both descriptions are reasonable, and this lesson uses both. We start with the f
 How do we judge whether one way of splitting the points is good? We want a single number. It should be small when the points sit tightly around their own centres, and large when the split is a mess. Think of a few candidates first.
 
 ::: {.callout-note collapse="true" title="Show answer"}
-We could look at how far the furthest point in each group is from its centre. We could add up the distance from each point to its own centre. We could also add up the squares of those distances. The first idea looks at one point only, so a single outlier can make it large. The other two look at every point. This lesson uses the sum of squared distances, for the same reason that Lesson 2 used squared error. For a set of points, the sum of squared distances to a position is smallest when that position is the mean (Advanced Study 1, Question 2). This gives us a ready-made way to find each centre.
+We could look at how far the furthest point in each group is from its centre. We could add up the distance from each point to its own centre. We could also add up the squares of those distances. The first idea looks at one point only, so a single outlier can make it large. The other two look at every point. This lesson uses the sum of squared distances, for the same reason that linear regression uses squared error. For a set of points, the sum of squared distances to a position is smallest when that position is the mean (Advanced Study 1, Question 1). This gives us a ready-made way to find each centre.
 :::
-
-Take the squared distance from each point to the centre of its own group, and add them all up. This total is called the **within-cluster sum of squares** (scikit-learn calls it `inertia_`). We want the split with the smallest within-cluster sum of squares.
-
-## 3. When We Do Not Know the Centres: K-means
 
 The difficulty is that the centres and the groups depend on each other. If we knew the centres, we could give each point to its nearest centre. If we knew the groups, we could work out each group's centre as the mean of its points. But we know neither.
 
 Think first: how can we break this chicken-and-egg loop?
 
 ::: {.callout-note collapse="true" title="Show answer"}
-One way is to try every possible split and pick the one with the smallest within-cluster sum of squares. But there are roughly $3^{180}$ ways to split 180 points into 3 groups, which is far too many to try. Another way is to guess three centres at random, then repeat two steps in turn: assign the points using the centres, then move the centres using the groups. We keep going until nothing changes.
+One way is to try every possible split and pick the one with the smallest score. But there are roughly $3^{180}$ ways to split 180 points into 3 groups, which is far too many to try. Another way is to guess three centres at random, then repeat two steps in turn: assign the points using the centres, then move the centres using the groups. We keep going until nothing changes.
 :::
 
-The second way is called **K-means** ($K$ is the number of groups). In the widget below, you can carry it out one step at a time:
+In the widget below you can do it yourself, one step at a time. The number at the top is "the squared distance from each point to its own centre, added up":
 
 {{< include figures/note_en/I1.html >}}
 
-Click through a few rounds first. How does the within-cluster sum of squares change? When does it stop? Then click "Try another start" and do it again.
+Click through a few rounds first. How does this number change? When does it stop? Then click "Try another start" and do it again.
 
 ::: {.callout-note collapse="true" title="Show answer"}
-With the first start, the sum goes 1851.3 → 130.2 → 127.0. After three rounds the centres stop moving, and all three lumps are found correctly. With the second start, the sum goes 2163.6 → 503.9 → 474.3 → 474.1. It also stops, but in a bad place: two centres crowd into the same lump, and the other two lumps share one centre.
+With the first start, the number goes 1851.3 → 130.2 → 127.0. After three rounds the centres stop moving, and all three lumps are found correctly. With the second start, it goes 2163.6 → 503.9 → 474.3 → 474.1. It also stops, but in a bad place: two centres crowd into the same lump, and the other two lumps share one centre.
 :::
 
-**Why does it always stop?** In the step "① Assign to the nearest centre", each point moves only to a closer centre, so the sum can only fall or stay the same. In the step "② Move centres to the mean", the sum of squared distances from a group's points to their mean is smaller than to any other position, so again the sum can only fall or stay the same. The sum never goes up, it cannot go below 0, and there are only finitely many ways to split the points. So the method must stop.
+You saw three things here: the score falls at every step; it stops somewhere; where it stops depends on the start. The next three sections write these down as a model, a loss and a solution.
+
+## 3. Model: One Centre per Group
+
+Each sample is a column of $d$ numbers, $\mathbf x_i$ (here $d = 2$; for the digits $d = 784$), and there are $n$ samples. We want $k$ groups.
+
+- Each group has a centre $\boldsymbol\mu_j$, also a column of $d$ numbers, $j = 1, \dots, k$;
+- each sample has a group number $c_i \in \{1, \dots, k\}$ saying which group it belongs to;
+- each sample is represented by the centre of its group:
+
+$$
+\mathbf x_i \approx \boldsymbol\mu_{c_i}.
+$$
+
+In words: for each sample we keep only a group number, and use that group's centre to stand for it. The assumption behind this is that **each group is a lump around one centre.**
+
+![One grouping: each point is joined to the centre of its own group (the black +).](figures/note_en_v2/S2.svg){fig-alt="Three lumps of points in three colours, each point joined by a thin line to its group's centre, the centres labelled mu1, mu2, mu3"}
+
+We will need one property later, so we state it here. A point $\mathbf x$ is equally far from $\boldsymbol\mu_1$ and $\boldsymbol\mu_2$ when $\|\mathbf x-\boldsymbol\mu_1\|^2 = \|\mathbf x-\boldsymbol\mu_2\|^2$. Expand both sides: $\|\mathbf x\|^2$ cancels, and what is left is linear in $\mathbf x$:
+
+$$
+2(\boldsymbol\mu_2-\boldsymbol\mu_1)^\top \mathbf x = \|\boldsymbol\mu_2\|^2-\|\boldsymbol\mu_1\|^2 .
+$$
+
+So the boundary between two groups is a straight line (a flat plane in more dimensions), at right angles to the line joining the two centres. Splitting by "nearest centre" can only cut space into pieces with straight edges.
+
+## 4. Loss: the Within-Cluster Sum of Squares
+
+To judge a grouping we use the quantity chosen in Section 2: the squared distance from each point to the centre of its own group, all added up.
+
+$$
+W(c, \boldsymbol\mu) = \sum_{i=1}^{n} \|\mathbf x_i-\boldsymbol\mu_{c_i}\|^2 .
+$$
+
+It is the number at the top of the widget. $W$ is small when every point sits close to its centre. It is also what we lose when each point is replaced by its centre, the same kind of quantity as the reconstruction error of PCA.
+
+It is called the **within-cluster sum of squares** (scikit-learn calls it `inertia_`). We want the grouping with the smallest within-cluster sum of squares.
+
+## 5. Solution: K-means
+
+There are two sets of unknowns: $n$ group numbers $c_1, \dots, c_n$ and $k$ centres $\boldsymbol\mu_1, \dots, \boldsymbol\mu_k$. Searching for both at once means trying all $k^n$ groupings. But if we look for only one set, the answer is ready-made:
+
+- **Centres fixed, find the group numbers:** $W$ is a sum of one term per point, so each point picks its smallest term on its own, which means its nearest centre: $c_i = \arg\min_j \|\mathbf x_i-\boldsymbol\mu_j\|^2$.
+- **Group numbers fixed, find the centres:** $W$ splits into one sum of squares per group, and each group makes its own sum smallest. Setting the derivative with respect to $\boldsymbol\mu_j$ to 0 gives $\boldsymbol\mu_j$ = the mean of group $j$.
+
+So we fix one set, solve for the other, and take turns. These are exactly the two buttons you clicked in the widget.
+
+This method is called **K-means** ($K$ is the number of groups).
+
+**Why does it always stop?** In the step "assign to the nearest centre", each point moves only to a closer centre, so the sum can only fall or stay the same. In the step "move centres to the mean", the sum of squared distances from a group's points to their mean is smaller than to any other position, so again the sum can only fall or stay the same. The sum never goes up, it cannot go below 0, and there are only finitely many ways to split the points. So the method must stop.
 
 **Why can it stop in the wrong place?** Each step only moves to a lower value close by. When no nearby move can lower the sum any further, the method stops. There is no promise that this is the lowest value over all possible splits.
 
@@ -97,27 +152,27 @@ print(km.labels_[:10])                       # the group of the first ten points
 
 **Did it find the right groups?** We made this data ourselves, so we know which lump each point really belongs to. We can use that afterwards as a check. However, we cannot compare the group numbers directly, because K-means numbers its groups in an arbitrary order. Its "group 1" is not necessarily our "lump 1". Instead, for each group we count which lump most of its points come from, and let the group stand for that lump. The share of points that are correct under this rule is called the **majority vote** accuracy. Here it is 99.4%, because only one point was put with a different lump.
 
-**Where does $k$ come from?** K-means needs a person to choose $k$ in advance. If we do not know it, we can try several values of $k$ and plot the within-cluster sum of squares:
+**Where does $k$ come from?** $k$ is not part of the solution: K-means needs a person to choose it in advance. If we do not know it, we can try several values of $k$ and plot the within-cluster sum of squares:
 
 ![The within-cluster sum of squares for different numbers of groups k. A larger k gives a smaller sum, but after k = 3 the fall becomes much slower.](figures/note_en/F2.svg){fig-alt="A falling line that drops from 968 to 127 at k = 3 and is almost flat after that"}
 
-A larger $k$ always gives a smaller sum (it is 0 when every point is its own group), so the smallest sum is not the right choice. The usual approach is to look for the "bend", which here is at 3. The digits in Assignment 2 have 10 classes, so there we use $k = 10$.
+A larger $k$ always gives a smaller sum (it is 0 when every point is its own group), so the smallest sum is not the right choice. The usual approach is to look for the "bend" (the **elbow plot**), which here is at 3. The digits in Assignment 2 have 10 classes, so there we use $k = 10$.
 
-## 4. Where K-means Fails
+## 6. Test: Where K-means Fails
 
 For K-means, a group means "points that are close to the same centre". Below are two data sets. A person can see at a glance that each one has two groups. Can K-means find them?
 
 {{< include figures/note_en/I2k.html >}}
 
-Look only at K-means for now. On the two rings and on the two bands, how much does it recover? Why?
+Look only at K-means for now. On the two rings and on the two strips, how much does it recover? Why?
 
 ::: {.callout-note collapse="true" title="Show answer"}
-On the two rings it recovers only 62.5%, and on the two bands only 51.3%. That is not much better than guessing. K-means gives each point to its nearest centre. The boundary between two centres is a straight line, made of the places that are equally far from both centres. So K-means can only cut the plane into pieces with straight edges. It cuts the two rings across the middle into a left half and a right half, and it cuts the two bands into a left part and a right part. The points on a ring are not "close to the same centre". In fact, the centre of the inner ring and the centre of the outer ring are the same point.
+On the two rings it recovers only 62.5%, and on the two strips only 51.3%. That is not much better than guessing. As Section 3 showed, the boundary between two centres is a straight line, so K-means can only cut the plane into pieces with straight edges. It cuts the two rings across the middle into a left half and a right half, and it cuts the two strips into a left part and a right part. The points on a ring are not "close to the same centre". In fact, the centre of the inner ring and the centre of the outer ring are the same point.
 :::
 
-In these two data sets, a group follows the second idea from Section 2: the points are linked one to the next.
+The model's assumption, "each group is a lump around one centre", does not hold here. In these two data sets, a group follows the second idea from Section 2: the points are linked one to the next.
 
-## 5. Candidate Two: Start from Each Point and Merge Step by Step
+## 7. Candidate Two: Start from Each Point and Merge Step by Step
 
 The points on a ring do not sit around one centre. Instead, they are linked one to the next. Think about this first. How could a machine join points that are linked one to the next into one group?
 
@@ -142,7 +197,7 @@ The widget below has the same two data sets, and you can choose any of the three
 {{< include figures/note_en/I2b.html >}}
 
 ::: {.callout-note collapse="true" title="Show answer"}
-"Nearest points" recovers 100% on both data sets. The points on a ring are linked one to the next, so following the ring joins them into one group. There is a gap between the two rings, so the rings are only merged at the very end. Ward fails in the same way as K-means (64.7% on the two rings, 53.7% on the two strips), because it also looks for compact blobs.
+"Nearest points" recovers 100% on both data sets. The points on a ring are linked one to the next, so following the ring joins them into one group. There is a gap between the two rings, so the rings are only merged at the very end. Ward fails in the same way as K-means (64.7% on the two rings, 53.7% on the two strips), because it also looks for compact lumps.
 :::
 
 ```python
@@ -152,9 +207,9 @@ hc = AgglomerativeClustering(n_clusters=2, linkage="single")   # merge the two n
 labels = hc.fit_predict(X_rings)             # stop when 2 groups are left; one label per point
 ```
 
-## 6. On MNIST: Are There Ten Groups in 784 Dimensions?
+## 8. Application: Are There Ten Groups in the Handwritten Digits?
 
-Now we return to the handwritten digits. We take the 5625 fitting images of the MNIST subset (the split from Lesson 6). First we use PCA to reduce them to 50 principal components (Lesson 7; Assignment 2 also uses 50, and they keep 82.7% of the variance). Then we use K-means to split them into 10 groups. To avoid mixing this up with the number of groups $k$, in this lesson we always write "50 principal components". The clustering never looks at the labels.
+Now we return to the question we started with. We take the 5625 fitting images (the split into 5625 fitting, 1875 validation and 2500 test images). First we use PCA to reduce them to 50 principal components (Assignment 2 also uses 50, and they keep 82.7% of the variance). Then we use K-means to split them into 10 groups. To avoid mixing this up with the number of groups $k$, in this lesson we always write "50 principal components". The clustering never looks at the labels.
 
 After the clustering, we can use the labels to check the result. For each group, we count how many images of 0, 1, 2 and so on it holds, and put the numbers in a **count table**.
 
@@ -166,7 +221,7 @@ Read the table first. Which digits have a group almost to themselves? Which digi
 The digits 2 (413 images) and 6 (443) each have a group almost to themselves. The digits 0 and 1 each take two groups. The 0s split into groups of 251 and 234 images (the more slanted ones and the rounder ones). The 1s split into groups of 352 and 285 images (the straight ones and the slanted ones). That leaves too few groups for the rest: no group is mostly 5 or 9. The digits 4, 7 and 9 are mixed in two groups (group 7 has 309 images of 4, 267 of 9 and 190 of 7). The digits 3, 5 and 8 are mixed in two groups (group 6 has 334 images of 3, 168 of 5 and 106 of 8). The digits that get mixed up are the ones that people write in similar ways.
 :::
 
-**Majority vote.** As in Section 3, we let each group guess the digit that appears most often in it, and we count how many guesses are right. K-means recovers 57.6%. The clustering itself uses no labels, so why do we still need a validation set? The reason is that "each group guesses one digit" was fixed using the labels of the fitting images. We want to know whether this split works as well on images it has not seen. We project the validation images onto the same 50 principal components, give each one to its nearest centre, and use the guess for each group that we fixed on the fitting images. This gives 57.7%, almost the same as on the fitting images. The clustering never saw a label, yet it puts nearly 60% of the images in the right place. This is much better than guessing (about 10%). But it is far from ten groups that each match one digit: some digits are written in such similar ways that they do not form ten clear lumps in 784 dimensions.
+**Majority vote.** As in Section 5, we let each group guess the digit that appears most often in it, and we count how many guesses are right. K-means recovers 57.6%. The clustering itself uses no labels, so why do we still need a validation set? The reason is that "each group guesses one digit" was fixed using the labels of the fitting images. We want to know whether this split works as well on images it has not seen. We project the validation images onto the same 50 principal components, give each one to its nearest centre, and use the guess for each group that we fixed on the fitting images. This gives 57.7%, almost the same as on the fitting images. The clustering never saw a label, yet it puts nearly 60% of the images in the right place. This is much better than guessing (about 10%). But it is far from ten groups that each match one digit: some digits are written in such similar ways that they do not form ten clear lumps in 784 dimensions.
 
 The centre of each group is the mean of all its images on the 50 principal components. If we turn it back into pixels, we get the **average image** of the group. It is also a 28×28 image:
 
@@ -180,7 +235,7 @@ The average images also show why the digits get mixed up. The group that is most
 
 There are two more ways of measuring how close two groups are. Average takes the mean distance over all pairs of points from the two groups. Complete looks at the two points in the two groups that are farthest apart. Ward does best (59.7%), a little higher than K-means. Single was the best on the two rings, but here it is the worst (11.5%). It links almost all the images in a chain to form one big group (5616 of the 5625 images), and each of the other 9 groups has only one or two images. The reason is that there are no clear gaps between the digits. There are always some unclear images that link two digits together. **No way of measuring is best everywhere.** The right choice depends on the shape of the data.
 
-## 7. What If There Is Too Much Data?
+## 9. What If There Is Too Much Data?
 
 At each step, hierarchical clustering must know which two groups are closest. So it has to store the distance between every pair of points. With $n$ points there are $n(n-1)/2$ pairs:
 
@@ -198,11 +253,11 @@ Think about this first. What can we do?
 We pick a random part of the points and cluster only those. This is called **subsampling**. If the sample still represents the data well, the groups we find will not be very different. On the MNIST subset, if we take only 500 random images and run Ward hierarchical clustering, the majority vote is 59.2%. This is close to 59.7% with all 5625 images. The hint for Assignment 2 is to take 5000 images, which needs about 0.1 GB. K-means does not need the distance between every pair of points. At each step it only works out the distance from each point to the $k$ centres, so it can use all the data directly.
 :::
 
-## 8. Implementation: Doing It in scikit-learn
+## 10. Implementation: Doing It in scikit-learn
 
-The data split and the PCA are the same as in Lesson 7. `X_digits_fit` holds the fitting images, and the PCA is fitted on the fitting part only.
+`X_fit` and `y_fit` hold the 5625 fitting images and their digits; the data block and the split are those of Part 2 of Lab 8.
 
-**Step 1: reduce to 50 principal components and split into 10 groups with K-means (Section 6):**
+**Step 1: reduce to 50 principal components and split into 10 groups with K-means (Section 8):**
 
 ```python
 import numpy as np
@@ -210,27 +265,27 @@ from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 
 pca = PCA(n_components=50, random_state=0)   # 50 components, as in Assignment 2
-pca.fit(X_digits_fit)                        # fitting images only
-Z_fit = pca.transform(X_digits_fit)          # 50 numbers per image
+pca.fit(X_fit)                               # fitting images only
+Z_fit = pca.transform(X_fit)                 # 50 numbers per image
 km = KMeans(n_clusters=10, n_init=10, random_state=0)   # 10 groups, 10 starting points
 km.fit(Z_fit)                                # no labels are used here
 groups = km.labels_                          # the group of every fitting image
 ```
 
-**Step 2: the count table and the majority vote (Section 6):**
+**Step 2: the count table and the majority vote (Section 8):**
 
 ```python
 table = np.zeros((10, 10), dtype=int)        # rows: groups, columns: true digits
 for i in range(len(groups)):
-    table[groups[i], y_digits_fit[i]] += 1   # count image i in its group and its digit
+    table[groups[i], y_fit[i]] += 1          # count image i in its group and its digit
 guess = table.argmax(axis=1)                 # each group guesses its most common digit
 correct = table.max(axis=1).sum()            # images whose digit is their group's guess
 print(correct / len(groups))                 # majority-vote accuracy
 ```
 
-The output is 0.576. The rows of this table come in a different order from the figure in Section 6. This is because K-means numbers its groups in an arbitrary order, and in the figure we sorted the groups by the most common digit in each one.
+The output is 0.576. The rows of this table come in a different order from the figure in Section 8. This is because K-means numbers its groups in an arbitrary order, and in the figure we sorted the groups by the most common digit in each one.
 
-**Step 3: hierarchical clustering (Sections 5 and 6):**
+**Step 3: hierarchical clustering (Sections 7 and 8):**
 
 ```python
 from sklearn.cluster import AgglomerativeClustering
@@ -239,25 +294,39 @@ hc = AgglomerativeClustering(n_clusters=10, linkage="ward")   # merge by the sma
 groups_hc = hc.fit_predict(Z_fit)            # one group per image
 ```
 
-If we run the same count table code on these groups, the majority-vote accuracy is 0.597. When there is too much data, pick a random subset of the rows first and cluster those (Section 7).
+If we run the same count table code on these groups, the majority-vote accuracy is 0.597. When there is too much data, pick a random subset of the rows first and cluster those (Section 9).
 
-## 9. The Lesson on One Page
+## 11. The Lesson on One Page
 
 If you read only one page, read this one.
 
-![The whole chain of this lesson.](figures/note_en/F7.svg){fig-alt="A vertical flow chart with six steps"}
+![The whole chain of this lesson: problem, insight, model, loss, solution, test, application, extension, limitations.](figures/note_en_v2/F7.svg){fig-alt="A vertical flow chart with nine steps, each with one line of key points and numbers"}
 
 | The problem you see | What you can do | What evidence to use |
 |---|---|---|
 | You only have points, and you want to know if they form natural groups | Clustering: K-means (points close to the same centre) | Within-cluster sum of squares; with labels, a count table as a check afterwards |
 | The centres and the groups depend on each other | Alternate the two steps; try several starting points and keep the best (`n_init`) | The within-cluster sum of squares falls step by step, and different starting points stop in different places |
 | The groups are rings or long strips | Hierarchical clustering, with the "nearest points" (single) measure | The share of each group recovered after the change of method |
-| You do not know which measure to use | Look at the shape of the data, and compare with a count table | On the MNIST subset, Ward 60% and single 12% |
+| You do not know which measure to use | Look at the shape of the data, and compare with a count table | On the MNIST subset, Ward 59.7% and single 11.5% |
 | There is too much data | Use subsampling before hierarchical clustering; K-means can use all of it | Memory grows with the square of the number of points |
 
-## 10. Summary and Limitations
+## 12. Extension: Other Clustering Methods (Optional)
 
-We began with the question "does the data form natural groups?" The answer depends on what we mean by a group. If a group means points close to the same centre, K-means finds the groups by alternating two steps. It recovers 99.4% of the three blobs and nearly 60% of the ten digits (digits that are written in similar ways get mixed together). If a group means points linked one after another in a chain, hierarchical clustering can find rings and bands that K-means cannot find.
+"Put similar samples together without labels" has several other common methods besides K-means and hierarchical clustering. Each is one line in scikit-learn:
+
+![The same three hand-made datasets, six methods. The percentage is the share recovered; grey points are those DBSCAN calls noise and puts in no group.](figures/note_en_v2/F8.svg){fig-alt="Three rows and six columns of small scatter plots: three blobs, two rings, two strips; the methods are KMeans, Ward, single, DBSCAN, GaussianMixture and Spectral. KMeans, Ward and the Gaussian mixture fail on the rings and strips; single, DBSCAN and spectral clustering score 100% on both; single scores only 67% on the three blobs"}
+
+| Method | What a group is | Call |
+|---|---|---|
+| DBSCAN | crowded points joined into a group; no $k$ needed, sparse points are noise | `DBSCAN(eps=0.5, min_samples=5)` |
+| Gaussian mixture | one ellipse per group; each point belongs to each group with some share | `GaussianMixture(n_components=3)` |
+| Spectral clustering | first re-describe the points by "who is a neighbour of whom", then split | `SpectralClustering(n_clusters=2, affinity="nearest_neighbors")` |
+
+Three things in the figure are worth a look. On the three blobs, single scores only 67%: two blobs are linked by a few points between them. On the two rings, DBSCAN finds 4 groups: the outer ring is sparse in a few places and breaks there; the majority vote is still 100%, a number that runs high when there are many groups. The Gaussian mixture, like K-means, only sees lumps, and fails on the rings and strips. Each method gives its own answer to "what is a group", so each suits different data.
+
+## 13. Summary and Limitations
+
+We began with the question "does the data form natural groups?" The answer depends on what we mean by a group. If a group means points close to the same centre, K-means finds the groups by alternating two steps. It recovers 99.4% of the three blobs and nearly 60% of the ten digits (digits that are written in similar ways get mixed together). If a group means points linked one after another in a chain, hierarchical clustering can find rings and strips that K-means cannot find.
 
 **Transfer question.** A website has 200,000 users, and for each user it records 30 numbers about how they use the site. The company wants to split the users into a few types, so that it can send each type different content. Answer without doing any calculation. Would you use K-means or hierarchical clustering? How would you choose $k$? How would you check whether the groups are "right"?
 
@@ -268,62 +337,64 @@ Hierarchical clustering on 200,000 points needs about 160 GB of memory, so it is
 **Where this method cannot be trusted.**
 
 1. **Someone has to give $k$.** The within-cluster sum of squares always falls as $k$ grows, and the bend is often hard to see. With hierarchical clustering, someone also has to decide where to cut the tree.
-2. **The result depends on what counts as a group.** K-means only recognises compact blobs. Single linkage can join two groups into one large group through a "bridge" of points. If you do not know the shape of the data, try several methods.
+2. **The result depends on what counts as a group.** K-means only recognises compact lumps. Single linkage can join two groups into one large group through a "bridge" of points. If you do not know the shape of the data, try several methods.
 3. **K-means can stop in a bad place.** Use several starting points (`n_init`), and compare the within-cluster sum of squares.
 4. **Without labels, there is no right or wrong.** In this lesson we used the labels to build a count table, but only as a check afterwards. A real clustering task usually has no such labels.
-5. **Scale changes distance.** If the features have different units, standardise them first. Otherwise the features with large units decide everything. The limitations from Lesson 7 apply here too.
+5. **Scale changes distance.** If the features have different units, standardise them first. Otherwise the features with large units decide everything (the same is true of PCA).
 
-**Back to the promise at the start.** You now have a set of data with no labels, and you can do the following. You can split it into groups with K-means, and explain why the two alternating steps stop and why we need several starting points. You can see that K-means fails on rings and long strips, and switch to hierarchical clustering with a suitable measure. You can use a count table and a majority vote to check how much of the known classes the clustering recovers. On large data, you can use subsampling first.
+**Back to the promise at the start.** You now have a set of data with no labels, and you can do the following. You can split it into groups with K-means, and explain that it makes the within-cluster sum of squares smaller, why the two alternating steps stop and why we need several starting points. You can see that K-means fails on rings and long strips, and switch to hierarchical clustering with a suitable measure. You can use a count table and a majority vote to check how much of the known classes the clustering recovers. On large data, you can use subsampling first.
 
 **30-second feedback.** Now that you have finished this lesson, please scan the code to leave anonymous feedback or questions. It helps us improve to know which parts were unclear and which parts went too fast.
 
 ![The feedback QR code for this lesson](./feedback-qr.svg){fig-align="center" width="160px" fig-alt="Feedback QR code"}
 
-*The Advanced Studies below are not part of the main thread, and you can read each one on its own. MPS311 students are encouraged to read them. MPS439 students have one main task, which is required: Advanced A of Lab 8. It builds on Study 1 here but uses k = 12, so its self-check values differ from the ones on this page. The other Studies are optional.*
+*The Advanced Studies below are not part of the main thread, and you can read each one on its own. MPS311 students are encouraged to read them. The three Studies are one derivation, one application and one computation. The required main task for MPS439 is Advanced A of Lab 8: write K-means yourself and put it into the Assignment 2 workflow; this page does not give its code.*
 
 ---
 
-## Advanced Study 1: Writing K-means in numpy and Comparing Starting Points
+## Advanced Study 1: Derive It Yourself
 
-Use `Z_fit` from Section 8, which holds 5625 images with 50 principal components. Each run picks 10 images at random as the starting centres. It then alternates the two steps until the centres stop moving.
+Section 5 gave only the results. Here you derive them step by step. Write the points of one group as $\mathbf x_1, \dots, \mathbf x_m$, with mean $\bar{\mathbf x}$.
+
+1. **The mean makes the sum of squares smallest.** Show that for any position $\mathbf c$:
+   $$\sum_{i=1}^{m}\|\mathbf x_i-\mathbf c\|^2 = \sum_{i=1}^{m}\|\mathbf x_i-\bar{\mathbf x}\|^2 + m\,\|\bar{\mathbf x}-\mathbf c\|^2 .$$
+   (Hint: write $\mathbf x_i-\mathbf c$ as $(\mathbf x_i-\bar{\mathbf x}) + (\bar{\mathbf x}-\mathbf c)$ and expand; the cross terms add up to 0.) Use it to explain why the sum is smallest at $\mathbf c = \bar{\mathbf x}$. You can also set the derivative with respect to $\mathbf c$ to 0; compare the two ways.
+2. **No step makes it larger.** Use Question 1 to show that "move centres to the mean" cannot make $W$ larger; then show the same for "assign to the nearest centre".
+3. **It always stops.** $W$ never goes up at any step; if the group numbers do not change, the centres do not change either, and the method stops. Why can it not go round forever between a few groupings? (Hint: there are only finitely many groupings; if $W$ falls strictly, the method never returns to a grouping it has already visited.)
+4. **Ward's merging cost.** When two groups $A$ and $B$ (with $n_A$ and $n_B$ points and means $\bar{\mathbf x}_A$ and $\bar{\mathbf x}_B$) are merged, the within-cluster sum of squares grows by
+   $$\Delta = \frac{n_A n_B}{n_A + n_B}\,\|\bar{\mathbf x}_A-\bar{\mathbf x}_B\|^2 .$$
+   Prove it with Question 1, expanding each group's sum of squares around the mean of the merged group. The formula shows that Ward only looks at how far apart the two centres are and how large the two groups are, not at how close the points at their edges are. That is why it looks for compact lumps, and fails on the two rings in the same way as K-means.
+
+## Advanced Study 2: Fewer Colours in a Photo with K-means
+
+Each pixel of a photo is three numbers (red, green, blue, from 0 to 1). Treat each pixel as a point in three dimensions, split them into $k$ groups with K-means, and replace each pixel by the colour of its group's centre: the photo now has only $k$ colours. This is also a kind of compression: instead of three numbers per pixel, we store one group number per pixel, plus $k$ colours.
 
 ```python
 import numpy as np
+from sklearn.datasets import load_sample_image
+from sklearn.cluster import KMeans
 
-k = 10
-results = []
-for seed in range(10):                                   # ten different starting points
-    rng = np.random.default_rng(seed)
-    centres = Z_fit[rng.choice(len(Z_fit), k, replace=False)]   # k images picked at random as starting centres
-    for step in range(100):
-        dist = ((Z_fit[:, None, :] - centres[None, :, :]) ** 2).sum(axis=2)   # squared distance of every image to every centre
-        groups = dist.argmin(axis=1)                     # step 1: nearest centre
-        new = centres.copy()                             # step 2: move each centre to its group's mean
-        for j in range(k):
-            members = Z_fit[groups == j]                 # the images in group j
-            if len(members) > 0:                         # an empty group keeps its old centre
-                new[j] = members.mean(axis=0)
-        if np.allclose(new, centres):                    # nothing moves: stop
-            break
-        centres = new
-    inertia = ((Z_fit - centres[groups]) ** 2).sum()     # within-cluster sum of squares
-    results.append(inertia)
-print(np.round(results, 1))
+image = load_sample_image("china.jpg") / 255    # 427 x 640 pixels, 3 colours each, 0 to 1
+pixels = image.reshape(-1, 3)                    # one row per pixel: 273,280 rows, 3 columns
+rng = np.random.default_rng(0)
+some = pixels[rng.choice(len(pixels), 20000, replace=False)]   # fit on 20,000 random pixels, to be quick
+km = KMeans(n_clusters=16, n_init=1, random_state=0).fit(some) # 16 colours
+groups = km.predict(pixels)                      # the colour group of every pixel
+new = km.cluster_centers_[groups]                # each pixel replaced by its group's colour
+error = ((pixels - new) ** 2).sum(axis=1).mean() # mean squared error per pixel
+print(round(error, 4))
 ```
 
-The 10 starting points stop at within-cluster sums of squares between 169340.0 and 171642.8, a difference of about 1.4%. scikit-learn picks its starting points with k-means++ and runs 10 times. It reaches 169025.6, which is a little lower than the best run of our own version (169340.0). So a better way of picking starting points makes bad results less common, but it does not promise the lowest value every time.
+**Self-check:** with $k = 16$ the mean squared error per pixel is 0.0055; with $k = 4$ it is 0.0211, and with $k = 64$ it is 0.0018.
 
-Now try the following yourself:
+Now try these yourself:
 
-1. Draw a count table for the run with the smallest within-cluster sum of squares and for the run with the largest. In the run with the largest, which digits are merged together, and which are split apart?
-2. Prove the claim from Section 3. For a group of points, the sum of squared distances to a position $\mathbf c$, $\sum_i\|\mathbf x_i-\mathbf c\|^2$, is smallest when $\mathbf c$ is the mean. (Hint: take the derivative with respect to $\mathbf c$ and set it to 0.)
-3. In the code above, a group that becomes empty keeps its old centre. What other ways could you handle an empty group? What problem does each one have?
+1. Use `plt.imshow(new.reshape(image.shape))` to show $k = 4$, 16 and 64 next to the original. From how many colours on can you no longer see a difference?
+2. The original stores three 8-bit numbers per pixel (24 bits). With $k = 16$, how many bits does one group number need? About how many times smaller is the whole image (ignoring the 16 colours themselves)?
+3. Here each pixel is replaced by one centre; PCA replaces each image by a combination of a few components. Say what each kind of compression keeps and what it loses.
 
-## Advanced Study 2: Open Questions
+## Advanced Study 3: How the Computer Does It
 
-This lesson does not develop the following four questions. Each comes with a starting point.
-
-1. **How to choose k.** The bend is often hard to see. Starting point: look up the silhouette score (`sklearn.metrics.silhouette_score`). Plot it for $k = 2$ to 15 on the three blobs and on the MNIST subset, and compare it with the plot of the within-cluster sum of squares.
-2. **Clustering by density.** Can we avoid giving $k$ in advance, and instead link the places where points are packed tightly into groups, treating sparse points as noise? Starting point: try `sklearn.cluster.DBSCAN` on the two rings, and see how `eps` changes the result.
-3. **Soft groups.** K-means puts each point in exactly one group. If a point sits between two groups, could we say it belongs 60% to one group and 40% to the other? Starting point: `sklearn.mixture.GaussianMixture`, which describes each group with an ellipse, as in Lesson 5.
-4. **Can clusters be used as features?** Extension task B of Assignment 2 asks whether "which group a point belongs to" can be given to a classifier as a new feature. Starting point: turn the K-means group numbers into 10 columns of 0s and 1s, add them to the inputs of logistic regression, and compare the results on the validation set.
+1. **How much work one round of K-means takes.** In one round, each point is compared with each of the $k$ centres, each comparison over $d$ numbers: about $n k d$ multiplications. For the digits in Section 8, $n = 5625$, $k = 10$ and $d = 50$, so one round is about 2.8 million; even the 50,000 images of Assignment 2 take only 25 million, and K-means usually stops within a few dozen rounds. Work it out: if we skipped PCA and clustered the 784 pixels directly, how many times more work would one round be?
+2. **How k-means++ picks its starts.** The first centre is a random point. For each next centre, every point gets a chance proportional to the squared distance to its nearest centre chosen so far. Points far from the existing centres are more likely to be picked, so the starts spread out. One can prove that with these starts the expected within-cluster sum of squares is at most $O(\log k)$ times that of the best grouping. Why the squared distance, and not the distance itself or the farthest point? (Hint: think about outliers.)
+3. **Why hierarchical clustering is slow.** The most direct way, at every merge, searches all pairs of groups for the closest one, then updates the distances from the new group to every other group. The memory is $n(n-1)/2$ distances (the table in Section 9), and the time grows faster than $n^2$. Ready-made software merges in a smarter order, but it cannot avoid storing all the pairwise distances. If the number of points doubles, how many times larger is the memory?

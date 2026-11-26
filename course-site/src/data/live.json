@@ -243,7 +243,8 @@
         "A tree of yes-or-no questions on the Titanic passengers",
         "Picking a cut with Gini, and growing the tree",
         "Choosing the depth",
-        "Reading a tree: one passenger, and feature importance", "Three classes, and a number in each leaf",
+        "Reading a tree: one passenger, and feature importance",
+        "Three classes, and a number in each leaf",
         "The code"
       ],
       "polls": [
@@ -325,18 +326,18 @@
     },
     "lesson-08": {
       "sections": [
-        "Seeing groups in points without labels",
-        "Scoring a grouping by distance to centres",
-        "Assign, move, repeat (K-means)",
-        "Where centres fail: rings and strips",
-        "Merging the nearest points from below",
-        "Checking the groups on handwritten digits",
-        "When there are too many points"
+        "Handwritten digits without labels: are there natural groups?",
+        "Scoring a grouping and trying it by hand",
+        "One centre per group, and its loss",
+        "K-means: fix one, solve the other",
+        "Where centres fail, and merging from below",
+        "Back to the digits: count table and majority vote",
+        "Other methods, and the limits"
       ],
       "polls": [
         {
           "key": "score-grouping",
-          "slide": "One centre per group: How do we score a grouping?",
+          "slide": "Problem: How do we score a grouping?",
           "prompt": "One number: small when points hug their centres. Use the…",
           "options": [
             "farthest point from its centre",
@@ -348,7 +349,7 @@
         },
         {
           "key": "rings-near",
-          "slide": "Merge from below: How near are two groups?",
+          "slide": "Test: How near are two groups?",
           "prompt": "Two rings: which way of measuring \"near\" will follow them?",
           "options": [
             "nearest two points (single)",
@@ -359,7 +360,7 @@
         },
         {
           "key": "scale-50000",
-          "slide": "Scale: Every pair of points",
+          "slide": "Application: Every pair of points",
           "prompt": "50,000 images: every pair needs 10 GB. You would…",
           "options": [
             "find a bigger machine",

@@ -1,0 +1,155 @@
+{
+ "F0_digits": [
+  2,
+  7,
+  6,
+  4,
+  9,
+  0,
+  9,
+  2,
+  7,
+  1,
+  8,
+  8,
+  6,
+  8,
+  0,
+  3,
+  4,
+  1,
+  4,
+  9,
+  9,
+  1,
+  1,
+  4,
+  9,
+  0,
+  6,
+  7,
+  3,
+  6,
+  0,
+  0,
+  2,
+  6,
+  0,
+  4,
+  5,
+  6,
+  6,
+  6
+ ],
+ "F8": {
+  "三团": {
+   "KMeans": {
+    "acc": 0.994,
+    "groups": 3,
+    "noise": 0
+   },
+   "Ward": {
+    "acc": 0.994,
+    "groups": 3,
+    "noise": 0
+   },
+   "single": {
+    "acc": 0.672,
+    "groups": 3,
+    "noise": 0
+   },
+   "DBSCAN": {
+    "acc": 0.911,
+    "groups": 3,
+    "noise": 16
+   },
+   "GaussianMixture": {
+    "acc": 0.989,
+    "groups": 3,
+    "noise": 0
+   },
+   "Spectral": {
+    "acc": 0.994,
+    "groups": 3,
+    "noise": 0
+   }
+  },
+  "两个环": {
+   "KMeans": {
+    "acc": 0.625,
+    "groups": 2,
+    "noise": 0
+   },
+   "Ward": {
+    "acc": 0.647,
+    "groups": 2,
+    "noise": 0
+   },
+   "single": {
+    "acc": 1.0,
+    "groups": 2,
+    "noise": 0
+   },
+   "DBSCAN": {
+    "acc": 1.0,
+    "groups": 4,
+    "noise": 0
+   },
+   "GaussianMixture": {
+    "acc": 0.625,
+    "groups": 2,
+    "noise": 0
+   },
+   "Spectral": {
+    "acc": 1.0,
+    "groups": 2,
+    "noise": 0
+   }
+  },
+  "两条带": {
+   "KMeans": {
+    "acc": 0.513,
+    "groups": 2,
+    "noise": 0
+   },
+   "Ward": {
+    "acc": 0.537,
+    "groups": 2,
+    "noise": 0
+   },
+   "single": {
+    "acc": 1.0,
+    "groups": 2,
+    "noise": 0
+   },
+   "DBSCAN": {
+    "acc": 1.0,
+    "groups": 2,
+    "noise": 0
+   },
+   "GaussianMixture": {
+    "acc": 0.513,
+    "groups": 2,
+    "noise": 0
+   },
+   "Spectral": {
+    "acc": 1.0,
+    "groups": 2,
+    "noise": 0
+   }
+  }
+ },
+ "quant": {
+  "shape": [
+   427,
+   640,
+   3
+  ],
+  "pixels": 273280,
+  "error": {
+   "4": 0.0211,
+   "16": 0.0055,
+   "64": 0.0018
+  }
+ }
+}
