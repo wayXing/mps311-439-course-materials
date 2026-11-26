@@ -4,6 +4,29 @@
   ],
   "releases": [
     {
+      "version": "0.3.20",
+      "date": "2026-11-26",
+      "title": "Lesson 9: neural networks, new lecture, notes and lab",
+      "items": [
+        {
+          "type": "new",
+          "text": "Lesson 9 follows one line from the problem to the answer: why hand-made features and PCA are not enough, the network as a model, its loss, and how it is trained."
+        },
+        {
+          "type": "new",
+          "text": "The Lesson 9 notes add a section on the loss, a page of ready-made extensions such as early stopping and dropout, and a guide to which sections to read."
+        },
+        {
+          "type": "new",
+          "text": "The Lesson 9 lab is about using a network: train the Assignment 2 network and choose the epochs, check three versions of code an AI wrote, and judge small differences."
+        },
+        {
+          "type": "improvement",
+          "text": "The Lesson 9 lab gives two backup downloads for MNIST, so the lab still runs when one source is down."
+        }
+      ]
+    },
+    {
       "version": "0.3.19",
       "date": "2026-11-26",
       "title": "Assignment 2 brief, version 7",

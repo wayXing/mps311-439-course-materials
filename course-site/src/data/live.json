@@ -373,17 +373,18 @@
     },
     "lesson-09": {
       "sections": [
-        "Why one straight line fails on the ring",
+        "Why hand-made features and PCA are not enough",
         "Combining several small lines into new features",
         "Why each middle unit needs a bend",
-        "Passing the error back to train every weight",
-        "Training in small batches",
-        "The MNIST network: reading the validation curves and the seed"
+        "What training makes small: cross-entropy",
+        "Passing the error back, and small batches",
+        "The MNIST network",
+        "Reading the validation curves and the seed"
       ],
       "polls": [
         {
           "key": "no-bend",
-          "slide": "A bend in the middle: Drop the middle sigmoid?",
+          "slide": "Model: Drop the middle sigmoid?",
           "prompt": "Ring data, 4 hidden units, no sigmoid in the middle. Accuracy?",
           "options": [
             "about 0.997",
@@ -395,7 +396,7 @@
         },
         {
           "key": "batch-size",
-          "slide": "Training: How many images per step?",
+          "slide": "Solution: How many images per step?",
           "prompt": "Same computing, 5 passes over the data. Which ends better?",
           "options": [
             "all 50,000 per step",
@@ -407,7 +408,7 @@
         },
         {
           "key": "seed-luck",
-          "slide": "MNIST: Change only the seed",
+          "slide": "Test: Change only the seed",
           "prompt": "512 units: 0.9803. Ours: 0.9780. Better?",
           "options": [
             "yes, it scores higher",

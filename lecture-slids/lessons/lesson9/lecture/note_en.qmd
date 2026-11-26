@@ -13,21 +13,29 @@ format:
     embed-resources: true
 ---
 
-## 1. Motivation: A Person Has to Think of the Features
+::: {.callout-tip title="How to read this lesson"}
+To do the Lab and the assignment, read Sections 1 to 7 and the code in Section 9. To follow the class only, read Sections 1 to 4, 6 and 7. In Section 5, the two "candidates" are enough. Section 8 is an extension: read it when you want to try more ways of doing things. Section 10 is a one-page review. To derive backpropagation yourself and write a network in numpy, do Advanced Study 1 and 2.
+:::
 
-At the end of Lesson 4 there was a ring-shaped data set: one class in the inner ring, one class in the outer ring. Logistic regression can draw only one straight line. Its accuracy was 50%, no better than a guess. We first thought of a new feature, "distance to the centre", and then gave it to logistic regression. The accuracy was 99%.
+## 1. The Problem: 784 Pixels, Which Combinations Say "This Is a 3"
+
+A handwritten digit is an image of 28 × 28 = 784 pixels. For a model to recognise "this is a 3", it first needs features that say "3". So far, there are two ways to make features.
+
+The first way is that a person thinks of them. Below is a ring-shaped data set: one class in the inner ring, one class in the outer ring, and two coordinates for each point. Logistic regression can draw only one straight line. Its accuracy is 0.50, no better than a guess. A person first thinks of a new feature, "distance to the centre", and then gives it to logistic regression. The accuracy is 0.99.
 
 ![Left: one straight line cannot separate the inner ring from the outer ring. Right: with the single feature "distance to the centre", one cut separates them.](figures/note_en/F1.svg){fig-alt="The left plot shows the ring-shaped data and one horizontal straight line, with accuracy 0.50. The right plot shows histograms of the distance to the centre for the two classes, blue on the left and orange on the right, with one vertical line between them and accuracy 0.99"}
 
-Where is the problem? The 99% depended on **a person thinking of this feature first**. The ring data has only two coordinates, so a plot shows the answer. Now take the MNIST data from Assignment 2: each image has 28 × 28 = 784 pixels. Which pixels, combined in which way, tell us "this is a 3"? Nobody can write that down. Lesson 3 also ended with this point: a person has to think of the features.
+The 0.99 depended on **a person thinking of this feature first**. The ring data has only two coordinates, so a plot shows the answer. Among 784 pixels, nobody can write down which pixels, combined in which way, say "this is a 3".
 
-Think first: if we do not let a person think of the features, what else can we do?
+The second way is PCA. No person has to think of anything: it computes a few dozen numbers (principal component scores) from the pixels, which is enough to make QDA run on handwritten digits. But the features it builds have two properties. It does not look at the labels, and only finds the directions in which the data spreads out most. And each score is a weighted sum of the pixels, which means a combination of straight lines. Look at the ring: the two principal components only turn the two coordinates to a new direction (they keep 54% and 46%), and logistic regression on these two scores is still 0.503. With only the first principal component, it is 0.53. "Distance to the centre" is curved, and a weighted sum cannot build it.
+
+Think first: if a person does not think of the features, and PCA is not enough, what is still missing?
 
 ::: {.callout-note collapse="true" title="Show answer"}
-Let the model build features from the raw input, and then classify with those features. The question becomes: what "parts" can the model use to build features?
+We lack a way to build features automatically, one that looks at the labels while it builds and gives features that can bend. The question becomes: what "parts" can the model use to build such features?
 :::
 
-What we want is this: **the model builds its own features, and the person gives only the raw input.** In this lesson we work out the method on the ring data, and then use it on MNIST.
+What we want is this: **the model builds its own features, and the person gives only the raw input**. It looks at the labels while it builds, and the features it builds can bend. In this lesson we work out the method on the ring data, and then use it on MNIST.
 
 **By the end of this lesson, you should be able to:**
 
@@ -37,9 +45,9 @@ What we want is this: **the model builds its own features, and the person gives 
 - read the training and validation curves: which epoch the validation loss and the validation accuracy each point to, and whether the gap between training and validation is growing;
 - compare fairly with logistic regression on the same validation set, and know how large the difference from changing the random seed is.
 
-## 2. Ready-Made Parts: Several Logistic Regressions
+## 2. The Idea: Enclose the Inner Ring with a Few Lines
 
-What parts can the model use to build features? We have only one ready-made part: the logistic regression from Lesson 4. It takes two coordinates and computes a weighted sum $z = w_1x_1 + w_2x_2 + b$ (the same $z$ as in Lesson 4: the linear part, before the sigmoid). Then it squeezes the sum with a sigmoid into a number between 0 and 1. The set $z = 0$ is a straight line, and the number tells us which side of the line the point is on.
+What parts can the model use to build features? We have one ready-made part: logistic regression. It takes two coordinates and computes a weighted sum $z = w_1x_1 + w_2x_2 + b$ (the linear part, before the sigmoid). Then it squeezes the sum with a sigmoid into a number between 0 and 1. The set $z = 0$ is a straight line, and the number tells us which side of the line the point is on.
 
 One line is not enough. So we use several small logistic regressions: **each gives one new feature** ("which side of line $k$ the point is on"). Then we give these new features to a last logistic regression, which makes the decision.
 
@@ -57,11 +65,13 @@ These three lines are three new features. The condition "on the inner side of al
 
 ![Three small logistic regressions each give one new feature, and the last one combines them.](figures/note_en/F2.svg){fig-alt="On the left, two input circles x1 and x2, each with arrows to three green circles h1, h2 and h3 in the middle. The three green circles connect to the output p on the right"}
 
-## 3. Letting the Machine Place the Lines: Neural Networks
+## 3. The Model: Neural Networks and Activation Functions
+
+### 3.1 Letting the Machine Place the Lines
 
 Placing three lines by hand is tiring. On 784 pixels, it cannot be done by hand at all. Can the machine place the lines itself?
 
-Yes. Every weight in the figure (the $w_1$, $w_2$ and $b$ of each line, and the weights of the last logistic regression) is still a number. So we can do what we did in Lesson 4: choose a loss (cross-entropy) and change the weights step by step with gradient descent. The small logistic regressions in the middle are trained together with the last one. The result is called a **neural network**. The middle layer is called the **hidden layer**, because we see only the input and the output and cannot see this layer. Each small logistic regression inside it is called a **unit**.
+Yes. Every weight in the figure (the $w_1$, $w_2$ and $b$ of each line, and the weights of the last logistic regression) is still a number. So we can choose a loss and change the weights step by step with gradient descent (Sections 4 and 5). The small logistic regressions in the middle are trained together with the last one. The result is called a **neural network**. The middle layer is called the **hidden layer**, because we see only the input and the output and cannot see this layer. Each small logistic regression inside it is called a **unit**.
 
 {{< include figures/note_en/I2a.html >}}
 
@@ -71,13 +81,13 @@ Look at 1 unit first, and then click 2, 3 and 4 in turn. How does the accuracy c
 1 unit gives 0.69, 2 units give 0.82, 3 units give 0.97 and 4 units give 0.997. With 1 unit there is only one line, and the shaded region is a half-plane. With 3 units the lines enclose a triangle, close to the one we placed by hand. With 4 units they enclose a quadrilateral that surrounds the inner ring almost exactly. We never told the network about "distance to the centre". It used a few lines to enclose the ring by itself.
 :::
 
-## 4. Can We Remove the Sigmoid in the Middle: Activation Functions
+### 3.2 Can We Remove the Sigmoid in the Middle
 
 Each hidden unit computes a weighted sum and then passes it through a sigmoid. This step looks unnecessary. There is a logistic regression at the end anyway, so why not hand the weighted sum straight on? The model would be simpler.
 
 Make a prediction, and then check it with the widget below: click "None", and then click 1 to 4 units in turn.
 
-{{< include figures/note_en/I2.html >}}
+{{< include figures/note_en/I2n.html >}}
 
 ::: {.callout-note collapse="true" title="Show answer"}
 With any number of units, the accuracy is 0.503, and the boundary of the shaded region is only a straight line.
@@ -95,38 +105,56 @@ What properties do we want from it? First, it is not a straight line (otherwise 
 
 ![Two activation functions.](figures/note_en/F3.svg){fig-alt="The left plot shows the sigmoid curve, rising smoothly from 0 to 1. The right plot shows ReLU, which is 0 when z is below 0 and a sloping line when z is above 0"}
 
-- **sigmoid**: the one from Lesson 4, which squeezes a number into the range 0 to 1;
+- **sigmoid**: the one in logistic regression, which squeezes a number into the range 0 to 1;
 - **ReLU** (rectified linear unit): $\max(0, z)$. Negative numbers become 0, and positive numbers stay the same. It has a corner at 0, and we can take its derivative everywhere else.
 
-In the widget, click "Another bend". This is ReLU: 3 units give 0.977 and 4 units give 0.997, close to sigmoid (0.97 and 0.997). On this data set, the two work equally well. The network in Assignment 2 uses ReLU. Networks with many layers often use ReLU, and the reason is linked to the fact that both ends of the sigmoid are almost flat. We do not check this in this lesson. It is left for Advanced Study 1, Question 2.
+The widget below has one more button, ReLU. Click ReLU, and then click 1 to 4 units in turn:
 
-## 5. How to Train
+{{< include figures/note_en/I2r.html >}}
 
-Training still uses the three things from Lesson 4: a cross-entropy loss, a gradient, and steps downhill. But there are two new questions.
+3 units give 0.977 and 4 units give 0.997, close to sigmoid (0.97 and 0.997). On this data set, the two work equally well. The network in Assignment 2 uses ReLU. Networks with many layers often use ReLU, and the reason is linked to the fact that both ends of the sigmoid are almost flat. We do not check this in this lesson. It is left for Advanced Study 1, Question 2.
 
-**New question 1: how do we find the gradient for the weights in a hidden layer?** The weights in the output layer connect directly to the loss, so their gradient is the same as in Lesson 4. The weights in a hidden layer first change the output of the hidden units, and only then change the loss through the output layer. There is one layer in between. There are two candidates:
+This model assumes that the boundary between the classes can be built from a few straight lines, each bent once and then combined. With more units, it can enclose more complex shapes. Unlike PCA, the labels decide where these lines go.
+
+## 4. The Loss: The Same Cross-Entropy as Logistic Regression
+
+Training needs one number that says whether the network is good. The aim is the same as in logistic regression: the larger the probability of the right class, the better. The loss is still the **cross-entropy**. The only difference is that the probability $p_i$ is now computed by the whole network:
+
+$$
+L = -\frac{1}{n}\sum_i\big[y_i\log p_i + (1-y_i)\log(1-p_i)\big].
+$$
+
+The unknowns are the weights and constants of all the units. The network with 4 units on the ring has 17 of them, and the network in Assignment 2 has 118,282 (Section 6). The widgets on the ring were trained to make this $L$ as small as possible.
+
+MNIST has ten digits. The output layer becomes 10 units, and **softmax** turns the 10 weighted sums into 10 probabilities that add up to 1. The loss is the negative logarithm of the probability of the right digit, averaged over the images: $L = -\frac{1}{n}\sum_i \log p_{i,\,y_i}$. With two classes, it is the formula above. In Keras, when the labels are integers from 0 to 9, this loss is written `sparse_categorical_crossentropy`.
+
+## 5. Solving: Backpropagation and Mini-Batches
+
+We have the loss. The solution is still gradient descent: compute the gradient and go downhill step by step. But there are two new questions.
+
+**New question 1: how do we find the gradient for the weights in a hidden layer?** The weights in the output layer connect directly to the loss, so their gradient is the same as in logistic regression. The weights in a hidden layer first change the output of the hidden units, and only then change the loss through the output layer. There is one layer in between. There are two candidates:
 
 1. Change each weight by a tiny amount, recompute the loss, and see how much it changed. The network in Assignment 2 has 118,282 weights, so one step would need 118 thousand recomputations.
-2. Use the chain rule. First compute the derivative of the loss with respect to the output (as in Lesson 4, this is the predicted probability minus the true label). Then share it out to each hidden unit through the weights of the output layer. Then multiply by the slope of that unit's activation function. This gives the gradient for the weights of that unit. The whole network needs only one pass from back to front.
+2. Use the chain rule. First compute the derivative of the loss with respect to the output (as in logistic regression, this is the predicted probability minus the true label). Then share it out to each hidden unit through the weights of the output layer. Then multiply by the slope of that unit's activation function. This gives the gradient for the weights of that unit. The whole network needs only one pass from back to front.
 
 We pick the second. The error is passed back from the output, layer by layer, so this is called **backpropagation**. Keras does it automatically, so we do not need to write it. The derivation is in Advanced Study 1.
 
-**New question 2: how many images should we look at in each step?** In Lesson 4, every step used all the training data to compute the gradient. The fitting part of MNIST has 50,000 images. Again there are two candidates:
+**New question 2: how many images should we look at in each step?** In gradient descent, every step uses all the training data to compute the gradient. The fitting part of MNIST has 50,000 images. Again there are two candidates:
 
 1. Use all 50,000 images in each step: the gradient is accurate, but each step is expensive.
 2. Use only a small group of images in each step, for example 32: the gradient is rougher, but each step is cheap, so the same amount of computation allows many more steps.
 
 Let us compare the two by looking at all 50,000 images 5 times. With all images in each step, we take only 5 steps, and the validation accuracy is 0.573. With 32 images per step, we take 7815 steps, and the validation accuracy is 0.970. So we use batches. The small group of images used in each step is called a **batch**. One full pass through all the training data is called an **epoch**. With 32 images per batch, one epoch is 1563 steps.
 
-One last point is the step size. In Lesson 4, a person had to choose the step size: too large and the steps jump about, too small and we hardly move. In Keras, **adam** is commonly used. It is a form of gradient descent that adjusts the step size by itself, and it sets the step size of each weight according to the size of its recent gradients. This lesson only uses it and does not explain it further.
+One last point is the step size. In gradient descent with a fixed step size, a person has to choose it: too large and the steps jump about, too small and we hardly move. In Keras, **adam** is commonly used. It is a form of gradient descent that adjusts the step size by itself, and it sets the step size of each weight according to the size of its recent gradients. This lesson only uses it and does not explain it further.
 
-## 6. MNIST: 784 Pixels
+## 6. Application: The 784 Pixels of MNIST
 
-Now we return to MNIST in Assignment 2. The split is the same as in Assignment 2. Of the 60,000 training images, the first 50,000 are the fitting part and the last 10,000 are the validation set (Lesson 6). We divide the pixels by 255, so they lie between 0 and 1.
+Assignment 2 uses MNIST. The split is the same as in Assignment 2. Of the 60,000 training images, the first 50,000 are the fitting part and the last 10,000 are the validation set. We divide the pixels by 255, so they lie between 0 and 1.
 
-**First we need a baseline to compare with.** In Lesson 4 we used multi-class logistic regression (softmax) on the course's MNIST subset: trained on 7,500 images, it scored 0.908 on the test set. This lesson uses the full MNIST that comes with Keras: the first 50,000 images for fitting and the last 10,000 as the validation set. The same method (default $C = 1$) gives a validation accuracy of 0.9277. It cannot be compared directly with 0.908: there are more than six times as many images to fit on, $C$ is different (Lesson 4 chose 0.1; on the subset the default $C = 1$ gives 0.902), and it is measured on different images (a validation set here, the subset's test set in Lesson 4). In this lesson we compare only with 0.9277.
+First we need a baseline to compare with. On the same split, multi-class logistic regression (softmax, default $C = 1$) has a validation accuracy of 0.9277. You may have seen other numbers on MNIST before, for example PCA down to 40 dimensions followed by QDA, with a validation accuracy of 0.957. That was a different split: it fitted on only 5,625 images and validated on another 1,875 images, so it cannot be compared with the numbers here. In this lesson we compare only with 0.9277. The results of PCA plus various classifiers on the same split are what Section 3 of Assignment 2 asks you to compute.
 
-**The network.** The input is 784 pixels. There are two hidden layers, each with 128 ReLU units. The output layer has 10 units and uses softmax to give the probabilities of the 10 digits. This is the same softmax as in the multi-class case in Lesson 4. The network is exactly the same as the one in Section 4 of Assignment 2.
+**The network.** The input is 784 pixels. There are two hidden layers, each with 128 ReLU units. The output layer has 10 units and uses softmax to give the probabilities of the 10 digits (Section 4). The network is exactly the same as the one in Section 4 of Assignment 2.
 
 Let us count the weights. Each unit in the first layer connects to 784 pixels, plus one constant, so $784 \times 128 + 128 = 100{,}480$. The second layer has $128 \times 128 + 128 = 16{,}512$. The output layer has $128 \times 10 + 10 = 1{,}290$. The total is 118,282. Logistic regression has $784 \times 10 + 10 = 7{,}850$.
 
@@ -137,12 +165,16 @@ After 5 epochs of training, the validation accuracy is 0.9700. This is more than
 Predict: if we remove the ReLU from the two middle layers and change nothing else, what happens?
 
 ::: {.callout-note collapse="true" title="Show answer"}
-The validation accuracy is 0.9203. This is back at the level of logistic regression (even slightly lower). The reason is the same as in Section 4: without activation functions, the three layers stacked together are still one set of weights multiplied by the pixels, plus one number. This is equal to one logistic regression. The extra 110 thousand weights in the network bring nothing new.
+The validation accuracy is 0.9203. This is back at the level of logistic regression (even slightly lower). The reason is the same as in Section 3.2: without activation functions, the three layers stacked together are still one set of weights multiplied by the pixels, plus one number. This is equal to one logistic regression. The extra 110 thousand weights in the network bring nothing new.
 :::
 
-## 7. How Long to Train: Training and Validation Curves
+## 7. Checking: When This Result Cannot Be Trusted
 
-How many epochs are enough? The more epochs, the lower the loss on the training set. But what we care about is images the network has not seen. Lesson 6 gave us a method: look at the validation set.
+A validation accuracy of 0.970 looks good, but three things can take away from this number. If we train for too long, the network memorises the training set. If we only change the seed, the result changes. And we cannot read the features the network builds. We look at them one by one.
+
+### 7.1 How Long to Train: Training and Validation Curves
+
+How many epochs are enough? The more epochs, the lower the loss on the training set. But what we care about is images the network has not seen, so we look at the validation set.
 
 Below, we train the network for 20 epochs. At the end of each epoch, we record the loss and the accuracy on the training set and on the validation set.
 
@@ -154,11 +186,16 @@ Read the plots: how do the training loss and the validation loss change? And the
 The training loss keeps falling, from 0.249 to 0.008, and the training accuracy reaches 0.997. The validation loss is lowest at epoch 4 (0.093), then rises again with ups and downs, and at epoch 20 it is 0.146. The validation accuracy moves up and down a lot (it drops to 0.970 at epoch 5 and is 0.974 at epoch 15), but overall it still rises slowly: 0.9743 at epoch 4 and 0.9780 at epoch 20.
 :::
 
-The two validation curves tell different stories. Why? Accuracy only checks whether the digit with the highest probability is the right one. Cross-entropy also checks how much probability was given to the right digit. In the later epochs, the network becomes more and more confident on the training set, and also more and more confident on images it has not seen, including the ones it gets wrong. The wrong images are penalised more and more heavily, so the validation loss rises. At the same time, a net of more than thirty images changed from wrong to right, so the validation accuracy still rose a little. The gap between training and validation keeps growing (accuracy 0.997 against 0.978). This is exactly what "memorising the training set" looks like in Lesson 6: most of the progress on the training set did not carry over to unseen images.
+The two validation curves tell different stories. Why? Accuracy only checks whether the digit with the highest probability is the right one. Cross-entropy also checks how much probability was given to the right digit. In the later epochs, the network becomes more and more confident on the training set, and also more and more confident on images it has not seen, including the ones it gets wrong. The wrong images are penalised more and more heavily, so the validation loss rises. At the same time, on balance more than thirty images changed from wrong to right, so the validation accuracy still rose a little. The gap between training and validation keeps growing (accuracy 0.997 against 0.978). This is exactly what "memorising the training set" looks like: most of the progress on the training set did not carry over to unseen images.
 
-So how many epochs? There is no single answer. We must first say which curve we look at. By the validation loss, we stop at epoch 4. By the validation accuracy, 20 epochs is slightly better. Assignment 2 fixes 20 epochs so that everyone's results can be compared, and so that you can see the disagreement between the two curves in Figure 2. A way to make training stop by itself at the lowest validation loss is in Advanced Study 3, Question 1.
+So how many epochs? The two validation curves point to different epochs: by the validation loss it is epoch 4, and by the validation accuracy it is 20 epochs (only slightly better). The course does it this way:
 
-**The same code can give different results.** Before training starts, the weights are drawn at random. Which 32 images go into each batch is also random. If we do not fix this randomness, the same code gives a different result each time it runs. `keras.utils.set_random_seed(0)` fixes it, so the result can be reproduced. Changing the seed is like trying your luck again. Below, we change only the seed and keep everything else the same. The table shows the validation accuracy at epoch 20.
+1. **In Assignment 2, Section 4, train for 20 epochs as the question says**, draw Figure 2, and write down in the text where the two curves disagree. In this way, everyone's results can be compared.
+2. **When you choose the number of epochs yourself, use the epoch with the lowest validation loss** (here, epoch 4). When the validation loss rises again, the network has started to be too confident on images it has not seen. A way to make training stop there by itself is in Section 8.
+
+### 7.2 The Same Code Can Give Different Results
+
+Before training starts, the weights are drawn at random. Which 32 images go into each batch is also random. If we do not fix this randomness, the same code gives a different result each time it runs. `keras.utils.set_random_seed(0)` fixes it, so the result can be reproduced. Changing the seed is like trying your luck again. Below, we change only the seed and keep everything else the same. The table shows the validation accuracy at epoch 20.
 
 | Seed | 0 | 1 | 2 |
 |---|---|---|---|
@@ -166,18 +203,30 @@ So how many epochs? There is no single answer. We must first say which curve we 
 
 The three seeds differ by at most 0.26 percentage points. So when we compare two networks, the gap must be much larger than this before we can say one is better than the other. If the gap is only 0.1 percentage points, it may be only the luck of the seed. In the same way, the rise of 0.37 percentage points in validation accuracy from epoch 4 to epoch 20 is only a little larger than the difference between seeds. The benefit of 16 more epochs of training is not certain.
 
-## 8. What the Hidden Units Learned
+### 7.3 What the Hidden Units Learned
 
-Each unit in the first layer has 784 weights. These can be arranged back into 28 × 28 and drawn as an image. Red weights are positive (where the image is bright, the weighted sum of this unit becomes larger), and blue weights are negative.
+Each unit in the first layer has 784 weights. These can be arranged back into 28 × 28 and drawn as an image. Red weights are positive: where there is ink, the weighted sum of this unit becomes larger, so we can say the unit "likes" a stroke there. Blue weights are negative: where there is ink, the weighted sum becomes smaller, so the unit "dislikes" a stroke there.
 
 ![Weights of 10 hidden units in the first layer of the network.](figures/note_en/F6.svg){fig-alt="Ten small squares, each a red and blue pattern of 28 by 28, with slanted stripes and blocks of red and blue, and none looks like a whole digit"}
 
 Look: do these units look like digits?
 
 ::: {.callout-note collapse="true" title="Show answer"}
-They do not look like any whole digit. Each unit is sensitive to the light and dark of a few places in the image: some look like a slanted stroke, and some have two opposite colours on the left and right. These are features that the network built by itself. We do not check here how the later layers combine them. They are also hard to read: we cannot say exactly what unit 3 is looking for. This is one cost of a network.
+They do not look like any whole digit. Each unit is sensitive to the light and dark of a few places in the image: some look like a slanted stroke, and some have two opposite colours on the left and right. In several units, the most striking stroke is blue: when there is ink there, the weighted sum of the unit becomes smaller. So the unit is "ruling out" a way of writing, not looking for it. These are features that the network built by itself. We do not check here how the later layers combine them. They are also hard to read: we cannot say exactly what unit 3 is looking for. This is one cost of a network.
 :::
 
+Principal components can also be arranged back into 28 × 28. They come from directions that do not look at the labels and only find where the data spreads out most. These units are trained while looking at the labels, and each unit also "bends" its weighted sum.
+
+## 8. Extensions: Ready-to-Use Variations
+
+The changes below take one line in Keras or scikit-learn. All numbers were measured on the split of this lesson, with seed 0. We give only the call and the result, without details.
+
+| Method | Call | Result |
+|---|---|---|
+| Early stopping | `fit(..., callbacks=[keras.callbacks.EarlyStopping(monitor="val_loss", patience=3, restore_best_weights=True)])` | Stops at epoch 7, keeps the weights of epoch 4, validation accuracy 0.9743 |
+| Dropout: in training, switch off a random part of the units in every step | Add `keras.layers.Dropout(0.2)` after each hidden layer | 8 epochs of training; the lowest validation loss is 0.078 (epoch 7), lower than 0.093 without dropout. At epoch 8, the training and validation losses are 0.063 and 0.079, a much smaller gap |
+| Wider, deeper | `Dense(512, ...)`, or one more `Dense` layer | With 512 units in each layer: 0.9803 at epoch 20, but see the transfer question in Section 11 |
+| Without Keras | `sklearn.neural_network.MLPClassifier(hidden_layer_sizes=(128, 128))` | The same network, written in scikit-learn (not measured in this lesson) |
 
 ## 9. Implementation: Doing It in Keras
 
@@ -216,12 +265,12 @@ print(model.count_params())                  # 118282
 print(hist.history["val_accuracy"][-1])      # validation accuracy after 20 epochs: 0.978
 ```
 
-`Dense` is a layer in which every unit is connected to all the inputs from the previous layer. `hist.history` holds four lists of numbers: `loss`, `val_loss`, `accuracy` and `val_accuracy`, one value per epoch. The plots in Section 7 were drawn from them. On an ordinary laptop, 20 epochs take about 40 seconds.
+`Dense` is a layer in which every unit is connected to all the inputs from the previous layer. If we do not write `activation`, Keras adds no activation by default, which is the "None" of Section 3.2. `hist.history` holds four lists of numbers: `loss`, `val_loss`, `accuracy` and `val_accuracy`, one value per epoch. The plots in Section 7.1 were drawn from them. On an ordinary laptop, 20 epochs take about 40 seconds.
 
-**A small network on the ring data (Sections 3 and 4):**
+**A small network on the ring data (Sections 2 and 3):**
 
 ```python
-rng = np.random.default_rng(0)               # the random numbers of the Lesson 4 ring
+rng = np.random.default_rng(0)               # the random numbers of the ring data
 angle = rng.uniform(0, 2 * np.pi, 300)       # an angle for every point
 inner_r = rng.normal(1.0, 0.25, 150)         # radius of the 150 inner points
 outer_r = rng.normal(2.4, 0.3, 150)          # radius of the 150 outer points
@@ -245,7 +294,7 @@ hist_ring = ring_model.fit(X_ring, y_ring, epochs=300,      # 300 steps
 print(hist_ring.history["accuracy"][-1])     # training accuracy: 0.997
 ```
 
-Change `"sigmoid"` (the one in the hidden layer) to `"linear"`. This is the same as clicking "None" in Section 4, and the accuracy becomes 0.503.
+Change `"sigmoid"` (the one in the hidden layer) to `"linear"`. This is the "None" of Section 3.2, and the accuracy becomes 0.503.
 
 ## 10. One-Page Review
 
@@ -256,7 +305,9 @@ If you read only one page, read this one.
 | The problem you see | What you can do | Evidence to judge it |
 |---|---|---|
 | One straight line cannot separate the classes, and you cannot think of good features | Let several small logistic regressions (units) each build one feature, then combine them: a neural network | On the ring, 1 to 4 units: 0.69 to 0.997 |
+| The features of PCA do not look at the labels, and they are only weighted sums | Let the network build features that can bend, while looking at the labels | On the ring, still 0.503 after PCA |
 | No activation function in the middle | One is needed: sigmoid or ReLU | Without it, the ring gives 0.503 and MNIST gives 0.9203 |
+| The aim of training | Cross-entropy; with ten classes, softmax at the output | The same quantity as in logistic regression |
 | How to find the gradient of the hidden-layer weights | Backpropagation: use the chain rule, working from back to front once | One pass backwards, not a separate calculation for every weight |
 | Too much data, and using all of it in every step is too slow | Use a batch in every step; one pass over the data is an epoch | Same 5 epochs: 0.573 against 0.970 |
 | How many epochs to train | Watch the validation loss and the validation accuracy | The validation loss is lowest at epoch 4, then rises again |
@@ -285,7 +336,7 @@ Not enough to trust it. The two results differ by 0.23 percentage points. This i
 
 ![The feedback QR code for this lesson](./feedback-qr.svg){fig-align="center" width="160px" fig-alt="Feedback QR code"}
 
-*The Advanced Studies below are not part of the main thread, and you can read each one on its own. MPS311 students are encouraged to read them. MPS439 students have one main task, which is required: Advanced A of Lab 9. It builds on Study 1 and 2 here but uses ReLU hidden units and step size 0.5, so its self-check values differ from the ones on this page. The other Studies are optional.*
+*The Advanced Studies below are not part of the main thread, and you can read each one on its own. MPS311 students are encouraged to read them. For MPS439, the required task is Advanced A of Lab 9: write a network in numpy on MNIST and compare it with Keras. It uses the four steps of Study 1 on this page, with the output changed to softmax and the hidden units changed to ReLU. The other Studies are optional.*
 
 ---
 
@@ -297,15 +348,15 @@ $$
 z_{ik} = \sum_j x_{ij}W_{jk} + b_k,\qquad h_{ik} = \sigma(z_{ik}),\qquad s_i = \sum_k h_{ik}v_k + c,\qquad p_i = \sigma(s_i).
 $$
 
-The loss is the cross-entropy from Lesson 4, $L = -\frac{1}{n}\sum_i\big[y_i\log p_i + (1-y_i)\log(1-p_i)\big]$.
+The loss is the cross-entropy from Section 4, $L = -\frac{1}{n}\sum_i\big[y_i\log p_i + (1-y_i)\log(1-p_i)\big]$.
 
-**Step 1, the output layer.** Advanced Study 1 of Lesson 4 already derived this:
+**Step 1, the output layer.** The derivative is the same as for the cross-entropy of logistic regression:
 
 $$
 \frac{\partial L}{\partial s_i} = \frac{p_i - y_i}{n}.
 $$
 
-So $\dfrac{\partial L}{\partial v_k} = \sum_i \dfrac{\partial L}{\partial s_i}\,h_{ik}$ and $\dfrac{\partial L}{\partial c} = \sum_i \dfrac{\partial L}{\partial s_i}$. These are exactly the gradients from Lesson 4. The only change is that the input is now the output $h$ of the hidden units instead of $x$.
+So $\dfrac{\partial L}{\partial v_k} = \sum_i \dfrac{\partial L}{\partial s_i}\,h_{ik}$ and $\dfrac{\partial L}{\partial c} = \sum_i \dfrac{\partial L}{\partial s_i}$. These are exactly the gradients of logistic regression. The only change is that the input is now the output $h$ of the hidden units instead of $x$.
 
 **Step 2, passing back to the hidden units.** In $s_i$, the coefficient of $h_{ik}$ is $v_k$, so $\dfrac{\partial L}{\partial h_{ik}} = \dfrac{\partial L}{\partial s_i}\,v_k$.
 
@@ -326,7 +377,7 @@ Each step uses only numbers that the step after it has already calculated. So on
 Now try the following yourself:
 
 1. Change the activation function to ReLU. What does Step 3 become? For a unit with $z_{ik} < 0$, what happens to its weights in this step?
-2. Section 4 said that the gradient of a sigmoid is close to 0 at both ends. Use the formula in Step 3 to show that when $z$ of a unit is very large or very small, the weights of that unit hardly move.
+2. Section 3.2 said that both ends of the sigmoid are almost flat. Use the formula in Step 3 to show that when $z$ of a unit is very large or very small, the weights of that unit hardly move.
 
 ## Advanced Study 2: A Single-Hidden-Layer Network in numpy
 
@@ -366,9 +417,9 @@ Now try the following yourself:
 
 ## Advanced Study 3: Open Questions
 
-This lesson does not develop the following four questions. Each comes with a starting point.
+This lesson does not develop the following four questions. Each comes with a starting point. The calls and results for Questions 1 and 2 are in Section 8. Here the question is why.
 
-1. **Early stopping.** In Section 7, the validation loss is lowest at epoch 4. Can we make the training stop there by itself? Starting point: `keras.callbacks.EarlyStopping(monitor="val_loss", patience=3, restore_best_weights=True)`, passed to `fit` as `callbacks`.
-2. **Dropout.** In every training step, switch off a random part of the hidden units, so that the network cannot depend on any one unit. Starting point: add `keras.layers.Dropout(0.2)` between the two `Dense` layers, and see how the validation curves change.
-3. **Wider or deeper.** What happens to the validation accuracy with 512 units in each layer, or with three hidden layers? Use the method of the Transfer question, and compare with several seeds together.
+1. Early stopping: it stops at epoch 7 and keeps the weights of epoch 4. Where does it stop if `patience=3` is changed to 1 or to 10? Which is more reliable?
+2. Dropout: in every step, 20% of the hidden units are switched off at random. Why does the gap between the training and validation losses become smaller? Starting point: the network can no longer depend on any one unit.
+3. **Wider or deeper.** What happens to the validation accuracy with 512 units in each layer, or with three hidden layers? Use the method of the transfer question, and compare with several seeds together.
 4. **Why adam is faster than a fixed step size.** Starting point: change `optimizer="adam"` to `keras.optimizers.SGD(0.01)`, and compare the validation accuracy after 5 epochs.

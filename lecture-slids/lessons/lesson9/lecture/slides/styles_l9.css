@@ -42,3 +42,15 @@
 .reveal .two.side .ask.vote .opts{flex-direction:column;gap:10px}
 .reveal .stage:has(>.scan)>.ask{margin-right:250px}
 .reveal .fig-f1{height:460px}
+
+/* Lesson 9 slide additions */
+
+.reveal .flow.seven{grid-template-columns:repeat(7,1fr);gap:12px}
+.reveal .flow.seven div{font-size:1.0em;padding:26px 6px}
+.reveal .fig-digit{width:1300px}
+.reveal .fig-f1s{height:380px;width:auto}
+.reveal .two.even .tile .fig{display:block;margin:12px auto 0}
+.reveal .ext table{font-size:.82em}
+.reveal .ext table td{vertical-align:top}
+.reveal .ext code{font-size:.85em}
+.reveal ol.lim{font-size:1.15em;line-height:1.5}

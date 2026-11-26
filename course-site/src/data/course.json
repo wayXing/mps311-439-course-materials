@@ -987,7 +987,7 @@
       "label": "Lesson 9",
       "title": "Letting the model make its own features",
       "shortTitle": "Neural networks",
-      "summary": "When a straight line is not enough and no one can think of the right feature, a network of small logistic regressions builds its own features; training and validation curves show when it starts to memorise.",
+      "summary": "When no one can think of the right feature and PCA ignores the labels, a network of small logistic regressions builds its own features; training and validation curves show when it starts to memorise.",
       "accent": "coral",
       "type": "teaching",
       "topics": [
@@ -995,7 +995,8 @@
         "Activation functions",
         "Backpropagation, batches and epochs",
         "Keras on MNIST",
-        "Training and validation curves"
+        "Training and validation curves",
+        "Checking network code"
       ],
       "video": {
         "youtubeId": "Ip_tAfJIGwI",
