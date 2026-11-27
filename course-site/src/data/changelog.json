@@ -4,6 +4,17 @@
   ],
   "releases": [
     {
+      "version": "0.3.22",
+      "date": "2026-11-27",
+      "title": "Module survey page",
+      "items": [
+        {
+          "type": "new",
+          "text": "A module survey page with one QR code for MPS311 and one for MPS439, linked from the homepage while the survey is open."
+        }
+      ]
+    },
+    {
       "version": "0.3.21",
       "date": "2026-11-26",
       "title": "Lesson 10: convolutional networks, new lecture, notes and lab",

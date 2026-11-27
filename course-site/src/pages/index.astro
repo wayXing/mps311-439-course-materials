@@ -3,6 +3,7 @@ import CourseLessonRow from '../components/CourseLessonRow.astro';
 import SemesterProgress from '../components/SemesterProgress.astro';
 import { assignmentOne, assignmentTwo } from '../data/assignment';
 import { course } from '../data/course';
+import { moduleSurvey } from '../data/module-survey';
 import SiteLayout from '../layouts/SiteLayout.astro';
 import { withBase } from '../lib/urls';
 
@@ -26,6 +27,12 @@ const deadlines = [
         <span aria-hidden="true">→</span>
       </a>
     ))}
+    {moduleSurvey.open && (
+      <a class="home-deadline home-survey" href={withBase('module-survey/')}>
+        <strong>Module survey (Tellus)</strong> is open, please share your feedback
+        <span aria-hidden="true">→</span>
+      </a>
+    )}
   </section>
 
   <section class="course-index shell" id="lessons" aria-label="Lessons">

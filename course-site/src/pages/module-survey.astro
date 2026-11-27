@@ -1,0 +1,100 @@
+---
+// Shown on the projector at the start of a class, and linked from the homepage while the survey is open.
+// The QR codes are drawn at build time from the links in src/data/module-survey.ts.
+import { renderSVG } from 'uqr';
+import { course } from '../data/course';
+import { moduleSurvey } from '../data/module-survey';
+import SiteLayout from '../layouts/SiteLayout.astro';
+
+const links = moduleSurvey.links.map((link) => ({ ...link, qr: renderSVG(link.href, { border: 1 }) }));
+---
+
+<SiteLayout
+  title={`Module survey · ${course.code}`}
+  description={`End-of-module survey (Tellus) for ${course.code} ${course.title}.`}
+>
+  <section class="survey-hero shell">
+    <span class="eyebrow">{course.code} · {course.academicYear}</span>
+    <h1>Module survey (Tellus)</h1>
+    <p>For students enrolled on this module. Your feedback helps us improve the module. Scan the code for your own module.</p>
+  </section>
+
+  <section class="survey-codes shell" aria-label="Survey links">
+    {links.map((link) => (
+      <a class="survey-card" href={link.href} target="_blank" rel="noopener">
+        <strong>{link.code} students</strong>
+        <span class="survey-qr" set:html={link.qr} />
+        <span class="survey-open">Open the {link.code} survey →</span>
+      </a>
+    ))}
+  </section>
+</SiteLayout>
+
+<style>
+  .survey-hero {
+    padding: 44px 0 20px;
+  }
+
+  .survey-hero h1 {
+    margin-bottom: 14px;
+    font-family: var(--font-display);
+    font-size: clamp(36px, 4.4vw, 54px);
+    font-weight: 500;
+    letter-spacing: -0.045em;
+    line-height: 1;
+  }
+
+  .survey-hero p {
+    max-width: 640px;
+    color: var(--ink-soft);
+    font-size: 17px;
+    line-height: 1.6;
+  }
+
+  .survey-codes {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 24px;
+    padding-bottom: 56px;
+  }
+
+  .survey-card {
+    display: grid;
+    justify-items: center;
+    gap: 14px;
+    padding: 24px;
+    color: var(--ink);
+    border: 1px solid var(--line);
+    border-radius: 18px;
+    text-decoration: none;
+  }
+
+  .survey-card strong {
+    font-size: clamp(22px, 2.4vw, 30px);
+    font-weight: 650;
+  }
+
+  .survey-qr {
+    display: block;
+    width: min(100%, 340px);
+    padding: 10px;
+    background: #fff;
+    border-radius: 10px;
+  }
+
+  .survey-qr :global(svg) {
+    display: block;
+    width: 100%;
+    height: auto;
+  }
+
+  .survey-open {
+    color: var(--practice-lab);
+    font-size: 15px;
+  }
+
+  .survey-card:hover .survey-open {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>
